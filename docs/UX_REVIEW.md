@@ -92,3 +92,22 @@ fields, checks all modes and unknown fields, switches both skins repeatedly,
 checks 0% and partial background opacity, and leaves non-default preferences for
 the serialization/reload fixture. Native Lua 5.0.3 and Lua 5.1 fixtures pass; live
 visual acceptance of this addition is still pending.
+
+## 0.2.0-review.3 correction following live user feedback
+
+The user’s screenshots exposed two defects in review.2: HUD opacity also faded
+the configuration shell, and concatenated values did not align into columns.
+Theme surfaces now opt into HUD preferences explicitly. Configuration, popups,
+Overview and the arrangement dock always retain the original opaque theme;
+HUD collapse buttons inherit their own parent’s visual scope.
+
+Damage, DPS and share each use one preallocated FontString with a fixed right
+anchor and width, independent of numeric length. Spell names have a separate
+bounded rectangle. Hidden columns change with the selected mode. Resizing keeps
+the saved left edge; initial width is set before position restoration, avoiding
+coordinate drift on reload. No totals or rates are inferred or recalculated.
+
+Regression fixtures check the actual visible column regions with differently
+sized numbers, mode visibility, fixed widths/anchors, retained left edge and
+settings opacity while HUD opacity is zero. Both Lua runtimes pass; the corrected
+candidate still requires visual confirmation in the game.

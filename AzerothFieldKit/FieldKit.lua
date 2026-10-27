@@ -1084,7 +1084,7 @@ local function CreateStatsFrame()
 	})
 	statsFrame:SetBackdropColor(0, 0, 0, 0.6)
 	statsFrame:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
- FieldKitTheme.Surface(statsFrame,"card")
+ FieldKitTheme.Surface(statsFrame,"card",true)
 	statsFrame:SetWidth(STACK_WIDTH)
 	statsFrame:SetHeight(20)
 	statsFrame.rows = {}
@@ -1327,7 +1327,7 @@ local function CreateMoneyFrame()
 	moneyFrame:SetBackdrop(statsFrame:GetBackdrop())
 	moneyFrame:SetBackdropColor(0, 0, 0, 0.6)
 	moneyFrame:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
- FieldKitTheme.Surface(moneyFrame,"card")
+ FieldKitTheme.Surface(moneyFrame,"card",true)
 
 	local coin = moneyFrame:CreateTexture("FieldKitMoneyFrameCoin", "ARTWORK")
 	coin:SetTexture("Interface\\MoneyFrame\\UI-MoneyIcons")
@@ -1437,7 +1437,7 @@ local function CreateGearFrame()
 	gearFrame:SetBackdrop(statsFrame:GetBackdrop())
 	gearFrame:SetBackdropColor(0, 0, 0, 0.6)
 	gearFrame:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
- FieldKitTheme.Surface(gearFrame,"card")
+ FieldKitTheme.Surface(gearFrame,"card",true)
 	gearFrame.slots = {}
 	AddCompactButton(gearFrame, "gearCollapsed", UpdateGearFrame)
 	for i = 1, table.getn(GEAR_SLOTS) do
@@ -1511,7 +1511,7 @@ local function CreateBarWindow(name, title, rows)
 	})
 	f:SetBackdropColor(0, 0, 0, 0.6)
 	f:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
- FieldKitTheme.Surface(f,"card")
+ FieldKitTheme.Surface(f,"card",true)
 	f.title = f:CreateFontString(name.."Title", "OVERLAY", "GameFontNormalSmall")
 	f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 9, -7)
 	FieldKit_Text(f.title,title)
@@ -1599,10 +1599,15 @@ local function UpdateMeterFrame(force)
 	end
 	local lines, total, dps = AZS_GetMeter()
 	lines = lines or {}
- local width=DB.meterValues==1 and METER_WIDTH or (DB.meterValues==2 and 320 or 360)
+ local width=FieldKit.MeterWidth(DB.meterValues)
  if meterFrame:GetWidth()~=width then
+  local previous=meterFrame:GetWidth()
   meterFrame:SetWidth(width);FieldKitTheme.Update(meterFrame)
-  if meterFrame.azsDefault and not meterFrame.azsMoving then PlaceMovable(meterFrame) end
+  if meterFrame.azsDefault and not meterFrame.azsMoving then
+   local position=DB.pos[meterFrame:GetName()]
+   if position then position[1]=position[1]+(width-previous)/2 end
+   PlaceMovable(meterFrame)
+  end
  end
 	FieldKit_Text(meterFrame.total,ShortNumber(total or 0).."  ("..ShortNumber(dps or 0).." dps)")
 	-- Total DPS can change with the run clock even when no new hit arrived.
@@ -1622,7 +1627,7 @@ local function UpdateMeterFrame(force)
 			row:SetStatusBarColor(0.8, 0.55, 0.1, 0.55)
 		end
 		row.label:SetText(line.name or "?")
-		row.value:SetText(FieldKit_FormatMeterValues(line,DB.meterValues))
+		FieldKit.UpdateMeterColumns(row,line,DB.meterValues,width)
 		row:Show()
 	end
 	FitRows(meterFrame, n)
@@ -1675,6 +1680,8 @@ end
 -- Create fixed outgoing/taken meter pools, each independently collapsible.
 local function CreateMeterFrames()
 	meterFrame = CreateBarWindow("FieldKitMeterFrame", "Damage", METER_ROWS)
+ meterFrame:SetWidth(FieldKit.MeterWidth(DB.meterValues));FieldKitTheme.Update(meterFrame)
+ FieldKit.CreateMeterColumns(meterFrame)
 	takenFrame = CreateBarWindow("FieldKitTakenFrame", "Damage taken", TAKEN_ROWS)
 
 	takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)
@@ -1992,7 +1999,7 @@ function CreateCompactBar()
 	})
 	compactBar:SetBackdropColor(0, 0, 0, 0.7)
 	compactBar:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.9)
- FieldKitTheme.Surface(compactBar,"card")
+ FieldKitTheme.Surface(compactBar,"card",true)
 
 
 	local xp = CreateFrame("StatusBar", "FieldKitCompactBarXP", compactBar)

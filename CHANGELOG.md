@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0-review.3 — 2026-10-27
+
+- Fix HUD style/opacity leaking into the settings window, menus, Overview cards and layout dock. Only explicitly marked in-game HUD surfaces use these preferences.
+- Replace the concatenated damage/DPS/share string with three fixed-width, right-aligned numeric columns. Ability names have a separate bounded rectangle.
+- Preserve the meter’s saved left edge when switching display width; initialize its width before restoring positions to avoid reload drift.
+- Add regressions for 0% HUD opacity with opaque settings, column geometry across orders of magnitude, mode visibility and saved left-edge stability.
+
 ## 0.2.0-review.2 — 2026-10-27
 
 - Show exact native cumulative damage per ability alongside DPS and contribution by default. Keep selectable DPS/share and damage/DPS modes; widen only the damage meter as needed.

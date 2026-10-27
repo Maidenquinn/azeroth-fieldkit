@@ -1,7 +1,7 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.2.0-review.2", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.2.0-review.3", folder = "AzerothFieldKit" }
 
 -- Return a finite numeric value, optionally clamped. Strings are parsed as numbers,
 -- never evaluated as Lua. A missing/invalid value returns the caller's fallback.

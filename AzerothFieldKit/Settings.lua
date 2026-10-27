@@ -11,16 +11,56 @@ function FieldKit_FormatHealth(current,maximum,mode)
 end
 -- These are observed native meter fields, not damage inferred from DPS/time.
 -- Missing fields remain visibly unknown. Damage totals are displayed unabridged.
-function FieldKit_FormatMeterValues(line,mode)
+local function MeterParts(line)
  local damage=FieldKit.Number(line.dmg,nil,0)
  local rate=FieldKit.Number(line.dps,nil,0)
  local share=FieldKit.Number(line.share,nil,0)
  local amount=damage and string.format("%.0f",damage) or "?"
  local dps=(rate and string.format("%.0f",rate) or "?").." dps"
  local percent=share and string.format("%.0f%%",share*100) or "?"
+ return amount,dps,percent
+end
+function FieldKit_FormatMeterValues(line,mode)
+ local amount,dps,percent=MeterParts(line)
  if mode==1 then return dps.." | "..percent end
  if mode==2 then return amount.." | "..dps end
  return amount.." | "..dps.." | "..percent
+end
+
+function FieldKit.MeterWidth(mode) return mode==1 and 220 or (mode==2 and 320 or 360) end
+
+-- One bounded set of right-aligned numeric columns per spell row. Text length
+-- never moves a neighbouring column or changes the available name rectangle.
+function FieldKit.CreateMeterColumns(frame)
+ for i=1,table.getn(frame.rows) do
+  local row=frame.rows[i];row.meterColumns={}
+  for j=1,3 do
+   local text=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
+   text:SetJustifyH("RIGHT");text:SetHeight(14);row.meterColumns[j]=text
+  end
+  row.value:Hide()
+ end
+end
+
+function FieldKit.UpdateMeterColumns(row,line,mode,width)
+ local columns=row.meterColumns
+ local damage,rate,share=MeterParts(line)
+ columns[1]:SetText(damage);columns[2]:SetText(rate);columns[3]:SetText(share)
+ if row.meterMode~=mode or row.meterWidth~=width then
+  row.meterMode=mode;row.meterWidth=width
+  local offsets=mode==2 and {89,3,0} or {131,45,3}
+  local sizes={92,78,34}
+  for i=1,3 do
+   local text=columns[i];text:ClearAllPoints()
+   text:SetPoint("RIGHT",row,"RIGHT",-offsets[i],0);text:SetWidth(sizes[i])
+   if (i==1 and mode==1) or (i==3 and mode==2) then text:Hide() else text:Show() end
+  end
+  local reserved=mode==1 and 123 or (mode==2 and 181 or 223)
+  row.label:ClearAllPoints();row.label:SetPoint("LEFT",row,"LEFT",3,0)
+  row.label:SetWidth(width-12-reserved-11);row.label:SetHeight(14)
+ end
+ -- Other bar windows still use the generic value region; this meter hides it.
+ row.value:Hide()
 end
 -- Factory keeps checkbox closures small enough for Lua 5.0.
 local function Check(key,label,tip,default)

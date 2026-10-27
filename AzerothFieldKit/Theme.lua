@@ -8,8 +8,12 @@ local T=FieldKitTheme
 T.surfaces={}
 
 -- Display preferences affect only our material layers, never frame/text alpha.
-function T.Style() return FieldKitDB and FieldKitDB.cardStyle==2 and 2 or 1 end
-function T.Opacity()
+function T.Style(frame)
+ if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
+ return FieldKitDB and FieldKitDB.cardStyle==2 and 2 or 1
+end
+function T.Opacity(frame)
+ if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
  return FieldKit.Number(FieldKitDB and FieldKitDB.cardOpacity,100,0,100)/100
 end
 function T.Refresh()
@@ -31,7 +35,7 @@ function T.Update(frame)
  if not frame.fieldkitSkin then return end
  local w,h=frame:GetWidth(),frame:GetHeight()
  local skin=frame.fieldkitSkin
- local style=T.Style()
+ local style=T.Style(frame)
  if skin.width==w and skin.height==h and skin.style==style then return end
  skin.width=w;skin.height=h;skin.style=style
  skin.base:SetWidth(w);skin.base:SetHeight(h);skin.grain:SetWidth(w);skin.grain:SetHeight(h)
@@ -55,10 +59,11 @@ function T.Update(frame)
 end
 
 -- Build nine owned material slices once; do not skin native/game-owned frames.
-function T.Surface(frame,kind)
+function T.Surface(frame,kind,hud)
  if frame.fieldkitSkin then T.Update(frame);return end
  kind=kind or "card";frame:SetBackdrop({})
- local skin={kind=kind,parts={}};frame.fieldkitSkin=skin
+ -- Explicit scope prevents HUD transparency/style leaking into settings and popups.
+ local skin={kind=kind,parts={},hud=hud==true};frame.fieldkitSkin=skin
  table.insert(T.surfaces,frame)
  local color=kind=="card" and T.panel or T.background
  skin.base=frame:CreateTexture(nil,"BACKGROUND");skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
@@ -79,12 +84,12 @@ end
 function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
  local alpha=(frame.fieldkitNavigation and not active) and 0 or 1
- local opacity=skin.kind=="button" and 1 or T.Opacity()
- skin.base:SetAlpha(alpha*opacity);skin.grain:SetAlpha(T.Style()==2 and 0 or .16*alpha*opacity)
+ local opacity=skin.kind=="button" and 1 or T.Opacity(frame)
+ skin.base:SetAlpha(alpha*opacity);skin.grain:SetAlpha(T.Style(frame)==2 and 0 or .16*alpha*opacity)
  local plate=skin.kind=="window" and 4 or (skin.kind=="card" and 3 or (active and 2 or 1))
  for i=1,table.getn(skin.parts) do
   local t=skin.parts[i].texture
-  if T.Style()==2 then
+  if T.Style(frame)==2 then
    if i<=4 then
     t:Show();t:SetTexture(T.bronze[1],T.bronze[2],T.bronze[3]);t:SetAlpha(alpha)
    else t:Hide() end
@@ -101,7 +106,7 @@ end
 -- Native legacy Button with its own visible label; no red template underneath.
 function T.Button(parent,name,label,x,y,w,h,callback)
  local b=CreateFrame("Button",name,parent);b:SetPoint("TOPLEFT",parent,"TOPLEFT",x,-y)
- b:SetWidth(w);b:SetHeight(h or 28);T.Surface(b,"button")
+ b:SetWidth(w);b:SetHeight(h or 28);T.Surface(b,"button",parent.fieldkitSkin and parent.fieldkitSkin.hud)
  b.fieldkitLabel=b:CreateFontString(nil,"OVERLAY","GameFontNormal")
  local padding=w<50 and 2 or 10
  b.fieldkitLabel:SetPoint("LEFT",b,"LEFT",padding,0);b.fieldkitLabel:SetWidth(w-2*padding);b.fieldkitLabel:SetHeight(h or 28)
