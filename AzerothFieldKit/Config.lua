@@ -1,6 +1,6 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+local defaults={linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
@@ -15,8 +15,18 @@ function FieldKit.InitializeSettings(defaultStats)
   if type(d[key])~=type(value) then d[key]=value end
  end
  d.schema=1;d.language=d.language=="fr" and "fr" or "en"
- for _,key in ipairs({"known","pos","collapsedWindows"}) do
+ d.cardStyle=math.floor(FieldKit.Number(d.cardStyle,1,1,2))
+ d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
+ d.meterValues=math.floor(FieldKit.Number(d.meterValues,3,1,3))
+ for _,key in ipairs({"known","pos","collapsedWindows","frameAnchors"}) do
   if type(d[key])~="table" then d[key]={} end
+ end
+ local anchors=0
+ for name,a in pairs(d.frameAnchors) do
+  anchors=anchors+1
+  if type(name)~="string" or string.len(name)>128 or anchors>256 or not FieldKitPositions.Valid(a) then
+   d.frameAnchors[name]=nil
+  end
  end
  local count=0
  for name,class in pairs(d.known) do
@@ -28,7 +38,15 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  d.minimapAngle=FieldKit.Number(d.minimapAngle,150,-360,360)
  d.lowHealthPct=FieldKit.Number(d.lowHealthPct,30,10,70)
- d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,11))
+ -- Stable journey ids survive page reordering without resetting user choices.
+ if d.uiSchema~=2 then
+  local previous={"nameplates","health","bosses","health","alerts","windows","map","interface","interface","combat","bosses"}
+  local titles={Nameplates="nameplates",Target="health",Combat="bosses",Player="health",Warnings="alerts",Windows="windows",Map="map",Interface="interface",Camera="interface",["Combat text"]="combat",["Boss health"]="bosses"}
+  d.uiPage=titles[d.panelSection] or previous[tonumber(d.panelTab)] or "home";d.uiSchema=2
+ end
+ local valid={home=true,combat=true,health=true,bosses=true,alerts=true,windows=true,map=true,nameplates=true,interface=true}
+ if not valid[d.uiPage] then d.uiPage="home" end
+ d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,9))
  d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)
  d.playerBarY=FieldKit.Number(d.playerBarY,-70,-10000,10000)
  if type(d.lastStats)=="table" then

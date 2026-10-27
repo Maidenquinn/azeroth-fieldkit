@@ -1,0 +1,107 @@
+{
+  "design": "Chroniques d’Azeroth; maintained Azeroth Stats visual system",
+  "source": "maintainer-provided installed Azeroth Stats media, 2026-10-27",
+  "fonts": "Noto OFL derivatives; included OFL-NotoSans.txt applies to both Latin faces",
+  "files": {
+    "media/ChronicleGrain.tga": {
+      "sha256": "a8dfe4cf993085897118dbe667e736010d39d0721fdd7c5c9bfa856447f02514",
+      "bytes": 65580
+    },
+    "media/ChronicleSeal.tga": {
+      "sha256": "65ff5ae1cc052c7ab36fe8d41a41cbd38f3356a0c4f83b93be96cd7fdcfeafa3",
+      "bytes": 65580
+    },
+    "media/AzerothSans.ttf": {
+      "sha256": "eabcbfd9d8f91780eabcf59f4628d00cf629dcfb3f20c7fd4c94f163fbcd0fe0",
+      "bytes": 569044
+    },
+    "media/AzerothSerif.ttf": {
+      "sha256": "e447d6a412357a324e2bb72d2627500ea88d9c00205a8b1a6205546e1152ddef",
+      "bytes": 638028
+    },
+    "media/OFL-NotoSans.txt": {
+      "sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb",
+      "bytes": 4377
+    },
+    "media/ChroniclePlate1.tga": {
+      "sha256": "f03b2527970ab91e823dacf4806966b776c96bc6cfe2df6bc8bab71f2c87f5c0",
+      "bytes": 262188
+    },
+    "media/ChroniclePlate2.tga": {
+      "sha256": "be3ae53f13fe54cc5b323d5861fdc3652d1ada6681eb3fbe3b3d225707d4cee6",
+      "bytes": 262188
+    },
+    "media/ChroniclePlate3.tga": {
+      "sha256": "92bd0e6d8c6702a75f6d3e183e09075261e7acd2e276e8ac903cdbf63ddbf118",
+      "bytes": 262188
+    },
+    "media/ChroniclePlate4.tga": {
+      "sha256": "7eab80065cea4a499303820187de5df32dec8579bde18f59053dc4d049dea4a7",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph01.tga": {
+      "sha256": "40d9f4231bca3d5caf90063b657434b51a81a9beb3fd971283ab92a095c716a2",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph02.tga": {
+      "sha256": "66900121ce5b99616b4fa0c4ce82df98534f53140c9b1d3079edfb07cda70b88",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph03.tga": {
+      "sha256": "665f54db175d24968775b1c98b47d08e51ef23387950cf97ad17cd46eef3173b",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph04.tga": {
+      "sha256": "fc538d432f7e94a80d97a02d66db62f5ca66de5a0d41b141dab0fde50549eb5a",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph05.tga": {
+      "sha256": "5a27bf7f20df94e4ac4501c410757b97be3b417c37034c2b8a467d675486e566",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph06.tga": {
+      "sha256": "d5d505ffeeb28ea712f14f212d1a4ee6b025bd27820c85857e81478320473817",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph07.tga": {
+      "sha256": "33bb035205c9730a9e02ce24b18ad49de2b794d728492d333d4115f634c1234a",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph08.tga": {
+      "sha256": "1c190b4d8863f01cd2953720ea16f3f625f044eeffacc5cae0749b5eff1f92bb",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph09.tga": {
+      "sha256": "35a067196dcc9f427c63ebffd509c58635f58551ee81a00fe67686653ded5d40",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph10.tga": {
+      "sha256": "3440d9fd94212f168d4bc6403452606e0489f2cdb4a4abf034fd71d507f4440a",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph11.tga": {
+      "sha256": "a8eecb96aceaa4bb588c19982d4c0a37f17ffde580e9efdde6f4f6e9fa3ba5b3",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph12.tga": {
+      "sha256": "03bdece96d601dd895190e717e48ae81ffb9d3f5b6a32cc6de4603288b54e4fa",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph13.tga": {
+      "sha256": "74fdb2576e7ded1ab9cfaf6748c9d80f9cfa9657f1d139764669f6c7d19cd01d",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph14.tga": {
+      "sha256": "3147f674f26f4f09e35132a05cdb66a8c29a345f9802de6155b704ae131e52df",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph15.tga": {
+      "sha256": "2af1e7268fd2b11b6057f198d6081ab4469011aeaaac89a58c2198904eb61840",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph16.tga": {
+      "sha256": "ea117d4d4c7d485b6ba06f9fe445d465d093e1092e874cef95fef62024881141",
+      "bytes": 262188
+    }
+  }
+}

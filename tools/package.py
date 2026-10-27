@@ -13,6 +13,8 @@ for name,result in inventory['files'].items():
  assert hashlib.sha256((root/name).read_bytes()).hexdigest()==result['sha256'],('Stale inventory',name)
 for result in inventory['textures']:
  assert hashlib.sha256((root/result['path']).read_bytes()).hexdigest()==result['sha256'],'Stale texture inventory'
+for name,result in inventory.get('themeMedia',{}).items():
+ assert hashlib.sha256((root/name).read_bytes()).hexdigest()==result['sha256'],'Stale theme media inventory'
 payload={p.relative_to(root).as_posix():p.read_bytes() for p in root.rglob('*') if p.is_file()}
 for name in ('README.md','README.fr.md','NOTICE.md','LICENSE.md','SECURITY.md','CHANGELOG.md'):
  payload[name]=(base/name).read_bytes()

@@ -34,7 +34,7 @@ The catalog contains client-derived creature/display identities and localized
 names. Rights to game assets/data are not assigned to this project. Their inclusion
 in a public distribution must be cleared with the relevant rights holders and the
 game's maintainers. The old MASH branding icon is not shipped by the fork; its
-minimap shortcut uses an existing native icon path instead.
+minimap shortcut uses the bundled Chroniques compass instead.
 
 The older portrait investigation is retained in docs/history/PORTRAITS.txt as
 historical evidence. Its old filenames, dates, commands and validation claims
@@ -53,3 +53,15 @@ not part of this repository or its addon package.
 References: https://www.curseforge.com/wow/addons/mik-scrolling-battle-text and
 https://github.com/cadoky/LuckyOdds. These are attribution references, not evidence
 of permission from Malk, Blizzard or the Azeroth Survivors developers.
+
+## Shared visual family
+
+The maintainer supplied the installed Azeroth Stats Chroniques design as the
+reference for this fork. The fixed compass, grain, four material plates and
+sixteen painted glyphs are bundled as independent local assets, credited to
+Kevin / Codex (original geometric and AI-generated artwork). No zone photos,
+Stats data collector or Stats Lua runtime are included. Exact inputs/hashes are
+recorded in data/theme-assets.json and the runtime inventory. AzerothSans.ttf
+and AzerothSerif.ttf are renamed Noto Sans / Noto Serif Bold derivatives; the
+SIL OFL notice in media/OFL-NotoSans.txt applies to both. No font download or
+asset generation runs in the game. Existing Malk/game-data notices still apply.

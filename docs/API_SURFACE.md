@@ -108,3 +108,25 @@ The removed talent state and optional chat content are not persisted.
 
 Keeping a feature disabled does not make an unapproved addon acceptable to load.
 The complete candidate, not just its default configuration, must be reviewed.
+
+## Configuration and theme surfaces (0.2)
+
+Interface.lua creates addon-owned frames, scroll viewports, bounded popups and
+an arrangement dock. Theme.lua loads only bundled, fixed local textures/fonts.
+No Stats Lua API is imported. Language/reflow/Refresh never invokes native setting
+setters. All native actions still originate in the existing schema callbacks or
+an explicit Reload UI button. Opening configuration does not unlock HUD dragging;
+the Move windows / Done action controls that in-memory mode. Saved uiPage and
+uiSchema only record navigation/migration, not game state or player coordinates.
+
+## 0.121 compatibility
+
+GameCompatibility.lua reads AZS_ZONE.heroic only during an active native phase. Critical-objective EN/FR names exempt existing orb nameplates from ordinary-mob filtering; the V key still controls visibility. No spawn coordinates, target/combat actions, progression writes or inferred mark/star/affix data are introduced. See GAME_0_121.md for evidence and limitations.
+
+## Linked HUD and run-mode reference
+
+RunMode.lua reads only the existing native rank/zone and phase; its versioned reference is static text, not live affix or multiplier data. HudStack.lua reanchors FieldKit-owned frames only. FieldKitDB.linkLeftCards, runModeCard and pos.FieldKitLeftStack persist configuration and a UI anchor. Legacy individual coordinates are retained; no world-position history or game progression is written.
+
+## Native anchor persistence
+
+Positions.lua reads GetPoint and writes only FieldKitDB.frameAnchors (validated own-frame names and point/relative-point/numeric offsets). Restoring uses UIParent-relative SetPoint; no frame pointers are serialized. Native SetClampedToScreen handles bounds of the linked group proxy, with child clamps disabled while linked. Legacy positions are retained and Reset/Undo includes both representations. No game/save/other-addon state is accessed.

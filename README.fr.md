@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.1.0-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
+La version `0.2.1-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -71,3 +71,52 @@ Le [dossier de revue](docs/REVIEW.md), l'[audit](SECURITY.md), les
 Les crédits et droits non résolus figurent dans [NOTICE](NOTICE.md) et
 [LICENSE](LICENSE.md). Le dépôt et la préversion sont publics pour faciliter la revue. Cet accès public
 ne confirme ni les permissions de redistribution ni l’approbation du jeu.
+
+## Nouveau parcours des paramètres
+
+Ouvrez `/fieldkit` ou la boussole de la minicarte. L’accueil présente les outils
+et leur état ; **Configurer** ouvre la page correspondante. Neuf rubriques
+regroupent les usages, avec un seul choix de format de PV par unité.
+
+**Texte de combat** regroupe Général, Événements, Police, Filtres, Zones et Jeu.
+La page Jeu règle les affichages natifs pour éviter les doublons. **Déplacer**
+masque les paramètres pour placer les fenêtres ; **Terminer** revient aux
+réglages. **Positions par défaut** propose ensuite une annulation immédiate.
+La barre compacte ne recharge l’interface qu’après un clic explicite.
+
+Le thème ardoise et or reprend Azeroth Stats sans en dépendre. Les pages
+défilent sur petit écran. Les préférences existantes sont conservées ; le détail
+de l’audit et les vérifications en jeu sont dans [UX_REVIEW.md](docs/UX_REVIEW.md).
+Cette refonte n’a pas encore été validée dans le jeu.
+
+Dans **Fenêtres**, choisissez le style **Travaillé / Classique** et l’opacité du fond (0–100 %), sans diminuer celle des textes et bordures. Le compteur propose **DPS et contribution**, **Dégâts et DPS** ou **Dégâts, DPS et contribution**. Les dégâts sont le cumul natif exact par compétence, sans estimation à partir du DPS.
+
+Correctif review.3 : style et opacité s’appliquent uniquement aux cartes du HUD en jeu. Les paramètres et menus restent opaques. Les dégâts, DPS et contributions occupent des colonnes fixes, alignées à droite ; changer de mode conserve le bord gauche du compteur.
+
+## Jeu 0.121.0
+
+Le contexte des paramètres affiche le rang Normal / Héroïque I–V lorsqu'il est
+fourni par le client. Les bonus conservent leurs dixièmes, et le filtre des
+monstres ordinaires préserve les barres des orbes explosives (la touche V reste
+respectée). Les PV, dégâts et soins restent ceux du jeu, sans appliquer une
+seconde fois les modificateurs Héroïques ou les étoiles.
+
+Aucune API de marques, d'étoiles ou d'affixes actifs n'a été confirmée. Ces
+valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md).
+
+## Carte du mode et alignement à gauche
+
+Le mode de jeu, les dégâts, les dégâts subis et les antres partagent désormais
+une largeur et une pile avec six pixels d'espacement. Réduire ou masquer une
+carte referme l'espace. Déplacez n'importe quelle carte en mode **Déplacer** pour
+bouger le groupe. Dans **Fenêtres**, **Aligner les cartes de gauche** permet de
+revenir aux positions individuelles conservées ; **Carte du mode de jeu** masque
+ou affiche la nouvelle carte.
+
+Le rang et la zone viennent du client. Les mécaniques sont marquées **Référence
+0.121**, avec tous les détails au survol. Les quatre dernières règles restent
+visibles ; les règles héritées supplémentaires sont comptées et détaillées dans
+l'infobulle. Les noms des affixes actifs et les multiplicateurs PV/dégâts ne sont
+pas inventés lorsqu'ils ne sont pas exposés. Voir [HUD_STACK.md](docs/HUD_STACK.md).
+
+Le correctif review.3 conserve les ancrages natifs lors du déplacement, sans recalcul depuis le centre au relâchement. La marge de 12 pixels a été retirée ; le client limite la pile sur sa taille complète. Les ancrages natifs sont enregistrés séparément des anciennes positions et inclus dans Réinitialiser/Annuler.

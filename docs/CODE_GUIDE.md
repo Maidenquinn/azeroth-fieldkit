@@ -24,7 +24,7 @@ are never in that list. There is no modern module loader or required library.
    Building the schema does not apply options.
 8. **LegacyCrits.lua:** the separate optional eight-line critical display. It
    preserves the old max-value-plus-count grouping; this is not a damage total.
-9. **FieldKit.lua:** the HUD/controller, native frame adapters and settings renderer.
+9. **FieldKit.lua:** the HUD/controller and native frame adapters. The settings shell lives in Interface.lua.
    Stateful helpers remain local. Its scoped blocks are intentional: flattening
    everything can exceed the old 32-upvalue limit. This module is still large;
    further splits should follow tests and explicit dependency tables, not globals.
@@ -97,3 +97,19 @@ The [function index](CODE_INDEX.md) links each named function to its declaration
 Anonymous callbacks are documented by their enclosing constructor/schema and the
 effects inventory. Generated data is explained at module level rather than by
 repeating a comment for each of the 1,063 aliases.
+
+### Presentation layer (0.2)
+
+Theme.lua owns fixed local materials, typography and cached geometry. It skins
+only FieldKit-owned surfaces. InterfaceStrings.lua extends EN/FR display labels.
+Interface.lua takes existing schema actions, organizes stable journey ids and
+constructs the settings/layout dock once. Refresh reads; setters require user
+input. CombatOptions.lua contributes the six-page editor and reflows its existing
+widgets. Config.lua migrates the legacy page selection without resetting feature
+preferences. New UI behavior is covered by tests/interface_journey.lua.
+
+GameCompatibility.lua contains the guarded native Heroic context, exact critical-objective nameplate exception and fractional-bonus formatting. Read docs/GAME_0_121.md and tests/game_0121.lua before extending it. It adds no native setter or gameplay action.
+
+RunMode.lua renders the native rank/zone separately from the labelled 0.121 mechanic reference. HudStack.lua owns only left-card geometry, preserves legacy positions and forwards player drags to the stack anchor. Both are initialized through injected HUD constructors; no native gameplay writer is added. tests/mode_stack.lua validates the actual frame geometry and controls.
+
+Positions.lua validates and persists native point/relative-point offsets. Drag-stop callbacks use this path without GetCenter subtraction. Legacy numeric positions remain a fallback. HudStack.lua now uses a full-size, mouse-disabled clamp proxy; linked cards delegate clamping to it. tests/edge_positions.lua covers zero-inset edges and native-anchor restoration.

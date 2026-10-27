@@ -86,7 +86,7 @@ function FieldKitCombatAnchor1:GetCenter() return 650,450 end
 this=FieldKitCombatAnchor1;FieldKitCombatAnchor1.scripts.OnDragStop();assert(FieldKitDB.combatTextX==150 and FieldKitDB.combatTextY==50)
 this=FieldKitPanel;FieldKitPanel.scripts.OnHide();assert(not FieldKitCombatAnchor1:IsShown())
 -- Persist event styles and ignored list without changing other modules' settings.
-FieldKitDB.combatTextX=savedX;FieldKitDB.panelTab=4;FieldKitDB.panelSection="Player";FieldKitDB.combatText=true
+FieldKitDB.combatTextX=savedX;FieldKitDB.uiPage="health";FieldKitDB.panelTab=3;FieldKitDB.panelSection="Health & buffs";FieldKitDB.combatText=true
 assert(FieldKitDB.moneyDockRepair==1 and FieldKitDB.guardianPins==false)
 
 click(button(editor.pages[1],"Utiliser seulement ce texte"))

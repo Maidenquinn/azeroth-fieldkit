@@ -15,11 +15,13 @@ assert(FieldKitMoneyFrame.gold.text=="1234" and FieldKitMoneyFrame.chest.text=="
 assert(FieldKitMoneyFrame.kills.text=="89")
 -- Moving the money bar deliberately detaches it; regular updates must respect that.
 local oldPoint=FieldKitDB.pos.FieldKitMoneyFrame
+FieldKit.layoutEditing=true
 this=FieldKitMoneyFrame;FieldKitMoneyFrame:GetScript("OnDragStart")()
 FieldKitMoneyFrame:ClearAllPoints();FieldKitMoneyFrame:SetPoint("CENTER",UIParent,"CENTER",120,60)
 update(FieldKitFrame,.1)
 assert(FieldKitMoneyFrame.point[1]=="CENTER" and FieldKitMoneyFrame.point[4]==120)
 this=FieldKitMoneyFrame;FieldKitMoneyFrame:GetScript("OnDragStop")()
+FieldKit.layoutEditing=false
 assert(FieldKitDB.moneyDetached==true)
 FieldKitMoneyFrame:ClearAllPoints();FieldKitMoneyFrame:SetPoint("CENTER",UIParent,"CENTER",100,50)
 update(FieldKitFrame,.1)

@@ -26,6 +26,15 @@ def runtime(saved=None):
 
 fresh=runtime();fresh.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
 fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))
+assert fresh.globals().FieldKitDB.uiPage=='home'
+# Migrating navigation must preserve unrelated preferences and explicit opt-outs.
+for title,page in {'Nameplates':'nameplates','Player':'health','Target':'health','Combat':'bosses',
+                   'Boss health':'bosses','Combat text':'combat','Camera':'interface','Windows':'windows'}.items():
+ old=runtime('{panelSection='+json.dumps(title)+',panelTab=4,playerHealthMode=3,moneyFrame=false,combatTextX=-217}')
+ old.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+ assert old.globals().FieldKitDB.uiPage==page
+ assert old.globals().FieldKitDB.playerHealthMode==3 and old.globals().FieldKitDB.moneyFrame is False
+ assert old.globals().FieldKitDB.combatTextX==-217
 defaults=runtime()
 defaults.execute('''
 local writes=0
@@ -48,15 +57,21 @@ fire(FieldKitFrame,"VARIABLES_LOADED")
 secure.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 effects=runtime();effects.execute((base/'tests/action_effects.lua').read_text(encoding='utf8'))
 official=runtime();official.execute((base/'tests/official_api.lua').read_text(encoding='utf8'))
+compatibility=runtime();compatibility.execute((base/'tests/game_0121.lua').read_text(encoding='utf8'))
+stack=runtime();stack.execute((base/'tests/mode_stack.lua').read_text(encoding='utf8'))
+edges=runtime();edges.execute((base/'tests/edge_positions.lua').read_text(encoding='utf8'))
 l=runtime('{compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,chestPins=true,guardianPins=true,moneyDetached=true,pos={FieldKitMoneyFrame={-2.5374755859375,-348.0493927001953}}}')
 assert l.globals().FieldKit.version==version,'TOC/runtime version mismatch'
 l.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
-for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua'):
+for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua','interface_journey.lua','card_preferences.lua'):
  l.execute((base/'tests'/name).read_text(encoding='utf8'),name=name)
  print('PASS',name)
+l.execute('FieldKitDB.frameAnchors.FieldKitStatsFrame={"TOPRIGHT","TOPRIGHT",0,-30}')
 l.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 saved=l.eval('SNAPSHOT(FieldKitDB)')
 again=runtime(saved);again.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
+again.execute('local p,r,rp,x,y=FieldKitStatsFrame:GetPoint();assert(p=="TOPRIGHT" and r==UIParent and rp=="TOPRIGHT" and x==0 and y==-30)')
+again.execute('assert(FieldKitDB.cardStyle==2 and FieldKitDB.cardOpacity==37 and FieldKitDB.meterValues==2)')
 again.execute('assert(FieldKitDB.language=="fr");assert(FieldKitDB.guardianPins==false);assert(FieldKitDB.targetHealthMode==2);assert(FieldKitDB.combatTextX==-123);assert(FieldKitDB.combatEvents.crit.size=="31");assert(FieldKitDB.chatCopy==false)')
 # Walk every compiled nested function, even callbacks the mock did not reach.
 compiler=LuaRuntime(encoding=None);prototypes={}

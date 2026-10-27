@@ -32,12 +32,7 @@ local SECTIONS = {
 				get = function() return FieldKitDB.targetHealth end,
 				set = function(v) FieldKitDB.targetHealth = v; actions.UpdateTargetHealth() end,
 			},
-			{ kind = "check", label = "Target health: percentage", tip = "Switch between numeric health and percentage; use the next option to show both.",
-			  get = function() return FieldKitDB.targetHealthMode == 2 end,
-			  set = function(v) FieldKitDB.targetHealthMode = v and 2 or 1; actions.UpdateTargetHealth() end },
-			{ kind = "check", label = "Target health: numbers + percent", tip = "Display both numeric HP and percentage.",
-			  get = function() return FieldKitDB.targetHealthMode == 3 end,
-			  set = function(v) FieldKitDB.targetHealthMode = v and 3 or 1; actions.UpdateTargetHealth() end },
+
 		},
 	},
 	{
@@ -46,7 +41,7 @@ local SECTIONS = {
 			{
 				kind = "check",
 				label = "Replace the game's boss bars",
-				tip = "Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Drag them while this panel is open.",
+				tip = "Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Use Move windows to position them.",
 				get = function() return FieldKitDB.bossFrame end,
 				set = function(v) FieldKitDB.bossFrame = v; actions.SyncHudBosses(); actions.UpdateBossFrame() end,
 			},
@@ -79,16 +74,11 @@ local SECTIONS = {
 			{
 				kind = "check",
 				label = "Health bar under the character",
-				tip = "A small green bar under your hero. Drag it while this panel is open.",
+				tip = "A small green bar under your hero. Use Move windows to position it.",
 				get = function() return FieldKitDB.playerBar end,
 				set = function(v) FieldKitDB.playerBar = v; actions.UpdatePlayerBar() end,
 			},
-            { kind = "check", label = "Player health: percentage", tip = "Show player health as a percentage.",
-              get = function() return FieldKitDB.playerHealthMode == 2 end,
-              set = function(v) FieldKitDB.playerHealthMode = v and 2 or 1; actions.UpdatePlayerBar() end },
-            { kind = "check", label = "Player health: numbers + percent", tip = "Show both health numbers and percentage.",
-              get = function() return FieldKitDB.playerHealthMode == 3 end,
-              set = function(v) FieldKitDB.playerHealthMode = v and 3 or 1; actions.UpdatePlayerBar() end },
+
 			{
 				kind = "check",
 				label = "Buff icons under the health bar",
@@ -202,7 +192,7 @@ local SECTIONS = {
 				label = "Compact action bar",
 				tip = "Your 6 spells and racial in a small bar with the XP bar below and the kills, gold and chest line above, and the menu buttons in the bottom right corner. Changing this reloads the interface.",
 				get = function() return FieldKitDB.compactBar end,
-				set = function(v) FieldKitDB.compactBar = v; ReloadUI() end,
+				set = function(v) FieldKitDB.compactBar = v end,
 			},
 			{
 				kind = "check",

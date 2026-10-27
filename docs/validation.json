@@ -1,7 +1,7 @@
 {
-  "version": "0.1.0-review.3",
+  "version": "0.2.1-review.3",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -15,17 +15,32 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "151fd6f2b696d288db1ee2ffba873f43bc4a4bd43b27c269caf00676c757e0bd"
+      "sha256": "5faea6b247c1567c24ff90e5edff5cdb265261f2080ec05b6fadc48bb9def540"
+    },
+    "Positions.lua": {
+      "maxUpvalues": 2,
+      "functions": 4,
+      "sha256": "bb57bda856dfda1d8b406da7e83a6930c866d56924acac9fb006842ecd32b9ae"
     },
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "7986ee5e6ae77afa92085e0d9d2462a24e4c530e39f2c7f110dac5f79cb64104"
+      "sha256": "a1acfeec6f29967fef91b8d354766e2cb533b70a7964ee39feb1dffd09aded41"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "e973035f8c0c8409b8a74c1e9227cfc5ec5cc7f0381fcc050363079881b65c7a"
+      "sha256": "fda1b0246945329cbf04e3ebf6d2b988b92b655f3ca8ed37315a107cc5d16480"
+    },
+    "InterfaceStrings.lua": {
+      "maxUpvalues": 0,
+      "functions": 1,
+      "sha256": "6ec3ba3a62089668870c4d1b3ce13764f76295129335d66283d405c7fadd3852"
+    },
+    "Theme.lua": {
+      "maxUpvalues": 1,
+      "functions": 14,
+      "sha256": "3cfdd79baa64e050e6c56e4c21e68ee97288437239c4b6f7a904c59774c7c055"
     },
     "Seed.lua": {
       "maxUpvalues": 0,
@@ -44,23 +59,43 @@
     },
     "Settings.lua": {
       "maxUpvalues": 2,
-      "functions": 10,
-      "sha256": "f8b57c898d772d554b12d8f480647ed7f6b3d392f4c6a53f2cc1fd2a04611be3"
+      "functions": 11,
+      "sha256": "155a7e0ab196fb85012560ec1b56b169caefc6fee9164681586f59ce609ded28"
+    },
+    "GameCompatibility.lua": {
+      "maxUpvalues": 1,
+      "functions": 6,
+      "sha256": "7e081ae1a650ef0b6d402341b0b9bee83f7281fdecf81aa7b449f1f778d25d56"
+    },
+    "RunMode.lua": {
+      "maxUpvalues": 1,
+      "functions": 9,
+      "sha256": "3cad0111778c79eb65fbd83c862230d830d8942b67bea369741e92c3442da98b"
+    },
+    "HudStack.lua": {
+      "maxUpvalues": 2,
+      "functions": 5,
+      "sha256": "f7c5155c32c91c985534a7e40110d89882de388016f2a94b091958bd10a66433"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
-      "functions": 57,
-      "sha256": "d55381548b7694c09ba588beca8eea9a96a2ae192279bab3cb1b6cfdf9c71ccc"
+      "functions": 49,
+      "sha256": "a738b4c4279ba4db879ac0845873e51b6f40ef03ecdecd27e5cf800dd5508dc9"
     },
     "LegacyCrits.lua": {
       "maxUpvalues": 7,
       "functions": 7,
       "sha256": "fda5238bdb3f59ef03763c58bed9ec3ada1b8d9335b14d0022b17b9aa9abdd6f"
     },
+    "Interface.lua": {
+      "maxUpvalues": 5,
+      "functions": 70,
+      "sha256": "5b3becf8726a620363253966723631b8d2d9e47026c44beda5a60d81fec7aacf"
+    },
     "FieldKit.lua": {
-      "maxUpvalues": 23,
-      "functions": 176,
-      "sha256": "dd15548f9fe73fe0ff1689d0ad312092223ff8e3dc754fa60ec123941f5edccf"
+      "maxUpvalues": 19,
+      "functions": 164,
+      "sha256": "bce6fcab5be36bfac072ffa5ed0b37527bb5329b4f9abc2fd4bf6465fc7bc3eb"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,
@@ -75,12 +110,12 @@
     "CombatOptions.lua": {
       "maxUpvalues": 5,
       "functions": 75,
-      "sha256": "2ef4fead53c9e76ed504e9fe93ad1cc69ac58af0ff8daffa9420b2fe134b54f9"
+      "sha256": "1bafcccaac54981ccd9d592679aa2537dd1b68414ad2b982bf0460b3783ee402"
     },
     "CopyLog.lua": {
       "maxUpvalues": 4,
       "functions": 14,
-      "sha256": "bc3c8631e3f81fc105c19b55cad07dc91bf720267012ae388a3bd53df9e10ea2"
+      "sha256": "1fafdbf73cdcb81b1f9b79a81b58d27d290e5b12d962a4c309b990d3c8cb6a0f"
     }
   }
 }

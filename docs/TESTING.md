@@ -96,3 +96,11 @@ must not be rebranded as FieldKit acceptance results.
 
 Update the acceptance record per candidate hash. Passing a previous candidate
 does not approve a changed ZIP or establish author/asset distribution permission.
+
+## 0.2 interface acceptance
+
+Follow [UX_REVIEW.md](UX_REVIEW.md) for the new page/layout journeys. The automated
+interface fixture additionally verifies exclusive HP choice, no automatic reload,
+no native writes during language/reflow, no resize allocations, wheel bounds,
+reset/Undo and independent money-strip hiding. Native scrollbars, custom fonts,
+visual clipping, keyboard focus and screen resizing still need in-game review.

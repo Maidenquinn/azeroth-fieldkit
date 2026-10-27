@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.1.0-review.3** is a public **review candidate** shared for technical examination,
+Version **0.2.1-review.3** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -40,6 +40,60 @@ No statement here substitutes for a decision from the game's developers.
 - **Optional local chat copy:** disabled by default. Up to 100 messages from
   the main chat frame, at most 512 bytes each, in memory only. Whispers may be
   included. Nothing is uploaded, posted or automatically copied to the clipboard.
+
+## Getting started with the interface
+
+Open `/fieldkit` or click the compass beside the minimap. **Overview** shows the
+main tools and their current status. Choose **Configure** to change one area.
+All preferences apply immediately except the optional compact action bar, which
+shows an explicit **Reload UI** action when changed.
+
+- **Combat text:** General, Events, Fonts, Filters, Areas, Game text. Use Game text
+  to turn off duplicate native damage/critical displays.
+- **Health & buffs / Bosses:** select Numbers, Percentage or both in one control.
+- **Windows:** choose Decorative or Classic styling and 0–100% background opacity for in-game HUD cards. Settings, menus and previews keep their original opaque theme. Text and borders stay readable. Select DPS + share, exact Damage + DPS, or all three in fixed right-aligned columns for each ability; damage comes directly from native cumulative totals, never a DPS/time estimate.
+- **Windows / Minimap:** independently enable the windows and pins you need.
+- **Interface:** English/Français, compact bar, native decorations, optional chat
+  copy and camera. Native creature/spell/item names are not translated.
+- **Move windows:** temporarily hides settings; drag the enabled HUD windows or
+  combat-area handles, then **Done** returns to settings. Escape exits this mode.
+- **Reset HUD positions:** restores HUD window defaults and offers **Undo**.
+  Combat-area offsets have their own controls in Areas.
+
+Pages keep readable font sizes and scroll on smaller screens. Close with the
+upper-right cross, **Close**, Escape or `/fieldkit`. The [UX review](docs/UX_REVIEW.md)
+records findings, migration and live acceptance checks. The slate/gold theme is
+shared with Azeroth Stats but bundled locally: that addon is not required.
+
+## Left HUD stack and run mode
+
+The left cards now share one movable stack and width: Run mode, Damage,
+Damage taken, Lairs. Collapsing or hiding a card closes the gap. Move any member
+in **Move windows** mode to move the group. **Windows → Align left HUD cards**
+turns linking off; individual old positions are retained. The stack has its own
+saved anchor, separate from those positions. Native drag anchors are retained
+without an addon-imposed screen inset. The native client clamps the full group;
+this avoids a second center-coordinate calculation on release.
+
+**Windows → Run mode card** controls the new card. Its rank and zone come from
+the client. Mechanic names are explicitly a **0.121 reference**, with cumulative
+details on hover. The four latest mechanics stay visible; any earlier mechanics
+are counted and listed in the tooltip. Current weekly affix identities and exact
+HP/damage multipliers remain unknown when not exposed by the native API. This
+card does not alter the difficulty, calculate scaled rewards or claim live data
+for the reference rules. See [details and tests](docs/HUD_STACK.md).
+
+## Game 0.121.0
+
+Settings show the native Normal / Heroic I–V rank when provided during a run.
+Stat bonuses retain tenths, and the ordinary-mob filter preserves explosive-orb
+nameplates while respecting V. Multiple boss frames keep using live native
+health; damage/healing and equipment tooltips remain authoritative native values.
+There is no local reapplication of Heroic or star bonuses.
+
+A marks, star-upgrade or weekly-affix tracker is not included: no corresponding
+read-only export has been confirmed in the inspected client. See the
+[compatibility evidence, limits and tests](docs/GAME_0_121.md).
 
 ## Conservative defaults
 
