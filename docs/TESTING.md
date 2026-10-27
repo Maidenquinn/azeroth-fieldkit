@@ -1,0 +1,92 @@
+# Verification and in-game acceptance
+
+## Repeatable offline checks
+
+Use Python 3.12+ and `pip install -r requirements-dev.txt`, then:
+
+```sh
+python tools/audit.py
+python tools/verify.py
+python tools/verify.py --lua50 /path/to/lua50
+python tools/package.py
+```
+
+The optional Lua interpreter must be an independently available **Lua 5.0.3**
+executable. It is not shipped, downloaded or launched by the addon. The local
+maintainer run used both Lua 5.0.3 and lupa's Lua 5.1 runtime. CI runs Lua 5.1
+through lupa and performs the structural/prototype checks; it does not claim
+native Lua 5.0 or live-game coverage unless that job is explicitly added.
+
+`audit.py` inspects all TOC Lua files, rejects selected dangerous runtime
+capabilities and unsupported strings, checks data-only textures and generates
+the function index/inventory. Its tokenizer deliberately rejects long literals
+until reviewed. This token gate is a regression guard, not a formal proof of
+safety or an adversarial malware scanner.
+
+`verify.py` executes the actual runtime files in a mock, then checks:
+
+- all settings tabs select their own pages; EN/FR switches and callbacks;
+- target-independent portraits across 1,063 aliases / 100 definitions / 12 maps,
+  unknown/conflicting displays and simultaneous instances;
+- health formats, collapsed windows, positions and saved settings on reload;
+- native gold/chest strip, intentional detachment and lost-anchor repair;
+- chest/guardian toggles, native axes, edge pins, square-map option and absent CVar;
+- combat categories, filtering, ability exclusions, style/font/position controls,
+  grouping, saturated bursts, lifetime/fade and native-healing counter resets;
+- opt-in/opt-out main-chat capture, 100-message bound, 512-byte message bound,
+  clearing editbox/memory, unaffected other chat frames and original forwarding;
+- both the legacy forwarding and simulated secure-hook paths under Lua 5.1;
+- CVar allowlist, missing CVars, finite numeric validation and malformed DB shapes;
+- disabled-filter WorldFrame noninterference and enable/disable restoration;
+- no native talent-state overwrite during repeated initialization;
+- native action-slot calls happen only for an explicit drag onto another button;
+  idle updates and dropping outside make no slot changes in the mock;
+- all nested Lua 5.1 prototypes fit the 32-upvalue limit (current maximum 24).
+
+Native Lua 5.0.3 runs the same core behavioral/privacy/UI fixtures in
+`tests/native50.lua`. The Python-hosted reload test and secure-hook simulation
+are additional Lua 5.1 checks. Tests use explicit mock native data; they are not
+a recording of a real run or evidence that every client API behaves identically.
+
+## What remains untested
+
+The renamed candidate has not been tested inside the running game. In particular,
+no claim is made about current-client menu approval, live frame strata/reparent
+behavior, action-slot drag integration, every resolution/map, engine texture
+decoder safety or FPS/memory use during dense combat. Old MASH user confirmations
+must not be rebranded as FieldKit acceptance results.
+
+## Authorized in-game checklist
+
+1. Obtain authorization to load the review candidate, disable MASH, and record
+   the exact client build, candidate hash, UI language and enabled options.
+2. Fresh configuration: confirm sensitive features/audio/chat are off. Verify
+   stock plates, HUD, camera, native damage numbers and stock action bar remain.
+3. Open `/fieldkit`; click every tab and close button. Switch EN/FR, reopen,
+   resize and reload. No text/layout options should duplicate the combat editor.
+4. Move/collapse each addon window; inspect saved positions, collapse state and
+   gold/chest strip after reload. Check native HP/shield against the addon display.
+5. Preview combat categories (clearly marked samples), then test actual damage,
+   healing, grouping, filters/exclusions, fonts, sizes and two scroll areas.
+6. If approved, enable boss replacement. Change/clear target during boss combat;
+   verify independent portrait and distinct HP for duplicate instances. Test
+   unknown appearances and representative scheduled/final bosses on each map.
+7. If approved, enable chest and lair pins separately. Check positions, edge
+   directions, zoom, rotation, tooltip and respawn-confirmation behavior. A lair
+   is not a moving guardian. No rune location should be invented.
+8. If approved, enable nameplate filtering. Exercise V, spawning/reused plates,
+   speech bubbles and disable again. Check native parent/scale/alpha restoration
+   and conflicts with other authorized addons.
+9. If approved, enable compact bar. Explicitly swap two native action slots by
+   dragging; verify that a drop outside does nothing, native clicks still work,
+   money/XP remain visible and disabling/reloading restores the stock layout.
+10. Exercise optional camera/damage/audio switches. Record which native settings
+    persist and restore player preferences before uninstalling.
+11. Optional privacy test with non-sensitive sample text only: capture is off,
+    enable it, open `/fieldkitlog`, verify older text absent, then disable and
+    confirm clearing. Exit normally/reload: chat content must not be persisted.
+12. Profile a dense authorized run. Record frame time/memory and any Lua errors.
+    Report failures with minimal data; never attach private chat or game saves.
+
+Update the acceptance record per candidate hash. Passing a previous candidate
+does not approve a changed ZIP or establish author/asset distribution permission.

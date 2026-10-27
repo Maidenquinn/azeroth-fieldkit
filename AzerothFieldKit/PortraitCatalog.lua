@@ -1,7 +1,7 @@
 -- Generated from this installed executable, locale tables and verified DBC appearances.
 -- Instance ids are never substituted for creature entry/display ids.
-MASH_PortraitCatalog = {}
-local C = MASH_PortraitCatalog
+FieldKit_PortraitCatalog = {}
+local C = FieldKit_PortraitCatalog
 C["ab"] = {}
 C["ab"]["Witherbark Headhunter"] = {entry=1509,display=3995,key="d3995",zone="ab",sharedAppearance=true}
 C["ab"]["Cazacabezas Secacorteza"] = C["ab"]["Witherbark Headhunter"]
@@ -1077,4 +1077,4 @@ C["wsg"]["Владыка Каззак"] = C["wsg"]["Lord Kazzak"]
 C["wsg"]["カザック卿"] = C["wsg"]["Lord Kazzak"]
 C["wsg"]["卡扎克领主"] = C["wsg"]["Lord Kazzak"]
 C["wsg"]["군주 카자크"] = C["wsg"]["Lord Kazzak"]
-MASH_PortraitCatalogInfo = {zones=12,bosses=60,guardians=40}
+FieldKit_PortraitCatalogInfo = {zones=12,bosses=60,guardians=40}

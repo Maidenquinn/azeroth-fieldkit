@@ -1,0 +1,52 @@
+-- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
+-- old settings and game saves must not be overwritten by a renamed review build.
+local defaults={hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+ bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
+ takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
+ lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
+ lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false}
+
+-- Normalize persisted shapes before any frame can consume them. Only the new
+-- addon's in-memory DB is repaired; serialization is the client's responsibility.
+function FieldKit.InitializeSettings(defaultStats)
+ if type(FieldKitDB)~="table" then FieldKitDB={} end
+ local d=FieldKitDB
+ for key,value in pairs(defaults) do
+  if type(d[key])~=type(value) then d[key]=value end
+ end
+ d.schema=1;d.language=d.language=="fr" and "fr" or "en"
+ for _,key in ipairs({"known","pos","collapsedWindows"}) do
+  if type(d[key])~="table" then d[key]={} end
+ end
+ local count=0
+ for name,class in pairs(d.known) do
+  count=count+1
+  if type(name)~="string" or string.len(name)>160 or type(class)~="string" or count>2048 then d.known[name]=nil end
+ end
+ for name,p in pairs(d.pos) do
+  if type(name)~="string" or type(p)~="table" or not FieldKit.Number(p[1]) or not FieldKit.Number(p[2]) then d.pos[name]=nil end
+ end
+ d.minimapAngle=FieldKit.Number(d.minimapAngle,150,-360,360)
+ d.lowHealthPct=FieldKit.Number(d.lowHealthPct,30,10,70)
+ d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,11))
+ d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)
+ d.playerBarY=FieldKit.Number(d.playerBarY,-70,-10000,10000)
+ if type(d.lastStats)=="table" then
+  for key,value in pairs(d.lastStats) do d.lastStats[key]=FieldKit.Number(value) end
+ else d.lastStats=nil end
+ if d.cameraMax~=nil then d.cameraMax=FieldKit.Number(d.cameraMax,nil,15,50) end
+ for _,key in ipairs({"playerHealthMode","targetHealthMode","bossHealthMode"}) do
+  d[key]=math.floor(FieldKit.Number(d[key],1,1,3))
+ end
+ for _,key in ipairs({"hideDamage","showCrits","groupCrits","hideGryphons","moneyDetached","hudBossesHidden","hudTallyHidden","hudMeterHidden","statsCollapsed","gearCollapsed"}) do
+  if d[key]~=nil and type(d[key])~="boolean" then d[key]=nil end
+ end
+ d.chestsOpened=FieldKit.Number(d.chestsOpened,0,0,1e9)
+ if type(d.shownStats)~="table" then
+  d.shownStats={};for i=1,table.getn(defaultStats) do d.shownStats[defaultStats[i]]=true end
+ end
+ -- Obsolete experiments and gameplay-state persistence are not supported.
+ for _,key in ipairs({"talentToggles","talentStamp","chestSeq","goldSpent","runePins","runeRecord","runePickupSetup","runeObservations","runeProbe","worldProbe","runeTrace","runeOverlay"}) do d[key]=nil end
+ if FieldKitCombat then FieldKitCombat.Ensure() end
+ return d
+end

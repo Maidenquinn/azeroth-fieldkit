@@ -1,22 +1,28 @@
--- Compact editor embedded in the existing /mash Combat text page.
-local C=MASHCombat
+-- Compact editor embedded in the existing /fieldkit Combat text page.
+local C=FieldKitCombat
 local serial=0
-local function Name() serial=serial+1;return "MASHCombatOption"..serial end
-function MASH_CreateCombatOptions(parent)
+-- Generate distinct editor frame names without overwriting native globals.
+local function Name() serial=serial+1;return "FieldKitCombatOption"..serial end
+-- Build the single five-page combat editor and its live preview controls.
+function FieldKit_CreateCombatOptions(parent)
  local width=parent:GetWidth()-6
  local ui=CreateFrame("Frame",nil,parent);ui:SetWidth(width);ui:SetHeight(505);ui:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-27)
  ui.widgets={};ui.pages={};ui.menus={};ui.selected=1;ui.eventKind="out"
+ -- Create one localized editor label.
  local function Text(p,label,x,y,width)
   local t=p:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");t:SetPoint("TOPLEFT",p,"TOPLEFT",x,y)
-  t:SetWidth(width or (parent:GetWidth()-6));t:SetJustifyH("LEFT");MASH_Text(t,label);return t
+  t:SetWidth(width or (parent:GetWidth()-6));t:SetJustifyH("LEFT");FieldKit_Text(t,label);return t
  end
+ -- Attach localized tooltip callbacks to an addon-owned control.
  local function Tip(button,text)
-  button:SetScript("OnEnter",function() GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(MASH_L(text),1,1,1);GameTooltip:Show() end)
+  button:SetScript("OnEnter",function() GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L(text),1,1,1);GameTooltip:Show() end)
   button:SetScript("OnLeave",function() GameTooltip:Hide() end)
  end
+ -- Create a localized explicit-action editor button.
  local function Button(p,label,x,y,w,callback)
-  local b=CreateFrame("Button",Name(),p,"UIPanelButtonTemplate");b:SetWidth(w);b:SetHeight(23);b:SetPoint("TOPLEFT",p,"TOPLEFT",x,y);MASH_Text(b,label);b:SetScript("OnClick",callback);return b
+  local b=CreateFrame("Button",Name(),p,"UIPanelButtonTemplate");b:SetWidth(w);b:SetHeight(23);b:SetPoint("TOPLEFT",p,"TOPLEFT",x,y);FieldKit_Text(b,label);b:SetScript("OnClick",callback);return b
  end
+ -- Build a boolean control with separate refresh/get and click/set paths.
  local function Check(p,label,y,get,set,tip)
   local b=CreateFrame("CheckButton",Name(),p,"UICheckButtonTemplate");b:SetWidth(22);b:SetHeight(22);b:SetPoint("TOPLEFT",p,"TOPLEFT",0,y)
   Text(p,label,25,y-4,width-25);b.get=get;b.set=set;b.label=label;b.controlKind="check"
@@ -25,27 +31,31 @@ function MASH_CreateCombatOptions(parent)
   if tip then Tip(b,tip) end
   table.insert(ui.widgets,b);return b
  end
+ -- Bind a checkbox to one combat DB option.
  local function Flag(p,label,y,key,tip)
-  return Check(p,label,y,function() return MASHDB[key] end,function(v) MASHDB[key]=v end,tip)
+  return Check(p,label,y,function() return FieldKitDB[key] end,function(v) FieldKitDB[key]=v end,tip)
  end
+ -- Build a bounded numeric control, suppressing callbacks during UI refresh.
  local function Slider(p,label,y,min,max,get,set,format)
   local name=Name();local s=CreateFrame("Slider",name,p,"OptionsSliderTemplate")
   s:SetWidth(width-20);s:SetHeight(17);s:SetPoint("TOPLEFT",p,"TOPLEFT",9,y-16);s:SetMinMaxValues(min,max);s:SetValueStep(1)
-  if getglobal(name.."Low") then MASH_Text(getglobal(name.."Low"),tostring(min));MASH_Text(getglobal(name.."High"),tostring(max)) end
+  if getglobal(name.."Low") then FieldKit_Text(getglobal(name.."Low"),tostring(min));FieldKit_Text(getglobal(name.."High"),tostring(max)) end
   s.get=get;s.set=set;s.label=label;s.controlKind="slider"
   s.Refresh=function()
-   local v=get();s:SetValue(v);if getglobal(name.."Text") then MASH_Text(getglobal(name.."Text"),MASH_L(label)..": "..(format and MASH_L(format(v)) or v)) end
+   local v=get();s:SetValue(v);if getglobal(name.."Text") then FieldKit_Text(getglobal(name.."Text"),FieldKit_L(label)..": "..(format and FieldKit_L(format(v)) or v)) end
   end
   s:SetScript("OnValueChanged",function()
    local v=math.floor(this:GetValue()+.5)
    if not ui.refreshing then set(v) end
-   if getglobal(name.."Text") then MASH_Text(getglobal(name.."Text"),MASH_L(label)..": "..(format and MASH_L(format(v)) or v)) end
+   if getglobal(name.."Text") then FieldKit_Text(getglobal(name.."Text"),FieldKit_L(label)..": "..(format and FieldKit_L(format(v)) or v)) end
   end)
   table.insert(ui.widgets,s);return s
  end
+ -- Bind a numeric slider to one validated combat option.
  local function Number(p,label,y,key,min,max,format)
-  return Slider(p,label,y,min,max,function() return C.Number(key,C.defaults[key],min,max) end,function(v) MASHDB[key]=v end,format)
+  return Slider(p,label,y,min,max,function() return C.Number(key,C.defaults[key],min,max) end,function(v) FieldKitDB[key]=v end,format)
  end
+ -- Create a bounded choice popup; capture the selected value per entry.
  local function Choice(p,label,y,values,get,set)
   Text(p,label,0,y,width)
   local menu=CreateFrame("Frame",nil,p);menu:SetWidth(width);menu:SetHeight(table.getn(values)*22+8)
@@ -63,7 +73,7 @@ function MASH_CreateCombatOptions(parent)
    b.choiceButtons[i]=Button(menu,values[i],4,-4-(i-1)*22,width-8,function() set(index);menu:Hide();ui.Refresh() end)
   end
   menu:Hide();table.insert(ui.menus,menu)
-  b.Refresh=function() MASH_Text(b,values[get()] or values[1]) end;b.label=label;b.controlKind="choice"
+  b.Refresh=function() FieldKit_Text(b,values[get()] or values[1]) end;b.label=label;b.controlKind="choice"
   Tip(b,"Cliquer pour choisir dans la liste.");table.insert(ui.widgets,b);return b
  end
  function ui.Refresh()
@@ -71,10 +81,11 @@ function MASH_CreateCombatOptions(parent)
   ui.refreshing=true;for i=1,table.getn(ui.widgets) do ui.widgets[i].Refresh() end;ui.refreshing=false
   if ui.sample then
    local color={C.Color(ui.eventKind)};ui.sample:SetTextColor(color[1],color[2],color[3])
-   MASH_Text(ui.sample,MASH_L(C.byKind[ui.eventKind][4] or C.byKind[ui.eventKind][2])..(C.byKind[ui.eventKind][4] and "" or " 123"))
+   FieldKit_Text(ui.sample,FieldKit_L(C.byKind[ui.eventKind][4] or C.byKind[ui.eventKind][2])..(C.byKind[ui.eventKind][4] and "" or " 123"))
   end
  end
  local labels={"Général","Événements","Police","Filtres","Zones"}
+ -- Show one editor subpage and hide its other pages/menus.
  local function Select(index)
   ui.selected=index
   for i=1,table.getn(ui.menus) do ui.menus[i]:Hide() end
@@ -86,7 +97,7 @@ function MASH_CreateCombatOptions(parent)
   local index=i;Button(ui,labels[i],(i-1)*(width/5),0,width/5-4,function() Select(index) end)
  end
  local p=ui.pages[1]
- Flag(p,"Activer le texte de combat MASH",0,"combatText")
+ Flag(p,"Activer le texte de combat FieldKit",0,"combatText")
  Flag(p,"Regrouper les frappes d'une compétence",-29,"combatTextGroup","Les critiques et les dégâts normaux restent séparés.")
  Number(p,"Messages simultanés (toutes zones)",-69,"combatTextMax",1,10)
  Number(p,"Durée d'affichage",-122,"combatTextDuration",6,50,function(v) return string.format("%.1f s",v/10) end)
@@ -96,8 +107,8 @@ function MASH_CreateCombatOptions(parent)
  Button(p,"Discret",width/3,-272,width/3-4,function() C.Preset("quiet");ui.Refresh() end)
  Button(p,"Tout",2*width/3,-272,width/3-4,function() C.Preset("all");ui.Refresh() end)
  Button(p,"Aperçu (exemples fictifs)",0,-313,width,function() C.Preview() end)
- Button(p,"Utiliser seulement ce texte",0,-347,width,function() if MASH_UseCombatTextOnly then MASH_UseCombatTextOnly();ui.Refresh() end end)
- Text(p,"Enables MASH text and hides game damage numbers and the old critical display. Restore them in Combat. Preview uses marked sample data. Healing uses native totals.",0,-387)
+ Button(p,"Utiliser seulement ce texte",0,-347,width,function() if FieldKit_UseCombatTextOnly then FieldKit_UseCombatTextOnly();ui.Refresh() end end)
+ Text(p,"Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Combat. Preview uses marked sample data. Healing uses native totals.",0,-387)
  p=ui.pages[2]
  Choice(p,"Catégorie à personnaliser",0,(function() local t={};for i=1,table.getn(C.defs) do table.insert(t,C.defs[i][2]) end;return t end)(),
   function() for i=1,table.getn(C.defs) do if C.defs[i][1]==ui.eventKind then return i end end;return 1 end,
@@ -118,10 +129,10 @@ function MASH_CreateCombatOptions(parent)
  Text(p,"Avoidance events appear only when the client sends the corresponding message. < = incoming; > = your action.",0,-420)
  p=ui.pages[3]
  local fonts={};for i=1,table.getn(C.fonts) do table.insert(fonts,C.fonts[i][1]) end
- Choice(p,"Police normale",0,fonts,function() return C.Number("combatTextFont",1,1,4) end,function(v) MASHDB.combatTextFont=v end)
+ Choice(p,"Police normale",0,fonts,function() return C.Number("combatTextFont",1,1,4) end,function(v) FieldKitDB.combatTextFont=v end)
  local critFonts={"Identique à la normale"};for i=1,table.getn(fonts) do table.insert(critFonts,fonts[i]) end
- Choice(p,"Police des critiques",-62,critFonts,function() return C.Number("combatTextCritFont",0,0,4)+1 end,function(v) MASHDB.combatTextCritFont=v-1 end)
- Choice(p,"Contour",-124,{"Aucun","Fin","Épais"},function() return C.Number("combatTextOutline",2,1,3) end,function(v) MASHDB.combatTextOutline=v end)
+ Choice(p,"Police des critiques",-62,critFonts,function() return C.Number("combatTextCritFont",0,0,4)+1 end,function(v) FieldKitDB.combatTextCritFont=v-1 end)
+ Choice(p,"Contour",-124,{"Aucun","Fin","Épais"},function() return C.Number("combatTextOutline",2,1,3) end,function(v) FieldKitDB.combatTextOutline=v end)
  Number(p,"Taille normale",-191,"combatTextFontSize",10,32,function(v) return v.." px" end)
  Number(p,"Taille des critiques",-244,"combatTextCritSize",10,40,function(v) return v.." px" end)
  Number(p,"Opacité",-297,"combatTextOpacity",10,100,function(v) return v.."%" end)
@@ -140,23 +151,24 @@ function MASH_CreateCombatOptions(parent)
  edit:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=16,edgeSize=8})
  if edit.SetMaxLetters then edit:SetMaxLetters(2000) end
  edit:SetScript("OnEscapePressed",function() this:ClearFocus() end)
- local load=Button(p,"Recharger la liste",0,-358,width/2-5,function() edit:SetText(MASHDB.combatTextIgnore or "");edit:ClearFocus() end)
- Button(p,"Appliquer la liste",width/2+5,-358,width/2-5,function() MASHDB.combatTextIgnore=C.LimitText(edit:GetText() or "",2000);edit:ClearFocus() end)
- p:SetScript("OnShow",function() edit:SetText(MASHDB and MASHDB.combatTextIgnore or "") end)
+ Button(p,"Recharger la liste",0,-358,width/2-5,function() edit:SetText(FieldKitDB.combatTextIgnore or "");edit:ClearFocus() end)
+ Button(p,"Appliquer la liste",width/2+5,-358,width/2-5,function() FieldKitDB.combatTextIgnore=C.LimitText(edit:GetText() or "",2000);edit:ClearFocus() end)
+ p:SetScript("OnShow",function() edit:SetText(FieldKitDB and FieldKitDB.combatTextIgnore or "") end)
  ui.ignoreEdit=edit
  Text(p,"Matches the name received from the game, without the healing prefix. Small hits are filtered before merging. Partially blocked hits remain one damage message.",0,-404)
  p=ui.pages[5]
  Flag(p,"Séparer reçus / soins et dégâts infligés",0,"combatTextSplit")
- Choice(p,"Sens du défilement",-41,{"Vers le haut","Vers le bas"},function() return C.Number("combatTextDirection",1,1,2) end,function(v) MASHDB.combatTextDirection=v end)
+ Choice(p,"Sens du défilement",-41,{"Vers le haut","Vers le bas"},function() return C.Number("combatTextDirection",1,1,2) end,function(v) FieldKitDB.combatTextDirection=v end)
  Button(p,"Afficher les poignées de déplacement",0,-104,width,function() C.ShowAnchors() end)
  Button(p,"Masquer les poignées",0,-137,width,function() C.HideAnchors() end)
  Number(p,"Espacement des lignes",-186,"combatTextSpacing",18,60,function(v) return v.." px" end)
  Choice(p,"Position to edit",-245,{"Outgoing area","Incoming / healing area"},function() return ui.positionArea or 1 end,function(v) ui.positionArea=v end)
+ -- Select the outgoing or incoming/healing saved offset key.
  local function PositionKey(axis) return (ui.positionArea==2 and "combatTextIncoming" or "combatText")..axis end
- Slider(p,"Horizontal offset",-310,-600,600,function() local key=PositionKey("X");return C.Number(key,C.defaults[key],-600,600) end,function(v) MASHDB[PositionKey("X")]=v end,function(v) return v.." px" end)
- Slider(p,"Vertical offset",-363,-300,300,function() local key=PositionKey("Y");return C.Number(key,C.defaults[key],-300,300) end,function(v) MASHDB[PositionKey("Y")]=v end,function(v) return v.." px" end)
+ Slider(p,"Horizontal offset",-310,-600,600,function() local key=PositionKey("X");return C.Number(key,C.defaults[key],-600,600) end,function(v) FieldKitDB[PositionKey("X")]=v end,function(v) return v.." px" end)
+ Slider(p,"Vertical offset",-363,-300,300,function() local key=PositionKey("Y");return C.Number(key,C.defaults[key],-300,300) end,function(v) FieldKitDB[PositionKey("Y")]=v end,function(v) return v.." px" end)
  Text(p,"Offsets are measured from the screen center. Drag handles also save these values.",0,-421)
- MASH_RefreshLanguage(ui.Refresh)
+ FieldKit_RefreshLanguage(ui.Refresh)
  parent.combatEditor=ui;parent:SetScript("OnShow",function() for i=1,table.getn(ui.menus) do ui.menus[i]:Hide() end;ui.Refresh() end)
  Select(1);return ui
 end

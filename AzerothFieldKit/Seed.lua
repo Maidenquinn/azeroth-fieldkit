@@ -1,6 +1,6 @@
--- Gerado por tools/gen_seed.py (cache do jogo + monstros aprendidos). Nao editar a mao.
--- 0 = normal; qualquer outro valor = mostrar a nameplate (3 = boss).
-MASH_Seed = {
+-- Inherited static nameplate classification seed; generated from client/cache observations.
+-- 0 means normal, 3 means boss; other nonzero values remain visible special enemies.
+FieldKit_Seed = {
 	["Abomination"] = 0,
 	["Alterac Yeti Lord"] = 1,
 	["Alzzin the Wildshaper"] = 3,

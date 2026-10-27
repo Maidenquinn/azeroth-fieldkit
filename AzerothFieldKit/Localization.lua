@@ -1,10 +1,10 @@
--- MASH-owned UI only. Never localize native protocol keys or game-provided names.
+-- FieldKit-owned UI only. Never localize native protocol keys or game-provided names.
 -- Lua 5.0 compatible: no string.match/gmatch, no modern frame hooks.
-MASHLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
-local T=MASHLocale
+FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
+local T=FieldKitLocale
 T.fr={
  ["Language"]="Langue",
- ["Choose the language used by MASH. Applies immediately; game-provided names keep the game's language."]="Choisis la langue de MASH. Application immédiate ; les noms fournis par le jeu gardent sa langue.",
+ ["Choose the language used by FieldKit. Applies immediately; game-provided names keep the game's language."]="Choisis la langue de FieldKit. Application immédiate ; les noms fournis par le jeu gardent sa langue.",
  ["Nameplates"]="Barres ennemies",
  ["Target"]="Cible",
  ["Combat"]="Combat",
@@ -19,7 +19,7 @@ T.fr={
  ["Show only elites and bosses"]="Afficher uniquement les élites et les boss",
  ["Common monsters get no nameplate. The V key shows or hides the elite and boss plates."]="Les monstres ordinaires n'ont pas de barre. La touche V affiche ou masque les barres des élites et des boss.",
  ["Hide unclassified monsters"]="Masquer les monstres non identifiés",
- ["Monsters MASH has not learned yet are hidden too. They are learned when you target or mouse over them."]="Masque aussi les monstres encore inconnus de MASH. Cible-les ou survole-les pour les identifier.",
+ ["Monsters FieldKit has not learned yet are hidden too. They are learned when you target or mouse over them."]="Masque aussi les monstres encore inconnus de FieldKit. Cible-les ou survole-les pour les identifier.",
  ["Enemy target health numbers"]="Afficher la vie de la cible ennemie",
  ["Shows current / max health on the target frame."]="Affiche la vie actuelle / maximale sur le cadre de cible.",
  ["Target health: percentage"]="Vie de la cible : pourcentage",
@@ -80,9 +80,9 @@ T.fr={
  ["Max camera distance: "]="Distance maximale de caméra : ",
  ["How far the camera can zoom out. The game's own option stops at about 30 yd."]="Distance maximale de recul de la caméra. L'option du jeu s'arrête vers 30 mètres.",
  ["Reset positions"]="Réinitialiser",
- ["Puts every MASH window and the health bar back in its default place."]="Replace toutes les fenêtres MASH et la barre de vie à leur position initiale.",
+ ["Puts every FieldKit window and the health bar back in its default place."]="Replace toutes les fenêtres FieldKit et la barre de vie à leur position initiale.",
  ["window positions reset."]="positions des fenêtres réinitialisées.",
- ["Drag MASH windows to move them  -  plates: %d (%d hidden)"]="Déplace les fenêtres MASH — barres : %d (%d masquées)",
+ ["Drag FieldKit windows to move them  -  plates: %d (%d hidden)"]="Déplace les fenêtres FieldKit — barres : %d (%d masquées)",
  ["Click to open the panel. Drag to move."]="Clique pour ouvrir le panneau. Glisse pour déplacer.",
  ["Guardian"]="Gardien",
  ["ENRAGED"]="ENRAGÉ",
@@ -162,18 +162,18 @@ T.fr={
  ["duplicate name: appearance not verified as shared"]="nom commun : apparence partagée non vérifiée",
  ["zone unavailable or outside verified portrait catalog"]="zone indisponible ou absente du catalogue vérifié",
  ["native static render; entry="]="rendu natif statique ; entrée=",
- ["MASH portraits: "]="Portraits MASH : ",
+ ["FieldKit portraits: "]="Portraits FieldKit : ",
  [" scheduled bosses + "]=" boss planifiés + ",
  [" elite/guardian definitions on "]=" définitions d'élites et de gardiens sur ",
  [" maps. Static native renders; game validation remains map by map."]=" cartes. Rendus natifs statiques ; validation en jeu à effectuer carte par carte.",
- ["MASH portrait "]="Portrait MASH ",
- ["MASH portrait: "]="Portrait MASH : ",
+ ["FieldKit portrait "]="Portrait FieldKit ",
+ ["FieldKit portrait: "]="Portrait FieldKit : ",
  [" source="]=" source=",
  [" texture="]=" texture=",
  [" display="]=" apparence=",
  [" zone="]=" zone=",
  ["Copy"]="Copier",
- ["MASH - Copy chat"]="MASH - Copier le chat",
+ ["FieldKit - Copy chat"]="FieldKit - Copier le chat",
  ["Ctrl+A then Ctrl+C - text without color codes"]="Ctrl+A puis Ctrl+C - texte sans codes de couleur",
  ["General"]="Général",
  ["Events"]="Événements",
@@ -181,7 +181,7 @@ T.fr={
  ["Filters"]="Filtres",
  ["Areas"]="Zones",
  ["Click to choose from the list."]="Cliquer pour choisir dans la liste.",
- ["Enable MASH combat text"]="Activer le texte de combat MASH",
+ ["Enable FieldKit combat text"]="Activer le texte de combat FieldKit",
  ["Group hits from the same ability"]="Regrouper les frappes d'une compétence",
  ["Critical and normal hits stay separate."]="Les critiques et les dégâts normaux restent séparés.",
  ["Simultaneous messages (all areas)"]="Messages simultanés (toutes zones)",
@@ -265,7 +265,7 @@ T.fr={
  ["Vertical offset"]="Décalage vertical",
  ["Offsets are measured from the screen center. Drag handles also save these values."]="Décalages par rapport au centre de l'écran. Les poignées enregistrent aussi ces valeurs.",
  ["Quick presets change filters, merging and message limits. Fonts, colors and positions are kept."]="Les profils modifient les filtres, le regroupement et la limite de messages. Police, couleurs et positions sont conservées.",
- ["Enables MASH text and hides game damage numbers and the old critical display. Restore them in Combat. Preview uses marked sample data. Healing uses native totals."]="Active le texte MASH et masque les chiffres du jeu et l'ancien affichage des critiques. Retour possible dans Combat. L'aperçu utilise des exemples signalés. Les soins viennent des totaux natifs.",
+ ["Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Combat. Preview uses marked sample data. Healing uses native totals."]="Active le texte FieldKit et masque les chiffres du jeu et l'ancien affichage des critiques. Retour possible dans Combat. L'aperçu utilise des exemples signalés. Les soins viennent des totaux natifs.",
  ["Avoidance events appear only when the client sends the corresponding message. < = incoming; > = your action."]="Les évitements apparaissent uniquement si le client envoie le message correspondant. < = reçu ; > = action du joueur.",
  ["Hidden abilities: one game-provided name per line. Example: Backstab. Maximum 32 names."]="Compétences masquées : un nom fourni par le jeu par ligne. Exemple : Backstab. 32 noms maximum.",
  ["Matches the name received from the game, without the healing prefix. Small hits are filtered before merging. Partially blocked hits remain one damage message."]="Compare le nom reçu du jeu, sans préfixe de soin. Les petites valeurs sont filtrées avant regroupement. Un coup partiellement bloqué reste un seul message de dégâts.",
@@ -278,41 +278,52 @@ T.fr={
  ["15 yd"]="15 m",
  ["50 yd"]="50 m",
 }
+-- Privacy controls added by the FieldKit fork (display strings only).
+T.fr["Enable local chat copy"]="Activer la copie locale du chat"
+T.fr["Off by default. Keeps up to 100 main-chat messages in memory only, including private messages. Nothing is sent or saved. Disabling clears the buffer."]="Désactivé par défaut. Conserve 100 messages du chat principal uniquement en mémoire, messages privés inclus. Aucun envoi ni sauvegarde. Désactiver efface le tampon."
+T.fr["Local chat copy is disabled. Enable it in Interface or use /fieldkitlog on."]="La copie locale est désactivée. Active-la dans Interface ou avec /fieldkitlog on."
+T.fr["FieldKit - Copy chat"]="FieldKit - Copier le chat"
 T.en={};for en,fr in pairs(T.fr) do T.en[fr]=en end
-function MASH_Language()
- return MASHDB and MASHDB.language=="fr" and "fr" or "en"
+-- Read the saved UI language; game-provided names remain unchanged.
+function FieldKit_Language()
+ return FieldKitDB and FieldKitDB.language=="fr" and "fr" or "en"
 end
-function MASH_L(text)
+-- Translate a known addon label; unknown/native strings are passed through.
+function FieldKit_L(text)
  if type(text)~="string" then return text end
  local en=T.en[text] or text
- if MASH_Language()=="fr" then return T.fr[en] or text end
+ if FieldKit_Language()=="fr" then return T.fr[en] or text end
  return en
 end
-function MASH_Text(object,text)
+-- Bind an addon label to a weakly tracked widget for later live language changes.
+function FieldKit_Text(object,text)
  if type(text)=="string" then T.bindings[object]=text else T.bindings[object]=nil end
- object:SetText(MASH_L(text))
+ object:SetText(FieldKit_L(text))
 end
-function MASH_RefreshLanguage(callback) table.insert(T.callbacks,callback) end
-function MASH_SetLanguage(language)
- if type(MASHDB)~="table" or (language~="en" and language~="fr") then return end
- MASHDB.language=language
- for object,text in pairs(T.bindings) do object:SetText(MASH_L(text)) end
+-- Register one refresh callback for dynamic UI labels.
+function FieldKit_RefreshLanguage(callback) table.insert(T.callbacks,callback) end
+-- Persist EN/FR and refresh bound widgets without rebuilding the UI.
+function FieldKit_SetLanguage(language)
+ if type(FieldKitDB)~="table" or (language~="en" and language~="fr") then return end
+ FieldKitDB.language=language
+ for object,text in pairs(T.bindings) do object:SetText(FieldKit_L(text)) end
  for i=1,table.getn(T.callbacks) do T.callbacks[i]() end
 end
-function MASH_CreateLanguageOption(page,y)
+-- Build two explicit language buttons; capture a distinct language in each callback.
+function FieldKit_CreateLanguageOption(page,y)
  local label=page:CreateFontString(nil,"OVERLAY","GameFontNormal")
- label:SetPoint("TOPLEFT",page,"TOPLEFT",0,y);MASH_Text(label,"Language")
+ label:SetPoint("TOPLEFT",page,"TOPLEFT",0,y);FieldKit_Text(label,"Language")
  for i=1,2 do
   local language=i==1 and "en" or "fr"
   local button=CreateFrame("Button",nil,page,"UIPanelButtonTemplate")
   button:SetWidth(150);button:SetHeight(25);button:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*160,y-24)
   button:SetText(i==1 and "English" or "Français")
-  local function Refresh() button:SetText((MASH_Language()==language and "|cffffd100> " or "")..(language=="en" and "English" or "Français").."|r") end
-  button:SetScript("OnClick",function() MASH_SetLanguage(language) end)
-  MASH_RefreshLanguage(Refresh);Refresh()
+  local function Refresh() button:SetText((FieldKit_Language()==language and "|cffffd100> " or "")..(language=="en" and "English" or "Français").."|r") end
+  button:SetScript("OnClick",function() FieldKit_SetLanguage(language) end)
+  FieldKit_RefreshLanguage(Refresh);Refresh()
  end
  local help=page:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
  help:SetPoint("TOPLEFT",page,"TOPLEFT",0,y-62);help:SetWidth(page:GetWidth()-12);help:SetJustifyH("LEFT")
- MASH_Text(help,"Choose the language used by MASH. Applies immediately; game-provided names keep the game's language.")
+ FieldKit_Text(help,"Choose the language used by FieldKit. Applies immediately; game-provided names keep the game's language.")
  return y-115
 end
