@@ -10,7 +10,7 @@ assert(FieldKitMoneyFrame:IsShown())
 assert(FieldKitMoneyFrame.point and FieldKitMoneyFrame.point[1]=="BOTTOM" and FieldKitMoneyFrame.point[2]==FieldKitCompactBar)
 -- Verify actual data, not only visibility.
 AZS_RUN.gold=1234;AZS_RUN.chest=567;AZS_RUN.kills=89
-update(FieldKitFrame,.1)
+update(FieldKitFrame,.2) -- Native snapshot polling matches the official 5 Hz limit.
 assert(FieldKitMoneyFrame.gold.text=="1234" and FieldKitMoneyFrame.chest.text=="567")
 assert(FieldKitMoneyFrame.kills.text=="89")
 -- Moving the money bar deliberately detaches it; regular updates must respect that.

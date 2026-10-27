@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.0-review.3 — 2026-10-27
+
+- Align run snapshot polling with the official API's 5 Hz delivery limit; retain
+  20 Hz debuff/layout refreshes and per-frame critical/low-health animation.
+- Cache unchanged static portraits using native unit stamps/table identity,
+  instance/name/zone and language; preserve uncached legacy behavior.
+- Use native pre-parsed stats and exact cache count `AZS_RUN.ck` when available.
+- Hide retained run-owned stats, money, equipment, meters, lairs, pins and shield
+  outside a run; prevent compact docking from reviving stale money text.
+- Display native lair remaining seconds without wall-clock extrapolation during
+  paused/choosing phases; keep native total DPS fresh without rebuilding spell rows.
+- Document the supplied official API snapshot and add contract regression tests.
+- Mock counters: 5 snapshot batches per 20 × 50 ms ticks; no in-game FPS claim.
+- Lua 5.0.3 / 5.1 fixtures pass; maximum captured variables is 23 (<32).
+
 ## 0.1.0-review.2 — 2026-10-27
 
 - Publish source and a prerelease for developer review at the maintainer's request.

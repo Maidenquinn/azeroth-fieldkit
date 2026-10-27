@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.1.0-review.2` est une candidate publique à examiner par les développeurs. Aucune approbation
+La version `0.1.0-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -24,6 +24,16 @@ Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
   automatique ni modification de `MASHDB`.
 - Fonctions conservées : portraits indépendants, combat, PV, fenêtres repliables,
   or/prix des coffres, équipements, minimap, caméra et barre compacte optionnelle.
+
+## Optimisations fondées sur la documentation officielle
+
+Les traitements de données de partie passent de 20 à 5 Hz ; les durées des
+debuffs gardent leur rafraîchissement rapide et les animations restent fluides.
+Les portraits inchangés sont mis en cache. Les données de partie périmées sont
+masquées hors partie, les antres ne décomptent plus du temps réel pendant une
+pause et le nombre de coffres vient du compteur natif quand il est fourni.
+Les tests de fréquence sont simulés ; aucun gain de FPS en jeu n’est annoncé.
+Voir [OFFICIAL_API](docs/OFFICIAL_API.md).
 
 ## Installation et usage
 

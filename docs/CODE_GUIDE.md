@@ -44,8 +44,12 @@ frame pools. PLAYER_ENTERING_WORLD refreshes visible data and applies explicitly
 chosen native visual settings. Combat/unit/inventory events refresh their owners.
 
 The main OnUpdate loop calls plate maintenance and legacy critical animation,
-then throttles the rest of the HUD at 0.05 seconds. Native meter stamps avoid
-reprocessing unchanged spell/source tables. The combat renderer checks grouping
+then maintains layout/health/buff/debuff timing at 0.05 seconds. Run snapshots
+(money, meters, pins and lairs) refresh every 0.2 seconds, matching the documented
+5 Hz delivery limit. Native meter stamps avoid rebuilding unchanged spell rows,
+while the native total-DPS getter remains fresh as the run clock advances. The
+portrait cache uses the native unit stamp, table identity, frame identity and
+UI language; clients without numeric stamps retain the uncached path. The combat renderer checks grouping
 and healing at 0.05 seconds while animating active text each frame. Chat's watcher
 checks only its option at 0.2 seconds.
 
@@ -63,7 +67,7 @@ are not part of either path. The client itself persists SavedVariables.
 - A `local Name` declaration followed by `function Name()` in the same scope is
   a local forward declaration, not a global leak. Do not mechanically rename these.
 - Limit nested-function upvalues to 32. Tests inspect **every** nested prototype,
-  not just event paths reached by a mock. Current maximum is 24.
+  not just event paths reached by a mock. Current maximum is 23.
 - Check optional API methods/functions before use. Unknown CVars may throw;
   use the Runtime wrapper or WorldPins' guarded read.
 

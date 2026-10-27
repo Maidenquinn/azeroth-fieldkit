@@ -1,6 +1,6 @@
 # Security and player-risk assessment
 
-**Assessment date:** 2026-10-27. **Candidate:** 0.1.0-review.2.
+**Assessment date:** 2026-10-27. **Candidate:** 0.1.0-review.3.
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
@@ -108,7 +108,7 @@ runtime ZIP excludes tools, tests, developer dependencies and historical files.
   text or portraits. The portrait catalog is version-specific.
 - Combat messages can be localized/unrecognized; healing uses cumulative deltas.
   A display cannot recover events the client did not expose.
-- The 20 Hz HUD update and nameplate scans have not been profiled in a live dense
+- The 20 Hz layout/debuff refresh, 5 Hz snapshot jobs and nameplate scans have not been profiled in a live dense
   run. Bounded tests are not an FPS/memory benchmark. Engine-owned frame caches
   can grow with native frame allocation even though text/pin pools are bounded.
 - Another addon shares the same Lua environment; FieldKit is not isolated from it.

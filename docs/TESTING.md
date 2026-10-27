@@ -41,7 +41,13 @@ safety or an adversarial malware scanner.
 - no native talent-state overwrite during repeated initialization;
 - native action-slot calls happen only for an explicit drag onto another button;
   idle updates and dropping outside make no slot changes in the mock;
-- all nested Lua 5.1 prototypes fit the 32-upvalue limit (current maximum 24).
+- all nested Lua 5.1 prototypes fit the 32-upvalue limit (current maximum 23).
+
+The official-API fixture additionally checks 5 snapshot batches per 20 simulated
+50 ms ticks, 20 debuff refreshes, paused/choosing lair counts, native cache counts,
+out-of-run stale-data suppression (including compact docking and shield), native
+preparsed stats, changing total DPS without a changed meter stamp, and portrait
+cache invalidation. These are mock call counts, not measured FPS gains.
 
 Native Lua 5.0.3 runs the same core behavioral/privacy/UI fixtures in
 `tests/native50.lua`. The Python-hosted reload test and secure-hook simulation

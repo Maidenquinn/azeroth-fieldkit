@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0-review.2",
+  "version": "0.1.0-review.3",
   "lua51": true,
   "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed",
   "persistence": true,
@@ -7,13 +7,15 @@
   "freshDefaultsNoCVarOrHudWrites": true,
   "manualActionSwapFixture": true,
   "bothChatHookPaths": true,
+  "officialApiFixtures": true,
+  "snapshotBatchesPer20MockTicks": 5,
   "inGameTest": false,
   "approval": "not approved",
   "files": {
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "0de10eadeb0b20d9b2e765de095a01960c28af8ae547ad31d9549f9731dd56e0"
+      "sha256": "151fd6f2b696d288db1ee2ffba873f43bc4a4bd43b27c269caf00676c757e0bd"
     },
     "Config.lua": {
       "maxUpvalues": 1,
@@ -23,7 +25,7 @@
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "c9e31a813b6bdd2cc9817e8ec602a47db169246ab7c348ad3303cf8810277517"
+      "sha256": "e973035f8c0c8409b8a74c1e9227cfc5ec5cc7f0381fcc050363079881b65c7a"
     },
     "Seed.lua": {
       "maxUpvalues": 0,
@@ -38,7 +40,7 @@
     "Portraits.lua": {
       "maxUpvalues": 1,
       "functions": 3,
-      "sha256": "d0ce2e7fd3738948801a1339e670eb65fd3c0009880b335bd689f74141ac2cd6"
+      "sha256": "adc04171b103936a03dc1e5940c595e274641d149f0a40e314cb65677557c7c4"
     },
     "Settings.lua": {
       "maxUpvalues": 2,
@@ -57,13 +59,13 @@
     },
     "FieldKit.lua": {
       "maxUpvalues": 23,
-      "functions": 175,
-      "sha256": "2b3c4ccb66f247c9461fda478c5c9c812737c05133b2cef57ef0027d54b8888b"
+      "functions": 176,
+      "sha256": "dd15548f9fe73fe0ff1689d0ad312092223ff8e3dc754fa60ec123941f5edccf"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,
       "functions": 10,
-      "sha256": "311171341ccd52552bac90cd74857c22a141451ce639af717ba43615a996c3bc"
+      "sha256": "86cd900d9fcd3582e185ee61720e074f4ae72f12b62f9c7c9bd6aa89e39fb666"
     },
     "CombatText.lua": {
       "maxUpvalues": 7,

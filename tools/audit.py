@@ -5,6 +5,7 @@ from pathlib import Path
 import hashlib,json,re,struct
 base=Path(__file__).resolve().parent.parent;root=base/'AzerothFieldKit'
 toc=(root/'AzerothFieldKit.toc').read_text(encoding='utf8')
+version=next(s.split(':',1)[1].strip() for s in toc.splitlines() if s.startswith('## Version:'))
 loaded=[line for line in toc.splitlines() if line.endswith('.lua')]
 assert set(loaded)=={p.name for p in root.glob('*.lua')},'Unexpected/unloaded Lua file'
 # Quoted text and comments must not make a documented example look executable.
@@ -47,7 +48,7 @@ for p in sorted(root.rglob('*')):
   assert len(raw)>=18+raw[0]+width*height*4,p.name
   textures.append({'path':p.relative_to(root).as_posix(),'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})
 assert len(textures)==98
-report={'kind':'maintainer static inventory; not certification','candidate':'0.1.0-review.2',
+report={'kind':'maintainer static inventory; not certification','candidate':version,
  'runtimeModules':len(loaded),'textureCount':len(textures),'forbiddenTokenGatePassed':True,
  'dynamicCombatEventNames':'See CombatText.lua events list; not all registrations are string literals.',
  'files':files,'textures':textures,'inGameTest':False,'approval':'not approved'}

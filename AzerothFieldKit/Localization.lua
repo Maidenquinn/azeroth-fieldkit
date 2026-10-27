@@ -283,6 +283,7 @@ T.fr["Enable local chat copy"]="Activer la copie locale du chat"
 T.fr["Off by default. Keeps up to 100 main-chat messages in memory only, including private messages. Nothing is sent or saved. Disabling clears the buffer."]="Désactivé par défaut. Conserve 100 messages du chat principal uniquement en mémoire, messages privés inclus. Aucun envoi ni sauvegarde. Désactiver efface le tampon."
 T.fr["Local chat copy is disabled. Enable it in Interface or use /fieldkitlog on."]="La copie locale est désactivée. Active-la dans Interface ou avec /fieldkitlog on."
 T.fr["FieldKit - Copy chat"]="FieldKit - Copier le chat"
+T.fr["No active run."]="Aucune partie en cours."
 T.en={};for en,fr in pairs(T.fr) do T.en[fr]=en end
 -- Read the saved UI language; game-provided names remain unchanged.
 function FieldKit_Language()

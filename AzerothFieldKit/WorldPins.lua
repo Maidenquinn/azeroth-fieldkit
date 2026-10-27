@@ -98,8 +98,8 @@ function FieldKit_UpdateWorldPins()
      if l.state=="awake" then p.icon:SetVertexColor(1,.25,.25) else p.icon:SetVertexColor(1,1,1) end
      p.detail=l.state=="awake" and FieldKit_L("Lair: guardian fighting (not its moving position)") or FieldKit_L("Lair: guardian asleep")
     else
-     -- Native countdown is extrapolated only up to 1.5 seconds, then waits for fresh data.
-     if left>0 and type(AZS_LAIRS_UPDATED)=="number" then left=math.max(0,left-math.min(1.5,math.max(0,GetTime()-AZS_LAIRS_UPDATED))) end
+     -- AZSLAIRS supplies the countdown once/second when changing. Do not subtract
+     -- wall-clock time: the official run clock stops while choosing or paused.
      p.icon:Hide();FieldKit_Text(p.timer,left>0 and Clock(left) or "?");p.timer:SetTextColor(1,.6,.15);p.timer:Show()
      p.detail=left>0 and (FieldKit_L("Lair empty; return in ")..Clock(left)) or FieldKit_L("Awaiting native return confirmation")
     end

@@ -2,7 +2,7 @@
 -- Read docs/CODE_GUIDE.md and SECURITY.md before changing native UI behavior.
 --
 -- Flow: VARIABLES_LOADED -> Config -> fixed frame pools; events refresh the
--- relevant windows; a 0.05s loop maintains observed health/buffs/pins/meters.
+-- relevant windows; 0.05s maintains layout/debuffs, 0.2s reads run snapshots.
 -- DB is the one normalized FieldKitDB table. AZS_* belongs to the game and is
 -- read-only here. UI settings and the explicit user-drag action-slot swap are
 -- the only intended native effects (enumerated in docs/API_SURFACE.md).
@@ -16,6 +16,7 @@ local MENU_FONT = "Fonts\\ARIALN.TTF"
 local PLATE_BORDER = "Interface\\Tooltips\\Nameplate-Border"
 local PLATE_SKULL = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull"
 local SCAN_INTERVAL = 0.05
+local DATA_INTERVAL = 0.2 -- Official native snapshots arrive at most five times/second.
 local CAMERA_BASE = 15
 
 local DB
@@ -24,6 +25,7 @@ local plateList = {}
 local lastChildren = 0
 local lastPlateScan = 0
 local elapsed = 0
+local dataClock = { elapsed = DATA_INTERVAL }
 local shownNow, hiddenNow, shownMax = 0, 0, 0
 local panel
 local movables = {}
@@ -67,16 +69,19 @@ end
 
 local specialAlive = {}
 local specialStamp
+local specialSource
 
--- Rebuild the live special-enemy name set only when the native timestamp changes.
+-- Rebuild on a native timestamp/table change; discard retained names outside a run.
 local function RefreshSpecialAlive()
-	if ( not HasAPI() or type(AZS_UNITS) ~= "table" ) then
+	if ( not HasAPI() or not AZS_GetPhase() or type(AZS_UNITS) ~= "table" ) then
+		if specialSource then specialAlive={};specialSource=nil;specialStamp=nil end
 		return
 	end
-	if ( specialStamp == AZS_UNITS_UPDATED ) then
+	if ( specialStamp == AZS_UNITS_UPDATED and specialSource == AZS_UNITS ) then
 		return
 	end
 	specialStamp = AZS_UNITS_UPDATED
+	specialSource = AZS_UNITS
 	specialAlive = {}
 	for i = 1, math.min(512,table.getn(AZS_UNITS)) do
 		local name = Field(AZS_UNITS[i], "name", 3)
@@ -758,7 +763,7 @@ local function UpdatePlayerBar()
 
 
 	local shield = 0
-	if ( DB.playerShield and HasAPI() and type(AZS_RUN) == "table" ) then
+	if ( DB.playerShield and HasAPI() and AZS_GetPhase() and type(AZS_RUN) == "table" ) then
 		shield = AZS_RUN.sh or 0
 	end
 	if ( shield > 0 ) then
@@ -1036,6 +1041,7 @@ local function UpdateStatsFrame()
 	if ( not statsFrame ) then
 		return
 	end
+	if HasAPI() and not AZS_GetPhase() then statsFrame:Hide();return end
 	local n = 0
 	for i = 1, table.getn(STATS) do
 		local def = STATS[i]
@@ -1232,6 +1238,7 @@ end
 
 -- Read the native next chest price, or use the explicitly documented legacy estimate.
 local function ChestCost()
+	if HasAPI() and not AZS_GetPhase() then return nil end
 	if ( HasAPI() and type(AZS_RUN) == "table" and AZS_RUN.chest ) then
 		return AZS_RUN.chest
 	end
@@ -1241,8 +1248,14 @@ local function ChestCost()
 	return ChestPrice(DB.chestsOpened + 1)
 end
 
--- Maintain the legacy chest-count estimate from gold spending; never open or buy a chest.
+-- Prefer the documented cache count; infer spending only on older clients missing it.
+-- Neither path opens or buys a chest.
 local function NoteGoldChange()
+	if HasAPI() then
+		if not AZS_GetPhase() then return end
+		local exact=type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.ck,nil,0)
+		if exact then DB.chestsOpened=exact;lastGold=RunGold();return end
+	end
 	local gold = RunGold()
 	if ( lastGold and gold < lastGold ) then
 		local paid = lastGold - gold
@@ -1281,6 +1294,9 @@ local function UpdateMoneyFrame()
 	if ( not moneyFrame ) then
 		return
 	end
+	if HasAPI() and not AZS_GetPhase() then moneyFrame:Hide();return end
+	local exact=HasAPI() and type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.ck,nil,0)
+	if exact then DB.chestsOpened=exact end
 
 	if ( not moneyFrame:IsShown() ) then
 		moneyFrame:Show()
@@ -1415,7 +1431,7 @@ local function UpdateGearFrame()
 	if ( not gearFrame ) then
 		return
 	end
-	if ( not DB.gearFrame ) then
+	if ( not DB.gearFrame or (HasAPI() and not AZS_GetPhase()) ) then
 		gearFrame:Hide()
 		return
 	end
@@ -1498,7 +1514,7 @@ local METER_ROWS = 8
 local TAKEN_ROWS = 6
 local ROW_HEIGHT = 15
 local meterFrame, takenFrame
-local meterStamp, takenStamp
+local meterStamp, takenStamp, meterSource, takenSource
 
 local TAKEN_NAMES = {
 	["boss melee"] = "Boss melee",
@@ -1601,7 +1617,7 @@ local function InRun()
 	return HasAPI() and AZS_GetPhase() ~= nil
 end
 
--- Render native spell totals and DPS only when the native meter timestamp changes.
+-- Refresh native total DPS at snapshot cadence; rebuild rows only when their list changes.
 local function UpdateMeterFrame(force)
 	if ( not meterFrame ) then
 		return
@@ -1610,13 +1626,13 @@ local function UpdateMeterFrame(force)
 		meterFrame:Hide()
 		return
 	end
-	if ( not force and meterStamp == AZS_METER_UPDATED and meterFrame:IsShown() ) then
-		return
-	end
-	meterStamp = AZS_METER_UPDATED
 	local lines, total, dps = AZS_GetMeter()
 	lines = lines or {}
 	FieldKit_Text(meterFrame.total,ShortNumber(total or 0).."  ("..ShortNumber(dps or 0).." dps)")
+	-- Total DPS can change with the run clock even when no new hit arrived.
+	-- Only the spell rows are stamp-cached; their values come from the native list.
+	if ( not force and meterStamp == AZS_METER_UPDATED and meterSource == lines and meterFrame:IsShown() ) then return end
+	meterStamp = AZS_METER_UPDATED;meterSource=lines
 	local top = lines[1] and lines[1].dmg or 1
 	local n = math.min(table.getn(lines), METER_ROWS)
 	for i = 1, n do
@@ -1646,10 +1662,10 @@ local function UpdateTakenFrame(force)
 		takenFrame:Hide()
 		return
 	end
-	if ( not force and takenStamp == AZS_TAKEN_UPDATED and takenFrame:IsShown() ) then
+	if ( not force and takenStamp == AZS_TAKEN_UPDATED and takenSource == AZS_TAKEN and takenFrame:IsShown() ) then
 		return
 	end
-	takenStamp = AZS_TAKEN_UPDATED
+	takenStamp = AZS_TAKEN_UPDATED;takenSource=AZS_TAKEN
 	local sum = 0
 	for i = 1, math.min(512,table.getn(AZS_TAKEN)) do
 		sum = sum + ( Field(AZS_TAKEN[i], "dmg", 2) or 0 )
@@ -2053,7 +2069,7 @@ function CreateCompactBar()
 		local repair = DB.moneyDockRepair ~= 1
 		AttachMoneyToBar(repair)
 		DB.moneyDockRepair = 1
-		moneyFrame:Show()
+		if HasAPI() and not AZS_GetPhase() then moneyFrame:Hide() else moneyFrame:Show() end
 	end
 
 
@@ -2079,7 +2095,7 @@ function AttachMoneyToBar(force)
 			moneyFrame:ClearAllPoints()
 			moneyFrame:SetPoint("BOTTOM", compactBar, "TOP", 0, 2)
 		end
-		moneyFrame:Show()
+		if HasAPI() and not AZS_GetPhase() then moneyFrame:Hide() else moneyFrame:Show() end
 	end
 end
 
@@ -2639,10 +2655,10 @@ local function FieldKitEventOther()
 		UpdatePlayerBuffs()
 	elseif ( event == "CHAT_MSG_ADDON" ) then
 		if ( arg1 == "AZS" and arg2 ) then
-			stats = ParseStats(arg2)
+			-- The official parser runs before addons; avoid parsing its payload twice.
+			stats = type(AZS_STATS)=="table" and AZS_STATS or ParseStats(arg2)
 			DB.lastStats = stats
 			UpdateStatsFrame()
-			UpdateGearFrame()
 		end
 	elseif ( arg1 == "target" ) then
 		UpdateTargetHealth()
@@ -2667,13 +2683,35 @@ frame:SetScript("OnEvent", function()
 	end
 end)
 
+-- Poll snapshots at their documented delivery rate. Timed debuffs/animations stay
+-- on the faster path. A phase change must hide stale tables even without new stats.
+local function RefreshNativeData()
+	if not HasAPI() then return end
+	local phase=AZS_GetPhase()
+	local zone=type(AZS_ZONE)=="table" and AZS_ZONE.zone
+	local rt=type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.t)
+	if zone~=dataClock.zone or (rt and dataClock.rt and rt<dataClock.rt) or (phase=="ready" and dataClock.phase~="ready") then levelSeen={} end
+	local changed=phase~=dataClock.phase
+	if changed or AZS_STATS_UPDATED~=dataClock.statsStamp or AZS_STATS~=dataClock.statsSource then
+		stats=type(AZS_STATS)=="table" and AZS_STATS or nil
+		if phase then DB.lastStats=stats end
+		UpdateStatsFrame()
+		UpdateGearFrame()
+	end
+	dataClock.phase=phase;dataClock.zone=zone;dataClock.rt=rt
+	dataClock.statsStamp=AZS_STATS_UPDATED;dataClock.statsSource=AZS_STATS
+	UpdateMoneyFrame();UpdateMeterFrames();UpdateChestPins();UpdateLairFrame()
+end
+
 frame:SetScript("OnUpdate", function()
 	if ( not DB ) then
 		return
 	end
 	UpdatePlates()
 	FieldKitCrits.Animate()
+	PulsePlayerBar()
 	elapsed = elapsed + ( arg1 or 0 )
+	dataClock.elapsed = dataClock.elapsed + ( arg1 or 0 )
 	if ( elapsed < SCAN_INTERVAL ) then
 		return
 	end
@@ -2682,13 +2720,7 @@ frame:SetScript("OnUpdate", function()
 	UpdateBossFrame()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
-	PulsePlayerBar()
-	if ( HasAPI() ) then
-		UpdateMoneyFrame()
-		UpdateMeterFrames()
-		UpdateChestPins()
-		UpdateLairFrame()
-	end
+	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData() end
 end)
 
 SLASH_FieldKit1 = "/fieldkit"
@@ -2718,6 +2750,7 @@ SlashCmdList["FieldKit"] = function(msg)
 		ToggleStatsPicker()
 		return
 	elseif ( string.find(msg, "chest") ) then
+		if HasAPI() and not AZS_GetPhase() then Print(FieldKit_L("No active run."));return end
 		Print(FieldKit_L("chests opened this run: ")..( DB.chestsOpened >= 0 and DB.chestsOpened or FieldKit_L("unknown") )
 			..FieldKit_L(", next chest: ")..( ChestCost() or "?" ))
 		return

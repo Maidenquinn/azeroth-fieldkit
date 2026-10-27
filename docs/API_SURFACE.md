@@ -16,6 +16,11 @@ in their owning UI modules. `tools/audit.py` emits a complementary machine inven
 - UI geometry/regions/children, minimap zoom/shape, mouse position/focus during
   explicit dragging, CVar reads for rotation/camera and local time for animation.
 
+The supplied official addon API document confirms the native run-state, chest,
+lair and HUD interfaces. See OFFICIAL_API.md for the exact document fingerprint
+and the resulting scheduling/phase/countdown corrections. This describes the
+intended API contract, not approval of this specific addon or its game assets.
+
 These reads may expose information beyond the selected target; game developers
 must decide which of those capabilities are acceptable.
 

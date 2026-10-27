@@ -34,8 +34,12 @@ function methods:GetStringHeight() return 14 end
 function methods:GetChildren() return end
 function methods:GetRegions() return end
 function methods:GetZoom() return 2 end
-function methods:SetValue(v) self.value=v end
-function methods:GetValue() return self.value or 0 end
+function methods:SetValue(v)
+ self.nativeValue=v
+ -- Native StatusBar state must not replace an addon-owned row.value fontstring.
+ if type(self.value)~="table" then self.value=v end
+end
+function methods:GetValue() return self.nativeValue or (type(self.value)=="number" and self.value) or 0 end
 function methods:SetChecked(v) self.checked=v end
 function methods:GetChecked() return self.checked end
 function methods:SetParent(p) self.parent=p end

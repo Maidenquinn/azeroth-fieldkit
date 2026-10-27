@@ -11,6 +11,7 @@ base=Path(__file__).resolve().parent.parent
 root=base/'AzerothFieldKit'
 parser=argparse.ArgumentParser();parser.add_argument('--lua50',type=Path);args=parser.parse_args()
 toc=(root/'AzerothFieldKit.toc').read_text(encoding='utf8')
+version=next(s.split(':',1)[1].strip() for s in toc.splitlines() if s.startswith('## Version:'))
 files=[s for s in toc.splitlines() if s.endswith('.lua')]
 assert len(files)==len(set(files)) and set(files)=={p.name for p in root.glob('*.lua')}
 assert '## SavedVariables: FieldKitDB' in toc
@@ -46,7 +47,9 @@ fire(FieldKitFrame,"VARIABLES_LOADED")
 ''')
 secure.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 effects=runtime();effects.execute((base/'tests/action_effects.lua').read_text(encoding='utf8'))
+official=runtime();official.execute((base/'tests/official_api.lua').read_text(encoding='utf8'))
 l=runtime('{compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,chestPins=true,guardianPins=true,moneyDetached=true,pos={FieldKitMoneyFrame={-2.5374755859375,-348.0493927001953}}}')
+assert l.globals().FieldKit.version==version,'TOC/runtime version mismatch'
 l.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
 for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua'):
  l.execute((base/'tests'/name).read_text(encoding='utf8'),name=name)
@@ -67,8 +70,9 @@ if args.lua50:
  run=subprocess.run([str(args.lua50.resolve()),'tests/native50.lua'],cwd=base,capture_output=True,text=True,encoding='utf8',timeout=60)
  assert run.returncode==0,run.stdout+run.stderr
  native=run.stdout.strip()
-result={'version':'0.1.0-review.2','lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
+result={'version':version,'lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
  'freshDefaultsNoCVarOrHudWrites':True,'manualActionSwapFixture':True,'bothChatHookPaths':True,
+ 'officialApiFixtures':True,'snapshotBatchesPer20MockTicks':official.globals().OFFICIAL_API_BATCHES,
  'inGameTest':False,'approval':'not approved','files':prototypes}
 out=base/'build';out.mkdir(exist_ok=True)
 (out/'validation.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf8',newline='\n')

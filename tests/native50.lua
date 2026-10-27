@@ -5,6 +5,10 @@ local files={"Runtime.lua","Config.lua","Localization.lua","Seed.lua","PortraitC
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 fire(FieldKitFrame,"VARIABLES_LOADED")
 dofile("tests/security.lua")
+-- Official API scheduling, stale-table, pause/countdown and portrait-cache contracts.
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/official_api.lua")
 -- Exercise user-driven native slot changes in an independent mock initialization.
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end

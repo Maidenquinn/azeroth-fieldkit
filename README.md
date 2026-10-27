@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.1.0-review.2** is a public **review candidate** shared for technical examination,
+Version **0.1.0-review.3** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -107,12 +107,13 @@ ids keep separate health/state even if they share an appearance.
 
 Markers require exposed native coordinates. Rotation disables the custom pins
 instead of projecting them incorrectly. Unknown minimap shapes use a round-map
-assumption. Edge markers show direction outside the displayed range. Countdown
-extrapolation is bounded and does not confirm a respawn.
+assumption. Edge markers show direction outside the displayed range. Countdowns display the native remaining value without subtracting wall-clock time
+during a pause/card choice; zero does not confirm a respawn.
 
 There is **no ground-rune tracking**. Old pickup observations, probes, external
 helpers and experimental modules are not distributed. Chest pricing/counting on
-older clients can use a historical estimate; the native price takes priority.
+older clients can use a historical estimate; native price and `AZS_RUN.ck` cache
+count take priority. Run-owned displays are hidden when the native phase is nil.
 
 ## Saved data, migration and removal
 
