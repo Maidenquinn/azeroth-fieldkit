@@ -107,3 +107,5 @@ constructs the settings/layout dock once. Refresh reads; setters require user
 input. CombatOptions.lua contributes the six-page editor and reflows its existing
 widgets. Config.lua migrates the legacy page selection without resetting feature
 preferences. New UI behavior is covered by tests/interface_journey.lua.
+
+GameCompatibility.lua contains the guarded native Heroic context, exact critical-objective nameplate exception and fractional-bonus formatting. Read docs/GAME_0_121.md and tests/game_0121.lua before extending it. It adds no native setter or gameplay action.

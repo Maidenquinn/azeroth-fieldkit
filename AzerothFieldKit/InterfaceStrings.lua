@@ -1,6 +1,7 @@
 -- Presentation-only additions. Native creature/spell names are never translated.
 local fr=FieldKitLocale.fr
 local labels={
+ ["Heroic"]="Héroïque",["Normal difficulty"]="Difficulté normale",
  ["Card style"]="Style des cartes en jeu",["Decorative"]="Travaillé",["Classic"]="Classique",
  ["Card background opacity"]="Opacité du fond des cartes en jeu",
  ["Damage meter values"]="Valeurs du compteur de dégâts",

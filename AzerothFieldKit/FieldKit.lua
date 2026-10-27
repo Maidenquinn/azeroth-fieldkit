@@ -590,7 +590,7 @@ function ApplyPlate(info, justShown)
 		if ( name == "" or name == UNKNOWNOBJECT or name == UNKNOWN ) then
 
 			hide = true
-		elseif ( specialAlive[name] or IsBoss(name) ) then
+		elseif ( specialAlive[name] or IsBoss(name) or FieldKit.IsCriticalObjective(name) ) then
 
 			hide = false
 		elseif ( normal == nil ) then
@@ -926,12 +926,12 @@ local stats
 
 -- Convert a native ratio to a percentage string for the stats window.
 local function Pct(v)
-	return string.format("%+.0f%%", v * 100)
+	return FieldKit.FormatPercent(v,true)
 end
 
 -- Convert a native multiplier to a signed percent for the stats window.
-local function PctOf(v, fmt)
-	return string.format(fmt, v * 100)
+local function PctOf(v)
+	return FieldKit.FormatPercent(v,false)
 end
 
 
@@ -939,18 +939,18 @@ local STATS = {
 	{ "hp", "Health", function(s) return string.format("%.0f", s.hp) end },
 	{ "dmg", "Damage", function(s) return Pct(s.dmg - 1) end },
 	{ "haste", "Haste", function(s) return Pct(1 - s.cd) end },
-	{ "crit", "Crit Chance", function(s) return PctOf(s.crit, "%.1f%%") end },
-	{ "cm", "Crit Dmg", function(s) return PctOf(s.cm, "%.0f%%") end },
-	{ "arm", "Armor", function(s) return PctOf(s.arm, "%.0f%%") end },
+	{ "crit", "Crit Chance", function(s) return PctOf(s.crit) end },
+	{ "cm", "Crit Dmg", function(s) return PctOf(s.cm) end },
+	{ "arm", "Armor", function(s) return PctOf(s.arm) end },
 	{ "area", "Area", function(s) return Pct(s.area - 1) end },
 	{ "cnt", "Targets", function(s) return string.format("+%d", s.cnt) end },
-	{ "echo", "Echo", function(s) return PctOf(s.echo, "%.0f%%") end },
+	{ "echo", "Echo", function(s) return PctOf(s.echo) end },
 	{ "spd", "Speed", function(s) return Pct(s.spd - 1) end },
 	{ "reg", "Regen", function(s) return string.format("%.1f", s.reg) end },
 	{ "pick", "Pickup", function(s) return string.format(FieldKit_L("%.0f yd"), s.pick) end },
-	{ "lch", "Lifesteal", function(s) return PctOf(s.lch, "%.1f%%") end },
-	{ "heal", "Kill Heal", function(s) return string.format("%.0f", s.heal) end },
-	{ "thn", "Thorns", function(s) return PctOf(s.thn, "%.0f%%") end },
+	{ "lch", "Lifesteal", function(s) return PctOf(s.lch) end },
+	{ "heal", "Kill Heal", function(s) return FieldKit.FormatBonus(s.heal) end },
+	{ "thn", "Thorns", function(s) return PctOf(s.thn) end },
 	{ "liv", "Lives", function(s) return string.format("%d", s.liv) end },
 	{ "xp", "Experience", function(s) return Pct(s.xp - 1) end },
 	{ "gold", "Gold", function(s) return Pct(s.gold - 1) end },

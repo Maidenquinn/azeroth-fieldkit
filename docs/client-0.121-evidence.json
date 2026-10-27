@@ -1,0 +1,47 @@
+{
+  "source": "Installed official client, read-only static inspection; not runtime observation",
+  "clientVersionMarker": "0.121.0",
+  "exeBytes": 146088960,
+  "exeSha256": "22f7938eb4f99f2857dc091b1c57c147bd848eaabfeaa81e444c0a3393ca8150",
+  "suppliedApiDocSha256": "aff3458784b492610c394693b57dadd9835f5cbfee84171ea305dbd893a8d9df",
+  "findings": {
+    "versionMarkerPresent": true,
+    "zoneHeroicWireFieldPresent": true,
+    "genericZoneParserPresent": true,
+    "oldModsWireFieldPresent": false,
+    "explosiveOrbNames": {
+      "Explosive Orb": true,
+      "Orbe explosif": true
+    },
+    "gearOrArmoryGlobalsFound": [],
+    "nativeGetterNamesFound": [
+      "AZS_GetBossMeter",
+      "AZS_GetBosses",
+      "AZS_GetDebuffs",
+      "AZS_GetFlaggedLair",
+      "AZS_GetGuardians",
+      "AZS_GetHealing",
+      "AZS_GetLairs",
+      "AZS_GetMeter",
+      "AZS_GetPartyMeter",
+      "AZS_GetPhase",
+      "AZS_GetRevive",
+      "AZS_GetRunLength",
+      "AZS_GetRunSummary",
+      "AZS_GetRunTime",
+      "AZS_GetStoredLevels",
+      "AZS_GetSummonCount",
+      "AZS_GetSummonGroups",
+      "AZS_GetSummons",
+      "AZS_GetTimers",
+      "AZS_GetUpcomingBosses",
+      "AZS_RegisterBannerHandler",
+      "AZS_SetHudShown",
+      "AZS_SetStoringLevels"
+    ]
+  },
+  "limits": [
+    "String inspection establishes names and sender/parser fragments, not live data receipt or complete implementation semantics.",
+    "No confirmed export for marks, individual stars, set unlocks, bad-luck counters or active affix ids was identified. This is not a proof of impossibility."
+  ]
+}

@@ -1,7 +1,7 @@
 {
-  "version": "0.2.0-review.3",
+  "version": "0.2.1-review.1",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -15,7 +15,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "a6c48cdb6587e2e441425d463ea984471119c2be702d59f29b5060f9023673a8"
+      "sha256": "763d066d05ef48b23b904197a4941eb5ce7bcdb93d7b01f26ad56839d76b5549"
     },
     "Config.lua": {
       "maxUpvalues": 1,
@@ -30,7 +30,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "35c2ede45fff74cb717a66be902ea1168579f25c51c6661f87d140d2ddce16d5"
+      "sha256": "6d6bb854f63c48dc335efd89f7739469ae706cb912d0a9b9dab265ec1571bbf9"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -57,6 +57,11 @@
       "functions": 11,
       "sha256": "155a7e0ab196fb85012560ec1b56b169caefc6fee9164681586f59ce609ded28"
     },
+    "GameCompatibility.lua": {
+      "maxUpvalues": 1,
+      "functions": 6,
+      "sha256": "7e081ae1a650ef0b6d402341b0b9bee83f7281fdecf81aa7b449f1f778d25d56"
+    },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
       "functions": 49,
@@ -69,13 +74,13 @@
     },
     "Interface.lua": {
       "maxUpvalues": 5,
-      "functions": 65,
-      "sha256": "aea0f37032352f48d46244707a29ad78c8c4b133b3a34acec63004f82bfab56c"
+      "functions": 66,
+      "sha256": "183f2695627bfc858ebba3a026ca97f419b3b6fcdf76a34c58af2f8408abb08e"
     },
     "FieldKit.lua": {
       "maxUpvalues": 17,
       "functions": 162,
-      "sha256": "2f9e037b95606a56164db6952593f9f693cc71d568ff2d4c1ca72615dc43658a"
+      "sha256": "cc3dcffc7f374e5a4f2604112ba1c1c37ce8de3eb8cccf62283b096ef6ac0417"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,

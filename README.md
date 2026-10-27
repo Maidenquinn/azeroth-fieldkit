@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.2.0-review.3** is a public **review candidate** shared for technical examination,
+Version **0.2.1-review.1** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -64,6 +64,18 @@ Pages keep readable font sizes and scroll on smaller screens. Close with the
 upper-right cross, **Close**, Escape or `/fieldkit`. The [UX review](docs/UX_REVIEW.md)
 records findings, migration and live acceptance checks. The slate/gold theme is
 shared with Azeroth Stats but bundled locally: that addon is not required.
+
+## Game 0.121.0
+
+Settings show the native Normal / Heroic I–V rank when provided during a run.
+Stat bonuses retain tenths, and the ordinary-mob filter preserves explosive-orb
+nameplates while respecting V. Multiple boss frames keep using live native
+health; damage/healing and equipment tooltips remain authoritative native values.
+There is no local reapplication of Heroic or star bonuses.
+
+A marks, star-upgrade or weekly-affix tracker is not included: no corresponding
+read-only export has been confirmed in the inspected client. See the
+[compatibility evidence, limits and tests](docs/GAME_0_121.md).
 
 ## Conservative defaults
 

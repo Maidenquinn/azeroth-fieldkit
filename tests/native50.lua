@@ -1,7 +1,7 @@
 -- Same actual Lua modules and behavioral fixtures, with no modern string API.
 dofile("tests/mock.lua")
 string.match=nil;string.gmatch=nil
-local files={"Runtime.lua","Config.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua"}
+local files={"Runtime.lua","Config.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua"}
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 fire(FieldKitFrame,"VARIABLES_LOADED")
 dofile("tests/security.lua")
@@ -20,3 +20,8 @@ FieldKitDB={compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,che
 fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")
 for _,name in ipairs({"test_money.lua","tests.lua","test_worldpins.lua","test_combat_editor.lua","test_localization.lua","interface_journey.lua","card_preferences.lua"}) do dofile("tests/"..name) end
 print("Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/game_0121.lua")
+print("0.121 compatibility fixtures passed")

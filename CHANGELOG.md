@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1-review.1 — 2026-10-27
+
+- Read the native AZS_ZONE.heroic field and display Normal / Heroic I–V in settings context, only during a run. Never infer a Heroic rank from zone difficulty or old Run Options.
+- Preserve tenths in stat bonuses, including +0.3%, and fractional kill-heal values supplied by the native stats.
+- Preserve Explosive Orb / Orbe explosif nameplates under the ordinary-mob filter; the player’s V-key state still applies. No targeting or combat action is automated.
+- Validate simultaneous final/companion boss frames, fractional bonuses, old/missing Heroic fields and critical-objective filtering in Lua 5.0.3 / 5.1 fixtures.
+- Document installed-client evidence and remaining API gaps for marks, stars, set progress and active affixes. No simulated progression or doubled Heroic modifiers.
+
 ## 0.2.0-review.3 — 2026-10-27
 
 - Fix HUD style/opacity leaking into the settings window, menus, Overview cards and layout dock. Only explicitly marked in-game HUD surfaces use these preferences.

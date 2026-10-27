@@ -118,3 +118,7 @@ setters. All native actions still originate in the existing schema callbacks or
 an explicit Reload UI button. Opening configuration does not unlock HUD dragging;
 the Move windows / Done action controls that in-memory mode. Saved uiPage and
 uiSchema only record navigation/migration, not game state or player coordinates.
+
+## 0.121 compatibility
+
+GameCompatibility.lua reads AZS_ZONE.heroic only during an active native phase. Critical-objective EN/FR names exempt existing orb nameplates from ordinary-mob filtering; the V key still controls visibility. No spawn coordinates, target/combat actions, progression writes or inferred mark/star/affix data are introduced. See GAME_0_121.md for evidence and limitations.

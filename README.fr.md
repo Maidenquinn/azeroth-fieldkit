@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.2.0-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
+La version `0.2.1-review.1` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -92,3 +92,14 @@ Cette refonte n’a pas encore été validée dans le jeu.
 Dans **Fenêtres**, choisissez le style **Travaillé / Classique** et l’opacité du fond (0–100 %), sans diminuer celle des textes et bordures. Le compteur propose **DPS et contribution**, **Dégâts et DPS** ou **Dégâts, DPS et contribution**. Les dégâts sont le cumul natif exact par compétence, sans estimation à partir du DPS.
 
 Correctif review.3 : style et opacité s’appliquent uniquement aux cartes du HUD en jeu. Les paramètres et menus restent opaques. Les dégâts, DPS et contributions occupent des colonnes fixes, alignées à droite ; changer de mode conserve le bord gauche du compteur.
+
+## Jeu 0.121.0
+
+Le contexte des paramètres affiche le rang Normal / Héroïque I–V lorsqu'il est
+fourni par le client. Les bonus conservent leurs dixièmes, et le filtre des
+monstres ordinaires préserve les barres des orbes explosives (la touche V reste
+respectée). Les PV, dégâts et soins restent ceux du jeu, sans appliquer une
+seconde fois les modificateurs Héroïques ou les étoiles.
+
+Aucune API de marques, d'étoiles ou d'affixes actifs n'a été confirmée. Ces
+valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md).

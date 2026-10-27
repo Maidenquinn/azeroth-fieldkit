@@ -210,8 +210,16 @@ function U.BuildPage(section,index)
 end
 
 -- Refresh is pure UI except for explicit user setters invoked elsewhere.
+function U.UpdateRunContext()
+ if not U.subtitle then return end
+ local label=FieldKit_L("Combat and interface tools")
+ local heroic=FieldKit.GetHeroicLabel()
+ if heroic then label=label.." · "..heroic end
+ if U.runContext~=label then U.runContext=label;FieldKit_Text(U.subtitle,label) end
+end
 function U.Refresh()
  if not U.frame or not FieldKitDB then return end
+ U.UpdateRunContext()
  U.refreshing=true
  for i=1,table.getn(U.controls) do U.controls[i].Refresh() end
  for i=1,table.getn(U.homeCards) do
@@ -367,6 +375,7 @@ function U.Build(sections,context)
  local elapsed=0
  frame:SetScript("OnUpdate",function()
   elapsed=elapsed+(arg1 or 0);if elapsed<.25 then return end;elapsed=0
+  U.UpdateRunContext()
   if U.screenWidth~=UIParent:GetWidth() or U.screenHeight~=UIParent:GetHeight() then U.Reflow() end
  end)
  if type(UISpecialFrames)=="table" then table.insert(UISpecialFrames,"FieldKitPanel");table.insert(UISpecialFrames,"FieldKitLayoutDock") end

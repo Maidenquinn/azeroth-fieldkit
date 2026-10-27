@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.0-review.3",
-  "runtimeModules": 17,
+  "candidate": "0.2.1-review.1",
+  "runtimeModules": 18,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 2427,
-      "sha256": "a6c48cdb6587e2e441425d463ea984471119c2be702d59f29b5060f9023673a8",
+      "sha256": "763d066d05ef48b23b904197a4941eb5ce7bcdb93d7b01f26ad56839d76b5549",
       "namedFunctions": [
         {
           "name": "FieldKit.Number",
@@ -80,8 +80,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 3795,
-      "sha256": "35c2ede45fff74cb717a66be902ea1168579f25c51c6661f87d140d2ddce16d5",
+      "bytes": 3865,
+      "sha256": "6d6bb854f63c48dc335efd89f7739469ae706cb912d0a9b9dab265ec1571bbf9",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -194,6 +194,33 @@
       ],
       "literalEvents": []
     },
+    "GameCompatibility.lua": {
+      "bytes": 1546,
+      "sha256": "7e081ae1a650ef0b6d402341b0b9bee83f7281fdecf81aa7b449f1f778d25d56",
+      "namedFunctions": [
+        {
+          "name": "FieldKit.GetHeroicLevel",
+          "line": 4
+        },
+        {
+          "name": "FieldKit.GetHeroicLabel",
+          "line": 10
+        },
+        {
+          "name": "FieldKit.IsCriticalObjective",
+          "line": 19
+        },
+        {
+          "name": "FieldKit.FormatPercent",
+          "line": 25
+        },
+        {
+          "name": "FieldKit.FormatBonus",
+          "line": 31
+        }
+      ],
+      "literalEvents": []
+    },
     "OptionsSchema.lua": {
       "bytes": 7595,
       "sha256": "a738b4c4279ba4db879ac0845873e51b6f40ef03ecdecd27e5cf800dd5508dc9",
@@ -237,8 +264,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 23033,
-      "sha256": "aea0f37032352f48d46244707a29ad78c8c4b133b3a34acec63004f82bfab56c",
+      "bytes": 23373,
+      "sha256": "183f2695627bfc858ebba3a026ca97f419b3b6fcdf76a34c58af2f8408abb08e",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -281,47 +308,51 @@
           "line": 178
         },
         {
-          "name": "U.Refresh",
+          "name": "U.UpdateRunContext",
           "line": 213
         },
         {
+          "name": "U.Refresh",
+          "line": 220
+        },
+        {
           "name": "U.Select",
-          "line": 237
+          "line": 245
         },
         {
           "name": "U.Reflow",
-          "line": 252
+          "line": 260
         },
         {
           "name": "U.SetLayoutEditing",
-          "line": 293
+          "line": 301
         },
         {
           "name": "U.StartLayout",
-          "line": 305
+          "line": 313
         },
         {
           "name": "U.ResetPositions",
-          "line": 310
+          "line": 318
         },
         {
           "name": "U.UndoPositions",
-          "line": 316
+          "line": 324
         },
         {
           "name": "U.Build",
-          "line": 323
+          "line": 331
         },
         {
           "name": "U.Toggle",
-          "line": 377
+          "line": 386
         }
       ],
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 79396,
-      "sha256": "2f9e037b95606a56164db6952593f9f693cc71d568ff2d4c1ca72615dc43658a",
+      "bytes": 79369,
+      "sha256": "cc3dcffc7f374e5a4f2604112ba1c1c37ce8de3eb8cccf62283b096ef6ac0417",
       "namedFunctions": [
         {
           "name": "Print",

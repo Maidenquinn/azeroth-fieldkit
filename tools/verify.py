@@ -57,6 +57,7 @@ fire(FieldKitFrame,"VARIABLES_LOADED")
 secure.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 effects=runtime();effects.execute((base/'tests/action_effects.lua').read_text(encoding='utf8'))
 official=runtime();official.execute((base/'tests/official_api.lua').read_text(encoding='utf8'))
+compatibility=runtime();compatibility.execute((base/'tests/game_0121.lua').read_text(encoding='utf8'))
 l=runtime('{compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,chestPins=true,guardianPins=true,moneyDetached=true,pos={FieldKitMoneyFrame={-2.5374755859375,-348.0493927001953}}}')
 assert l.globals().FieldKit.version==version,'TOC/runtime version mismatch'
 l.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
