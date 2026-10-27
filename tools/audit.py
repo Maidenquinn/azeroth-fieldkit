@@ -39,7 +39,7 @@ for name in loaded:
  files[name]={'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'namedFunctions':functions,'literalEvents':events}
 media=json.loads((base/"data/theme-assets.json").read_text(encoding="utf8"))["files"]
 textures=[];portraits=0
-for p in sorted(root.rglob('*')):
+for p in sorted(root.rglob('*'),key=lambda p:p.relative_to(root).as_posix()):
  assert not p.is_symlink(),'No symlinks in runtime'
  if not p.is_file():continue
  relative=p.relative_to(root).as_posix()
