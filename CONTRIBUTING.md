@@ -1,4 +1,4 @@
-# Contributing to the private review candidate
+# Contributing to the public review candidate
 
 Read NOTICE.md and LICENSE.md before sharing the source. No inherited rights or
 game approval have been established. Changes should help review, not evade the
@@ -14,6 +14,6 @@ handling. Add tests for real behavior/failure boundaries, not a restatement of
 the implementation. In-game tests require authorization and must be recorded as
 such. Do not label an offline screenshot or mock as in-game validation.
 
-See docs/RELEASING.md for the private review/public-release gates. Do not upload
+See docs/RELEASING.md for the review/approved-release gates. Do not upload
 external helpers, native binaries, third-party addon code or extracted game
 resources beyond the explicitly declared portrait candidate without review.

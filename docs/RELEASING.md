@@ -1,33 +1,32 @@
 # Release procedure
 
-## Private review candidate
+## Public technical-review candidate
 
-1. Update Runtime.lua, the controller version and TOC consistently, then changelog.
-2. Run static audit, Lua 5.1/prototype tests and the available native Lua 5.0.3 run.
-3. Copy the validation report into docs/validation.json for the review snapshot.
-4. Commit the runtime, tests and documentation in this dedicated repository.
-5. Run package.py. It refuses stale runtime validation or texture inventory.
-6. Repeat package.py without changes and compare SHA-256 to prove reproducibility
-   on that build environment. ZIP metadata/order are fixed; compression-library
-   versions can still affect bit identity across different environments.
-7. Create the review tag pointing at the tested commit. Keep the repository
-   private and create a **draft/prerelease** with runtime ZIP, SHA256SUMS,
-   manifest and validation evidence. No executables or developer dependencies.
-8. Give reviewers access only through the appropriate authorization process.
-   Do not advertise the candidate as approved or publish to an addon list yet.
+The maintainer explicitly requested a public repository and review prerelease on
+2026-10-27 to share the addon with DK, a game developer. Preserve the attribution,
+unresolved licensing status and lack of game approval on every review release.
+Public access does not settle author/asset permissions or authorize game-rule bypasses.
 
-## Public release prerequisites
+1. Update the TOC and Runtime.lua version, changelog and current review status.
+2. Run static audit, Lua 5.1/prototype tests and available native Lua 5.0.3 fixtures.
+3. Copy the local validation snapshot into docs/validation.json, then commit.
+4. Run package.py; it rejects stale validation/inventory and dirty source trees.
+5. Repeat the build and compare SHA-256 for reproducibility on those inputs.
+6. Tag the tested commit and publish a **prerelease**, explicitly awaiting review.
+   Include runtime ZIP, file manifest, SHA256SUMS and validation evidence.
+7. Share the repository for examination. Do not call it approved or stable and
+   do not change approval/version checks to make the client accept it.
 
-- Recorded applicable upstream code permission/license and asset/data rights.
-- Actual game-developer approval bound to the reviewed version/package/hash.
-- Authorized current-client in-game acceptance, including minimap/native hooks,
-  action bar, old Lua behavior and live performance.
-- All remaining review findings explicitly accepted, fixed or features removed.
-- Complete credit/licensing notices and accurate installation/removal guidance.
+## Approved general-use release prerequisites
 
-Only then choose the public version/license compatible with the permissions,
-rerun verification, package the final commit and publish its exact tag/artifacts.
-Checksums establish file identity, not trustworthiness or developer approval.
+- Resolve applicable upstream code permission/license and asset/data rights.
+- Obtain game-developer approval tied to the exact version/package/hash.
+- Complete authorized current-client integration/performance tests.
+- Resolve, remove or explicitly accept the review findings and native effects.
+- Keep accurate credits, licensing, installation and removal instructions.
 
-There is no automatic updater. GitHub Actions validates/packages source changes
-but does not create a public release or change repository visibility.
+Only then prepare an approved release and select a license compatible with the
+permissions. Checksums establish file identity, not trustworthiness or approval.
+
+There is no automatic updater. CI validates/packages source; publication and
+repository-visibility changes require an explicit maintainer action.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-review.2 — 2026-10-27
+
+- Publish source and a prerelease for developer review at the maintainer's request.
+- Update review/status documentation while retaining credits, unresolved rights
+  and the explicit lack of game approval.
+- Package committed validation evidence, separating it from the current CI run.
+- No gameplay/UI behavior changes from review.1; version metadata updated.
+
 ## 0.1.0-review.1 — 2026-10-27
 
 First separately named review candidate, based on the inspected MASH 1.3.9.

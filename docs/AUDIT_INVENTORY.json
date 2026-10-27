@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.1.0-review.1",
+  "candidate": "0.1.0-review.2",
   "runtimeModules": 14,
   "textureCount": 98,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 2427,
-      "sha256": "1d3348bdf34f79be67179409f117eacb288fe5370c206c5408a8bc5c9fb530ed",
+      "sha256": "0de10eadeb0b20d9b2e765de095a01960c28af8ae547ad31d9549f9731dd56e0",
       "namedFunctions": [
         {
           "name": "FieldKit.Number",

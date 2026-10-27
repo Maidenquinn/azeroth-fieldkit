@@ -3,8 +3,8 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.1.0-review.1** is a private **review candidate**, not a developer-approved
-addon or public release. Renaming identifies this maintained fork; it does not
+Version **0.1.0-review.2** is a public **review candidate** shared for technical examination,
+not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
 [Français](README.fr.md) · [Review dossier](docs/REVIEW.md) ·

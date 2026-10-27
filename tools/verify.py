@@ -67,7 +67,7 @@ if args.lua50:
  run=subprocess.run([str(args.lua50.resolve()),'tests/native50.lua'],cwd=base,capture_output=True,text=True,encoding='utf8',timeout=60)
  assert run.returncode==0,run.stdout+run.stderr
  native=run.stdout.strip()
-result={'version':'0.1.0-review.1','lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
+result={'version':'0.1.0-review.2','lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
  'freshDefaultsNoCVarOrHudWrites':True,'manualActionSwapFixture':True,'bothChatHookPaths':True,
  'inGameTest':False,'approval':'not approved','files':prototypes}
 out=base/'build';out.mkdir(exist_ok=True)

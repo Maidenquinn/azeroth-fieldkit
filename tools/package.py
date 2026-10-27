@@ -19,14 +19,18 @@ for name in ('README.md','README.fr.md','NOTICE.md','LICENSE.md','SECURITY.md','
 for p in (base/'docs').glob('*'):
  if p.is_file():payload['docs/'+p.name]=p.read_bytes()
 # Historical guides and raw baseline source are deliberately not in the runtime.
-payload['docs/validation.json']=(base/'build/validation.json').read_bytes()
+# Package the committed review snapshot. The current verification report stays a
+# separate build artifact, so differing CI capabilities do not alter the ZIP.
+snapshot=json.loads((base/'docs/validation.json').read_text(encoding='utf8'))
+for name,result in snapshot['files'].items():
+ assert hashlib.sha256((root/name).read_bytes()).hexdigest()==result['sha256'],'Stale committed validation snapshot'
 try:
  commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=base,text=True,stderr=subprocess.DEVNULL).strip()
  dirty=subprocess.check_output(['git','status','--porcelain'],cwd=base,text=True)
  assert not dirty,'Commit reviewed source/docs first; refusing a dirty sourceCommit claim'
 except (subprocess.CalledProcessError,FileNotFoundError):commit=None
 manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':'not approved',
- 'distribution':'private review candidate; permissions unresolved','inGameTest':False,
+ 'distribution':'public technical-review candidate; permissions unresolved','inGameTest':False,
  'files':{name:{'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)} for name,data in sorted(payload.items())}}
 payload['MANIFEST.json']=(json.dumps(manifest,indent=2)+'\n').encode()
 out=base/'dist';out.mkdir(exist_ok=True);archive=out/f'AzerothFieldKit-{version}.zip'

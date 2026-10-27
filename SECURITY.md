@@ -1,6 +1,6 @@
 # Security and player-risk assessment
 
-**Assessment date:** 2026-10-27. **Candidate:** 0.1.0-review.1.
+**Assessment date:** 2026-10-27. **Candidate:** 0.1.0-review.2.
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
@@ -70,13 +70,14 @@ only allows writes to `cameraDistanceMaxFactor`, `CombatDamage`, `PetMeleeDamage
 and `PetSpellDamage`. Camera values are bounded; damage switches accept 0/1 only.
 WorldPins handles unsupported rotation without an uncaught CVar error.
 
-### F06 — Inherited ownership and asset rights (unresolved release blocker)
+### F06 — Inherited ownership and asset rights (unresolved licensing issue)
 
 No applicable upstream license or author permission was located in the inspected
 material. Portraits/data derive from native game resources. Renaming does not
 resolve either issue. NOTICE.md and LICENSE.md preserve the distinction between
 Malk's original project, later community changes and this maintained fork.
-Keep the review candidate private pending clarification.
+The maintainer requested public technical review; the unresolved rights are
+still disclosed and no upstream permission or license grant is asserted.
 
 ## Capabilities not found in the runtime
 
@@ -119,7 +120,8 @@ clear-on-disable, forwarding behavior, CVar allowlist, malformed settings,
 WorldFrame restoration and existing feature regressions under Lua 5.0.3/5.1.
 No new test inside the running game is claimed for this candidate.
 
-Report issues privately to the maintainer through the private repository. Include
+Report sensitive issues directly to the maintainer; use public issues only for
+non-sensitive reproductions. Include
 candidate version, client version, UI language and a minimal reproduction. Avoid
 uploading game saves or private chat. For a privacy concern, disable chat capture
 immediately and reload; no persistent chat history needs to be deleted.

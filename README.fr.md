@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.1.0-review.1` est une candidate privée à examiner. Aucune approbation
+La version `0.1.0-review.2` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -59,4 +59,5 @@ Le [dossier de revue](docs/REVIEW.md), l'[audit](SECURITY.md), les
 [effets natifs](docs/API_SURFACE.md), le [guide du code](docs/CODE_GUIDE.md) et le
 [plan de test](docs/TESTING.md) servent de base aux développeurs pour décider.
 Les crédits et droits non résolus figurent dans [NOTICE](NOTICE.md) et
-[LICENSE](LICENSE.md). Le dépôt et sa release de revue restent privés.
+[LICENSE](LICENSE.md). Le dépôt et la préversion sont publics pour faciliter la revue. Cet accès public
+ne confirme ni les permissions de redistribution ni l’approbation du jeu.

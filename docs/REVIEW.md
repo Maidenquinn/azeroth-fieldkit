@@ -1,6 +1,6 @@
 # Manual approval dossier
 
-**Azeroth FieldKit 0.1.0-review.1 — submitted candidate, not approved.**
+**Azeroth FieldKit 0.1.0-review.2 — submitted candidate, not approved.**
 
 Maintainer: Kevin Radlowski / Maidenhead. Origin: MASH by Malk. This dossier is
 prepared for game developers to inspect; it has not been sent to them by a tool.
@@ -42,8 +42,9 @@ The entire shipped code and its available capabilities are disclosed.
 - The renamed/refactored candidate has not been visually/integration-tested in
   the running game. Historical MASH user tests are not validation of this fork.
 
-The repository and draft review release remain private. They provide a concrete
-reviewable candidate, not a certification or a public replacement for MASH.
+The maintainer has authorized a public repository and review prerelease so game
+developers can inspect the candidate. This is not a certification, a license grant
+or an approved replacement for MASH.
 
 ## Maintainer assurances supported by this work
 

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0-review.1",
+  "version": "0.1.0-review.2",
   "lua51": true,
   "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed",
   "persistence": true,
@@ -13,7 +13,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "1d3348bdf34f79be67179409f117eacb288fe5370c206c5408a8bc5c9fb530ed"
+      "sha256": "0de10eadeb0b20d9b2e765de095a01960c28af8ae547ad31d9549f9731dd56e0"
     },
     "Config.lua": {
       "maxUpvalues": 1,

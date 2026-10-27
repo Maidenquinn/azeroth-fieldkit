@@ -5,7 +5,7 @@ for your manual addon review. I am not claiming that a rename makes the old
 code approved or changes Malk's authorship. The specific reason for MASH's
 untrusted classification has not been provided to me.
 
-The private repository preserves the exact inspected MASH 1.3.9 snapshot and
+The public repository preserves the exact inspected MASH 1.3.9 snapshot and
 the subsequent changes, with a detailed README, native API effects inventory,
 source comments, security findings and reproducible runtime ZIP/manifest/hash.
 
@@ -20,10 +20,11 @@ The remaining approval questions include native chest/lair markers, nameplate
 reparenting, the camera range, compact-bar player-driven slot swapping and the
 game-derived portrait assets. These are listed explicitly in docs/REVIEW.md.
 Offline Lua 5.0.3/5.1 tests pass; the renamed candidate still needs authorized
-in-game integration testing. It is not advertised as approved or publicly released.
+in-game integration testing. It is published as a review prerelease, not as an approved/stable release.
 
 Upstream code permission and game-asset redistribution rights also remain to be
-clarified. The repository/review release will stay private pending those decisions.
+clarified. Public access is provided for your technical review and does not imply that
+those permissions or game approval have been obtained.
 Could you specify the accepted feature boundaries and the process/build against
 which you want the candidate reviewed? I can adjust or remove disputed modules
 before any public distribution.

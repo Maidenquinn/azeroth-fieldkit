@@ -24,7 +24,8 @@ namespace does not turn inherited code into exclusively owned new work.
 The first Git commit preserves the exact inspected runtime snapshot. Its
 `docs/UPSTREAM_MANIFEST.json` records relative file paths and SHA-256 hashes.
 Subsequent commits identify the fork changes. The snapshot is available for
-private review; it is not asserted to be an independently licensed distribution.
+public technical review at the maintainer’s explicit request; no independently
+licensed distribution or upstream permission is asserted.
 
 ## Game-derived assets and data
 
