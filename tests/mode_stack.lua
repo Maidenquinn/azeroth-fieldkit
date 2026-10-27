@@ -14,7 +14,7 @@ local function checkStack()
   local f=frames[i]
   if f:IsShown() then
    local point,relative,rp,x,offset=f:GetPoint()
-   assert(point=="TOPLEFT" and relative==S.root and rp=="CENTER" and x==0)
+   assert(point=="TOPLEFT" and relative==S.root and rp=="TOPLEFT" and x==0)
    assert(offset==-y and f:GetWidth()==FieldKit.MeterWidth(FieldKitDB.meterValues))
    y=y+f:GetHeight()+6
   end
@@ -66,9 +66,9 @@ assert(R.frame.total:GetText()=="Heroic V")
 assert(R.frame.rows[8].label:GetText()=="Active affixes: not provided")
 local originalWidth,originalHeight=UIParent.width,UIParent.height
 UIParent.width=800;UIParent.height=600;S.Apply()
-local _,_,_,sx,sy=S.root:GetPoint()
-assert(sx>=-400+12 and sx+S.width<=400-12)
-assert(sy<=300-12 and sy-S.height>=-300+12)
+assert(S.root.clamped and S.root:GetWidth()==S.width and S.root:GetHeight()==S.height)
+assert(not S.root.mouseEnabled,"The full-size clamp proxy must not cover card controls")
+for i=1,4 do assert(frames[i].clamped==false,"A linked child added an independent clamp") end
 UIParent.width=originalWidth;UIParent.height=originalHeight;S.Apply()
 AZS_ZONE.heroic=nil;update(FieldKitFrame,.3)
 assert(R.frame.total:GetText()=="Mode not provided" and R.frame.mashVisibleRows==2)

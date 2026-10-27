@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.1-review.2",
-  "runtimeModules": 20,
+  "candidate": "0.2.1-review.3",
+  "runtimeModules": 21,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 2427,
-      "sha256": "14bf00c24fbb6dfb0d3fedb00fbd2f7105ad618a18b0aeabc2e51394d0dd1aab",
+      "sha256": "5faea6b247c1567c24ff90e5edff5cdb265261f2080ec05b6fadc48bb9def540",
       "namedFunctions": [
         {
           "name": "FieldKit.Number",
@@ -33,9 +33,28 @@
       ],
       "literalEvents": []
     },
+    "Positions.lua": {
+      "bytes": 1687,
+      "sha256": "bb57bda856dfda1d8b406da7e83a6930c866d56924acac9fb006842ecd32b9ae",
+      "namedFunctions": [
+        {
+          "name": "P.Valid",
+          "line": 10
+        },
+        {
+          "name": "P.Save",
+          "line": 16
+        },
+        {
+          "name": "P.Restore",
+          "line": 33
+        }
+      ],
+      "literalEvents": []
+    },
     "Config.lua": {
-      "bytes": 3899,
-      "sha256": "b1629ef1f8c012caf572d0add1dfb1440629811c7cf60430c4507864da664b34",
+      "bytes": 4134,
+      "sha256": "a1acfeec6f29967fef91b8d354766e2cb533b70a7964ee39feb1dffd09aded41",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -245,8 +264,8 @@
       "literalEvents": []
     },
     "HudStack.lua": {
-      "bytes": 2835,
-      "sha256": "19d5dc0cb380c888f1d9947cd887aa7a2146c4879cd202c799473e96e533d80d",
+      "bytes": 3243,
+      "sha256": "f7c5155c32c91c985534a7e40110d89882de388016f2a94b091958bd10a66433",
       "namedFunctions": [
         {
           "name": "S.Initialize",
@@ -254,7 +273,7 @@
         },
         {
           "name": "S.Apply",
-          "line": 27
+          "line": 30
         }
       ],
       "literalEvents": []
@@ -302,8 +321,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 24054,
-      "sha256": "307b59405b68c698dcc98eb88a80846d313188567851500467adaf1611b4cd1e",
+      "bytes": 24202,
+      "sha256": "5b3becf8726a620363253966723631b8d2d9e47026c44beda5a60d81fec7aacf",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -375,22 +394,22 @@
         },
         {
           "name": "U.UndoPositions",
-          "line": 330
+          "line": 331
         },
         {
           "name": "U.Build",
-          "line": 337
+          "line": 339
         },
         {
           "name": "U.Toggle",
-          "line": 392
+          "line": 394
         }
       ],
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 80080,
-      "sha256": "9c499e9bd230ed5fa0b080626ee1b88213b67c49cb1082e7c6db7104a14d0132",
+      "bytes": 80370,
+      "sha256": "bce6fcab5be36bfac072ffa5ed0b37527bb5329b4f9abc2fd4bf6465fc7bc3eb",
       "namedFunctions": [
         {
           "name": "Print",
@@ -434,343 +453,343 @@
         },
         {
           "name": "MakeMovable",
-          "line": 161
+          "line": 165
         },
         {
           "name": "SetMovablesUnlocked",
-          "line": 196
+          "line": 197
         },
         {
           "name": "MirrorTarget",
-          "line": 211
+          "line": 212
         },
         {
           "name": "CreateBossFrame",
-          "line": 230
+          "line": 231
         },
         {
           "name": "CreateBossFrames",
-          "line": 313
+          "line": 314
         },
         {
           "name": "SyncHudBosses",
-          "line": 321
+          "line": 322
         },
         {
           "name": "ShowBossFrame",
-          "line": 335
+          "line": 336
         },
         {
           "name": "UpdateBossFrame",
-          "line": 417
+          "line": 418
         },
         {
           "name": "RegisterPlate",
-          "line": 460
+          "line": 461
         },
         {
           "name": "SetPlateAlpha",
-          "line": 523
+          "line": 524
         },
         {
           "name": "Lift",
-          "line": 533
+          "line": 534
         },
         {
           "name": "Drop",
-          "line": 545
+          "line": 546
         },
         {
           "name": "ApplyPlate",
-          "line": 562
+          "line": 563
         },
         {
           "name": "UpdatePlates",
-          "line": 617
+          "line": 618
         },
         {
           "name": "SyncNativePlates",
-          "line": 685
+          "line": 686
         },
         {
           "name": "SetFilter",
-          "line": 694
+          "line": 695
         },
         {
           "name": "ApplyCamera",
-          "line": 701
+          "line": 702
         },
         {
           "name": "UpdateTargetHealth",
-          "line": 715
+          "line": 716
         },
         {
           "name": "UpdatePlayerBar",
-          "line": 744
+          "line": 745
         },
         {
           "name": "PulsePlayerBar",
-          "line": 797
+          "line": 798
         },
         {
           "name": "TestLowHealth",
-          "line": 806
+          "line": 807
         },
         {
           "name": "CreatePlayerBar",
-          "line": 812
+          "line": 813
         },
         {
           "name": "BuffIcon",
-          "line": 852
+          "line": 853
         },
         {
           "name": "FormatBuffTime",
-          "line": 870
+          "line": 871
         },
         {
           "name": "UpdatePlayerBuffs",
-          "line": 880
+          "line": 881
         },
         {
           "name": "CreatePlayerBuffs",
-          "line": 913
+          "line": 914
         },
         {
           "name": "Pct",
-          "line": 928
+          "line": 929
         },
         {
           "name": "PctOf",
-          "line": 933
+          "line": 934
         },
         {
           "name": "ParseStats",
-          "line": 973
+          "line": 974
         },
         {
           "name": "StatsRow",
-          "line": 988
+          "line": 989
         },
         {
           "name": "ApplyCompactPanel",
-          "line": 1004
+          "line": 1005
         },
         {
           "name": "AddCompactButton",
-          "line": 1029
+          "line": 1030
         },
         {
           "name": "UpdateStatsFrame",
-          "line": 1040
+          "line": 1041
         },
         {
           "name": "CreateStatsFrame",
-          "line": 1076
+          "line": 1077
         },
         {
           "name": "MenuFont",
-          "line": 1105
+          "line": 1106
         },
         {
           "name": "StyleWindow",
-          "line": 1114
+          "line": 1115
         },
         {
           "name": "CreateStatsPicker",
-          "line": 1130
+          "line": 1131
         },
         {
           "name": "ToggleStatsPicker",
-          "line": 1165
+          "line": 1166
         },
         {
           "name": "RunGold",
-          "line": 1189
+          "line": 1190
         },
         {
           "name": "ChestPrice",
-          "line": 1198
+          "line": 1199
         },
         {
           "name": "ChestCost",
-          "line": 1207
+          "line": 1208
         },
         {
           "name": "NoteGoldChange",
-          "line": 1220
+          "line": 1221
         },
         {
           "name": "Compact",
-          "line": 1247
+          "line": 1248
         },
         {
           "name": "UpdateMoneyFrame",
-          "line": 1260
+          "line": 1261
         },
         {
           "name": "SyncHudTally",
-          "line": 1306
+          "line": 1307
         },
         {
           "name": "CreateMoneyFrame",
-          "line": 1320
+          "line": 1321
         },
         {
           "name": "ReadSlot",
-          "line": 1374
+          "line": 1375
         },
         {
           "name": "UpdateGearFrame",
-          "line": 1398
+          "line": 1399
         },
         {
           "name": "CreateGearFrame",
-          "line": 1432
+          "line": 1433
         },
         {
           "name": "CreateBarWindow",
-          "line": 1499
+          "line": 1500
         },
         {
           "name": "FitRows",
-          "line": 1573
+          "line": 1574
         },
         {
           "name": "InRun",
-          "line": 1589
+          "line": 1590
         },
         {
           "name": "UpdateMeterFrame",
-          "line": 1594
+          "line": 1595
         },
         {
           "name": "UpdateTakenFrame",
-          "line": 1640
+          "line": 1641
         },
         {
           "name": "SyncHudMeter",
-          "line": 1675
+          "line": 1676
         },
         {
           "name": "CreateMeterFrames",
-          "line": 1683
+          "line": 1684
         },
         {
           "name": "UpdateMeterFrames",
-          "line": 1697
+          "line": 1698
         },
         {
           "name": "UpdateChestPins",
-          "line": 1717
+          "line": 1718
         },
         {
           "name": "FormatClock",
-          "line": 1727
+          "line": 1728
         },
         {
           "name": "UpdateLairFrame",
-          "line": 1733
+          "line": 1734
         },
         {
           "name": "CreateLairFrame",
-          "line": 1818
+          "line": 1819
         },
         {
           "name": "ApplyDamageNumbers",
-          "line": 1844
+          "line": 1845
         },
         {
           "name": "FieldKit_UseCombatTextOnly",
-          "line": 1855
+          "line": 1856
         },
         {
           "name": "SlotOf",
-          "line": 1879
+          "line": 1880
         },
         {
           "name": "SwapSlots",
-          "line": 1887
+          "line": 1888
         },
         {
           "name": "HookBarDrag",
-          "line": 1897
+          "line": 1898
         },
         {
           "name": "PlaceMicroMenu",
-          "line": 1931
+          "line": 1932
         },
         {
           "name": "PlaceBarButtons",
-          "line": 1961
+          "line": 1962
         },
         {
           "name": "UpdateCompactXP",
-          "line": 1978
+          "line": 1979
         },
         {
           "name": "CreateCompactBar",
-          "line": 1989
+          "line": 1990
         },
         {
           "name": "AttachMoneyToBar",
-          "line": 2071
+          "line": 2072
         },
         {
           "name": "KeepCompactBar",
-          "line": 2091
+          "line": 2092
         },
         {
           "name": "UpdateGryphons",
-          "line": 2120
+          "line": 2121
         },
         {
           "name": "ResetPositions",
-          "line": 2161
+          "line": 2162
         },
         {
           "name": "RefreshPanel",
-          "line": 2168
+          "line": 2170
         },
         {
           "name": "FieldKit_RefreshInterfaceLanguage",
-          "line": 2169
+          "line": 2171
         },
         {
           "name": "CreatePanel",
-          "line": 2174
+          "line": 2176
         },
         {
           "name": "TogglePanel",
-          "line": 2187
+          "line": 2189
         },
         {
           "name": "CreateMinimapButton",
-          "line": 2193
+          "line": 2195
         },
         {
           "name": "PlaceOnRim",
-          "line": 2203
+          "line": 2205
         },
         {
           "name": "InitDB",
-          "line": 2238
+          "line": 2240
         },
         {
           "name": "FieldKitEventLifecycle",
-          "line": 2260
+          "line": 2262
         },
         {
           "name": "FieldKitEventWorld",
-          "line": 2287
+          "line": 2289
         },
         {
           "name": "FieldKitEventOther",
-          "line": 2314
+          "line": 2316
         },
         {
           "name": "RefreshNativeData",
-          "line": 2362
+          "line": 2364
         }
       ],
       "literalEvents": [

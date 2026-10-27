@@ -111,3 +111,5 @@ preferences. New UI behavior is covered by tests/interface_journey.lua.
 GameCompatibility.lua contains the guarded native Heroic context, exact critical-objective nameplate exception and fractional-bonus formatting. Read docs/GAME_0_121.md and tests/game_0121.lua before extending it. It adds no native setter or gameplay action.
 
 RunMode.lua renders the native rank/zone separately from the labelled 0.121 mechanic reference. HudStack.lua owns only left-card geometry, preserves legacy positions and forwards player drags to the stack anchor. Both are initialized through injected HUD constructors; no native gameplay writer is added. tests/mode_stack.lua validates the actual frame geometry and controls.
+
+Positions.lua validates and persists native point/relative-point offsets. Drag-stop callbacks use this path without GetCenter subtraction. Legacy numeric positions remain a fallback. HudStack.lua now uses a full-size, mouse-disabled clamp proxy; linked cards delegate clamping to it. tests/edge_positions.lua covers zero-inset edges and native-anchor restoration.

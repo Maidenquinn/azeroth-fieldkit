@@ -53,3 +53,31 @@ card, hide damage or mode, change number mode, drag the group through each card,
 toggle linking, change language, resize and reload. Compare the mode rank and
 reference rules with the native Difficulty screen. No new live-game test or
 approval is claimed for this candidate.
+
+## Edge correction in 0.2.1-review.3
+
+The supplied 8-second video shows the accessories/stats group moving and then
+repositioning on release near the screen edge. The old drag-stop handler read
+frame/UIParent centers, subtracted them, then re-clamped and reapplied a center
+position. This conversion is removed. The revised path retains native GetPoint
+anchors and offsets, following the existing Azeroth Stats persistence pattern.
+It avoids mixing those coordinate spaces and supports zero-offset edge anchors.
+
+`FieldKitDB.frameAnchors` is validated independently of legacy `pos` entries and
+wins on restoration after a new drag. Only UIParent/implicit-viewport anchors are
+accepted; no external frame pointer is serialized. Unexpected anchor references
+are left untouched rather than forcibly recentered. Reset/Undo includes native
+records. Existing saved variables are never edited directly by installation.
+
+The linked proxy now has the full group width/height, delegates bounds to the
+native client and imposes no 12-pixel margin. Children disable their independent
+clamps while linked. The proxy never receives mouse input; visible cards still
+forward explicit layout drags. Native edge anchors retain their semantics;
+vertical middle anchors can be stabilized against changing row counts.
+
+This supersedes the one-point proxy/manual-inset description above. Tests replay
+native anchors at all four corners and make GetCenter fail deliberately; verify
+exact restoration, group dimensions, mouse/clamp flags, native right pinning,
+reset/Undo and serialization/reload. They do not simulate or certify the client's
+native clamp algorithm. The corrected build still needs in-game acceptance at
+the viewport edges and at the user's actual UI scale/resolution.

@@ -126,3 +126,7 @@ GameCompatibility.lua reads AZS_ZONE.heroic only during an active native phase. 
 ## Linked HUD and run-mode reference
 
 RunMode.lua reads only the existing native rank/zone and phase; its versioned reference is static text, not live affix or multiplier data. HudStack.lua reanchors FieldKit-owned frames only. FieldKitDB.linkLeftCards, runModeCard and pos.FieldKitLeftStack persist configuration and a UI anchor. Legacy individual coordinates are retained; no world-position history or game progression is written.
+
+## Native anchor persistence
+
+Positions.lua reads GetPoint and writes only FieldKitDB.frameAnchors (validated own-frame names and point/relative-point/numeric offsets). Restoring uses UIParent-relative SetPoint; no frame pointers are serialized. Native SetClampedToScreen handles bounds of the linked group proxy, with child clamps disabled while linked. Legacy positions are retained and Reset/Undo includes both representations. No game/save/other-addon state is accessed.

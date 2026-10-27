@@ -18,8 +18,15 @@ function FieldKit.InitializeSettings(defaultStats)
  d.cardStyle=math.floor(FieldKit.Number(d.cardStyle,1,1,2))
  d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
  d.meterValues=math.floor(FieldKit.Number(d.meterValues,3,1,3))
- for _,key in ipairs({"known","pos","collapsedWindows"}) do
+ for _,key in ipairs({"known","pos","collapsedWindows","frameAnchors"}) do
   if type(d[key])~="table" then d[key]={} end
+ end
+ local anchors=0
+ for name,a in pairs(d.frameAnchors) do
+  anchors=anchors+1
+  if type(name)~="string" or string.len(name)>128 or anchors>256 or not FieldKitPositions.Valid(a) then
+   d.frameAnchors[name]=nil
+  end
  end
  local count=0
  for name,class in pairs(d.known) do

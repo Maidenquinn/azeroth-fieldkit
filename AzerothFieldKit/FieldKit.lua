@@ -149,8 +149,12 @@ end
 
 -- Restore a saved center-relative position, clamping the visible frame to the screen.
 local function PlaceMovable(frame)
+ if FieldKitPositions.Restore(frame) then return end
 	local p = DB.pos[frame:GetName()]
 	frame:ClearAllPoints()
+ if frame.fieldkitTopLeftAnchor then
+  frame:SetPoint("TOPLEFT",UIParent,"CENTER",p[1],p[2]);return
+ end
 	local xlimit = math.max(0, (UIParent:GetWidth() - frame:GetWidth()) / 2)
 	local ylimit = math.max(0, (UIParent:GetHeight() - frame:GetHeight()) / 2)
 	frame:SetPoint("CENTER", UIParent, "CENTER", math.max(-xlimit, math.min(xlimit, tonumber(p[1]) or 0)), math.max(-ylimit, math.min(ylimit, tonumber(p[2]) or 0)))
@@ -182,20 +186,17 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 		end
 		frame.azsMoving = nil
 		frame:StopMovingOrSizing()
-		local x, y = frame:GetCenter()
-		local px, py = UIParent:GetCenter()
-		DB.pos[frame:GetName()] = { x - px, y - py }
-		PlaceMovable(frame)
+  if FieldKitPositions.Save(frame,frame.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(frame) end
 	end)
 	handle.azsFreeDrag = freeDrag
-	handle:EnableMouse(freeDrag and 1 or nil)
+	handle:EnableMouse(not handle.fieldkitMouseProxy and freeDrag and 1 or nil)
 	table.insert(movables, handle)
 end
 
 -- Enable drag handles while the settings panel is open, then lock them again.
 local function SetMovablesUnlocked(unlocked)
 	for i = 1, table.getn(movables) do
-		movables[i]:EnableMouse((unlocked or movables[i].azsFreeDrag) and 1 or nil)
+		movables[i]:EnableMouse(not movables[i].fieldkitMouseProxy and (unlocked or movables[i].azsFreeDrag) and 1 or nil)
 	end
 end
 
@@ -2070,7 +2071,7 @@ end
 -- Dock or repair the strip unless the user intentionally detached it.
 function AttachMoneyToBar(force)
 	if ( not compactBar or not moneyFrame ) then return end
-	if ( force ) then DB.moneyDetached = nil end
+	if ( force ) then DB.moneyDetached = nil;DB.frameAnchors.FieldKitMoneyFrame=nil end
 	if ( not DB.moneyDetached and not moneyFrame.azsMoving ) then
 		if moneyFrame:GetParent() ~= UIParent then moneyFrame:SetParent(UIParent) end
 		moneyFrame:SetFrameStrata("MEDIUM")
@@ -2106,9 +2107,9 @@ function KeepCompactBar()
 	end
 
 	local bottom = compactBar:GetBottom()
-	if ( bottom and bottom < 2 and not compactBar.azsMoving ) then
+	if ( bottom and bottom < 0 and not compactBar.azsMoving and not DB.frameAnchors.FieldKitCompactBar ) then
 		local p = DB.pos["FieldKitCompactBar"]
-		p[2] = p[2] + ( 2 - bottom )
+		p[2] = p[2] - bottom
 		PlaceMovable(compactBar)
 	end
 end
@@ -2159,6 +2160,7 @@ SECTIONS=FieldKit.BuildJourneySections(SECTIONS,settingsActions)
 
 -- Restore only addon HUD positions. The journey offers an immediate Undo.
 local function ResetPositions()
+ DB.frameAnchors={}
  for i=1,table.getn(movableFrames) do
   local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
  end

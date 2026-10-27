@@ -322,14 +322,16 @@ end
 
 -- Position reset has a bounded, immediate Undo; feature/style preferences are untouched.
 function U.ResetPositions()
- local snapshot={pos={},detached=FieldKitDB.moneyDetached}
+ local snapshot={pos={},anchors={},detached=FieldKitDB.moneyDetached}
  for name,p in pairs(FieldKitDB.pos) do snapshot.pos[name]={p[1],p[2]} end
+ for name,a in pairs(FieldKitDB.frameAnchors) do snapshot.anchors[name]={a[1],a[2],a[3],a[4]} end
  U.undoPositions=snapshot;U.context.reset();U.Refresh()
 end
 
 function U.UndoPositions()
  local saved=U.undoPositions;if not saved then return end
  FieldKitDB.pos=saved.pos;FieldKitDB.moneyDetached=saved.detached
+ FieldKitDB.frameAnchors=saved.anchors
  U.undoPositions=nil;U.context.positions();U.Refresh()
 end
 

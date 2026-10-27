@@ -146,3 +146,5 @@ function methods:GetID() return self.id end
 function methods:EnableMouseWheel(v) self.mouseWheel=v end
 function methods:SetVerticalScroll(v) self.verticalScroll=v end
 function methods:GetVerticalScroll() return self.verticalScroll or 0 end
+function methods:SetClampedToScreen(v) self.clamped=v and true or false end
+function methods:EnableMouse(v) self.mouseEnabled=v and true or false end

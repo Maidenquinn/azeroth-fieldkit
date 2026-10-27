@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.2.1-review.2** is a public **review candidate** shared for technical examination,
+Version **0.2.1-review.3** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -71,7 +71,9 @@ The left cards now share one movable stack and width: Run mode, Damage,
 Damage taken, Lairs. Collapsing or hiding a card closes the gap. Move any member
 in **Move windows** mode to move the group. **Windows → Align left HUD cards**
 turns linking off; individual old positions are retained. The stack has its own
-saved top-left anchor, separate from those positions.
+saved anchor, separate from those positions. Native drag anchors are retained
+without an addon-imposed screen inset. The native client clamps the full group;
+this avoids a second center-coordinate calculation on release.
 
 **Windows → Run mode card** controls the new card. Its rank and zone come from
 the client. Mechanic names are explicitly a **0.121 reference**, with cumulative

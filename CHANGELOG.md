@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1-review.3 — 2026-10-28
+
+- Fix post-drag repositioning by saving/restoring native GetPoint anchors instead of subtracting GetCenter coordinates and immediately applying a second center clamp.
+- Remove the linked stack’s hardcoded 12-pixel screen inset. Clamp a full-size group proxy natively, with linked child clamps disabled.
+- Keep the transparent proxy mouse-disabled so it cannot cover card controls. Preserve edge anchors and avoid forced reanchoring every tick.
+- Persist validated frameAnchors separately from legacy numeric positions; Reset/Undo covers both. The compact bar no longer enforces a two-pixel bottom gap.
+- Check all four edge anchors, no-GetCenter drop handling, native right pinning after resizing, serialization/reload, proxy bounds and Undo under Lua 5.0.3 / 5.1. Live confirmation pending.
+
 ## 0.2.1-review.2 — 2026-10-27
 
 - Add an optional Run mode HUD card: native rank and zone, explicitly labelled cumulative 0.121 mechanic references, full rules on hover and unknown live affix identity. No guessed HP/damage multipliers.

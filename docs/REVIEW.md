@@ -1,6 +1,6 @@
 # Manual approval dossier
 
-**Azeroth FieldKit 0.2.1-review.2 — submitted candidate, not approved.**
+**Azeroth FieldKit 0.2.1-review.3 — submitted candidate, not approved.**
 
 Maintainer: Kevin Radlowski / Maidenhead. Origin: MASH by Malk. This dossier is
 prepared for game developers to inspect; it has not been sent to them by a tool.

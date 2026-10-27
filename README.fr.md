@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.2.1-review.2` est une candidate publique à examiner par les développeurs. Aucune approbation
+La version `0.2.1-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -118,3 +118,5 @@ Le rang et la zone viennent du client. Les mécaniques sont marquées **Référe
 visibles ; les règles héritées supplémentaires sont comptées et détaillées dans
 l'infobulle. Les noms des affixes actifs et les multiplicateurs PV/dégâts ne sont
 pas inventés lorsqu'ils ne sont pas exposés. Voir [HUD_STACK.md](docs/HUD_STACK.md).
+
+Le correctif review.3 conserve les ancrages natifs lors du déplacement, sans recalcul depuis le centre au relâchement. La marge de 12 pixels a été retirée ; le client limite la pile sur sa taille complète. Les ancrages natifs sont enregistrés séparément des anciennes positions et inclus dans Réinitialiser/Annuler.

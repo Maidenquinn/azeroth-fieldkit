@@ -1,7 +1,7 @@
 {
-  "version": "0.2.1-review.2",
+  "version": "0.2.1-review.3",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -15,12 +15,17 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "14bf00c24fbb6dfb0d3fedb00fbd2f7105ad618a18b0aeabc2e51394d0dd1aab"
+      "sha256": "5faea6b247c1567c24ff90e5edff5cdb265261f2080ec05b6fadc48bb9def540"
+    },
+    "Positions.lua": {
+      "maxUpvalues": 2,
+      "functions": 4,
+      "sha256": "bb57bda856dfda1d8b406da7e83a6930c866d56924acac9fb006842ecd32b9ae"
     },
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "b1629ef1f8c012caf572d0add1dfb1440629811c7cf60430c4507864da664b34"
+      "sha256": "a1acfeec6f29967fef91b8d354766e2cb533b70a7964ee39feb1dffd09aded41"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
@@ -70,7 +75,7 @@
     "HudStack.lua": {
       "maxUpvalues": 2,
       "functions": 5,
-      "sha256": "19d5dc0cb380c888f1d9947cd887aa7a2146c4879cd202c799473e96e533d80d"
+      "sha256": "f7c5155c32c91c985534a7e40110d89882de388016f2a94b091958bd10a66433"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
@@ -85,12 +90,12 @@
     "Interface.lua": {
       "maxUpvalues": 5,
       "functions": 70,
-      "sha256": "307b59405b68c698dcc98eb88a80846d313188567851500467adaf1611b4cd1e"
+      "sha256": "5b3becf8726a620363253966723631b8d2d9e47026c44beda5a60d81fec7aacf"
     },
     "FieldKit.lua": {
       "maxUpvalues": 19,
       "functions": 164,
-      "sha256": "9c499e9bd230ed5fa0b080626ee1b88213b67c49cb1082e7c6db7104a14d0132"
+      "sha256": "bce6fcab5be36bfac072ffa5ed0b37527bb5329b4f9abc2fd4bf6465fc7bc3eb"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,
