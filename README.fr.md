@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.2.1-review.1` est une candidate publique à examiner par les développeurs. Aucune approbation
+La version `0.2.1-review.2` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -103,3 +103,18 @@ seconde fois les modificateurs Héroïques ou les étoiles.
 
 Aucune API de marques, d'étoiles ou d'affixes actifs n'a été confirmée. Ces
 valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md).
+
+## Carte du mode et alignement à gauche
+
+Le mode de jeu, les dégâts, les dégâts subis et les antres partagent désormais
+une largeur et une pile avec six pixels d'espacement. Réduire ou masquer une
+carte referme l'espace. Déplacez n'importe quelle carte en mode **Déplacer** pour
+bouger le groupe. Dans **Fenêtres**, **Aligner les cartes de gauche** permet de
+revenir aux positions individuelles conservées ; **Carte du mode de jeu** masque
+ou affiche la nouvelle carte.
+
+Le rang et la zone viennent du client. Les mécaniques sont marquées **Référence
+0.121**, avec tous les détails au survol. Les quatre dernières règles restent
+visibles ; les règles héritées supplémentaires sont comptées et détaillées dans
+l'infobulle. Les noms des affixes actifs et les multiplicateurs PV/dégâts ne sont
+pas inventés lorsqu'ils ne sont pas exposés. Voir [HUD_STACK.md](docs/HUD_STACK.md).

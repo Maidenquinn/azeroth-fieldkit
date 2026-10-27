@@ -109,3 +109,5 @@ widgets. Config.lua migrates the legacy page selection without resetting feature
 preferences. New UI behavior is covered by tests/interface_journey.lua.
 
 GameCompatibility.lua contains the guarded native Heroic context, exact critical-objective nameplate exception and fractional-bonus formatting. Read docs/GAME_0_121.md and tests/game_0121.lua before extending it. It adds no native setter or gameplay action.
+
+RunMode.lua renders the native rank/zone separately from the labelled 0.121 mechanic reference. HudStack.lua owns only left-card geometry, preserves legacy positions and forwards player drags to the stack anchor. Both are initialized through injected HUD constructors; no native gameplay writer is added. tests/mode_stack.lua validates the actual frame geometry and controls.

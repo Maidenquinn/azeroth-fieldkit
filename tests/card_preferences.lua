@@ -25,10 +25,14 @@ for i=1,3 do
 end
 assert(FieldKitMeterFrame:GetWidth()==360)
 local center=FieldKitDB.pos.FieldKitMeterFrame[1]
+local stackLeft=FieldKitDB.pos.FieldKitLeftStack[1]
 choose(display,2)
 assert(columns[1]:IsShown() and columns[2]:IsShown() and not columns[3]:IsShown())
 assert(FieldKitMeterFrame:GetWidth()==320)
-assert(FieldKitDB.pos.FieldKitMeterFrame[1]-320/2==center-360/2,"Mode switch moved the saved left edge")
+if FieldKitDB.linkLeftCards then
+ assert(FieldKitDB.pos.FieldKitLeftStack[1]==stackLeft,"Mode switch moved the stack anchor")
+ assert(FieldKitDB.pos.FieldKitMeterFrame[1]==center,"Linked layout overwrote individual coordinates")
+else assert(FieldKitDB.pos.FieldKitMeterFrame[1]-320/2==center-360/2,"Mode switch moved the saved left edge") end
 choose(display,1)
 assert(not columns[1]:IsShown() and columns[2]:IsShown() and columns[3]:IsShown())
 assert(FieldKitMeterFrame:GetWidth()==220)

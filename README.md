@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.2.1-review.1** is a public **review candidate** shared for technical examination,
+Version **0.2.1-review.2** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -64,6 +64,22 @@ Pages keep readable font sizes and scroll on smaller screens. Close with the
 upper-right cross, **Close**, Escape or `/fieldkit`. The [UX review](docs/UX_REVIEW.md)
 records findings, migration and live acceptance checks. The slate/gold theme is
 shared with Azeroth Stats but bundled locally: that addon is not required.
+
+## Left HUD stack and run mode
+
+The left cards now share one movable stack and width: Run mode, Damage,
+Damage taken, Lairs. Collapsing or hiding a card closes the gap. Move any member
+in **Move windows** mode to move the group. **Windows → Align left HUD cards**
+turns linking off; individual old positions are retained. The stack has its own
+saved top-left anchor, separate from those positions.
+
+**Windows → Run mode card** controls the new card. Its rank and zone come from
+the client. Mechanic names are explicitly a **0.121 reference**, with cumulative
+details on hover. The four latest mechanics stay visible; any earlier mechanics
+are counted and listed in the tooltip. Current weekly affix identities and exact
+HP/damage multipliers remain unknown when not exposed by the native API. This
+card does not alter the difficulty, calculate scaled rewards or claim live data
+for the reference rules. See [details and tests](docs/HUD_STACK.md).
 
 ## Game 0.121.0
 

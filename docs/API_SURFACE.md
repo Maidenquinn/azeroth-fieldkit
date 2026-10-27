@@ -122,3 +122,7 @@ uiSchema only record navigation/migration, not game state or player coordinates.
 ## 0.121 compatibility
 
 GameCompatibility.lua reads AZS_ZONE.heroic only during an active native phase. Critical-objective EN/FR names exempt existing orb nameplates from ordinary-mob filtering; the V key still controls visibility. No spawn coordinates, target/combat actions, progression writes or inferred mark/star/affix data are introduced. See GAME_0_121.md for evidence and limitations.
+
+## Linked HUD and run-mode reference
+
+RunMode.lua reads only the existing native rank/zone and phase; its versioned reference is static text, not live affix or multiplier data. HudStack.lua reanchors FieldKit-owned frames only. FieldKitDB.linkLeftCards, runModeCard and pos.FieldKitLeftStack persist configuration and a UI anchor. Legacy individual coordinates are retained; no world-position history or game progression is written.

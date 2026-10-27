@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.1-review.1",
-  "runtimeModules": 18,
+  "candidate": "0.2.1-review.2",
+  "runtimeModules": 20,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 2427,
-      "sha256": "763d066d05ef48b23b904197a4941eb5ce7bcdb93d7b01f26ad56839d76b5549",
+      "sha256": "14bf00c24fbb6dfb0d3fedb00fbd2f7105ad618a18b0aeabc2e51394d0dd1aab",
       "namedFunctions": [
         {
           "name": "FieldKit.Number",
@@ -34,8 +34,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 3863,
-      "sha256": "4bb7366df157e0e6463c34079a09fe8a31e0230451bb929b417d52c9af5b5c3f",
+      "bytes": 3899,
+      "sha256": "b1629ef1f8c012caf572d0add1dfb1440629811c7cf60430c4507864da664b34",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -80,8 +80,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 3865,
-      "sha256": "6d6bb854f63c48dc335efd89f7739469ae706cb912d0a9b9dab265ec1571bbf9",
+      "bytes": 7049,
+      "sha256": "6ec3ba3a62089668870c4d1b3ce13764f76295129335d66283d405c7fadd3852",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -221,6 +221,44 @@
       ],
       "literalEvents": []
     },
+    "RunMode.lua": {
+      "bytes": 3845,
+      "sha256": "3cad0111778c79eb65fbd83c862230d830d8942b67bea369741e92c3442da98b",
+      "namedFunctions": [
+        {
+          "name": "R.Tooltip",
+          "line": 19
+        },
+        {
+          "name": "R.Create",
+          "line": 34
+        },
+        {
+          "name": "R.Reflow",
+          "line": 48
+        },
+        {
+          "name": "R.Update",
+          "line": 55
+        }
+      ],
+      "literalEvents": []
+    },
+    "HudStack.lua": {
+      "bytes": 2835,
+      "sha256": "19d5dc0cb380c888f1d9947cd887aa7a2146c4879cd202c799473e96e533d80d",
+      "namedFunctions": [
+        {
+          "name": "S.Initialize",
+          "line": 6
+        },
+        {
+          "name": "S.Apply",
+          "line": 27
+        }
+      ],
+      "literalEvents": []
+    },
     "OptionsSchema.lua": {
       "bytes": 7595,
       "sha256": "a738b4c4279ba4db879ac0845873e51b6f40ef03ecdecd27e5cf800dd5508dc9",
@@ -264,8 +302,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 23373,
-      "sha256": "183f2695627bfc858ebba3a026ca97f419b3b6fcdf76a34c58af2f8408abb08e",
+      "bytes": 24054,
+      "sha256": "307b59405b68c698dcc98eb88a80846d313188567851500467adaf1611b4cd1e",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -277,82 +315,82 @@
         },
         {
           "name": "U.Tip",
-          "line": 55
+          "line": 61
         },
         {
           "name": "U.Choice",
-          "line": 62
+          "line": 68
         },
         {
           "name": "U.CloseMenus",
-          "line": 100
+          "line": 106
         },
         {
           "name": "U.Wheel",
-          "line": 105
+          "line": 111
         },
         {
           "name": "Checkbox",
-          "line": 116
+          "line": 122
         },
         {
           "name": "Slider",
-          "line": 134
+          "line": 140
         },
         {
           "name": "BuildHome",
-          "line": 155
+          "line": 161
         },
         {
           "name": "U.BuildPage",
-          "line": 178
+          "line": 184
         },
         {
           "name": "U.UpdateRunContext",
-          "line": 213
+          "line": 219
         },
         {
           "name": "U.Refresh",
-          "line": 220
+          "line": 226
         },
         {
           "name": "U.Select",
-          "line": 245
+          "line": 251
         },
         {
           "name": "U.Reflow",
-          "line": 260
+          "line": 266
         },
         {
           "name": "U.SetLayoutEditing",
-          "line": 301
+          "line": 307
         },
         {
           "name": "U.StartLayout",
-          "line": 313
+          "line": 319
         },
         {
           "name": "U.ResetPositions",
-          "line": 318
-        },
-        {
-          "name": "U.UndoPositions",
           "line": 324
         },
         {
+          "name": "U.UndoPositions",
+          "line": 330
+        },
+        {
           "name": "U.Build",
-          "line": 331
+          "line": 337
         },
         {
           "name": "U.Toggle",
-          "line": 386
+          "line": 392
         }
       ],
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 79369,
-      "sha256": "cc3dcffc7f374e5a4f2604112ba1c1c37ce8de3eb8cccf62283b096ef6ac0417",
+      "bytes": 80080,
+      "sha256": "9c499e9bd230ed5fa0b080626ee1b88213b67c49cb1082e7c6db7104a14d0132",
       "namedFunctions": [
         {
           "name": "Print",
@@ -596,143 +634,143 @@
         },
         {
           "name": "FitRows",
-          "line": 1572
+          "line": 1573
         },
         {
           "name": "InRun",
-          "line": 1587
+          "line": 1589
         },
         {
           "name": "UpdateMeterFrame",
-          "line": 1592
+          "line": 1594
         },
         {
           "name": "UpdateTakenFrame",
-          "line": 1638
+          "line": 1640
         },
         {
           "name": "SyncHudMeter",
-          "line": 1673
+          "line": 1675
         },
         {
           "name": "CreateMeterFrames",
-          "line": 1681
+          "line": 1683
         },
         {
           "name": "UpdateMeterFrames",
-          "line": 1695
+          "line": 1697
         },
         {
           "name": "UpdateChestPins",
-          "line": 1714
+          "line": 1717
         },
         {
           "name": "FormatClock",
-          "line": 1724
+          "line": 1727
         },
         {
           "name": "UpdateLairFrame",
-          "line": 1730
+          "line": 1733
         },
         {
           "name": "CreateLairFrame",
-          "line": 1815
+          "line": 1818
         },
         {
           "name": "ApplyDamageNumbers",
-          "line": 1840
+          "line": 1844
         },
         {
           "name": "FieldKit_UseCombatTextOnly",
-          "line": 1851
+          "line": 1855
         },
         {
           "name": "SlotOf",
-          "line": 1875
+          "line": 1879
         },
         {
           "name": "SwapSlots",
-          "line": 1883
+          "line": 1887
         },
         {
           "name": "HookBarDrag",
-          "line": 1893
+          "line": 1897
         },
         {
           "name": "PlaceMicroMenu",
-          "line": 1927
+          "line": 1931
         },
         {
           "name": "PlaceBarButtons",
-          "line": 1957
+          "line": 1961
         },
         {
           "name": "UpdateCompactXP",
-          "line": 1974
+          "line": 1978
         },
         {
           "name": "CreateCompactBar",
-          "line": 1985
+          "line": 1989
         },
         {
           "name": "AttachMoneyToBar",
-          "line": 2067
+          "line": 2071
         },
         {
           "name": "KeepCompactBar",
-          "line": 2087
+          "line": 2091
         },
         {
           "name": "UpdateGryphons",
-          "line": 2116
+          "line": 2120
         },
         {
           "name": "ResetPositions",
-          "line": 2155
-        },
-        {
-          "name": "RefreshPanel",
           "line": 2161
         },
         {
+          "name": "RefreshPanel",
+          "line": 2168
+        },
+        {
           "name": "FieldKit_RefreshInterfaceLanguage",
-          "line": 2162
+          "line": 2169
         },
         {
           "name": "CreatePanel",
-          "line": 2167
+          "line": 2174
         },
         {
           "name": "TogglePanel",
-          "line": 2180
+          "line": 2187
         },
         {
           "name": "CreateMinimapButton",
-          "line": 2186
+          "line": 2193
         },
         {
           "name": "PlaceOnRim",
-          "line": 2196
+          "line": 2203
         },
         {
           "name": "InitDB",
-          "line": 2231
+          "line": 2238
         },
         {
           "name": "FieldKitEventLifecycle",
-          "line": 2253
+          "line": 2260
         },
         {
           "name": "FieldKitEventWorld",
-          "line": 2277
+          "line": 2287
         },
         {
           "name": "FieldKitEventOther",
-          "line": 2304
+          "line": 2314
         },
         {
           "name": "RefreshNativeData",
-          "line": 2352
+          "line": 2362
         }
       ],
       "literalEvents": [

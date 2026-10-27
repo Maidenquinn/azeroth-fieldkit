@@ -1535,6 +1535,7 @@ local function CreateBarWindow(name, title, rows)
 		else
 			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
 			f.total:Show(); FieldKit_Text(this,"-")
+   for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
 		end
 	end)
 	f.mashCollapseButton = collapse
@@ -1570,6 +1571,7 @@ end
 
 -- Size the visible row pool while keeping a collapsed window at header height.
 local function FitRows(f, n)
+ f.mashVisibleRows=n
 	for i = n + 1, table.getn(f.rows) do
 		f.rows[i]:Hide()
 	end
@@ -1603,7 +1605,7 @@ local function UpdateMeterFrame(force)
  if meterFrame:GetWidth()~=width then
   local previous=meterFrame:GetWidth()
   meterFrame:SetWidth(width);FieldKitTheme.Update(meterFrame)
-  if meterFrame.azsDefault and not meterFrame.azsMoving then
+  if not DB.linkLeftCards and meterFrame.azsDefault and not meterFrame.azsMoving then
    local position=DB.pos[meterFrame:GetName()]
    if position then position[1]=position[1]+(width-previous)/2 end
    PlaceMovable(meterFrame)
@@ -1696,7 +1698,7 @@ local function UpdateMeterFrames(force)
 	UpdateMeterFrame(force)
 	UpdateTakenFrame(force)
 
-	if ( takenFrame ) then
+	if ( takenFrame and not DB.linkLeftCards ) then
 		takenFrame:ClearAllPoints()
 		if ( meterFrame:IsShown() ) then
 			takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)
@@ -1704,6 +1706,7 @@ local function UpdateMeterFrames(force)
 			takenFrame:SetPoint("TOPLEFT", meterFrame, "TOPLEFT", 0, 0)
 		end
 	end
+ FieldKitHudStack.Apply()
 end
 
 local UpdateChestPins, UpdateLairFrame, CreateLairFrame
@@ -1829,6 +1832,7 @@ function CreateLairFrame()
 	end
 	MakeMovable(lairFrame, -( UIParent:GetWidth() / 2 - 140 ), -170, true)
 	lairFrame:Hide()
+ return lairFrame
 end
 
 end
@@ -2146,6 +2150,8 @@ local settingsActions={
  UpdateChestPins=UpdateChestPins,
  UpdateLairFrame=UpdateLairFrame,
  UpdateGryphons=UpdateGryphons,
+ UpdateHudStack=function() FieldKitHudStack.Apply();UpdateMeterFrames(true) end,
+ UpdateRunMode=function() FieldKitRunMode.Update();FieldKitHudStack.Apply() end,
 }
 local SECTIONS=FieldKit.CreateOptionsSchema(settingsActions)
 FieldKit_AddSettingsSections(SECTIONS)
@@ -2157,11 +2163,12 @@ local function ResetPositions()
   local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
  end
  if AttachMoneyToBar then AttachMoneyToBar(true) end
+ FieldKitHudStack.Apply()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
  RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true)
- UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame()
+ UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
 end
 local function CreatePanel()
@@ -2170,7 +2177,7 @@ local function CreatePanel()
   dismiss=function() if statsPicker then statsPicker:Hide() end end,
   positions=function()
    for i=1,table.getn(movableFrames) do PlaceMovable(movableFrames[i]) end
-   AttachMoneyToBar(false)
+   AttachMoneyToBar(false);FieldKitHudStack.Apply()
   end,
   camera=function(v) DB.cameraMax=v;ApplyCamera(true) end,
   reload=function() ReloadUI() end,
@@ -2262,7 +2269,10 @@ local function FieldKitEventLifecycle()
 		CreateMoneyFrame()
 		CreateGearFrame()
 		CreateMeterFrames()
-		CreateLairFrame()
+		local lairs=CreateLairFrame()
+  local mode=FieldKitRunMode.Create(CreateBarWindow,FitRows)
+  MakeMovable(mode,-(UIParent:GetWidth()/2-140),260,true)
+  FieldKitHudStack.Initialize({mode,meterFrame,takenFrame,lairs},MakeMovable,PlaceMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
@@ -2384,7 +2394,8 @@ frame:SetScript("OnUpdate", function()
 	UpdateBossFrame()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
-	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData() end
+	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData();FieldKitRunMode.Update() end
+ FieldKitHudStack.Apply()
 end)
 
 SLASH_FieldKit1 = "/fieldkit"

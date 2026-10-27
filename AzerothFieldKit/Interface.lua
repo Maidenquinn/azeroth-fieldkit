@@ -38,6 +38,12 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(windows,5,{kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
   get=function() return FieldKitDB.moneyFrame end,
   set=function(value) FieldKitDB.moneyFrame=value;actions.SyncHudTally();actions.UpdateMoneyFrame() end})
+ table.insert(windows,1,{kind="check",label="Align left HUD cards",tip="Use one width and one movable stack for run mode, damage, damage taken and lairs. Individual positions are kept when unlinked.",
+  get=function() return FieldKitDB.linkLeftCards end,
+  set=function(value) FieldKitDB.linkLeftCards=value;actions.UpdateHudStack() end})
+ table.insert(windows,2,{kind="check",label="Run mode card",tip="Native difficulty rank with a labelled 0.121 modifier reference. Hover for full rules; unexposed live multipliers and affixes remain unknown.",
+  get=function() return FieldKitDB.runModeCard end,
+  set=function(value) FieldKitDB.runModeCard=value;actions.UpdateRunMode() end})
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
