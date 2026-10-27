@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.1.0-review.3** is a public **review candidate** shared for technical examination,
+Version **0.2.0-review.1** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -40,6 +40,29 @@ No statement here substitutes for a decision from the game's developers.
 - **Optional local chat copy:** disabled by default. Up to 100 messages from
   the main chat frame, at most 512 bytes each, in memory only. Whispers may be
   included. Nothing is uploaded, posted or automatically copied to the clipboard.
+
+## Getting started with the interface
+
+Open `/fieldkit` or click the compass beside the minimap. **Overview** shows the
+main tools and their current status. Choose **Configure** to change one area.
+All preferences apply immediately except the optional compact action bar, which
+shows an explicit **Reload UI** action when changed.
+
+- **Combat text:** General, Events, Fonts, Filters, Areas, Game text. Use Game text
+  to turn off duplicate native damage/critical displays.
+- **Health & buffs / Bosses:** select Numbers, Percentage or both in one control.
+- **Windows / Minimap:** independently enable the windows and pins you need.
+- **Interface:** English/Français, compact bar, native decorations, optional chat
+  copy and camera. Native creature/spell/item names are not translated.
+- **Move windows:** temporarily hides settings; drag the enabled HUD windows or
+  combat-area handles, then **Done** returns to settings. Escape exits this mode.
+- **Reset HUD positions:** restores HUD window defaults and offers **Undo**.
+  Combat-area offsets have their own controls in Areas.
+
+Pages keep readable font sizes and scroll on smaller screens. Close with the
+upper-right cross, **Close**, Escape or `/fieldkit`. The [UX review](docs/UX_REVIEW.md)
+records findings, migration and live acceptance checks. The slate/gold theme is
+shared with Azeroth Stats but bundled locally: that addon is not required.
 
 ## Conservative defaults
 

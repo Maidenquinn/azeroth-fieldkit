@@ -4,7 +4,7 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.1.0-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
+La version `0.2.0-review.1` est une candidate publique à examiner par les développeurs. Aucune approbation
 des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
@@ -71,3 +71,20 @@ Le [dossier de revue](docs/REVIEW.md), l'[audit](SECURITY.md), les
 Les crédits et droits non résolus figurent dans [NOTICE](NOTICE.md) et
 [LICENSE](LICENSE.md). Le dépôt et la préversion sont publics pour faciliter la revue. Cet accès public
 ne confirme ni les permissions de redistribution ni l’approbation du jeu.
+
+## Nouveau parcours des paramètres
+
+Ouvrez `/fieldkit` ou la boussole de la minicarte. L’accueil présente les outils
+et leur état ; **Configurer** ouvre la page correspondante. Neuf rubriques
+regroupent les usages, avec un seul choix de format de PV par unité.
+
+**Texte de combat** regroupe Général, Événements, Police, Filtres, Zones et Jeu.
+La page Jeu règle les affichages natifs pour éviter les doublons. **Déplacer**
+masque les paramètres pour placer les fenêtres ; **Terminer** revient aux
+réglages. **Positions par défaut** propose ensuite une annulation immédiate.
+La barre compacte ne recharge l’interface qu’après un clic explicite.
+
+Le thème ardoise et or reprend Azeroth Stats sans en dépendre. Les pages
+défilent sur petit écran. Les préférences existantes sont conservées ; le détail
+de l’audit et les vérifications en jeu sont dans [UX_REVIEW.md](docs/UX_REVIEW.md).
+Cette refonte n’a pas encore été validée dans le jeu.

@@ -1,6 +1,6 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+local defaults={moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
@@ -28,7 +28,15 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  d.minimapAngle=FieldKit.Number(d.minimapAngle,150,-360,360)
  d.lowHealthPct=FieldKit.Number(d.lowHealthPct,30,10,70)
- d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,11))
+ -- Stable journey ids survive page reordering without resetting user choices.
+ if d.uiSchema~=2 then
+  local previous={"nameplates","health","bosses","health","alerts","windows","map","interface","interface","combat","bosses"}
+  local titles={Nameplates="nameplates",Target="health",Combat="bosses",Player="health",Warnings="alerts",Windows="windows",Map="map",Interface="interface",Camera="interface",["Combat text"]="combat",["Boss health"]="bosses"}
+  d.uiPage=titles[d.panelSection] or previous[tonumber(d.panelTab)] or "home";d.uiSchema=2
+ end
+ local valid={home=true,combat=true,health=true,bosses=true,alerts=true,windows=true,map=true,nameplates=true,interface=true}
+ if not valid[d.uiPage] then d.uiPage="home" end
+ d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,9))
  d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)
  d.playerBarY=FieldKit.Number(d.playerBarY,-70,-10000,10000)
  if type(d.lastStats)=="table" then

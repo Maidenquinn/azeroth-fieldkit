@@ -1,18 +1,18 @@
 -- Exercise live language changes through the real Interface buttons.
 assert(FieldKitDB.language=="en")
-assert(table.getn(FieldKitPanel.tabs)==11)
-assert(FieldKitPanel.tabs[10].text.text=="Combat text")
-assert(FieldKitPanel.tabs[11].text.text=="Boss health")
-for i=1,table.getn(FieldKitPanel.tabs) do assert(FieldKitPanel.tabs[i].text.text~="Text layout") end
-local interface=FieldKitPanel.tabs[8].page
-local en,fr
+assert(table.getn(FieldKitPanel.tabs)==9)
+assert(FieldKitPanel.tabs[2].fieldkitLabel.text=="Combat text")
+assert(FieldKitPanel.tabs[4].fieldkitLabel.text=="Bosses")
+for i=1,table.getn(FieldKitPanel.tabs) do assert(FieldKitPanel.tabs[i].fieldkitLabel.text~="Text layout") end
+local interface=FieldKitPanel.tabs[9].page
+local en,fr=FieldKitUI.languageRow.en,FieldKitUI.languageRow.fr
 for i=1,table.getn(interface.children) do
  local b=interface.children[i]
  if b.kind=="Button" and string.find(b.text or "","English",1,true) then en=b end
  if b.kind=="Button" and string.find(b.text or "","Français",1,true) then fr=b end
 end
 assert(en and fr)
-local editor=FieldKitPanel.tabs[10].page.combatEditor
+local editor=FieldKitPanel.tabs[2].page.combatEditor
 local x,y=FieldKitDB.combatTextX,FieldKitDB.combatTextIncomingX
 local color=FieldKitDB.combatEvents.crit.color
 local ignored=FieldKitDB.combatTextIgnore
@@ -27,16 +27,16 @@ local function widget(label)
 end
 for n=1,3 do
  click(fr)
- assert(FieldKitDB.language=="fr" and FieldKitPanel.tabs[10].text.text=="Texte de combat")
- assert(FieldKitPanel.tabs[1].text.text=="Barres ennemies")
- assert(FieldKitPanelReset.text=="Réinitialiser")
+ assert(FieldKitDB.language=="fr" and FieldKitPanel.tabs[2].fieldkitLabel.text=="Texte de combat")
+ assert(FieldKitPanel.tabs[8].fieldkitLabel.text=="Barres ennemies")
+ assert(FieldKitPanelReset.text=="Positions par défaut")
  assert(FieldKit_L("Show only elites and bosses")=="Afficher uniquement les élites et les boss")
  assert(FieldKit_L("Dégâts infligés")=="Dégâts infligés")
  assert(FieldKit_L("Backstab")=="Backstab" and FieldKit_L("Brute gordunni")=="Brute gordunni")
  assert(widget("Catégorie à personnaliser").text==FieldKit_L(FieldKitCombat.byKind[editor.eventKind][2]))
  click(en)
- assert(FieldKitDB.language=="en" and FieldKitPanel.tabs[10].text.text=="Combat text")
- assert(FieldKitPanelReset.text=="Reset positions")
+ assert(FieldKitDB.language=="en" and FieldKitPanel.tabs[2].fieldkitLabel.text=="Combat text")
+ assert(FieldKitPanelReset.text=="Reset HUD positions")
  assert(FieldKit_L("Dégâts infligés")=="Outgoing damage")
  assert(editor.sample.text==FieldKit_L(FieldKitCombat.byKind[editor.eventKind][4] or FieldKitCombat.byKind[editor.eventKind][2])..(FieldKitCombat.byKind[editor.eventKind][4] and "" or " 123"))
 end

@@ -24,7 +24,7 @@ are never in that list. There is no modern module loader or required library.
    Building the schema does not apply options.
 8. **LegacyCrits.lua:** the separate optional eight-line critical display. It
    preserves the old max-value-plus-count grouping; this is not a damage total.
-9. **FieldKit.lua:** the HUD/controller, native frame adapters and settings renderer.
+9. **FieldKit.lua:** the HUD/controller and native frame adapters. The settings shell lives in Interface.lua.
    Stateful helpers remain local. Its scoped blocks are intentional: flattening
    everything can exceed the old 32-upvalue limit. This module is still large;
    further splits should follow tests and explicit dependency tables, not globals.
@@ -97,3 +97,13 @@ The [function index](CODE_INDEX.md) links each named function to its declaration
 Anonymous callbacks are documented by their enclosing constructor/schema and the
 effects inventory. Generated data is explained at module level rather than by
 repeating a comment for each of the 1,063 aliases.
+
+### Presentation layer (0.2)
+
+Theme.lua owns fixed local materials, typography and cached geometry. It skins
+only FieldKit-owned surfaces. InterfaceStrings.lua extends EN/FR display labels.
+Interface.lua takes existing schema actions, organizes stable journey ids and
+constructs the settings/layout dock once. Refresh reads; setters require user
+input. CombatOptions.lua contributes the six-page editor and reflows its existing
+widgets. Config.lua migrates the legacy page selection without resetting feature
+preferences. New UI behavior is covered by tests/interface_journey.lua.

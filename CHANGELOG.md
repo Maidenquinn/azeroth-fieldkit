@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0-review.1 — 2026-10-27
+
+- Rebuild settings around nine task-oriented pages, with an Overview and direct configuration cards.
+- Adopt the maintainer’s Azeroth Stats material, glyph and OFL font family; no Stats dependency.
+- Use a single exclusive HP-format selector per unit and keep all existing preferences.
+- Introduce explicit Move windows / Done mode, HUD position reset with Undo, and a separate gold/chest strip toggle.
+- Stage compact-bar changes until an explicit Reload UI click; opening settings no longer unlocks HUD dragging or displays a fake boss.
+- Reflow and scroll pages at 800×600; bound choice menus to seven visible entries.
+- Consolidate native damage/critical options into the combat editor’s Game text page.
+- Add UI migration, interaction/resize fixtures and exact theme-asset inventory.
+- Offline Lua 5.0.3/5.1 validation; in-game acceptance and developer approval pending.
+
 ## 0.1.0-review.3 — 2026-10-27
 
 - Align run snapshot polling with the official API's 5 Hz delivery limit; retain

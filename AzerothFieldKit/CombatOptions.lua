@@ -6,12 +6,16 @@ local function Name() serial=serial+1;return "FieldKitCombatOption"..serial end
 -- Build the single five-page combat editor and its live preview controls.
 function FieldKit_CreateCombatOptions(parent)
  local width=parent:GetWidth()-6
- local ui=CreateFrame("Frame",nil,parent);ui:SetWidth(width);ui:SetHeight(505);ui:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-27)
+ local T=FieldKitTheme
+ local layout={}
+ -- Store proportional horizontal geometry; resize existing widgets, never rebuild.
+ local function Track(widget,x,w) table.insert(layout,{widget=widget,x=x/width,w=w/width});return widget end
+ local ui=CreateFrame("Frame",nil,parent);ui:SetWidth(width);ui:SetHeight(505);ui:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-48)
  ui.widgets={};ui.pages={};ui.menus={};ui.selected=1;ui.eventKind="out"
  -- Create one localized editor label.
  local function Text(p,label,x,y,width)
   local t=p:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");t:SetPoint("TOPLEFT",p,"TOPLEFT",x,y)
-  t:SetWidth(width or (parent:GetWidth()-6));t:SetJustifyH("LEFT");FieldKit_Text(t,label);return t
+  t:SetWidth(width or (parent:GetWidth()-6));t:SetHeight(44);t:SetJustifyH("LEFT");t:SetJustifyV("TOP");T.Font(t,13,T.text);FieldKit_Text(t,label);Track(t,x,width or (parent:GetWidth()-6));return t
  end
  -- Attach localized tooltip callbacks to an addon-owned control.
  local function Tip(button,text)
@@ -20,7 +24,7 @@ function FieldKit_CreateCombatOptions(parent)
  end
  -- Create a localized explicit-action editor button.
  local function Button(p,label,x,y,w,callback)
-  local b=CreateFrame("Button",Name(),p,"UIPanelButtonTemplate");b:SetWidth(w);b:SetHeight(23);b:SetPoint("TOPLEFT",p,"TOPLEFT",x,y);FieldKit_Text(b,label);b:SetScript("OnClick",callback);return b
+  local b=T.Button(p,Name(),label,x,-y,w,27,callback);Track(b,x,w);return b
  end
  -- Build a boolean control with separate refresh/get and click/set paths.
  local function Check(p,label,y,get,set,tip)
@@ -38,9 +42,10 @@ function FieldKit_CreateCombatOptions(parent)
  -- Build a bounded numeric control, suppressing callbacks during UI refresh.
  local function Slider(p,label,y,min,max,get,set,format)
   local name=Name();local s=CreateFrame("Slider",name,p,"OptionsSliderTemplate")
-  s:SetWidth(width-20);s:SetHeight(17);s:SetPoint("TOPLEFT",p,"TOPLEFT",9,y-16);s:SetMinMaxValues(min,max);s:SetValueStep(1)
+  Track(s,9,width-20);s:SetWidth(width-20);s:SetHeight(17);s:SetPoint("TOPLEFT",p,"TOPLEFT",9,y-16);s:SetMinMaxValues(min,max);s:SetValueStep(1)
   if getglobal(name.."Low") then FieldKit_Text(getglobal(name.."Low"),tostring(min));FieldKit_Text(getglobal(name.."High"),tostring(max)) end
   s.get=get;s.set=set;s.label=label;s.controlKind="slider"
+  if getglobal(name.."Text") then T.Font(getglobal(name.."Text"),13,T.gold) end
   s.Refresh=function()
    local v=get();s:SetValue(v);if getglobal(name.."Text") then FieldKit_Text(getglobal(name.."Text"),FieldKit_L(label)..": "..(format and FieldKit_L(format(v)) or v)) end
   end
@@ -58,23 +63,9 @@ function FieldKit_CreateCombatOptions(parent)
  -- Create a bounded choice popup; capture the selected value per entry.
  local function Choice(p,label,y,values,get,set)
   Text(p,label,0,y,width)
-  local menu=CreateFrame("Frame",nil,p);menu:SetWidth(width);menu:SetHeight(table.getn(values)*22+8)
-  menu:SetFrameStrata("DIALOG");menu:SetFrameLevel(p:GetFrameLevel()+30)
-  menu:SetPoint("TOPLEFT",p,"TOPLEFT",0,y-42)
-  menu:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=16,edgeSize=8});menu:SetBackdropColor(0,0,0,1)
-  local backdrop=menu:CreateTexture(nil,"BACKGROUND");backdrop:SetAllPoints(menu);backdrop:SetTexture(.025,.025,.035,1)
-  local b=Button(p,"",0,y-18,width,function()
-   local shown=menu:IsShown();for i=1,table.getn(ui.menus) do ui.menus[i]:Hide() end
-   if not shown then menu:Show() end
-  end)
-  b.choiceButtons={}
-  for i=1,table.getn(values) do
-   local index=i
-   b.choiceButtons[i]=Button(menu,values[i],4,-4-(i-1)*22,width-8,function() set(index);menu:Hide();ui.Refresh() end)
-  end
-  menu:Hide();table.insert(ui.menus,menu)
-  b.Refresh=function() FieldKit_Text(b,values[get()] or values[1]) end;b.label=label;b.controlKind="choice"
-  Tip(b,"Cliquer pour choisir dans la liste.");table.insert(ui.widgets,b);return b
+  local b=FieldKitUI.Choice(p,Name(),label,0,18-y,width,values,get,set,function() ui.Refresh() end)
+  b.label=label;b.controlKind="choice";Track(b,0,width)
+  table.insert(ui.menus,b.menu);table.insert(ui.widgets,b);return b
  end
  function ui.Refresh()
   if not C.Ensure() then return end
@@ -84,17 +75,18 @@ function FieldKit_CreateCombatOptions(parent)
    FieldKit_Text(ui.sample,FieldKit_L(C.byKind[ui.eventKind][4] or C.byKind[ui.eventKind][2])..(C.byKind[ui.eventKind][4] and "" or " 123"))
   end
  end
- local labels={"Général","Événements","Police","Filtres","Zones"}
+ local labels={"Général","Événements","Police","Filtres","Zones","Game text"};ui.tabs={}
  -- Show one editor subpage and hide its other pages/menus.
  local function Select(index)
   ui.selected=index
   for i=1,table.getn(ui.menus) do ui.menus[i]:Hide() end
-  for i=1,5 do if i==index then ui.pages[i]:Show() else ui.pages[i]:Hide() end end
+  for i=1,6 do if i==index then ui.pages[i]:Show() else ui.pages[i]:Hide() end end
+  for i=1,6 do T.State(ui.tabs[i],i==index) end
   ui.Refresh()
  end
- for i=1,5 do
+ for i=1,6 do
   local p=CreateFrame("Frame",nil,ui);p:SetWidth(width);p:SetHeight(465);p:SetPoint("TOPLEFT",ui,"TOPLEFT",0,-34);ui.pages[i]=p
-  local index=i;Button(ui,labels[i],(i-1)*(width/5),0,width/5-4,function() Select(index) end)
+  local index=i;ui.tabs[i]=Button(ui,labels[i],(i-1)*(width/6),0,width/6-4,function() Select(index) end);T.Font(ui.tabs[i].fieldkitLabel,11,T.gold)
  end
  local p=ui.pages[1]
  Flag(p,"Activer le texte de combat FieldKit",0,"combatText")
@@ -108,7 +100,7 @@ function FieldKit_CreateCombatOptions(parent)
  Button(p,"Tout",2*width/3,-272,width/3-4,function() C.Preset("all");ui.Refresh() end)
  Button(p,"Aperçu (exemples fictifs)",0,-313,width,function() C.Preview() end)
  Button(p,"Utiliser seulement ce texte",0,-347,width,function() if FieldKit_UseCombatTextOnly then FieldKit_UseCombatTextOnly();ui.Refresh() end end)
- Text(p,"Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Combat. Preview uses marked sample data. Healing uses native totals.",0,-387)
+ Text(p,"Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Game text. Preview uses marked sample data. Healing uses native totals.",0,-387)
  p=ui.pages[2]
  Choice(p,"Catégorie à personnaliser",0,(function() local t={};for i=1,table.getn(C.defs) do table.insert(t,C.defs[i][2]) end;return t end)(),
   function() for i=1,table.getn(C.defs) do if C.defs[i][1]==ui.eventKind then return i end end;return 1 end,
@@ -147,7 +139,7 @@ function FieldKit_CreateCombatOptions(parent)
  Number(p,"Soin minimum (par mise à jour)",-155,"combatTextHealMin",0,500)
  Text(p,"Hidden abilities: one game-provided name per line. Example: Backstab. Maximum 32 names.",0,-213)
  local edit=CreateFrame("EditBox",Name(),p);edit:SetWidth(width-10);edit:SetHeight(90);edit:SetPoint("TOPLEFT",p,"TOPLEFT",5,-253)
- edit:SetMultiLine(true);edit:SetAutoFocus(false);edit:SetFontObject("ChatFontNormal")
+ Track(edit,5,width-10);edit:SetMultiLine(true);edit:SetAutoFocus(false);edit:SetFontObject("ChatFontNormal")
  edit:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=16,edgeSize=8})
  if edit.SetMaxLetters then edit:SetMaxLetters(2000) end
  edit:SetScript("OnEscapePressed",function() this:ClearFocus() end)
@@ -159,7 +151,7 @@ function FieldKit_CreateCombatOptions(parent)
  p=ui.pages[5]
  Flag(p,"Séparer reçus / soins et dégâts infligés",0,"combatTextSplit")
  Choice(p,"Sens du défilement",-41,{"Vers le haut","Vers le bas"},function() return C.Number("combatTextDirection",1,1,2) end,function(v) FieldKitDB.combatTextDirection=v end)
- Button(p,"Afficher les poignées de déplacement",0,-104,width,function() C.ShowAnchors() end)
+ Button(p,"Afficher les poignées de déplacement",0,-104,width,function() FieldKitUI.StartLayout(true) end)
  Button(p,"Masquer les poignées",0,-137,width,function() C.HideAnchors() end)
  Number(p,"Espacement des lignes",-186,"combatTextSpacing",18,60,function(v) return v.." px" end)
  Choice(p,"Position to edit",-245,{"Outgoing area","Incoming / healing area"},function() return ui.positionArea or 1 end,function(v) ui.positionArea=v end)
@@ -168,6 +160,23 @@ function FieldKit_CreateCombatOptions(parent)
  Slider(p,"Horizontal offset",-310,-600,600,function() local key=PositionKey("X");return C.Number(key,C.defaults[key],-600,600) end,function(v) FieldKitDB[PositionKey("X")]=v end,function(v) return v.." px" end)
  Slider(p,"Vertical offset",-363,-300,300,function() local key=PositionKey("Y");return C.Number(key,C.defaults[key],-300,300) end,function(v) FieldKitDB[PositionKey("Y")]=v end,function(v) return v.." px" end)
  Text(p,"Offsets are measured from the screen center. Drag handles also save these values.",0,-421)
+ p=ui.pages[6]
+ for i=1,table.getn(FieldKitUI.nativeTextOptions) do
+  local item=FieldKitUI.nativeTextOptions[i];Check(p,item.label,-(i-1)*58,item.get,item.set,item.tip)
+ end
+ Text(p,"Native text is independent of FieldKit scrolling text. Disable duplicate displays here.",0,-200)
+ function ui.Reflow(newWidth)
+  width=newWidth;ui:SetWidth(width)
+  for i=1,table.getn(ui.pages) do ui.pages[i]:SetWidth(width) end
+  for i=1,table.getn(layout) do
+   local entry=layout[i];local widget=entry.widget
+   local point,relative,rp,x,y=widget:GetPoint()
+   widget:ClearAllPoints();widget:SetPoint(point,relative,rp,entry.x*width,y);widget:SetWidth(entry.w*width)
+   if widget.Reflow then widget.Reflow(entry.w*width) end
+   if widget.fieldkitLabel then widget.fieldkitLabel:SetWidth(math.max(20,entry.w*width-20)) end
+   T.Update(widget)
+  end
+ end
  FieldKit_RefreshLanguage(ui.Refresh)
  parent.combatEditor=ui;parent:SetScript("OnShow",function() for i=1,table.getn(ui.menus) do ui.menus[i]:Hide() end;ui.Refresh() end)
  Select(1);return ui

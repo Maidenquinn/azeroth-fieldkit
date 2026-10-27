@@ -172,6 +172,7 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 	if frame.SetClampedToScreen then frame:SetClampedToScreen(1) end
 	handle:RegisterForDrag("LeftButton")
 	handle:SetScript("OnDragStart", function()
+		if not FieldKit.layoutEditing then return end
 		frame.azsMoving = true
 		frame:StartMoving()
 	end)
@@ -194,9 +195,7 @@ end
 -- Enable drag handles while the settings panel is open, then lock them again.
 local function SetMovablesUnlocked(unlocked)
 	for i = 1, table.getn(movables) do
-		if ( not movables[i].azsFreeDrag ) then
-			movables[i]:EnableMouse(unlocked and 1 or nil)
-		end
+		movables[i]:EnableMouse((unlocked or movables[i].azsFreeDrag) and 1 or nil)
 	end
 end
 
@@ -444,7 +443,7 @@ local function UpdateBossFrame()
 		end
 	end
 
-	if ( n == 0 and DB.bossFrame and panel and panel:IsShown() ) then
+	if ( n == 0 and DB.bossFrame and FieldKit.layoutEditing ) then
 		n = 1
 		ShowBossFrame(bossFrames[1], "Boss", 1, 1, "boss", 0)
 		FieldKit_Text(bossFrames[1].hp,"drag to move")
@@ -1006,6 +1005,7 @@ local function ApplyCompactPanel(f, key, expandedHeight)
     if not f then return end
     local collapsed = DB[key]
     f:SetHeight(collapsed and 23 or expandedHeight)
+    FieldKitTheme.Update(f)
     local rows = f.rows or f.slots or {}
     for i = 1, table.getn(rows) do
         local row = rows[i]
@@ -1027,7 +1027,7 @@ local function ApplyCompactPanel(f, key, expandedHeight)
 end
 -- Attach one collapse button that updates the owning DB option and refreshes the panel.
 local function AddCompactButton(f, key, refresh)
-    local b = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+    local b = FieldKitTheme.Button(f,nil,"",0,0,18,17,nil);b:ClearAllPoints()
     b:SetWidth(18); b:SetHeight(17)
     b:SetPoint("TOPRIGHT", f, "TOPRIGHT", -2, -2)
     FieldKit_Text(b,DB[key] and "+" or "-")
@@ -1084,6 +1084,7 @@ local function CreateStatsFrame()
 	})
 	statsFrame:SetBackdropColor(0, 0, 0, 0.6)
 	statsFrame:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
+ FieldKitTheme.Surface(statsFrame,"card")
 	statsFrame:SetWidth(STACK_WIDTH)
 	statsFrame:SetHeight(20)
 	statsFrame.rows = {}
@@ -1110,60 +1111,25 @@ end
 
 
 -- Create title, close button and drag behavior for addon-owned windows.
-local function StyleWindow(f, titleText, subtitleText)
-	f:SetBackdrop({
-		bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		tile = true, tileSize = 16, edgeSize = 14,
-		insets = { left = 3, right = 3, top = 3, bottom = 3 },
-	})
-	f:SetBackdropColor(0.04, 0.04, 0.06, 0.94)
-	f:SetBackdropBorderColor(0.75, 0.62, 0.25, 1.0)
-
-	local bar = f:CreateTexture(nil, "ARTWORK")
-	bar:SetTexture(1.0, 0.82, 0.0, 0.10)
-	bar:SetPoint("TOPLEFT", f, "TOPLEFT", 4, -4)
-	bar:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -4)
-	bar:SetHeight(22)
-	local line = f:CreateTexture(nil, "ARTWORK")
-	line:SetTexture(1.0, 0.82, 0.0, 0.35)
-	line:SetPoint("TOPLEFT", bar, "BOTTOMLEFT", 0, 0)
-	line:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, 0)
-	line:SetHeight(1)
-
-	local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	title:SetPoint("LEFT", bar, "LEFT", 8, 0)
-	FieldKit_Text(title,titleText)
-	if ( subtitleText ) then
-		local subtitle = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-		MenuFont(subtitle, 13, 0.7, 0.7, 0.7)
-		subtitle:SetPoint("LEFT", title, "RIGHT", 8, 0)
-		FieldKit_Text(subtitle,subtitleText)
-	end
-
-	local close = CreateFrame("Button", f:GetName().."Close", f, "UIPanelCloseButton")
-	close:SetWidth(24)
-	close:SetHeight(24)
-	close:SetPoint("RIGHT", bar, "RIGHT", 2, 0)
-	close:SetFrameLevel(f:GetFrameLevel() + 10)
-	close:SetScript("OnClick", function() this:GetParent():Hide() end)
-
-	f:SetFrameStrata("DIALOG")
-	f:SetToplevel(1)
-	f:EnableMouse(1)
-	f:SetMovable(1)
-	f:RegisterForDrag("LeftButton")
-	f:SetScript("OnDragStart", function() this:StartMoving() end)
-	f:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
+local function StyleWindow(f,titleText,subtitleText)
+ FieldKitTheme.Surface(f,"window")
+ FieldKitTheme.Label(f,titleText,16,10,f:GetWidth()-58,28,20,FieldKitTheme.gold,true)
+ local close=CreateFrame("Button",f:GetName().."Close",f,"UIPanelCloseButton")
+ close:SetWidth(26);close:SetHeight(26);close:SetPoint("TOPRIGHT",f,"TOPRIGHT",-6,-6)
+ close:SetFrameLevel(f:GetFrameLevel()+10);close:SetScript("OnClick",function() f:Hide() end)
+ f:SetFrameStrata("DIALOG");f:SetToplevel(1);f:EnableMouse(1);f:SetMovable(1)
+ if f.SetClampedToScreen then f:SetClampedToScreen(1) end
+ f:RegisterForDrag("LeftButton");f:SetScript("OnDragStart",function() f:StartMoving() end)
+ f:SetScript("OnDragStop",function() f:StopMovingOrSizing() end)
 end
 
 
-local PICKER_ROW = 15
+local PICKER_ROW = 20
 
 -- Build one checkbox per supported native statistic; preserve the user selection.
 local function CreateStatsPicker()
 	statsPicker = CreateFrame("Frame", "FieldKitStatsPicker", UIParent)
-	statsPicker:SetWidth(168)
+	statsPicker:SetWidth(280)
 	statsPicker:SetHeight(38 + PICKER_ROW * table.getn(STATS))
 	StyleWindow(statsPicker, "Stats")
 
@@ -1204,8 +1170,9 @@ local function ToggleStatsPicker()
 		statsPicker:Hide()
 		return
 	end
+	statsPicker:SetScale(math.min(1,(UIParent:GetHeight()-30)/statsPicker:GetHeight()))
 	statsPicker:ClearAllPoints()
-	if ( panel and panel:IsShown() ) then
+	if ( panel and panel:IsShown() and UIParent:GetWidth() >= panel:GetWidth()+580 ) then
 		statsPicker:SetPoint("TOPLEFT", panel, "TOPRIGHT", 2, 0)
 	else
 		statsPicker:SetPoint("CENTER", UIParent, "CENTER", 0, 40)
@@ -1294,7 +1261,7 @@ local function UpdateMoneyFrame()
 	if ( not moneyFrame ) then
 		return
 	end
-	if HasAPI() and not AZS_GetPhase() then moneyFrame:Hide();return end
+	if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide();return end
 	local exact=HasAPI() and type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.ck,nil,0)
 	if exact then DB.chestsOpened=exact end
 
@@ -1340,7 +1307,7 @@ local function SyncHudTally()
 	if ( not HasAPI() or not AZS_SetHudShown ) then
 		return
 	end
-	if ( DB.replaceTally ) then
+	if ( DB.replaceTally and DB.moneyFrame ) then
 		FieldKit.SetHudShown("tally", false)
 		DB.hudTallyHidden = true
 	elseif ( DB.hudTallyHidden ) then
@@ -1360,6 +1327,7 @@ local function CreateMoneyFrame()
 	moneyFrame:SetBackdrop(statsFrame:GetBackdrop())
 	moneyFrame:SetBackdropColor(0, 0, 0, 0.6)
 	moneyFrame:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
+ FieldKitTheme.Surface(moneyFrame,"card")
 
 	local coin = moneyFrame:CreateTexture("FieldKitMoneyFrameCoin", "ARTWORK")
 	coin:SetTexture("Interface\\MoneyFrame\\UI-MoneyIcons")
@@ -1469,6 +1437,7 @@ local function CreateGearFrame()
 	gearFrame:SetBackdrop(statsFrame:GetBackdrop())
 	gearFrame:SetBackdropColor(0, 0, 0, 0.6)
 	gearFrame:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
+ FieldKitTheme.Surface(gearFrame,"card")
 	gearFrame.slots = {}
 	AddCompactButton(gearFrame, "gearCollapsed", UpdateGearFrame)
 	for i = 1, table.getn(GEAR_SLOTS) do
@@ -1542,12 +1511,13 @@ local function CreateBarWindow(name, title, rows)
 	})
 	f:SetBackdropColor(0, 0, 0, 0.6)
 	f:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.8)
+ FieldKitTheme.Surface(f,"card")
 	f.title = f:CreateFontString(name.."Title", "OVERLAY", "GameFontNormalSmall")
 	f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 9, -7)
 	FieldKit_Text(f.title,title)
 	f.total = f:CreateFontString(name.."Total", "OVERLAY", "GameFontHighlightSmall")
 	f.total:SetPoint("TOPRIGHT", f, "TOPRIGHT", -25, -7)
-	local collapse = CreateFrame("Button", name.."Collapse", f, "UIPanelButtonTemplate")
+	local collapse = FieldKitTheme.Button(f,name.."Collapse","-",0,0,18,17,nil);collapse:ClearAllPoints()
 	collapse:SetWidth(18); collapse:SetHeight(17)
 	collapse:SetPoint("TOPRIGHT", f, "TOPRIGHT", -3, -3)
 	FieldKit_Text(collapse,"-")
@@ -1559,11 +1529,11 @@ local function CreateBarWindow(name, title, rows)
 		DB.collapsedWindows[name] = collapsed or nil
 		if collapsed then
 			f.mashExpandHeight = f:GetHeight()
-			f:SetHeight(24); f.total:Hide()
+			f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide()
 			for j = 1, table.getn(f.rows) do f.rows[j]:Hide() end
 			FieldKit_Text(this,"+")
 		else
-			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45)
+			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
 			f.total:Show(); FieldKit_Text(this,"-")
 		end
 	end)
@@ -1592,7 +1562,7 @@ local function CreateBarWindow(name, title, rows)
 	end
 	if DB and DB.collapsedWindows and DB.collapsedWindows[name] then
 		f.mashCollapsed = true; f.mashExpandHeight = f:GetHeight()
-		f:SetHeight(24); f.total:Hide(); FieldKit_Text(collapse,"+")
+		f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide(); FieldKit_Text(collapse,"+")
 	end
 	return f
 end
@@ -1610,6 +1580,7 @@ local function FitRows(f, n)
 		for i = 1, table.getn(f.rows) do f.rows[i]:Hide() end
 		f:SetHeight(24)
 	else f:SetHeight(height); f.total:Show() end
+ FieldKitTheme.Update(f)
 end
 
 -- Require the native API and a non-nil native phase before using run data.
@@ -2016,6 +1987,7 @@ function CreateCompactBar()
 	})
 	compactBar:SetBackdropColor(0, 0, 0, 0.7)
 	compactBar:SetBackdropBorderColor(0.5, 0.5, 0.5, 0.9)
+ FieldKitTheme.Surface(compactBar,"card")
 
 
 	local xp = CreateFrame("StatusBar", "FieldKitCompactBarXP", compactBar)
@@ -2069,7 +2041,7 @@ function CreateCompactBar()
 		local repair = DB.moneyDockRepair ~= 1
 		AttachMoneyToBar(repair)
 		DB.moneyDockRepair = 1
-		if HasAPI() and not AZS_GetPhase() then moneyFrame:Hide() else moneyFrame:Show() end
+		if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide() else moneyFrame:Show() end
 	end
 
 
@@ -2088,14 +2060,14 @@ function AttachMoneyToBar(force)
 		moneyFrame:SetFrameStrata("MEDIUM")
 		moneyFrame:SetFrameLevel(compactBar:GetFrameLevel() + 2)
 		local width = compactBar:GetWidth()
-		if width and width > 0 then moneyFrame:SetWidth(width) end
+		if width and width > 0 then moneyFrame:SetWidth(width);FieldKitTheme.Update(moneyFrame) end
 		moneyFrame:SetHeight(22)
 		local point, relative, relativePoint, x, y = moneyFrame:GetPoint(1)
 		if point ~= "BOTTOM" or relative ~= compactBar or relativePoint ~= "TOP" or x ~= 0 or y ~= 2 then
 			moneyFrame:ClearAllPoints()
 			moneyFrame:SetPoint("BOTTOM", compactBar, "TOP", 0, 2)
 		end
-		if HasAPI() and not AZS_GetPhase() then moneyFrame:Hide() else moneyFrame:Show() end
+		if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide() else moneyFrame:Show() end
 	end
 end
 
@@ -2144,7 +2116,7 @@ local function UpdateGryphons()
 end
 
 
-local SECTIONS = FieldKit.CreateOptionsSchema({
+local settingsActions={
  SetFilter=SetFilter,
  UpdateTargetHealth=UpdateTargetHealth,
  SyncHudBosses=SyncHudBosses,
@@ -2162,362 +2134,41 @@ local SECTIONS = FieldKit.CreateOptionsSchema({
  UpdateChestPins=UpdateChestPins,
  UpdateLairFrame=UpdateLairFrame,
  UpdateGryphons=UpdateGryphons,
-})
-
-
+}
+local SECTIONS=FieldKit.CreateOptionsSchema(settingsActions)
 FieldKit_AddSettingsSections(SECTIONS)
+SECTIONS=FieldKit.BuildJourneySections(SECTIONS,settingsActions)
 
-
-local PANEL_WIDTH, PANEL_HEIGHT = 620, 620
-local TAB_WIDTH = 148
-local CONTENT_X = TAB_WIDTH + 22
-local CONTENT_WIDTH = PANEL_WIDTH - CONTENT_X - 16
-local CONTENT_TOP = -36
-
--- Refresh controls from DB without running their setters or changing the selected values.
-local function RefreshPanel()
-	if ( not panel ) then
-		return
-	end
-	for i = 1, table.getn(panel.checks) do
-		local check = panel.checks[i]
-		check:SetChecked(check.item.get() and 1 or nil)
-	end
-	panel.refreshing = true
-	for i = 1, table.getn(panel.sliders) do
-		local slider = panel.sliders[i]
-		slider:SetValue(slider.item.get())
-		local text = getglobal(slider:GetName().."Text")
-		if ( text ) then
-			FieldKit_Text(text,slider.item.format(slider.item.get()))
-		end
-	end
-	panel.refreshing = nil
-	if ( panel.camera ) then
-		panel.refreshing = true
-		panel.camera:SetValue(DB.cameraMax or CAMERA_BASE)
-		if FieldKitPanelCameraText then FieldKit_Text(FieldKitPanelCameraText,FieldKit_L("Max camera distance: ")..(DB.cameraMax or CAMERA_BASE)..FieldKit_L(" yd")) end
-		panel.refreshing = nil
-	end
+-- Restore only addon HUD positions. The journey offers an immediate Undo.
+local function ResetPositions()
+ for i=1,table.getn(movableFrames) do
+  local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
+ end
+ if AttachMoneyToBar then AttachMoneyToBar(true) end
 end
-
-
--- Refresh dynamic window text after the saved EN/FR choice changes.
+local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
  RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true)
  UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
 end
-
--- Show a localized tooltip owned by the supplied settings control.
-local function ShowTip(owner, title, text)
-	GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
-	GameTooltip:SetText(FieldKit_L(title), 1.0, 1.0, 1.0)
-	if ( text ) then
-		GameTooltip:AddLine(FieldKit_L(text), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, 1)
-	end
-	GameTooltip:Show()
-end
-
-
--- Build one checkbox from a schema descriptor; setter runs only on a player click.
-local function AddCheck(page, item, y)
-	local n = table.getn(panel.checks) + 1
-	local check = CreateFrame("CheckButton", "FieldKitPanelCheck"..n, page, "UICheckButtonTemplate")
-	check:SetWidth(22)
-	check:SetHeight(22)
-	check:SetPoint("TOPLEFT", page, "TOPLEFT", -3, y)
-	check.item = item
-	if ( check.SetHitRectInsets ) then
-		check:SetHitRectInsets(0, -180, 0, 0)
-	end
-	local label = check:CreateFontString("FieldKitPanelCheck"..n.."Label", "OVERLAY", "GameFontHighlight")
-	MenuFont(label, 15)
-	label:SetPoint("LEFT", check, "RIGHT", 2, 1)
-	FieldKit_Text(label,item.label)
-	check:SetScript("OnClick", function()
-		this.item.set(this:GetChecked() and true or false)
-		RefreshPanel()
-	end)
-	panel.checks[n] = check
-
-	if ( item.button ) then
-		local b = CreateFrame("Button", "FieldKitPanelCheck"..n.."Button", page, "UIPanelButtonTemplate")
-		b:SetWidth(78)
-		b:SetHeight(20)
-		b:SetPoint("TOPRIGHT", page, "TOPRIGHT", 0, y - 1)
-		FieldKit_Text(b,item.button.text)
-		b:SetScript("OnClick", item.button.onClick)
-	end
-
-	local tip = page:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	MenuFont(tip, 13, 0.75, 0.75, 0.75)
-	tip:SetPoint("TOPLEFT", page, "TOPLEFT", 22, y - 21)
-	tip:SetWidth(CONTENT_WIDTH - 24)
-	tip:SetJustifyH("LEFT")
-	FieldKit_Text(tip,item.tip)
-
-
- local widest=tip:GetStringWidth() or 0
- tip:SetText(FieldKitLocale.fr[item.tip] or item.tip)
- widest=math.max(widest,tip:GetStringWidth() or 0)
- tip:SetText(FieldKitLocale.en[item.tip] or item.tip)
- widest=math.max(widest,tip:GetStringWidth() or 0)
- FieldKit_Text(tip,item.tip)
- local lines = math.max(1, math.ceil(widest / ( CONTENT_WIDTH - 24 )))
- return y - 21 - 14 * lines - 10
-end
-
--- Build a numeric slider; suppress its setter while values are programmatically refreshed.
-local function AddSlider(page, item, y)
-	local n = table.getn(panel.sliders) + 1
-	local name = "FieldKitPanelSlider"..n
-	local ok, slider = pcall(CreateFrame, "Slider", name, page, "OptionsSliderTemplate")
-	if ( not ok or not slider ) then
-		return y
-	end
-	slider.item = item
-	slider:SetWidth(CONTENT_WIDTH - 20)
-	slider:SetHeight(17)
-	slider:SetPoint("TOPLEFT", page, "TOPLEFT", 8, y - 16)
-	slider:SetMinMaxValues(item.min, item.max)
-	slider:SetValueStep(item.step)
-	if ( getglobal(name.."Low") ) then
-		FieldKit_Text(getglobal(name.."Low"),tostring(item.min))
-		FieldKit_Text(getglobal(name.."High"),tostring(item.max))
-	end
-	slider:SetScript("OnValueChanged", function()
-		local v = math.floor(this:GetValue() + 0.5)
-		if ( getglobal(this:GetName().."Text") ) then
-			FieldKit_Text(getglobal(this:GetName().."Text"),this.item.format(v))
-		end
-		if ( not panel.refreshing and this.item.get() ~= v ) then
-			this.item.set(v)
-		end
-	end)
-	slider:SetScript("OnEnter", function() ShowTip(this, this.item.label, this.item.tip) end)
-	slider:SetScript("OnLeave", function() GameTooltip:Hide() end)
-	panel.sliders[n] = slider
-	return y - 52
-end
-
--- Build the 15–50 yard camera slider; explicit interaction can also zoom the camera.
-local function AddCameraSlider(page, y)
-	local ok, slider = pcall(CreateFrame, "Slider", "FieldKitPanelCamera", page, "OptionsSliderTemplate")
-	if ( not ok or not slider ) then
-		return y
-	end
-	slider:SetWidth(CONTENT_WIDTH - 20)
-	slider:SetHeight(17)
-	slider:SetPoint("TOPLEFT", page, "TOPLEFT", 8, y - 16)
-	slider:SetMinMaxValues(CAMERA_BASE, 50)
-	slider:SetValueStep(1)
-	if ( FieldKitPanelCameraLow ) then
-		FieldKit_Text(FieldKitPanelCameraLow,CAMERA_BASE..FieldKit_L(" yd"))
-		FieldKit_Text(FieldKitPanelCameraHigh,"50 yd")
-	end
-	slider:SetScript("OnValueChanged", function()
-		local v = math.floor(this:GetValue() + 0.5)
-		if ( FieldKitPanelCameraText ) then
-			FieldKit_Text(FieldKitPanelCameraText,FieldKit_L("Max camera distance: ")..v..FieldKit_L(" yd"))
-		end
-		if ( DB.cameraMax ~= v and not panel.refreshing ) then
-			DB.cameraMax = v
-			ApplyCamera(true)
-		end
-	end)
-	panel.camera = slider
-	local tip = page:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-	MenuFont(tip, 13, 0.75, 0.75, 0.75)
-	tip:SetPoint("TOPLEFT", page, "TOPLEFT", 0, y - 56)
-	tip:SetWidth(CONTENT_WIDTH)
-	tip:SetJustifyH("LEFT")
-	FieldKit_Text(tip,"How far the camera can zoom out. The game's own option stops at about 30 yd.")
-	return y - 80
-end
-
--- Reset only addon window positions, then reapply defaults; no history/game-save cleanup.
-local function ResetPositions()
-	for i = 1, table.getn(movableFrames) do
-		local f = movableFrames[i]
-		DB.pos[f:GetName()] = { f.azsDefault[1], f.azsDefault[2] }
-		PlaceMovable(f)
-	end
-	if ( AttachMoneyToBar ) then
-		AttachMoneyToBar(true)
-	end
-	Print(FieldKit_L("window positions reset."))
-end
-
--- Select exactly one settings page and persist its index/title for the next opening.
-local function SelectTab(index)
-	index = math.max(1, math.min(table.getn(panel.tabs), tonumber(index) or 1))
-	DB.panelTab = index
-	DB.panelSection = SECTIONS[index].title
-	for i = 1, table.getn(panel.tabs) do
-		local tab = panel.tabs[i]
-		if ( i == index ) then
-			tab.selected:Show()
-			tab.mark:Show()
-			tab.text:SetTextColor(1.0, 0.82, 0.0)
-			tab.page:Show()
-		else
-			tab.selected:Hide()
-			tab.mark:Hide()
-			tab.text:SetTextColor(0.8, 0.8, 0.8)
-			tab.page:Hide()
-		end
-	end
-	if ( statsPicker ) then
-		statsPicker:Hide()
-	end
-end
-
--- Build the settings UI once from the declarative schema; bind each tab index separately.
 local function CreatePanel()
-	panel = CreateFrame("Frame", "FieldKitPanel", UIParent)
-	panel:SetWidth(PANEL_WIDTH)
-	panel:SetHeight(PANEL_HEIGHT)
-	if panel.SetClampedToScreen then panel:SetClampedToScreen(1) end
-	panel:SetPoint("CENTER", UIParent, "CENTER", 0, 60)
-
-
-	panel:SetFrameLevel(100)
-	StyleWindow(panel, "Azeroth FieldKit", "Review candidate  -  v"..FieldKit.version)
-
- local background=panel:CreateTexture(nil,"BACKGROUND")
- background:SetAllPoints(panel);background:SetTexture(0.025,0.025,0.035,1)
-
-
-	local tabsBg = panel:CreateTexture(nil, "BACKGROUND")
-	tabsBg:SetTexture(0, 0, 0, 0.35)
-	tabsBg:SetPoint("TOPLEFT", panel, "TOPLEFT", 4, -27)
-	tabsBg:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 4, 4)
-	tabsBg:SetWidth(TAB_WIDTH)
-	local divider = panel:CreateTexture(nil, "ARTWORK")
-	divider:SetTexture(1.0, 0.82, 0.0, 0.25)
-	divider:SetPoint("TOPLEFT", tabsBg, "TOPRIGHT", 0, 0)
-	divider:SetPoint("BOTTOMLEFT", tabsBg, "BOTTOMRIGHT", 0, 0)
-	divider:SetWidth(1)
-
-	panel.checks = {}
-	panel.sliders = {}
-	panel.tabs = {}
-	for s = 1, table.getn(SECTIONS) do
-		local section = SECTIONS[s]
-
-		local tab = CreateFrame("Button", "FieldKitPanelTab"..s, panel)
-		tab:SetWidth(TAB_WIDTH - 8)
-		tab:SetHeight(24)
-		tab:SetPoint("TOPLEFT", panel, "TOPLEFT", 8, -34 - 26 * ( s - 1 ))
-		tab.selected = tab:CreateTexture(nil, "BACKGROUND")
-		tab.selected:SetTexture(1.0, 0.82, 0.0, 0.16)
-		tab.selected:SetAllPoints(tab)
-		local mark = tab:CreateTexture(nil, "ARTWORK")
-		mark:SetTexture(1.0, 0.82, 0.0, 0.9)
-		mark:SetWidth(2)
-		mark:SetPoint("TOPLEFT", tab, "TOPLEFT", 0, 0)
-		mark:SetPoint("BOTTOMLEFT", tab, "BOTTOMLEFT", 0, 0)
-		tab.mark = mark
-		local hover = tab:CreateTexture(nil, "BACKGROUND")
-		hover:SetTexture(1.0, 1.0, 1.0, 0.06)
-		hover:SetAllPoints(tab)
-		hover:Hide()
-		tab.text = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-		MenuFont(tab.text, 15)
-		tab.text:SetPoint("LEFT", tab, "LEFT", 10, 0)
-		FieldKit_Text(tab.text,section.title)
-		tab:SetScript("OnEnter", function() hover:Show() end)
-		tab:SetScript("OnLeave", function() hover:Hide() end)
-		local tabIndex = s
-		tab:SetScript("OnClick", function() SelectTab(tabIndex) end)
-
-
-		local page = CreateFrame("Frame", "FieldKitPanelPage"..s, panel)
-		page:SetPoint("TOPLEFT", panel, "TOPLEFT", CONTENT_X, CONTENT_TOP)
-		page:SetWidth(CONTENT_WIDTH)
-		page:SetHeight(PANEL_HEIGHT + CONTENT_TOP - 40)
-		local heading = page:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-		heading:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
-		FieldKit_Text(heading,section.title)
-		local y = -28
-		for i = 1, table.getn(section.items) do
-			local item = section.items[i]
-			if ( item.kind == "language" ) then
-				y = FieldKit_CreateLanguageOption(page, y)
-			elseif ( item.kind == "combat" ) then
-				FieldKit_CreateCombatOptions(page)
-			elseif ( item.kind == "check" ) then
-				y = AddCheck(page, item, y)
-			elseif ( item.kind == "slider" ) then
-				y = AddSlider(page, item, y)
-			elseif ( item.kind == "camera" ) then
-				y = AddCameraSlider(page, y)
-			end
-		end
-		tab.page = page
-		panel.tabs[s] = tab
-	end
-
-
-	local reset = CreateFrame("Button", "FieldKitPanelReset", panel, "UIPanelButtonTemplate")
-	reset:SetWidth(TAB_WIDTH - 12)
-	reset:SetHeight(20)
-	reset:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 10, 10)
-	FieldKit_Text(reset,"Reset positions")
-	reset:SetScript("OnClick", ResetPositions)
-	reset:SetScript("OnEnter", function() ShowTip(this, "Reset positions", "Puts every FieldKit window and the health bar back in its default place.") end)
-	reset:SetScript("OnLeave", function() GameTooltip:Hide() end)
-
-
-	panel.status = panel:CreateFontString("FieldKitPanelStatus", "OVERLAY", "GameFontDisableSmall")
-	MenuFont(panel.status, 12, 0.6, 0.6, 0.6)
-	panel.status:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", CONTENT_X, 12)
-	panel.statusElapsed = 0
-	panel:SetScript("OnUpdate", function()
-		this.statusElapsed = this.statusElapsed + ( arg1 or 0 )
-		if ( this.statusElapsed < 0.3 ) then
-			return
-		end
-		this.statusElapsed = 0
-		FieldKit_Text(this.status,string.format(FieldKit_L("Drag FieldKit windows to move them  -  plates: %d (%d hidden)"), shownNow, hiddenNow))
-	end)
-
-	panel:SetScript("OnShow", function()
-		RefreshPanel()
-		SetMovablesUnlocked(true)
-		UpdateBossFrame()
-	end)
-	panel:SetScript("OnHide", function()
-		if FieldKitCombat then FieldKitCombat.HideAnchors() end
-		SetMovablesUnlocked(false)
-		UpdateBossFrame()
-		if ( statsPicker ) then
-			statsPicker:Hide()
-		end
-	end)
-	local selected=DB.panelTab or 1
- if DB.panelSection then
-  for i=1,table.getn(SECTIONS) do if SECTIONS[i].title==DB.panelSection then selected=i end end
- end
- SelectTab(selected)
+ panel=FieldKitUI.Build(SECTIONS,{
+  unlock=SetMovablesUnlocked,bosses=UpdateBossFrame,reset=ResetPositions,
+  dismiss=function() if statsPicker then statsPicker:Hide() end end,
+  positions=function()
+   for i=1,table.getn(movableFrames) do PlaceMovable(movableFrames[i]) end
+   AttachMoneyToBar(false)
+  end,
+  camera=function(v) DB.cameraMax=v;ApplyCamera(true) end,
+  reload=function() ReloadUI() end,
+ })
  FieldKit_RefreshLanguage(FieldKit_RefreshInterfaceLanguage)
-	panel:Hide()
 end
-
--- Open/close the existing panel and fit its scale to the viewport.
 local function TogglePanel()
-	if ( not panel ) then
-		CreatePanel()
-	end
-	if panel.SetScale then panel:SetScale(math.min(1, (UIParent:GetHeight() - 20) / PANEL_HEIGHT, (UIParent:GetWidth() - 20) / PANEL_WIDTH)) end
-	if ( panel:IsShown() ) then
-		panel:Hide()
-	else
-		panel:Show()
-	end
+ if not panel then CreatePanel() end
+ FieldKitUI.Toggle()
 end
-
 
 -- Create the addon settings shortcut; dragging changes only its saved rim angle.
 local function CreateMinimapButton()
@@ -2550,7 +2201,7 @@ local function CreateMinimapButton()
 	b:SetScript("OnDragStop", function() this:SetScript("OnUpdate", nil) end)
 
 	local icon = b:CreateTexture("FieldKitMinimapButtonIcon", "ARTWORK")
-	icon:SetTexture("Interface\\Icons\\INV_Misc_Book_09")
+	icon:SetTexture(FieldKitTheme.media.."ChronicleSeal.tga")
 	icon:SetAllPoints(b)
 	b:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 	b:SetScript("OnClick", TogglePanel)
@@ -2601,6 +2252,7 @@ local function FieldKitEventLifecycle()
 		CreateMeterFrames()
 		CreateLairFrame()
 		CreateCompactBar()
+  FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
 		return
 	end
@@ -2737,7 +2389,7 @@ SlashCmdList["FieldKit"] = function(msg)
 	elseif msg == "combat" then
 		if not panel then CreatePanel() end
 		panel:Show()
-		for i=1,table.getn(SECTIONS) do if SECTIONS[i].title=="Combat text" then SelectTab(i) end end
+		for i=1,table.getn(SECTIONS) do if SECTIONS[i].title=="Combat text" then FieldKitUI.Select(i) end end
 		return
 	elseif ( string.find(msg, "plates") ) then
 		SetFilter(not DB.hidePlates)

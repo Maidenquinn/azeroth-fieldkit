@@ -1,0 +1,75 @@
+# Interface review — 0.2.0-review.1
+
+Reviewed on 2026-10-27 against the installed FieldKit 0.1.0-review.3 and the
+maintainer-provided Azeroth Stats 1.6.0-dev.6 design. This document records source
+and offline checks; it is not a claim of in-game acceptance or developer approval.
+
+## Findings and implemented changes
+
+- The old panel exposed eleven technical pages, including two competing HP
+  checkboxes for each unit. Nine task-oriented destinations now use stable ids:
+  Overview, Combat text, Health & buffs, Bosses, Alerts, Windows, Minimap,
+  Nameplates, Interface. HP uses one exclusive three-value choice per unit.
+- Opening settings previously unlocked HUD dragging and could show a fictitious
+  boss. Opening now only reads preferences. Move windows hides settings, unlocks
+  handles and shows an explicit Done dock; boss placement previews only appear
+  in this arrangement mode. Escape ends the mode and locks drag handlers.
+- Compact action-bar changes previously reloaded immediately. The checkbox now
+  stages the setting and reveals an explicit Reload UI button. No automatic
+  reload interrupts the current run. The current bar stays applied until reload.
+- Narrow screens previously shrank the complete interface. Pages now reflow
+  horizontally and scroll vertically, retaining normal text size at 800×600.
+  Exceptionally smaller viewports still use a bounded scale to keep the shell
+  visible. Choice popups show at most seven rows, scroll, open upward near the
+  bottom and live outside clipped page viewports.
+- Reset positions now offers immediate Undo, preserving the prior coordinates
+  and money-strip attachment. This resets the addon HUD window positions only;
+  combat-area offsets remain independently configurable in Areas.
+- Gold/chest price can be hidden separately from statistics; disabling the strip
+  restores the native tally when FieldKit was replacing it. Maintenance ticks do
+  not bring a disabled strip back.
+- The settings shell, controls, navigation, owned HUD surfaces and stats picker
+  use the Azeroth Stats material family: slate, gold, painted glyphs and bundled
+  OFL sans/serif fonts. Health/portrait/action artwork keeps native semantics.
+- Combat settings stay in one six-page editor: General, Events, Fonts, Filters,
+  Areas, Game text. The final page contains the existing native damage/critical
+  options so duplicate displays can be disabled in the same journey.
+
+## Boundaries and preserved behavior
+
+No new telemetry, network, dynamic execution, gameplay automation, external
+helper or native write capability was introduced. Runtime.lua remains the
+native-write boundary. Changing language or visiting/resizing pages does not
+apply a CVar or native HUD setting. Action-slot swaps remain explicit player
+drags, as documented in API_SURFACE.md. Existing boss identities, minimap data,
+combat filters/colors/fonts, collapse state and saved HUD coordinates remain.
+
+UI migrations are confined to FieldKitDB: legacy page indices/titles map to
+stable ids under uiSchema=2. Other addons and client saves are outside scope.
+The inherited code/game-data licensing and manual approval blockers in
+REVIEW.md still apply; restyling is not a clean-room rewrite or a rights transfer.
+
+## Verification
+
+- Actual TOC modules executed under Lua 5.0.3 and Lua 5.1 without string.match.
+- Existing portrait, combat, minimap, collapse, privacy, malformed-data and
+  persistence fixtures retained; new interface_journey.lua exercises real UI
+  callbacks for routing, exclusive HP choice, staged reload, layout mode,
+  reset/Undo, strip visibility, 800×600 reflow and bounded scrolling.
+- Repeated reflows allocate no additional widgets. The theme caches geometry and
+  material selection. UI viewport checks run every 250 ms while settings show.
+- Static inventory checks every loaded module, portrait format and exact hashes
+  for bundled theme assets/fonts. Font license notices accompany the package.
+- Offline geometry previews use the real Lua widget tree and bundled assets;
+  these are approximate projections, not screenshots of the game renderer.
+
+## Required in-game acceptance
+
+Restart the client to discover the new files, enable only FieldKit for its
+overlapping functions, and open /fieldkit. Check English/Français, close and
+Escape, all pages and scrollbars at normal and reduced window size, each HP
+format, long item/spell names, and Events dropdown scrolling. Move windows,
+finish, reset/Undo and reload once to check persistence. Confirm compact-bar
+application only after explicit reload, money strip visibility, collapsible
+panels, boss portraits with another target, and chest/lair markers. A result
+recorded by the maintainer/user is needed before claiming live-game validation.

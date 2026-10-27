@@ -18,14 +18,6 @@ end
 -- Extend the existing schema with language, privacy, combat editor and boss HP controls.
 function FieldKit_AddSettingsSections(sections)
  table.insert(sections,{title="Combat text",items={{kind="combat"}}})
- table.insert(sections,{title="Boss health",items={
- {kind="check",label="Boss health: percentage",tip="Percentage only. Uncheck to return to exact numbers.",
- get=function() return FieldKitDB and FieldKitDB.bossHealthMode==2 end,
- set=function(v) FieldKitDB.bossHealthMode=v and 2 or 1 end},
- {kind="check",label="Boss health: numbers + percent",tip="Exact numeric values and percentage.",
- get=function() return FieldKitDB and FieldKitDB.bossHealthMode==3 end,
- set=function(v) FieldKitDB.bossHealthMode=v and 3 or 1 end}
- }})
  -- Keep the native guardian minimap option in the existing Map page.
  for i=1,table.getn(sections) do
   if sections[i].title=="Interface" then

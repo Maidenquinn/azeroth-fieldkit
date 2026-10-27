@@ -27,7 +27,7 @@ T.fr={
  ["Target health: numbers + percent"]="Vie de la cible : valeurs + pourcentage",
  ["Display both numeric HP and percentage."]="Affiche les valeurs numériques et le pourcentage.",
  ["Replace the game's boss bars"]="Remplacer les barres de boss du jeu",
- ["Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Drag them while this panel is open."]="Remplace les grandes barres du jeu par des cadres pour les boss et les gardiens éveillés. Déplace-les lorsque ce panneau est ouvert.",
+ ["Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Use Move windows to position them."]="Remplace les grandes barres du jeu par des cadres pour les boss et les gardiens éveillés. Utilise Déplacer pour les positionner.",
  ["Hide damage numbers"]="Masquer les chiffres de dégâts du jeu",
  ["Hides the damage numbers that pop over monsters (yours and your pet's)."]="Masque les chiffres de dégâts au-dessus des monstres (les tiens et ceux de ton familier).",
  ["Show my crits above the hero"]="Afficher mes critiques au-dessus du héros",
@@ -35,7 +35,7 @@ T.fr={
  ["Group crits"]="Regrouper les critiques",
  ["Crits that land within a quarter second become one line: the biggest, with how many there were (x7)."]="Les critiques d'un quart de seconde sont réunis : valeur la plus élevée et nombre de coups (x7).",
  ["Health bar under the character"]="Barre de vie sous le personnage",
- ["A small green bar under your hero. Drag it while this panel is open."]="Une petite barre verte sous ton héros. Déplace-la lorsque ce panneau est ouvert.",
+ ["A small green bar under your hero. Use Move windows to position it."]="Une petite barre verte sous ton héros. Utilise Déplacer pour la positionner.",
  ["Player health: percentage"]="Vie du joueur : pourcentage",
  ["Show player health as a percentage."]="Affiche la vie du joueur en pourcentage.",
  ["Player health: numbers + percent"]="Vie du joueur : valeurs + pourcentage",
@@ -265,7 +265,7 @@ T.fr={
  ["Vertical offset"]="Décalage vertical",
  ["Offsets are measured from the screen center. Drag handles also save these values."]="Décalages par rapport au centre de l'écran. Les poignées enregistrent aussi ces valeurs.",
  ["Quick presets change filters, merging and message limits. Fonts, colors and positions are kept."]="Les profils modifient les filtres, le regroupement et la limite de messages. Police, couleurs et positions sont conservées.",
- ["Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Combat. Preview uses marked sample data. Healing uses native totals."]="Active le texte FieldKit et masque les chiffres du jeu et l'ancien affichage des critiques. Retour possible dans Combat. L'aperçu utilise des exemples signalés. Les soins viennent des totaux natifs.",
+ ["Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Game text. Preview uses marked sample data. Healing uses native totals."]="Active le texte FieldKit et masque les chiffres du jeu et l'ancien affichage des critiques. Retour possible dans Combat. L'aperçu utilise des exemples signalés. Les soins viennent des totaux natifs.",
  ["Avoidance events appear only when the client sends the corresponding message. < = incoming; > = your action."]="Les évitements apparaissent uniquement si le client envoie le message correspondant. < = reçu ; > = action du joueur.",
  ["Hidden abilities: one game-provided name per line. Example: Backstab. Maximum 32 names."]="Compétences masquées : un nom fourni par le jeu par ligne. Exemple : Backstab. 32 noms maximum.",
  ["Matches the name received from the game, without the healing prefix. Small hits are filtered before merging. Partially blocked hits remain one damage message."]="Compare le nom reçu du jeu, sans préfixe de soin. Les petites valeurs sont filtrées avant regroupement. Un coup partiellement bloqué reste un seul message de dégâts.",
@@ -299,7 +299,7 @@ end
 -- Bind an addon label to a weakly tracked widget for later live language changes.
 function FieldKit_Text(object,text)
  if type(text)=="string" then T.bindings[object]=text else T.bindings[object]=nil end
- object:SetText(FieldKit_L(text))
+ object:SetText(FieldKit_L(text));if object.fieldkitLabel then object.fieldkitLabel:SetText(FieldKit_L(text)) end
 end
 -- Register one refresh callback for dynamic UI labels.
 function FieldKit_RefreshLanguage(callback) table.insert(T.callbacks,callback) end
@@ -307,7 +307,7 @@ function FieldKit_RefreshLanguage(callback) table.insert(T.callbacks,callback) e
 function FieldKit_SetLanguage(language)
  if type(FieldKitDB)~="table" or (language~="en" and language~="fr") then return end
  FieldKitDB.language=language
- for object,text in pairs(T.bindings) do object:SetText(FieldKit_L(text)) end
+ for object,text in pairs(T.bindings) do object:SetText(FieldKit_L(text));if object.fieldkitLabel then object.fieldkitLabel:SetText(FieldKit_L(text)) end end
  for i=1,table.getn(T.callbacks) do T.callbacks[i]() end
 end
 -- Build two explicit language buttons; capture a distinct language in each callback.

@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.1.0-review.3",
-  "runtimeModules": 14,
-  "textureCount": 98,
+  "candidate": "0.2.0-review.1",
+  "runtimeModules": 17,
+  "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 2427,
-      "sha256": "151fd6f2b696d288db1ee2ffba873f43bc4a4bd43b27c269caf00676c757e0bd",
+      "sha256": "47cb234b29e6ab0ff2e261cb2149fc63a31c6b05fcd27c6154e2bdee10b70c93",
       "namedFunctions": [
         {
           "name": "FieldKit.Number",
@@ -34,8 +34,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 2931,
-      "sha256": "7986ee5e6ae77afa92085e0d9d2462a24e4c530e39f2c7f110dac5f79cb64104",
+      "bytes": 3671,
+      "sha256": "8f8eadb1198322f3d48b11406be8ae07d3e6410360aa23049c05b6f838819090",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -45,8 +45,8 @@
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 20728,
-      "sha256": "e973035f8c0c8409b8a74c1e9227cfc5ec5cc7f0381fcc050363079881b65c7a",
+      "bytes": 20881,
+      "sha256": "fda1b0246945329cbf04e3ebf6d2b988b92b655f3ca8ed37315a107cc5d16480",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
@@ -79,6 +79,47 @@
       ],
       "literalEvents": []
     },
+    "InterfaceStrings.lua": {
+      "bytes": 3439,
+      "sha256": "0f9f05ad8b2d3e87b148786bb511a71997ae6354872c1fe546bfa850d117b829",
+      "namedFunctions": [],
+      "literalEvents": []
+    },
+    "Theme.lua": {
+      "bytes": 5110,
+      "sha256": "802668c15a933434219e360d4c6f20c9acb75b3f1f2f41df82088903b2f6e09c",
+      "namedFunctions": [
+        {
+          "name": "T.Font",
+          "line": 10
+        },
+        {
+          "name": "T.Update",
+          "line": 18
+        },
+        {
+          "name": "T.Surface",
+          "line": 36
+        },
+        {
+          "name": "T.State",
+          "line": 56
+        },
+        {
+          "name": "T.Button",
+          "line": 70
+        },
+        {
+          "name": "T.Glyph",
+          "line": 86
+        },
+        {
+          "name": "T.Label",
+          "line": 93
+        }
+      ],
+      "literalEvents": []
+    },
     "Seed.lua": {
       "bytes": 3910,
       "sha256": "958925a3bfd1719530a3056f6a45a8281fdfac0ae75ff0215ec0907fe9aaf39e",
@@ -103,8 +144,8 @@
       "literalEvents": []
     },
     "Settings.lua": {
-      "bytes": 2266,
-      "sha256": "f8b57c898d772d554b12d8f480647ed7f6b3d392f4c6a53f2cc1fd2a04611be3",
+      "bytes": 1737,
+      "sha256": "d22329429e2591dbf008a7c9d80a43fbc92090988a81b55880a60e500ed9dedc",
       "namedFunctions": [
         {
           "name": "FieldKit_FormatHealth",
@@ -122,8 +163,8 @@
       "literalEvents": []
     },
     "OptionsSchema.lua": {
-      "bytes": 8814,
-      "sha256": "d55381548b7694c09ba588beca8eea9a96a2ae192279bab3cb1b6cfdf9c71ccc",
+      "bytes": 7595,
+      "sha256": "a738b4c4279ba4db879ac0845873e51b6f40ef03ecdecd27e5cf800dd5508dc9",
       "namedFunctions": [
         {
           "name": "FieldKit.CreateOptionsSchema",
@@ -163,9 +204,92 @@
       ],
       "literalEvents": []
     },
+    "Interface.lua": {
+      "bytes": 22256,
+      "sha256": "30824a96b91a1bb4f3633cd9a92f8d87dd146ae3ed135a2a5ea55c7748c68d0d",
+      "namedFunctions": [
+        {
+          "name": "HealthChoice",
+          "line": 8
+        },
+        {
+          "name": "FieldKit.BuildJourneySections",
+          "line": 15
+        },
+        {
+          "name": "U.Tip",
+          "line": 45
+        },
+        {
+          "name": "U.Choice",
+          "line": 52
+        },
+        {
+          "name": "U.CloseMenus",
+          "line": 90
+        },
+        {
+          "name": "U.Wheel",
+          "line": 95
+        },
+        {
+          "name": "Checkbox",
+          "line": 106
+        },
+        {
+          "name": "Slider",
+          "line": 124
+        },
+        {
+          "name": "BuildHome",
+          "line": 145
+        },
+        {
+          "name": "U.BuildPage",
+          "line": 168
+        },
+        {
+          "name": "U.Refresh",
+          "line": 203
+        },
+        {
+          "name": "U.Select",
+          "line": 227
+        },
+        {
+          "name": "U.Reflow",
+          "line": 242
+        },
+        {
+          "name": "U.SetLayoutEditing",
+          "line": 283
+        },
+        {
+          "name": "U.StartLayout",
+          "line": 295
+        },
+        {
+          "name": "U.ResetPositions",
+          "line": 300
+        },
+        {
+          "name": "U.UndoPositions",
+          "line": 306
+        },
+        {
+          "name": "U.Build",
+          "line": 313
+        },
+        {
+          "name": "U.Toggle",
+          "line": 367
+        }
+      ],
+      "literalEvents": []
+    },
     "FieldKit.lua": {
-      "bytes": 90096,
-      "sha256": "dd15548f9fe73fe0ff1689d0ad312092223ff8e3dc754fa60ec123941f5edccf",
+      "bytes": 78880,
+      "sha256": "ae116f2308f444fea3d71eaf3a0c91dba2dcd90a441cfb58fbdcaad71322444e",
       "namedFunctions": [
         {
           "name": "Print",
@@ -213,123 +337,123 @@
         },
         {
           "name": "SetMovablesUnlocked",
-          "line": 195
+          "line": 196
         },
         {
           "name": "MirrorTarget",
-          "line": 212
+          "line": 211
         },
         {
           "name": "CreateBossFrame",
-          "line": 231
+          "line": 230
         },
         {
           "name": "CreateBossFrames",
-          "line": 314
+          "line": 313
         },
         {
           "name": "SyncHudBosses",
-          "line": 322
+          "line": 321
         },
         {
           "name": "ShowBossFrame",
-          "line": 336
+          "line": 335
         },
         {
           "name": "UpdateBossFrame",
-          "line": 418
+          "line": 417
         },
         {
           "name": "RegisterPlate",
-          "line": 461
+          "line": 460
         },
         {
           "name": "SetPlateAlpha",
-          "line": 524
+          "line": 523
         },
         {
           "name": "Lift",
-          "line": 534
+          "line": 533
         },
         {
           "name": "Drop",
-          "line": 546
+          "line": 545
         },
         {
           "name": "ApplyPlate",
-          "line": 563
+          "line": 562
         },
         {
           "name": "UpdatePlates",
-          "line": 618
+          "line": 617
         },
         {
           "name": "SyncNativePlates",
-          "line": 686
+          "line": 685
         },
         {
           "name": "SetFilter",
-          "line": 695
+          "line": 694
         },
         {
           "name": "ApplyCamera",
-          "line": 702
+          "line": 701
         },
         {
           "name": "UpdateTargetHealth",
-          "line": 716
+          "line": 715
         },
         {
           "name": "UpdatePlayerBar",
-          "line": 745
+          "line": 744
         },
         {
           "name": "PulsePlayerBar",
-          "line": 798
+          "line": 797
         },
         {
           "name": "TestLowHealth",
-          "line": 807
+          "line": 806
         },
         {
           "name": "CreatePlayerBar",
-          "line": 813
+          "line": 812
         },
         {
           "name": "BuffIcon",
-          "line": 853
+          "line": 852
         },
         {
           "name": "FormatBuffTime",
-          "line": 871
+          "line": 870
         },
         {
           "name": "UpdatePlayerBuffs",
-          "line": 881
+          "line": 880
         },
         {
           "name": "CreatePlayerBuffs",
-          "line": 914
+          "line": 913
         },
         {
           "name": "Pct",
-          "line": 929
+          "line": 928
         },
         {
           "name": "PctOf",
-          "line": 934
+          "line": 933
         },
         {
           "name": "ParseStats",
-          "line": 974
+          "line": 973
         },
         {
           "name": "StatsRow",
-          "line": 989
+          "line": 988
         },
         {
           "name": "ApplyCompactPanel",
-          "line": 1005
+          "line": 1004
         },
         {
           "name": "AddCompactButton",
@@ -345,227 +469,207 @@
         },
         {
           "name": "MenuFont",
-          "line": 1104
+          "line": 1105
         },
         {
           "name": "StyleWindow",
-          "line": 1113
+          "line": 1114
         },
         {
           "name": "CreateStatsPicker",
-          "line": 1164
+          "line": 1130
         },
         {
           "name": "ToggleStatsPicker",
-          "line": 1199
+          "line": 1165
         },
         {
           "name": "RunGold",
-          "line": 1222
+          "line": 1189
         },
         {
           "name": "ChestPrice",
-          "line": 1231
+          "line": 1198
         },
         {
           "name": "ChestCost",
-          "line": 1240
+          "line": 1207
         },
         {
           "name": "NoteGoldChange",
-          "line": 1253
+          "line": 1220
         },
         {
           "name": "Compact",
-          "line": 1280
+          "line": 1247
         },
         {
           "name": "UpdateMoneyFrame",
-          "line": 1293
+          "line": 1260
         },
         {
           "name": "SyncHudTally",
-          "line": 1339
+          "line": 1306
         },
         {
           "name": "CreateMoneyFrame",
-          "line": 1353
+          "line": 1320
         },
         {
           "name": "ReadSlot",
-          "line": 1406
+          "line": 1374
         },
         {
           "name": "UpdateGearFrame",
-          "line": 1430
+          "line": 1398
         },
         {
           "name": "CreateGearFrame",
-          "line": 1464
+          "line": 1432
         },
         {
           "name": "CreateBarWindow",
-          "line": 1530
+          "line": 1499
         },
         {
           "name": "FitRows",
-          "line": 1602
+          "line": 1572
         },
         {
           "name": "InRun",
-          "line": 1616
+          "line": 1587
         },
         {
           "name": "UpdateMeterFrame",
-          "line": 1621
+          "line": 1592
         },
         {
           "name": "UpdateTakenFrame",
-          "line": 1657
+          "line": 1628
         },
         {
           "name": "SyncHudMeter",
-          "line": 1692
+          "line": 1663
         },
         {
           "name": "CreateMeterFrames",
-          "line": 1700
+          "line": 1671
         },
         {
           "name": "UpdateMeterFrames",
-          "line": 1712
+          "line": 1683
         },
         {
           "name": "UpdateChestPins",
-          "line": 1731
+          "line": 1702
         },
         {
           "name": "FormatClock",
-          "line": 1741
+          "line": 1712
         },
         {
           "name": "UpdateLairFrame",
-          "line": 1747
+          "line": 1718
         },
         {
           "name": "CreateLairFrame",
-          "line": 1832
+          "line": 1803
         },
         {
           "name": "ApplyDamageNumbers",
-          "line": 1857
+          "line": 1828
         },
         {
           "name": "FieldKit_UseCombatTextOnly",
-          "line": 1868
+          "line": 1839
         },
         {
           "name": "SlotOf",
-          "line": 1892
+          "line": 1863
         },
         {
           "name": "SwapSlots",
-          "line": 1900
+          "line": 1871
         },
         {
           "name": "HookBarDrag",
-          "line": 1910
+          "line": 1881
         },
         {
           "name": "PlaceMicroMenu",
-          "line": 1944
+          "line": 1915
         },
         {
           "name": "PlaceBarButtons",
-          "line": 1974
+          "line": 1945
         },
         {
           "name": "UpdateCompactXP",
-          "line": 1991
+          "line": 1962
         },
         {
           "name": "CreateCompactBar",
-          "line": 2002
+          "line": 1973
         },
         {
           "name": "AttachMoneyToBar",
-          "line": 2083
+          "line": 2055
         },
         {
           "name": "KeepCompactBar",
-          "line": 2103
+          "line": 2075
         },
         {
           "name": "UpdateGryphons",
-          "line": 2132
-        },
-        {
-          "name": "RefreshPanel",
-          "line": 2178
-        },
-        {
-          "name": "FieldKit_RefreshInterfaceLanguage",
-          "line": 2206
-        },
-        {
-          "name": "ShowTip",
-          "line": 2213
-        },
-        {
-          "name": "AddCheck",
-          "line": 2224
-        },
-        {
-          "name": "AddSlider",
-          "line": 2272
-        },
-        {
-          "name": "AddCameraSlider",
-          "line": 2305
+          "line": 2104
         },
         {
           "name": "ResetPositions",
-          "line": 2340
+          "line": 2143
         },
         {
-          "name": "SelectTab",
-          "line": 2353
+          "name": "RefreshPanel",
+          "line": 2149
+        },
+        {
+          "name": "FieldKit_RefreshInterfaceLanguage",
+          "line": 2150
         },
         {
           "name": "CreatePanel",
-          "line": 2377
+          "line": 2155
         },
         {
           "name": "TogglePanel",
-          "line": 2509
+          "line": 2168
         },
         {
           "name": "CreateMinimapButton",
-          "line": 2523
+          "line": 2174
         },
         {
           "name": "PlaceOnRim",
-          "line": 2533
+          "line": 2184
         },
         {
           "name": "InitDB",
-          "line": 2568
+          "line": 2219
         },
         {
           "name": "FieldKitEventLifecycle",
-          "line": 2590
+          "line": 2241
         },
         {
           "name": "FieldKitEventWorld",
-          "line": 2613
+          "line": 2265
         },
         {
           "name": "FieldKitEventOther",
-          "line": 2640
+          "line": 2292
         },
         {
           "name": "RefreshNativeData",
-          "line": 2688
+          "line": 2340
         }
       ],
       "literalEvents": [
@@ -700,8 +804,8 @@
       "literalEvents": []
     },
     "CombatOptions.lua": {
-      "bytes": 12933,
-      "sha256": "2ef4fead53c9e76ed504e9fe93ad1cc69ac58af0ff8daffa9420b2fe134b54f9",
+      "bytes": 13342,
+      "sha256": "1bafcccaac54981ccd9d592679aa2537dd1b68414ad2b982bf0460b3783ee402",
       "namedFunctions": [
         {
           "name": "Name",
@@ -712,55 +816,63 @@
           "line": 7
         },
         {
-          "name": "Text",
+          "name": "Track",
           "line": 12
         },
         {
+          "name": "Text",
+          "line": 16
+        },
+        {
           "name": "Tip",
-          "line": 17
+          "line": 21
         },
         {
           "name": "Button",
-          "line": 22
-        },
-        {
-          "name": "Check",
           "line": 26
         },
         {
-          "name": "Flag",
-          "line": 35
+          "name": "Check",
+          "line": 30
         },
         {
-          "name": "Slider",
+          "name": "Flag",
           "line": 39
         },
         {
+          "name": "Slider",
+          "line": 43
+        },
+        {
           "name": "Number",
-          "line": 55
+          "line": 60
         },
         {
           "name": "Choice",
-          "line": 59
+          "line": 64
         },
         {
           "name": "ui.Refresh",
-          "line": 79
+          "line": 70
         },
         {
           "name": "Select",
-          "line": 89
+          "line": 80
         },
         {
           "name": "PositionKey",
-          "line": 167
+          "line": 159
+        },
+        {
+          "name": "ui.Reflow",
+          "line": 168
         }
       ],
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 4947,
-      "sha256": "bc3c8631e3f81fc105c19b55cad07dc91bf720267012ae388a3bd53df9e10ea2",
+      "bytes": 5054,
+      "sha256": "1fafdbf73cdcb81b1f9b79a81b58d27d290e5b12d962a4c309b990d3c8cb6a0f",
       "namedFunctions": [
         {
           "name": "Clean",
@@ -791,6 +903,116 @@
     }
   },
   "textures": [
+    {
+      "path": "media/ChronicleGlyph01.tga",
+      "bytes": 262188,
+      "sha256": "40d9f4231bca3d5caf90063b657434b51a81a9beb3fd971283ab92a095c716a2"
+    },
+    {
+      "path": "media/ChronicleGlyph02.tga",
+      "bytes": 262188,
+      "sha256": "66900121ce5b99616b4fa0c4ce82df98534f53140c9b1d3079edfb07cda70b88"
+    },
+    {
+      "path": "media/ChronicleGlyph03.tga",
+      "bytes": 262188,
+      "sha256": "665f54db175d24968775b1c98b47d08e51ef23387950cf97ad17cd46eef3173b"
+    },
+    {
+      "path": "media/ChronicleGlyph04.tga",
+      "bytes": 262188,
+      "sha256": "fc538d432f7e94a80d97a02d66db62f5ca66de5a0d41b141dab0fde50549eb5a"
+    },
+    {
+      "path": "media/ChronicleGlyph05.tga",
+      "bytes": 262188,
+      "sha256": "5a27bf7f20df94e4ac4501c410757b97be3b417c37034c2b8a467d675486e566"
+    },
+    {
+      "path": "media/ChronicleGlyph06.tga",
+      "bytes": 262188,
+      "sha256": "d5d505ffeeb28ea712f14f212d1a4ee6b025bd27820c85857e81478320473817"
+    },
+    {
+      "path": "media/ChronicleGlyph07.tga",
+      "bytes": 262188,
+      "sha256": "33bb035205c9730a9e02ce24b18ad49de2b794d728492d333d4115f634c1234a"
+    },
+    {
+      "path": "media/ChronicleGlyph08.tga",
+      "bytes": 262188,
+      "sha256": "1c190b4d8863f01cd2953720ea16f3f625f044eeffacc5cae0749b5eff1f92bb"
+    },
+    {
+      "path": "media/ChronicleGlyph09.tga",
+      "bytes": 262188,
+      "sha256": "35a067196dcc9f427c63ebffd509c58635f58551ee81a00fe67686653ded5d40"
+    },
+    {
+      "path": "media/ChronicleGlyph10.tga",
+      "bytes": 262188,
+      "sha256": "3440d9fd94212f168d4bc6403452606e0489f2cdb4a4abf034fd71d507f4440a"
+    },
+    {
+      "path": "media/ChronicleGlyph11.tga",
+      "bytes": 262188,
+      "sha256": "a8eecb96aceaa4bb588c19982d4c0a37f17ffde580e9efdde6f4f6e9fa3ba5b3"
+    },
+    {
+      "path": "media/ChronicleGlyph12.tga",
+      "bytes": 262188,
+      "sha256": "03bdece96d601dd895190e717e48ae81ffb9d3f5b6a32cc6de4603288b54e4fa"
+    },
+    {
+      "path": "media/ChronicleGlyph13.tga",
+      "bytes": 262188,
+      "sha256": "74fdb2576e7ded1ab9cfaf6748c9d80f9cfa9657f1d139764669f6c7d19cd01d"
+    },
+    {
+      "path": "media/ChronicleGlyph14.tga",
+      "bytes": 262188,
+      "sha256": "3147f674f26f4f09e35132a05cdb66a8c29a345f9802de6155b704ae131e52df"
+    },
+    {
+      "path": "media/ChronicleGlyph15.tga",
+      "bytes": 262188,
+      "sha256": "2af1e7268fd2b11b6057f198d6081ab4469011aeaaac89a58c2198904eb61840"
+    },
+    {
+      "path": "media/ChronicleGlyph16.tga",
+      "bytes": 262188,
+      "sha256": "ea117d4d4c7d485b6ba06f9fe445d465d093e1092e874cef95fef62024881141"
+    },
+    {
+      "path": "media/ChronicleGrain.tga",
+      "bytes": 65580,
+      "sha256": "a8dfe4cf993085897118dbe667e736010d39d0721fdd7c5c9bfa856447f02514"
+    },
+    {
+      "path": "media/ChroniclePlate1.tga",
+      "bytes": 262188,
+      "sha256": "f03b2527970ab91e823dacf4806966b776c96bc6cfe2df6bc8bab71f2c87f5c0"
+    },
+    {
+      "path": "media/ChroniclePlate2.tga",
+      "bytes": 262188,
+      "sha256": "be3ae53f13fe54cc5b323d5861fdc3652d1ada6681eb3fbe3b3d225707d4cee6"
+    },
+    {
+      "path": "media/ChroniclePlate3.tga",
+      "bytes": 262188,
+      "sha256": "92bd0e6d8c6702a75f6d3e183e09075261e7acd2e276e8ac903cdbf63ddbf118"
+    },
+    {
+      "path": "media/ChroniclePlate4.tga",
+      "bytes": 262188,
+      "sha256": "7eab80065cea4a499303820187de5df32dec8579bde18f59053dc4d049dea4a7"
+    },
+    {
+      "path": "media/ChronicleSeal.tga",
+      "bytes": 65580,
+      "sha256": "65ff5ae1cc052c7ab36fe8d41a41cbd38f3356a0c4f83b93be96cd7fdcfeafa3"
+    },
     {
       "path": "Portraits/d10169.tga",
       "bytes": 65580,
@@ -1282,6 +1504,108 @@
       "sha256": "0ede54dbba2737e724bd9cea10a608c613d4b1cc5e8377eda085d74f7913ddd7"
     }
   ],
+  "themeMedia": {
+    "media/ChronicleGrain.tga": {
+      "sha256": "a8dfe4cf993085897118dbe667e736010d39d0721fdd7c5c9bfa856447f02514",
+      "bytes": 65580
+    },
+    "media/ChronicleSeal.tga": {
+      "sha256": "65ff5ae1cc052c7ab36fe8d41a41cbd38f3356a0c4f83b93be96cd7fdcfeafa3",
+      "bytes": 65580
+    },
+    "media/AzerothSans.ttf": {
+      "sha256": "eabcbfd9d8f91780eabcf59f4628d00cf629dcfb3f20c7fd4c94f163fbcd0fe0",
+      "bytes": 569044
+    },
+    "media/AzerothSerif.ttf": {
+      "sha256": "e447d6a412357a324e2bb72d2627500ea88d9c00205a8b1a6205546e1152ddef",
+      "bytes": 638028
+    },
+    "media/OFL-NotoSans.txt": {
+      "sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb",
+      "bytes": 4377
+    },
+    "media/ChroniclePlate1.tga": {
+      "sha256": "f03b2527970ab91e823dacf4806966b776c96bc6cfe2df6bc8bab71f2c87f5c0",
+      "bytes": 262188
+    },
+    "media/ChroniclePlate2.tga": {
+      "sha256": "be3ae53f13fe54cc5b323d5861fdc3652d1ada6681eb3fbe3b3d225707d4cee6",
+      "bytes": 262188
+    },
+    "media/ChroniclePlate3.tga": {
+      "sha256": "92bd0e6d8c6702a75f6d3e183e09075261e7acd2e276e8ac903cdbf63ddbf118",
+      "bytes": 262188
+    },
+    "media/ChroniclePlate4.tga": {
+      "sha256": "7eab80065cea4a499303820187de5df32dec8579bde18f59053dc4d049dea4a7",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph01.tga": {
+      "sha256": "40d9f4231bca3d5caf90063b657434b51a81a9beb3fd971283ab92a095c716a2",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph02.tga": {
+      "sha256": "66900121ce5b99616b4fa0c4ce82df98534f53140c9b1d3079edfb07cda70b88",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph03.tga": {
+      "sha256": "665f54db175d24968775b1c98b47d08e51ef23387950cf97ad17cd46eef3173b",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph04.tga": {
+      "sha256": "fc538d432f7e94a80d97a02d66db62f5ca66de5a0d41b141dab0fde50549eb5a",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph05.tga": {
+      "sha256": "5a27bf7f20df94e4ac4501c410757b97be3b417c37034c2b8a467d675486e566",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph06.tga": {
+      "sha256": "d5d505ffeeb28ea712f14f212d1a4ee6b025bd27820c85857e81478320473817",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph07.tga": {
+      "sha256": "33bb035205c9730a9e02ce24b18ad49de2b794d728492d333d4115f634c1234a",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph08.tga": {
+      "sha256": "1c190b4d8863f01cd2953720ea16f3f625f044eeffacc5cae0749b5eff1f92bb",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph09.tga": {
+      "sha256": "35a067196dcc9f427c63ebffd509c58635f58551ee81a00fe67686653ded5d40",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph10.tga": {
+      "sha256": "3440d9fd94212f168d4bc6403452606e0489f2cdb4a4abf034fd71d507f4440a",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph11.tga": {
+      "sha256": "a8eecb96aceaa4bb588c19982d4c0a37f17ffde580e9efdde6f4f6e9fa3ba5b3",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph12.tga": {
+      "sha256": "03bdece96d601dd895190e717e48ae81ffb9d3f5b6a32cc6de4603288b54e4fa",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph13.tga": {
+      "sha256": "74fdb2576e7ded1ab9cfaf6748c9d80f9cfa9657f1d139764669f6c7d19cd01d",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph14.tga": {
+      "sha256": "3147f674f26f4f09e35132a05cdb66a8c29a345f9802de6155b704ae131e52df",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph15.tga": {
+      "sha256": "2af1e7268fd2b11b6057f198d6081ab4469011aeaaac89a58c2198904eb61840",
+      "bytes": 262188
+    },
+    "media/ChronicleGlyph16.tga": {
+      "sha256": "ea117d4d4c7d485b6ba06f9fe445d465d093e1092e874cef95fef62024881141",
+      "bytes": 262188
+    }
+  },
   "inGameTest": false,
   "approval": "not approved"
 }

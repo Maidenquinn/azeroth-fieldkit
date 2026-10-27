@@ -26,6 +26,15 @@ def runtime(saved=None):
 
 fresh=runtime();fresh.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
 fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))
+assert fresh.globals().FieldKitDB.uiPage=='home'
+# Migrating navigation must preserve unrelated preferences and explicit opt-outs.
+for title,page in {'Nameplates':'nameplates','Player':'health','Target':'health','Combat':'bosses',
+                   'Boss health':'bosses','Combat text':'combat','Camera':'interface','Windows':'windows'}.items():
+ old=runtime('{panelSection='+json.dumps(title)+',panelTab=4,playerHealthMode=3,moneyFrame=false,combatTextX=-217}')
+ old.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+ assert old.globals().FieldKitDB.uiPage==page
+ assert old.globals().FieldKitDB.playerHealthMode==3 and old.globals().FieldKitDB.moneyFrame is False
+ assert old.globals().FieldKitDB.combatTextX==-217
 defaults=runtime()
 defaults.execute('''
 local writes=0
@@ -51,7 +60,7 @@ official=runtime();official.execute((base/'tests/official_api.lua').read_text(en
 l=runtime('{compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,chestPins=true,guardianPins=true,moneyDetached=true,pos={FieldKitMoneyFrame={-2.5374755859375,-348.0493927001953}}}')
 assert l.globals().FieldKit.version==version,'TOC/runtime version mismatch'
 l.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
-for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua'):
+for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua','interface_journey.lua'):
  l.execute((base/'tests'/name).read_text(encoding='utf8'),name=name)
  print('PASS',name)
 l.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))

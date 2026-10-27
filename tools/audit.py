@@ -37,21 +37,31 @@ for name in loaded:
    functions.append({'name':m[1],'line':line})
    index.append(f'- [{name}: {m[1]}](../AzerothFieldKit/{name}#L{line})')
  files[name]={'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'namedFunctions':functions,'literalEvents':events}
-textures=[]
+media=json.loads((base/"data/theme-assets.json").read_text(encoding="utf8"))["files"]
+textures=[];portraits=0
 for p in sorted(root.rglob('*')):
  assert not p.is_symlink(),'No symlinks in runtime'
  if not p.is_file():continue
- assert p.suffix in ('.lua','.toc','.tga'),('Unexpected runtime file',p.name)
+ relative=p.relative_to(root).as_posix()
+ if relative in media:
+  raw=p.read_bytes();expected=media[relative]
+  assert len(raw)==expected['bytes'] and hashlib.sha256(raw).hexdigest()==expected['sha256'],relative
+ else:
+  assert p.suffix in ('.lua','.toc','.tga'),('Unexpected runtime file',p.name)
  if p.suffix=='.tga':
   raw=p.read_bytes();width,height=struct.unpack_from('<HH',raw,12)
-  assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height)==(128,128),p.name
+  assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height) in ((128,128),(256,256)),p.name
+  if not relative.startswith('media/'):
+   assert (width,height)==(128,128),p.name
+   portraits+=1
   assert len(raw)>=18+raw[0]+width*height*4,p.name
   textures.append({'path':p.relative_to(root).as_posix(),'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})
-assert len(textures)==98
+assert portraits==98
+assert all((root/name).is_file() for name in media)
 report={'kind':'maintainer static inventory; not certification','candidate':version,
  'runtimeModules':len(loaded),'textureCount':len(textures),'forbiddenTokenGatePassed':True,
  'dynamicCombatEventNames':'See CombatText.lua events list; not all registrations are string literals.',
- 'files':files,'textures':textures,'inGameTest':False,'approval':'not approved'}
+ 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':'not approved'}
 docs=base/'docs';docs.mkdir(exist_ok=True)
 (docs/'AUDIT_INVENTORY.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n',encoding='utf8',newline='\n')
 (docs/'CODE_INDEX.md').write_text('\n'.join(index)+'\n',encoding='utf8',newline='\n')

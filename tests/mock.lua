@@ -143,3 +143,6 @@ function methods:SetFocus() self.focused=true end
 function methods:HighlightText() self.highlighted=true end
 function methods:SetID(id) self.id=id end
 function methods:GetID() return self.id end
+function methods:EnableMouseWheel(v) self.mouseWheel=v end
+function methods:SetVerticalScroll(v) self.verticalScroll=v end
+function methods:GetVerticalScroll() return self.verticalScroll or 0 end
