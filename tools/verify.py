@@ -60,12 +60,13 @@ official=runtime();official.execute((base/'tests/official_api.lua').read_text(en
 l=runtime('{compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,chestPins=true,guardianPins=true,moneyDetached=true,pos={FieldKitMoneyFrame={-2.5374755859375,-348.0493927001953}}}')
 assert l.globals().FieldKit.version==version,'TOC/runtime version mismatch'
 l.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
-for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua','interface_journey.lua'):
+for name in ('test_money.lua','tests.lua','test_worldpins.lua','test_combat_editor.lua','test_localization.lua','interface_journey.lua','card_preferences.lua'):
  l.execute((base/'tests'/name).read_text(encoding='utf8'),name=name)
  print('PASS',name)
 l.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 saved=l.eval('SNAPSHOT(FieldKitDB)')
 again=runtime(saved);again.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")')
+again.execute('assert(FieldKitDB.cardStyle==2 and FieldKitDB.cardOpacity==37 and FieldKitDB.meterValues==2)')
 again.execute('assert(FieldKitDB.language=="fr");assert(FieldKitDB.guardianPins==false);assert(FieldKitDB.targetHealthMode==2);assert(FieldKitDB.combatTextX==-123);assert(FieldKitDB.combatEvents.crit.size=="31");assert(FieldKitDB.chatCopy==false)')
 # Walk every compiled nested function, even callbacks the mock did not reach.
 compiler=LuaRuntime(encoding=None);prototypes={}

@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0-review.1",
+  "version": "0.2.0-review.2",
   "lua51": true,
   "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed",
   "persistence": true,
@@ -15,12 +15,12 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "47cb234b29e6ab0ff2e261cb2149fc63a31c6b05fcd27c6154e2bdee10b70c93"
+      "sha256": "e44d653ba174f46c51a49727acb4bde407a761bfd08856005bba67c38b46bfbc"
     },
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "8f8eadb1198322f3d48b11406be8ae07d3e6410360aa23049c05b6f838819090"
+      "sha256": "4bb7366df157e0e6463c34079a09fe8a31e0230451bb929b417d52c9af5b5c3f"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
@@ -30,12 +30,12 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "0f9f05ad8b2d3e87b148786bb511a71997ae6354872c1fe546bfa850d117b829"
+      "sha256": "731030b4eaca5c2dbc7901e4e6afa7f9900c196e7f3cc4c73fbb3a611ee1d5fc"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
-      "functions": 11,
-      "sha256": "802668c15a933434219e360d4c6f20c9acb75b3f1f2f41df82088903b2f6e09c"
+      "functions": 14,
+      "sha256": "d762afb53a0f96f9cef7dd6d2df192320d07f9f267361835ccf513cf179d3d19"
     },
     "Seed.lua": {
       "maxUpvalues": 0,
@@ -54,8 +54,8 @@
     },
     "Settings.lua": {
       "maxUpvalues": 2,
-      "functions": 6,
-      "sha256": "d22329429e2591dbf008a7c9d80a43fbc92090988a81b55880a60e500ed9dedc"
+      "functions": 7,
+      "sha256": "523b87dfa259394dac15c1588e061df75dc7894fdb3f6bd821975dc736cdf25a"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
@@ -69,13 +69,13 @@
     },
     "Interface.lua": {
       "maxUpvalues": 5,
-      "functions": 58,
-      "sha256": "30824a96b91a1bb4f3633cd9a92f8d87dd146ae3ed135a2a5ea55c7748c68d0d"
+      "functions": 65,
+      "sha256": "aea0f37032352f48d46244707a29ad78c8c4b133b3a34acec63004f82bfab56c"
     },
     "FieldKit.lua": {
       "maxUpvalues": 17,
       "functions": 162,
-      "sha256": "ae116f2308f444fea3d71eaf3a0c91dba2dcd90a441cfb58fbdcaad71322444e"
+      "sha256": "74eb5aad90e265dac52d204ab33fdf9b327f8c1f25428f4a6cb8ee25de779bb7"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,

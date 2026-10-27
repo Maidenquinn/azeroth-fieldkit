@@ -15,6 +15,9 @@ function FieldKit.InitializeSettings(defaultStats)
   if type(d[key])~=type(value) then d[key]=value end
  end
  d.schema=1;d.language=d.language=="fr" and "fr" or "en"
+ d.cardStyle=math.floor(FieldKit.Number(d.cardStyle,1,1,2))
+ d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
+ d.meterValues=math.floor(FieldKit.Number(d.meterValues,3,1,3))
  for _,key in ipairs({"known","pos","collapsedWindows"}) do
   if type(d[key])~="table" then d[key]={} end
  end

@@ -9,6 +9,19 @@ function FieldKit_FormatHealth(current,maximum,mode)
  if mode==3 then return numbers.." ("..percent.."%)" end
  return numbers
 end
+-- These are observed native meter fields, not damage inferred from DPS/time.
+-- Missing fields remain visibly unknown. Damage totals are displayed unabridged.
+function FieldKit_FormatMeterValues(line,mode)
+ local damage=FieldKit.Number(line.dmg,nil,0)
+ local rate=FieldKit.Number(line.dps,nil,0)
+ local share=FieldKit.Number(line.share,nil,0)
+ local amount=damage and string.format("%.0f",damage) or "?"
+ local dps=(rate and string.format("%.0f",rate) or "?").." dps"
+ local percent=share and string.format("%.0f%%",share*100) or "?"
+ if mode==1 then return dps.." | "..percent end
+ if mode==2 then return amount.." | "..dps end
+ return amount.." | "..dps.." | "..percent
+end
 -- Factory keeps checkbox closures small enough for Lua 5.0.
 local function Check(key,label,tip,default)
  return {kind="check",label=label,tip=tip,

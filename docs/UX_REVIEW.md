@@ -73,3 +73,22 @@ finish, reset/Undo and reload once to check persistence. Confirm compact-bar
 application only after explicit reload, money strip visibility, collapsible
 panels, boss portraits with another target, and chest/lair markers. A result
 recorded by the maintainer/user is needed before claiming live-game validation.
+
+## 0.2.0-review.2 additions
+
+Windows now begins with card styling, background opacity and meter-value format.
+These apply immediately and persist. The default meter row shows the unabridged
+native cumulative damage, DPS and share; alternate modes preserve a compact view.
+Unknown native fields display `?`, rather than damage extrapolated from DPS/time.
+The damage meter alone widens to fit the selected values and clamps its visible
+position after resizing. Other window sizes and saved coordinates are preserved.
+
+Classic style reuses four existing slices as one-pixel solid edges, hides the
+other slices and grain, and keeps the body simple. Opacity changes material
+layers only: frame, text, icon and border opacity is not reduced. Switching styles
+restores the original UV/material geometry without allocating additional widgets.
+`tests/card_preferences.lua` exercises actual choice callbacks and observed native
+fields, checks all modes and unknown fields, switches both skins repeatedly,
+checks 0% and partial background opacity, and leaves non-default preferences for
+the serialization/reload fixture. Native Lua 5.0.3 and Lua 5.1 fixtures pass; live
+visual acceptance of this addition is still pending.

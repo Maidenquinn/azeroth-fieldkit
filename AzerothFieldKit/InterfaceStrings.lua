@@ -1,6 +1,11 @@
 -- Presentation-only additions. Native creature/spell names are never translated.
 local fr=FieldKitLocale.fr
 local labels={
+ ["Card style"]="Style des cartes",["Decorative"]="Travaillé",["Classic"]="Classique",
+ ["Card background opacity"]="Opacité du fond des cartes",
+ ["Damage meter values"]="Valeurs du compteur de dégâts",
+ ["DPS + share"]="DPS et contribution",["Damage + DPS"]="Dégâts et DPS",
+ ["Damage + DPS + share"]="Dégâts, DPS et contribution",
  ["Overview"]="Vue d'ensemble",["Start here"]="Pour commencer",["Combat & health"]="Combat et survie",["Your interface"]="Votre interface",
  ["Health & buffs"]="Vie et effets",["Bosses"]="Boss suivis",["Alerts"]="Alertes de survie",["Minimap"]="Minicarte",
  ["Numbers"]="Valeurs numériques",["Percentage"]="Pourcentage",["Numbers + percentage"]="Valeurs et pourcentage",

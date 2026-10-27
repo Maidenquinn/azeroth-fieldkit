@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0-review.2 — 2026-10-27
+
+- Show exact native cumulative damage per ability alongside DPS and contribution by default. Keep selectable DPS/share and damage/DPS modes; widen only the damage meter as needed.
+- Add Decorative / Classic cards and a 0–100% background-opacity slider in Windows. Changes apply immediately to owned panels; labels, icons and borders retain their opacity.
+- Reuse existing material slices for classic one-pixel borders; appearance changes allocate no new frames or textures.
+- Verify native totals, unknown-value display, all meter modes, skin switching, zero opacity and persistence under Lua 5.0.3 / 5.1. In-game acceptance pending.
+
 ## 0.2.0-review.1 — 2026-10-27
 
 - Rebuild settings around nine task-oriented pages, with an Overview and direct configuration cards.

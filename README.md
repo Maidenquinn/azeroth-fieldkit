@@ -3,7 +3,7 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.2.0-review.1** is a public **review candidate** shared for technical examination,
+Version **0.2.0-review.2** is a public **review candidate** shared for technical examination,
 not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
 change the authorship or rights of the inherited code.
 
@@ -51,6 +51,7 @@ shows an explicit **Reload UI** action when changed.
 - **Combat text:** General, Events, Fonts, Filters, Areas, Game text. Use Game text
   to turn off duplicate native damage/critical displays.
 - **Health & buffs / Bosses:** select Numbers, Percentage or both in one control.
+- **Windows:** choose Decorative or Classic styling and 0–100% background opacity. Text and borders stay readable. Select DPS + share, exact Damage + DPS, or all three for each ability; damage comes directly from native cumulative totals, never a DPS/time estimate.
 - **Windows / Minimap:** independently enable the windows and pins you need.
 - **Interface:** English/Français, compact bar, native decorations, optional chat
   copy and camera. Native creature/spell/item names are not translated.

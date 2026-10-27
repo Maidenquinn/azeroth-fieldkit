@@ -25,7 +25,17 @@ function FieldKit.BuildJourneySections(sections,actions)
  end
  table.insert(interface,{kind="camera"})
  local windows=old.Windows.items
- table.insert(windows,2,{kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
+ table.insert(windows,1,{kind="choice",label="Card style",values={"Decorative","Classic"},
+  get=function() return FieldKitDB.cardStyle end,
+  set=function(value) FieldKitDB.cardStyle=value;T.Refresh() end})
+ table.insert(windows,2,{kind="slider",label="Card background opacity",min=0,max=100,step=1,
+  format=function(v) return FieldKit_L("Card background opacity")..": "..v.."%" end,
+  get=function() return FieldKitDB.cardOpacity end,
+  set=function(value) FieldKitDB.cardOpacity=value;T.Refresh() end})
+ table.insert(windows,3,{kind="choice",label="Damage meter values",values={"DPS + share","Damage + DPS","Damage + DPS + share"},
+  get=function() return FieldKitDB.meterValues end,
+  set=function(value) FieldKitDB.meterValues=value;actions.UpdateMeterFrames(true) end})
+ table.insert(windows,5,{kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
   get=function() return FieldKitDB.moneyFrame end,
   set=function(value) FieldKitDB.moneyFrame=value;actions.SyncHudTally();actions.UpdateMoneyFrame() end})
  return {

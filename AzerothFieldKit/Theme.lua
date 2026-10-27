@@ -5,6 +5,18 @@ FieldKitTheme={media="Interface\\AddOns\\AzerothFieldKit\\media\\",
  bronze={.54,.44,.27},text={.94,.91,.83},muted={.65,.70,.70},
  green={.61,.77,.57},red={.91,.40,.37}}
 local T=FieldKitTheme
+T.surfaces={}
+
+-- Display preferences affect only our material layers, never frame/text alpha.
+function T.Style() return FieldKitDB and FieldKitDB.cardStyle==2 and 2 or 1 end
+function T.Opacity()
+ return FieldKit.Number(FieldKitDB and FieldKitDB.cardOpacity,100,0,100)/100
+end
+function T.Refresh()
+ for i=1,table.getn(T.surfaces) do
+  local frame=T.surfaces[i];T.State(frame,frame.fieldkitActive);T.Update(frame)
+ end
+end
 
 -- Keep headings and body type consistent; the native face is a safe fallback.
 function T.Font(label,size,color,heading)
@@ -19,11 +31,21 @@ function T.Update(frame)
  if not frame.fieldkitSkin then return end
  local w,h=frame:GetWidth(),frame:GetHeight()
  local skin=frame.fieldkitSkin
- if skin.width==w and skin.height==h then return end
- skin.width=w;skin.height=h
+ local style=T.Style()
+ if skin.width==w and skin.height==h and skin.style==style then return end
+ skin.width=w;skin.height=h;skin.style=style
  skin.base:SetWidth(w);skin.base:SetHeight(h);skin.grain:SetWidth(w);skin.grain:SetHeight(h)
  local c=math.min(skin.kind=="window" and 18 or (skin.kind=="card" and 10 or 6),w/3,h/3)
  local xs,ys={0,c,w-c},{0,c,h-c}
+ if style==2 then
+  -- Four one-pixel solid edges; remaining ornate slices stay hidden.
+  local edges={{0,0,w,1},{0,h-1,w,1},{0,0,1,h},{w-1,0,1,h}}
+  for i=1,4 do
+   local t=skin.parts[i].texture;local e=edges[i]
+   t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",e[1],-e[2]);t:SetWidth(e[3]);t:SetHeight(e[4])
+  end
+  return
+ end
  for i=1,table.getn(skin.parts) do
   local p=skin.parts[i];local x,y=p.x,p.y
   p.texture:ClearAllPoints();p.texture:SetPoint("TOPLEFT",frame,"TOPLEFT",xs[x],-ys[y])
@@ -37,6 +59,7 @@ function T.Surface(frame,kind)
  if frame.fieldkitSkin then T.Update(frame);return end
  kind=kind or "card";frame:SetBackdrop({})
  local skin={kind=kind,parts={}};frame.fieldkitSkin=skin
+ table.insert(T.surfaces,frame)
  local color=kind=="card" and T.panel or T.background
  skin.base=frame:CreateTexture(nil,"BACKGROUND");skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
  skin.base:SetTexture(color[1],color[2],color[3]);skin.base:SetAlpha(1)
@@ -56,12 +79,21 @@ end
 function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
  local alpha=(frame.fieldkitNavigation and not active) and 0 or 1
- skin.base:SetAlpha(alpha);skin.grain:SetAlpha(.16*alpha)
- for i=1,table.getn(skin.parts) do skin.parts[i].texture:SetAlpha(alpha) end
+ local opacity=skin.kind=="button" and 1 or T.Opacity()
+ skin.base:SetAlpha(alpha*opacity);skin.grain:SetAlpha(T.Style()==2 and 0 or .16*alpha*opacity)
  local plate=skin.kind=="window" and 4 or (skin.kind=="card" and 3 or (active and 2 or 1))
  for i=1,table.getn(skin.parts) do
   local t=skin.parts[i].texture
-  if t.fieldkitPlate~=plate then t:SetTexture(T.media.."ChroniclePlate"..plate..".tga");t.fieldkitPlate=plate end
+  if T.Style()==2 then
+   if i<=4 then
+    t:Show();t:SetTexture(T.bronze[1],T.bronze[2],T.bronze[3]);t:SetAlpha(alpha)
+   else t:Hide() end
+   t.fieldkitPlate=nil
+  else
+   if skin.kind=="window" and i==5 then t:Hide() else t:Show() end
+   if t.fieldkitPlate~=plate then t:SetTexture(T.media.."ChroniclePlate"..plate..".tga");t.fieldkitPlate=plate end
+   t:SetAlpha(alpha*(i==5 and opacity or 1))
+  end
  end
  frame.fieldkitActive=active and true or false
 end

@@ -1599,6 +1599,11 @@ local function UpdateMeterFrame(force)
 	end
 	local lines, total, dps = AZS_GetMeter()
 	lines = lines or {}
+ local width=DB.meterValues==1 and METER_WIDTH or (DB.meterValues==2 and 320 or 360)
+ if meterFrame:GetWidth()~=width then
+  meterFrame:SetWidth(width);FieldKitTheme.Update(meterFrame)
+  if meterFrame.azsDefault and not meterFrame.azsMoving then PlaceMovable(meterFrame) end
+ end
 	FieldKit_Text(meterFrame.total,ShortNumber(total or 0).."  ("..ShortNumber(dps or 0).." dps)")
 	-- Total DPS can change with the run clock even when no new hit arrived.
 	-- Only the spell rows are stamp-cached; their values come from the native list.
@@ -1617,7 +1622,7 @@ local function UpdateMeterFrame(force)
 			row:SetStatusBarColor(0.8, 0.55, 0.1, 0.55)
 		end
 		row.label:SetText(line.name or "?")
-		row.value:SetText(string.format("%s  %.0f%%", ShortNumber(line.dps or 0), ( line.share or 0 ) * 100))
+		row.value:SetText(FieldKit_FormatMeterValues(line,DB.meterValues))
 		row:Show()
 	end
 	FitRows(meterFrame, n)

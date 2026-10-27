@@ -18,5 +18,5 @@ dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 FieldKitDB={compactBar=true,bossFrame=true,hidePlates=true,replaceTally=true,chestPins=true,guardianPins=true,moneyDetached=true,pos={FieldKitMoneyFrame={-2.5374755859375,-348.0493927001953}}}
 fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")
-for _,name in ipairs({"test_money.lua","tests.lua","test_worldpins.lua","test_combat_editor.lua","test_localization.lua","interface_journey.lua"}) do dofile("tests/"..name) end
+for _,name in ipairs({"test_money.lua","tests.lua","test_worldpins.lua","test_combat_editor.lua","test_localization.lua","interface_journey.lua","card_preferences.lua"}) do dofile("tests/"..name) end
 print("Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed")
