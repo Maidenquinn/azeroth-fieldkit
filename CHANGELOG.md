@@ -1,5 +1,14 @@
 # Changelog
 
+## Publication documentation — 2026-10-28 (no runtime change)
+
+- Record maintainer-reported game-team permission to post as a verified addon.
+- Update EN/FR getting-started and approval status; retain Malk's credits and
+  separate unresolved rights from publication permission.
+- Prepare a Discord announcement, exact package identity and player-support guide.
+- Keep 0.2.1-review.3, its ZIP, tag, checksum and prerelease label unchanged.
+  Historical validation reports are not rewritten as certification evidence.
+
 ## 0.2.1-review.3 — 2026-10-28
 
 - Fix post-drag repositioning by saving/restoring native GetPoint anchors instead of subtracting GetCenter coordinates and immediately applying a second center clamp.

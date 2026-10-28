@@ -1,4 +1,10 @@
-# Suggested message to game developers (not sent)
+# Historical submission draft
+
+This draft predates the maintainer's 2026-10-28 report of permission to post as a
+verified addon. Do not resend it as a current status request. Use PUBLICATION.md
+and DISCORD_ANNOUNCEMENT.md for the current publication materials.
+
+## Original suggested message (not sent by tools)
 
 Hi! I'm preparing **Azeroth FieldKit**, a maintained fork of **MASH by Malk**,
 for your manual addon review. I am not claiming that a rename makes the old

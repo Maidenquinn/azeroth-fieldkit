@@ -1,6 +1,11 @@
 # Manual approval dossier
 
-**Azeroth FieldKit 0.2.1-review.3 — submitted candidate, not approved.**
+**Publication status updated 2026-10-28:** the maintainer reports game-team
+permission to post FieldKit as a verified addon and receipt of its Discord role.
+See [PUBLICATION.md](PUBLICATION.md). The questions and findings below remain
+the technical review record, not a claim that every feature received a separate
+written decision. No approval message, hash binding or scope conditions have
+been supplied in this repository.
 
 Maintainer: Kevin Radlowski / Maidenhead. Origin: MASH by Malk. This dossier is
 prepared for game developers to inspect; it has not been sent to them by a tool.
@@ -38,13 +43,14 @@ The entire shipped code and its available capabilities are disclosed.
 - Malk's modification/redistribution permission or an applicable upstream license
   has not been obtained from the examined material.
 - Distribution rights for game-derived portraits/data remain unconfirmed.
-- Current developer approval rules and any rejection explanation are not supplied.
+- Verified-channel publication permission is now reported; exact version/hash binding
+  and any feature-specific conditions have not been supplied.
 - The renamed/refactored candidate has not been visually/integration-tested in
   the running game. Historical MASH user tests are not validation of this fork.
 
 The maintainer has authorized a public repository and review prerelease so game
 developers can inspect the candidate. This is not a certification, a license grant
-or an approved replacement for MASH.
+or a transfer of Malk's rights. Current publication status is recorded above.
 
 ## Maintainer assurances supported by this work
 
