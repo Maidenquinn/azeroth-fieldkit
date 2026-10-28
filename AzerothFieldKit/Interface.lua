@@ -50,6 +50,9 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(windows,{kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
   get=function() return FieldKitDB.partyMeter end,
   set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end})
+ table.insert(windows,{kind="check",label="Share spell breakdowns with group",tip="Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots.",
+  get=function() return FieldKitDB.partyDetailSync end,
+  set=function(v) FieldKitDB.partyDetailSync=v;FieldKitPartySync.Watch();FieldKitCoop.Update() end})
  local sizes=FieldKitCardLayout.Options()
  for i=1,table.getn(sizes) do table.insert(windows,3+i,sizes[i]) end
  return {

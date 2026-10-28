@@ -2321,6 +2321,7 @@ local function FieldKitEventOther()
 	elseif ( event == "PLAYER_AURAS_CHANGED" ) then
 		UpdatePlayerBuffs()
 	elseif ( event == "CHAT_MSG_ADDON" ) then
+  FieldKitPartySync.Receive(arg1,arg2,arg3,arg4)
   FieldKitCoop.Packet(arg1)
 		if ( arg1 == "AZS" and arg2 ) then
 			-- The official parser runs before addons; avoid parsing its payload twice.
@@ -2389,11 +2390,12 @@ frame:SetScript("OnUpdate", function()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
 	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update() end
- FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+ FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitPartySync.Tick()
 end)
 
 SLASH_FieldKit1 = "/fieldkit"
 SlashCmdList["FieldKit"] = function(msg)
+ if msg=="sync" then FieldKitPartySync.Diagnostic();return end
  if msg=="coop" then FieldKitCoop.Diagnostic();return end
 	if ( not DB ) then
 		return

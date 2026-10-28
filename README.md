@@ -73,6 +73,17 @@ shared with Azeroth Stats but bundled locally: that addon is not required.
 
 ### Co-op in the local 0.2.2-review.2 candidate
 
+**Experimental 0.2.2-review.4 update:** the hover card follows your HUD preset
+and background opacity. To obtain an ally's full spell snapshot, both players
+must install this candidate and enable **Windows → Share spell breakdowns with
+group**, then hover the ally's row. This sends only own native meter data on
+request through a bounded PARTY addon channel. It is off by default. Shared
+data shows its receipt age; without a response the native fallback remains limited.
+The protocol passes simulated two-client tests, but **delivery in the actual
+co-op client is not confirmed**. `/fieldkit sync` distinguishes accepted API
+calls from received complete snapshots. There is no visible chat or external
+helper fallback. See [setup, privacy, bounds and real test](docs/PARTY_SYNC.md).
+
 **Hover detail in 0.2.2-review.3:** hover a name in Group damage. Your own card
 shows the native per-spell table, including sources beyond the main meter's
 eight visible rows. Wheel over the name/card or use its arrows; the card remains
@@ -82,7 +93,8 @@ and its DPS: the card labels that limit and leaves missing spell damage/share
 unknown. It cannot show their complete spell list with the current API. Own
 spell totals are read independently of the party snapshot and can differ while
 packets update. One ten-row pool renders up to 512 supplied sources; larger
-inputs are explicitly labelled partial. No extra addon or messages are used.
+inputs are explicitly labelled partial. That native-only mode sends no messages;
+the new optional sharing mode is described above.
 
 - **Health & buffs → Co-op teammate cards** opts into rectangular party cards
   instead of available stock party frames. Off by default. Each has native

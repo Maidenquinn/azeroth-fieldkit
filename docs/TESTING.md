@@ -99,6 +99,15 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+0.2.2-review.4 adds party_sync.lua plus an explicit two-VM simulated PARTY relay
+in tools/verify.py. Validate opt-out/default silence, fixed channel/prefix/rate,
+ASCII escaping, large exact integers, out-of-order fragments, duplicate/replay
+and malformed inputs, source/body caps, stale runs and shared-view rendering.
+Hover surfaces must now follow both HUD presets and opacity, without changing
+settings surfaces. These are protocol tests, not native-network tests. Follow
+PARTY_SYNC.md with two opted-in real clients before claiming complete peer spells
+work in this game's co-op. A successful native call without a response is not a pass.
+
 For 0.2.2-review.3, party_details.lua checks a 23-source local list versus a
 peer's sole top spell, unknown peer damage/share, paging by wheel/buttons, gap
 crossing and delayed close, opaque materials, re-hover without new frames,

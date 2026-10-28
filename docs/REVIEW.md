@@ -58,7 +58,8 @@ or a transfer of Malk's rights. Current publication status is recorded above.
 - Death Recap, Azeroth Stats and other addons are outside scope and not edited.
 - No executable, MPQ or game save has been altered; no external helper is required.
 - Runtime source is visible, unobfuscated, bounded at key inputs and listed by TOC.
-- No telemetry, outbound chat/messages or dynamic execution is present in the
-  reviewed runtime. Native effects and exceptions to read-only behavior are listed.
+- No telemetry, visible chat sending or dynamic execution is present. The new
+  optional PARTY-only meter-sharing capability in 0.2.2-review.4 is disclosed in
+  SECURITY.md and PARTY_SYNC.md; it is not covered by a blanket no-messaging claim.
 - Tests are reproducible and their limitations are explicit. An approval decision
   must be made by the developers, not inferred from those tests.

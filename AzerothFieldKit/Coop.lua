@@ -1,5 +1,6 @@
--- Read native party units and AZSPARTY only. No addon messages, target changes,
--- health-loss damage estimates or peer spell-detail reconstruction are used.
+-- Read native party units and AZSPARTY. Optional peer spell snapshots are
+-- handled separately by PartySync, not inferred from HP or native top DPS.
+-- No target/cast actions or health-loss damage estimates are used.
 FieldKitCoop={generation=0,takenGeneration=0,frames={},stock={}}
 local P=FieldKitCoop
 local colors={WARRIOR={.78,.61,.43},ROGUE={1,.96,.41},MAGE={.41,.8,.94},PRIEST={1,1,1},

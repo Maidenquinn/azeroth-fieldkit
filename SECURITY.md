@@ -1,15 +1,23 @@
 # Security and player-risk assessment
 
-**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.3.
+**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.4.
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
 ## Scope and evidence
 
-The hover-detail addition reads local spell snapshots and existing peer top/topdps
-fields only. Its bounded reusable popup is memory-only, with no new native write,
-communication or persisted player-data history. It explicitly discloses that a
-full peer spell breakdown is unavailable from the inspected API.
+The hover card now follows HUD style/opacity. Native peer details remain limited,
+so 0.2.2-review.4 adds an explicitly opted-in PARTY-only snapshot protocol in
+PartySync.lua. Both players must enable it. Runtime.lua is the sole send boundary:
+fixed AFKDETAIL1 prefix, PARTY channel, printable packets up to 230 bytes and at
+most four calls per second. Only own per-spell damage/DPS/share is shared on
+request. No chat text, positions, account information or saves are transmitted.
+Payloads are never evaluated as Lua. Peer caches are memory-only and reset on
+run exit/regression, opt-out and roster departure. Native sender membership and
+request nonces are checked, but other addons in the same Lua VM can still forge
+events or globals. The two-client test uses a simulated transport: real co-op
+forwarding is unconfirmed. This new capability requires reviewer attention;
+earlier publication permission is not an automatic approval of this candidate.
 
 Co-op addition: `Coop.lua` reads native party-unit and group-meter snapshots.
 With explicit user opt-in it wraps/hides only PartyMemberFrame1–4 while valid
@@ -93,10 +101,16 @@ Malk's original project, later community changes and this maintained fork.
 The maintainer requested public technical review; the unresolved rights are
 still disclosed and no upstream permission or license grant is asserted.
 
-## Capabilities not found in the runtime
+## Optional communication and capabilities not found
+
+Party-only addon messages are now the one opt-in communication exception, as
+documented above. The static gate allows the native send identifier only in
+Runtime.lua; direct use in other modules remains forbidden. Tests cover opt-out,
+channel/prefix/size/rate bounds, malformed fragments, replays, fresh-run nonces
+and exact integer damage. Successful API calls are not labelled as delivery.
 
 Source inspection and the static token gate find no network library, HTTP client,
-chat/addon-message sending, shell/process launch, process-memory reading, direct
+visible chat sending, shell/process launch, process-memory reading, direct
 filesystem I/O, runtime dependency loading, downloaded updates, dynamic code
 evaluation or obfuscated executable payload. There are no executable/DLL files
 or external helpers in the addon ZIP. TGA assets are images, not Lua chunks.

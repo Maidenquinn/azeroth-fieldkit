@@ -1,34 +1,42 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.2-review.3",
-  "runtimeModules": 24,
+  "candidate": "0.2.2-review.4",
+  "runtimeModules": 25,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
-      "bytes": 2427,
-      "sha256": "6845af0849da39e1bae29ae116251f312ff3a5e9460f962a6bc4186b36a5b8fc",
+      "bytes": 3659,
+      "sha256": "41adbe521314ed0e8592c9fb648fadb08cbe2ee6bd5de5375a4b22726498fc54",
       "namedFunctions": [
         {
+          "name": "FieldKit.PartyTransportAvailable",
+          "line": 9
+        },
+        {
+          "name": "FieldKit.SendPartyDetail",
+          "line": 10
+        },
+        {
           "name": "FieldKit.Number",
-          "line": 8
+          "line": 27
         },
         {
           "name": "FieldKit.GetCVar",
-          "line": 17
+          "line": 36
         },
         {
           "name": "FieldKit.SetCVar",
-          "line": 26
+          "line": 45
         },
         {
           "name": "FieldKit.SetHudShown",
-          "line": 38
+          "line": 57
         },
         {
           "name": "FieldKit.RememberClassification",
-          "line": 46
+          "line": 65
         }
       ],
       "literalEvents": []
@@ -53,8 +61,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 4619,
-      "sha256": "25f2a00500a0555bf926b4d2616d8e482539ba08a304dc8f9bc7390208d7a3e7",
+      "bytes": 4641,
+      "sha256": "9b41c5c1ed478be0ef1030bd7e8cd1f5ec17462030f56e9d6b65720689074fe6",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -99,8 +107,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 11212,
-      "sha256": "8dd61d0923986445ea763e0f09289e9dd2c3b3c227ed475f5c57b19220015f0e",
+      "bytes": 12241,
+      "sha256": "bf049bd6f20b0aadf640c7371b28cf0cc362219010c7def6b1314834f1f48685",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -338,71 +346,142 @@
       "literalEvents": []
     },
     "Coop.lua": {
-      "bytes": 12588,
-      "sha256": "3afe9cd66f19a372f785ef2e0e7cba77612a783dc593f08066de31632ef24f36",
+      "bytes": 12648,
+      "sha256": "99cda460768a25180cbfbf26412278b60498d6beffd7ffddf5ad7f242116fd02",
       "namedFunctions": [
         {
           "name": "P.Taken",
-          "line": 12
+          "line": 13
         },
         {
           "name": "P.TrackRun",
-          "line": 37
+          "line": 38
         },
         {
           "name": "P.Packet",
-          "line": 49
+          "line": 50
         },
         {
           "name": "P.Roster",
-          "line": 55
+          "line": 56
         },
         {
           "name": "P.ReadParty",
-          "line": 69
+          "line": 70
         },
         {
           "name": "P.MemberDamage",
-          "line": 110
+          "line": 111
         },
         {
           "name": "P.Stock",
-          "line": 116
+          "line": 117
         },
         {
           "name": "P.Create",
-          "line": 138
+          "line": 139
         },
         {
           "name": "P.CreateMember",
-          "line": 153
+          "line": 154
         },
         {
           "name": "P.Row",
-          "line": 166
+          "line": 167
         },
         {
           "name": "P.UpdateMember",
-          "line": 175
+          "line": 176
         },
         {
           "name": "P.UpdateMeter",
-          "line": 207
+          "line": 208
         },
         {
           "name": "P.Update",
-          "line": 229
+          "line": 230
         },
         {
           "name": "P.Diagnostic",
-          "line": 237
+          "line": 238
+        }
+      ],
+      "literalEvents": []
+    },
+    "PartySync.lua": {
+      "bytes": 9342,
+      "sha256": "ead62ba3befb1cbe95acf4a1c14f86279b92d9f54ffab55ee52c3030f01fda36",
+      "namedFunctions": [
+        {
+          "name": "S.Clear",
+          "line": 7
+        },
+        {
+          "name": "S.Watch",
+          "line": 11
+        },
+        {
+          "name": "S.Encode",
+          "line": 21
+        },
+        {
+          "name": "S.Decode",
+          "line": 29
+        },
+        {
+          "name": "S.Split",
+          "line": 36
+        },
+        {
+          "name": "S.Number",
+          "line": 47
+        },
+        {
+          "name": "S.Peer",
+          "line": 53
+        },
+        {
+          "name": "S.Value",
+          "line": 58
+        },
+        {
+          "name": "S.Snapshot",
+          "line": 65
+        },
+        {
+          "name": "S.Parse",
+          "line": 82
+        },
+        {
+          "name": "S.Request",
+          "line": 103
+        },
+        {
+          "name": "S.Get",
+          "line": 118
+        },
+        {
+          "name": "S.Respond",
+          "line": 128
+        },
+        {
+          "name": "S.Receive",
+          "line": 140
+        },
+        {
+          "name": "S.Tick",
+          "line": 169
+        },
+        {
+          "name": "S.Diagnostic",
+          "line": 186
         }
       ],
       "literalEvents": []
     },
     "PartyDetails.lua": {
-      "bytes": 8964,
-      "sha256": "6399d1375bac807be2537522fbbaac1503e99eeaf6cfe1dd7802bf2a1864f457",
+      "bytes": 10431,
+      "sha256": "48d44a51b8423825ec324e7e3f4b8aee48da743b97ae2f7aea98c3e9f7d3ce88",
       "namedFunctions": [
         {
           "name": "D.Data",
@@ -410,43 +489,43 @@
         },
         {
           "name": "D.DelayClose",
-          "line": 35
+          "line": 43
         },
         {
           "name": "D.Close",
-          "line": 37
+          "line": 45
         },
         {
           "name": "D.BindHover",
-          "line": 44
+          "line": 52
         },
         {
           "name": "D.Page",
-          "line": 56
+          "line": 64
         },
         {
           "name": "D.Build",
-          "line": 62
+          "line": 70
         },
         {
           "name": "D.Anchor",
-          "line": 108
-        },
-        {
-          "name": "D.Render",
           "line": 118
         },
         {
+          "name": "D.Render",
+          "line": 128
+        },
+        {
           "name": "D.Open",
-          "line": 154
+          "line": 180
         },
         {
           "name": "D.BindRow",
-          "line": 161
+          "line": 187
         },
         {
           "name": "D.Sync",
-          "line": 172
+          "line": 198
         }
       ],
       "literalEvents": []
@@ -494,8 +573,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 25919,
-      "sha256": "ebd217760f02800512dbfaf8df0b839857043108d139ae943abf58728ac40cfd",
+      "bytes": 26377,
+      "sha256": "481e74cf3020db426bc340cc3b96ae8f9175fbaf072441d07ff8a6e686582cef",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -507,82 +586,82 @@
         },
         {
           "name": "U.Tip",
-          "line": 72
+          "line": 75
         },
         {
           "name": "U.Choice",
-          "line": 79
+          "line": 82
         },
         {
           "name": "U.CloseMenus",
-          "line": 117
+          "line": 120
         },
         {
           "name": "U.Wheel",
-          "line": 122
+          "line": 125
         },
         {
           "name": "Checkbox",
-          "line": 133
+          "line": 136
         },
         {
           "name": "Slider",
-          "line": 151
+          "line": 154
         },
         {
           "name": "BuildHome",
-          "line": 173
+          "line": 176
         },
         {
           "name": "U.BuildPage",
-          "line": 196
+          "line": 199
         },
         {
           "name": "U.UpdateRunContext",
-          "line": 231
+          "line": 234
         },
         {
           "name": "U.Refresh",
-          "line": 238
+          "line": 241
         },
         {
           "name": "U.Select",
-          "line": 263
+          "line": 266
         },
         {
           "name": "U.Reflow",
-          "line": 278
+          "line": 281
         },
         {
           "name": "U.SetLayoutEditing",
-          "line": 319
+          "line": 322
         },
         {
           "name": "U.StartLayout",
-          "line": 332
+          "line": 335
         },
         {
           "name": "U.ResetPositions",
-          "line": 337
+          "line": 340
         },
         {
           "name": "U.UndoPositions",
-          "line": 344
+          "line": 347
         },
         {
           "name": "U.Build",
-          "line": 352
+          "line": 355
         },
         {
           "name": "U.Toggle",
-          "line": 416
+          "line": 419
         }
       ],
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 80803,
-      "sha256": "6b376090470b61c8281d4dd5fc481ee146289a604d6f478125cee38024ea90fe",
+      "bytes": 80940,
+      "sha256": "111d31ec3dc24ed2af5606188338c46ed51da94d0eeca6ff589a13b26a9cc849",
       "namedFunctions": [
         {
           "name": "Print",
@@ -962,7 +1041,7 @@
         },
         {
           "name": "RefreshNativeData",
-          "line": 2356
+          "line": 2357
         }
       ],
       "literalEvents": [
@@ -1900,5 +1979,14 @@
     }
   },
   "inGameTest": false,
-  "approval": "not approved"
+  "approval": "not approved",
+  "optionalPartyDetailTransport": {
+    "defaultEnabled": false,
+    "nativeCallBoundary": "Runtime.lua",
+    "prefix": "AFKDETAIL1",
+    "distribution": "PARTY",
+    "maxBytes": 230,
+    "maxCallsPerSecond": 4,
+    "liveCoopTransportConfirmed": false
+  }
 }

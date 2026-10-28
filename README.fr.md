@@ -116,6 +116,21 @@ valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md
 
 ### Candidate coop locale 0.2.2-review.2
 
+**Mise à jour expérimentale 0.2.2-review.4 :** la fiche de survol respecte
+désormais le preset Classique/Travaillé et l'opacité des cartes. Pour recevoir
+le détail des sorts d'un allié, **chaque joueur doit installer cette version**
+et activer **Fenêtres → Partager le détail des sorts avec le groupe**, puis
+survoler le pseudo. Cette option, désactivée par défaut, échange uniquement les
+compteurs natifs de sorts sur demande via un canal d'addon réservé au groupe.
+Le relevé reçu porte son âge de réception ; sans réponse, la vue native reste
+limitée au DPS du meilleur sort. Les colonnes inconnues ne sont plus affichées.
+
+Le protocole passe les tests entre deux clients Lua simulés, mais **le transport
+dans la coop réelle n'est pas encore confirmé**. `/fieldkit sync` affiche les
+requêtes acceptées et les relevés réellement reçus. Aucun programme externe ni
+message de statistiques dans le chat visible n'est utilisé comme contournement.
+Voir [mise en place, limites et test réel](docs/PARTY_SYNC.md).
+
 **Survol dans la 0.2.2-review.3 :** survolez un pseudo dans Dégâts du groupe.
 Votre fiche montre les sorts fournis par le compteur natif, y compris au-delà
 des huit lignes visibles du compteur principal. Défilez avec la molette sur le
@@ -123,11 +138,11 @@ pseudo ou la fiche, ou utilisez les flèches. La fiche reste ouverte au survol,
 avec un fond opaque ; Échap, la croix, la sortie du survol ou le mode Déplacer
 la ferment. Pour un allié, le client ne fournit que son meilleur sort et le DPS
 de ce sort : la limite est indiquée et ses dégâts/contribution restent inconnus.
-La liste complète des sorts des alliés nécessite une extension de l'API du jeu.
+Sans partage fonctionnel, la liste complète des alliés nécessite une extension de l'API du jeu.
 Vos totaux détaillés peuvent différer temporairement du relevé de groupe car les
 sources sont actualisées séparément. Dix lignes réutilisables parcourent jusqu'à
-512 sources ; au-delà, la vue est explicitement partielle. Aucun échange de
-messages ou addon supplémentaire n'est ajouté.
+512 sources ; au-delà, la vue est explicitement partielle. Ce mode natif n'échange
+pas de messages ; le partage facultatif de la nouvelle version est décrit ci-dessus.
 
 - **Vie et effets → Cartes des coéquipiers** active les cartes rectangulaires,
   avec vie, ressource, état et dégâts/DPS natifs lorsqu'ils sont disponibles.

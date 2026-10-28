@@ -26,6 +26,17 @@ must decide which of those capabilities are acceptable.
 
 ## Writes and hooks
 
+### Optional party spell sharing (new in 0.2.2-review.4, default off)
+
+PartySync.lua may request/share each consenting player's own native meter with
+current party peers. Runtime.lua alone calls SendAddonMessage with fixed prefix
+AFKDETAIL1, PARTY distribution, at most 230 printable bytes and four calls/second.
+No visible chat, whisper or external service fallback is used. Receive parsing
+checks channel, roster sender, nonce, limits and numeric fields; data is never
+executed. See PARTY_SYNC.md for wire format, TTLs, source/byte/queue caps, privacy
+and the outstanding real co-op forwarding test. The old static blanket ban now
+has this explicit Runtime.lua-only exception; it remains banned in other modules.
+
 ### Always-installed addon UI
 
 The addon creates its own frames/fontstrings/textures, slash commands and event
@@ -152,13 +163,14 @@ See COOP_EVIDENCE.json for inspected client hash and data-contract limitations.
 
 ## Native anchor persistence
 
-PartyDetails.lua is presentation-only. It reads the local AZS_GetMeter snapshot
-or sanitized peer top/topdps fields already exposed by AZSPARTY. It owns one
-opaque popup and ten pooled rows, retains at most 512 sanitized spell sources,
-and refreshes on the existing co-op 5 Hz tick while visible. No new native UI
-hook, write, network message, saved data or peer-detail API is introduced.
-Unknown peer spell damage/share are displayed as unknown; only the local player
-has a full per-source list. Popup anchors are temporary and clamped natively.
+PartyDetails.lua reads local AZS_GetMeter snapshots, sanitized native peer
+top/topdps or an opt-in PartySync snapshot. Its requests go through the bounded
+sharing module described above. One HUD-themed popup with ten pooled rows
+refreshes at the existing 5 Hz cadence; native local input is capped at 512
+sources, shared input at 128 and 12,000 bytes. Missing native peer spell fields
+are not invented. Source/age labels distinguish shared snapshots from native
+partial views. No popup position or received data is saved; anchors are clamped
+natively. The popup now follows the HUD preset and background opacity.
 
 CardLayout.lua adds per-card own-frame dimensions and a right-side group proxy.
 Only FieldKitDB.cardSizes/linkRightCards and FieldKit-owned frames are written.
