@@ -1,10 +1,24 @@
 # Security and player-risk assessment
 
-**Assessment date:** 2026-10-27. **Candidate:** 0.2.1-review.3.
+**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.3.
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
 ## Scope and evidence
+
+The hover-detail addition reads local spell snapshots and existing peer top/topdps
+fields only. Its bounded reusable popup is memory-only, with no new native write,
+communication or persisted player-data history. It explicitly discloses that a
+full peer spell breakdown is unavailable from the inspected API.
+
+Co-op addition: `Coop.lua` reads native party-unit and group-meter snapshots.
+With explicit user opt-in it wraps/hides only PartyMemberFrame1–4 while valid
+replacements are available, preserving their original OnShow callback and
+restoring it when disabled. No targeting, casting, gameplay-state write, external
+helper or addon-message sending is introduced. These native UI hooks can conflict
+with another party-frame addon; disable one replacement and reload to isolate it.
+New freshness/fallback and restoration fixtures run offline under both Lua
+versions; this is not a live multiplayer test or an independent security audit.
 
 The baseline is the full installed MASH 1.3.9 folder, copied and hashed before
 editing. Every TOC-loaded Lua file and catalog was inspected; portrait assets

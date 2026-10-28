@@ -1,7 +1,7 @@
 -- Same actual Lua modules and behavioral fixtures, with no modern string API.
 dofile("tests/mock.lua")
 string.match=nil;string.gmatch=nil
-local files={"Runtime.lua","Positions.lua","Config.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","RunMode.lua","HudStack.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua"}
+local files={"Runtime.lua","Positions.lua","Config.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","RunMode.lua","HudStack.lua","CardLayout.lua","Coop.lua","PartyDetails.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua"}
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 fire(FieldKitFrame,"VARIABLES_LOADED")
 dofile("tests/security.lua")
@@ -35,3 +35,15 @@ dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 dofile("tests/edge_positions.lua")
 print("Native edge-anchor persistence fixtures passed")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/individual_layout.lua")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/coop.lua")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/party_details.lua")

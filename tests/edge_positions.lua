@@ -1,6 +1,6 @@
 -- Replay native drop anchors, including adversarial center/scale coordinates.
 -- This validates our persistence path, not the native client's clamp algorithm.
-FieldKitDB={meterValues=3,linkLeftCards=true,runModeCard=true}
+FieldKitDB={meterValues=3,linkLeftCards=true,linkRightCards=false,runModeCard=true}
 fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("")
 AZS_RUN.ph="playing";AZS_ZONE.heroic=2;update(FieldKitFrame,.3)
 local stats=FieldKitStatsFrame

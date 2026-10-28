@@ -114,6 +114,71 @@ valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md
 
 ## Carte du mode et alignement à gauche
 
+### Candidate coop locale 0.2.2-review.2
+
+**Survol dans la 0.2.2-review.3 :** survolez un pseudo dans Dégâts du groupe.
+Votre fiche montre les sorts fournis par le compteur natif, y compris au-delà
+des huit lignes visibles du compteur principal. Défilez avec la molette sur le
+pseudo ou la fiche, ou utilisez les flèches. La fiche reste ouverte au survol,
+avec un fond opaque ; Échap, la croix, la sortie du survol ou le mode Déplacer
+la ferment. Pour un allié, le client ne fournit que son meilleur sort et le DPS
+de ce sort : la limite est indiquée et ses dégâts/contribution restent inconnus.
+La liste complète des sorts des alliés nécessite une extension de l'API du jeu.
+Vos totaux détaillés peuvent différer temporairement du relevé de groupe car les
+sources sont actualisées séparément. Dix lignes réutilisables parcourent jusqu'à
+512 sources ; au-delà, la vue est explicitement partielle. Aucun échange de
+messages ou addon supplémentaire n'est ajouté.
+
+- **Vie et effets → Cartes des coéquipiers** active les cartes rectangulaires,
+  avec vie, ressource, état et dégâts/DPS natifs lorsqu'ils sont disponibles.
+  Le remplacement est désactivé par défaut ; le format des PV se règle juste dessous.
+- **Fenêtres → Compteur de dégâts du groupe** affiche chaque joueur, vous compris,
+  séparément du détail de vos sorts. Activé par défaut, il apparaît en groupe ou
+  en aperçu explicite de placement. L'en-tête indique joueurs reçus/groupe actuel.
+- **Déplacer** permet de bouger chaque carte séparément. Dans **Fenêtre à
+  redimensionner**, choisissez **Dégâts du groupe** ou **Coéquipier 1–4** pour régler
+  sa largeur/hauteur. Les numéros affichés en placement correspondent aux places
+  du groupe, pas à des identités permanentes. Les aperçus n'inventent pas de PV/DPS.
+- **Dégâts subis** complète les sources reçues avec **Non attribués (total natif)**
+  si le compteur total fourni par le jeu est supérieur. Si aucune donnée n'est
+  fournie, la carte l'indique au lieu d'afficher un faux zéro. Aucun calcul à
+  partir de pertes de PV ne remplace les vrais dégâts reçus.
+
+Les cartes personnalisées sont des affichages : pas de clic de ciblage, menu
+d'unité ou bouton de buff/sort. Désactivez le remplacement pour retrouver les
+interactions natives. Si les PV ne sont pas exploitables, le cadre natif reste
+disponible. Les alliés n'ont pas besoin d'installer FieldKit pour le compteur de
+groupe. Le détail de leurs sorts, soins et dégâts subis n'est pas inventé.
+
+`/fieldkit coop` affiche localement les compteurs de diagnostic et les dégâts
+subis natifs/affichés. En cas de problème, fournissez cette ligne plutôt qu'une
+sauvegarde ou du chat privé. Le client **0.123.0** a été inspecté en lecture seule ;
+la validation visuelle en coop reste à faire.
+
+### Nouvelle candidate locale 0.2.2-review.1
+
+Dans **Déplacer**, choisissez **Gauche : groupées/séparées** et
+**Droite : groupées/séparées**. La gauche comprend le mode, les dégâts, les dégâts
+subis et les antres ; la droite comprend les accessoires et les statistiques.
+Les fenêtres séparées gardent chacune leur position, sans être rattachées à la
+prochaine actualisation. Regrouper retrouve l'ancrage du groupe ; séparer retrouve
+les positions individuelles enregistrées. Glisser la barre d'or la détache de
+la barre compacte.
+
+**Régler les tailles** ouvre **Fenêtres** : choisissez la **Fenêtre à redimensionner**,
+puis sa **Largeur** et sa **Hauteur**. Les sept cartes du HUD sont concernées,
+pas les paramètres, les boutons d'action, la vie du joueur ou les portraits de boss.
+**Taille automatique pour cette fenêtre** réinitialise uniquement ses dimensions.
+Les tailles personnalisées sont conservées en mode groupé comme séparé.
+
+Les textes et icônes ne sont pas étirés. Une hauteur minimale protège les lignes
+visibles ; une grande hauteur augmente leur espacement, puis laisse du fond vide.
+La largeur minimale du compteur protège ses colonnes, celle de l'or ses valeurs.
+Les valeurs « px » sont des unités d'interface soumises à l'échelle du client.
+Si une pile dépasse la hauteur de l'écran, réduisez les tailles, repliez des cartes
+ou séparez-les. La candidate doit encore être vérifiée visuellement en jeu ;
+elle ne remplace pas la release publique existante.
+
 Le mode de jeu, les dégâts, les dégâts subis et les antres partagent désormais
 une largeur et une pile avec six pixels d'espacement. Réduire ou masquer une
 carte referme l'espace. Déplacez n'importe quelle carte en mode **Déplacer** pour

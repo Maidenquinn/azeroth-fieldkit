@@ -71,6 +71,70 @@ shared with Azeroth Stats but bundled locally: that addon is not required.
 
 ## Left HUD stack and run mode
 
+### Co-op in the local 0.2.2-review.2 candidate
+
+**Hover detail in 0.2.2-review.3:** hover a name in Group damage. Your own card
+shows the native per-spell table, including sources beyond the main meter's
+eight visible rows. Wheel over the name/card or use its arrows; the card remains
+open while hovered. It uses an opaque theme and closes on exit, Escape, collapse
+or layout editing. On an ally, the native API supplies only their top spell name
+and its DPS: the card labels that limit and leaves missing spell damage/share
+unknown. It cannot show their complete spell list with the current API. Own
+spell totals are read independently of the party snapshot and can differ while
+packets update. One ten-row pool renders up to 512 supplied sources; larger
+inputs are explicitly labelled partial. No extra addon or messages are used.
+
+- **Health & buffs → Co-op teammate cards** opts into rectangular party cards
+  instead of available stock party frames. Off by default. Each has native
+  health, resource, connection/zero-HP status and party damage/DPS when received.
+  **Teammate health format** chooses numbers, percentage or both.
+- **Windows → Group damage meter** shows native damage, DPS and contribution per
+  player, including you, separately from your own per-spell meter. Enabled by
+  default, visible only with a party or an explicit layout preview. Its title
+  counts received players/current roster; missing DPS stays `?`.
+- **Move windows** moves each teammate card and group meter independently.
+  **Window to resize** now also includes Group damage and Teammates 1–4. Numbered
+  labels in layout mode match party slots; saved placement follows the slot,
+  not a permanent player identity. Outside a party, previews show no fake HP/DPS.
+- **Damage taken** prefers received source buckets and supplements them with
+  **Unattributed (native total)** when `AZS_RUN.taken` exceeds their sum. This
+  cannot recover an unexposed source or count individual hits. No data means
+  Not provided; a native zero is the only empty-list case displayed as zero.
+
+The cards are passive displays: they do not implement native target clicks,
+unit menus, buff buttons or casting. Turn the replacement off to regain stock
+party-frame interactions. Unknown HP does not justify hiding the native frame.
+Peer damage requires the native party API; other players do not need FieldKit.
+No peer healing/taken or full per-spell export was identified. Diagnostics:
+`/fieldkit coop` prints only API counts and native/shown taken totals locally.
+Do not post private chat or game saves when reporting problems. The installed
+client's **0.123.0** API was inspected read-only; native UI behavior still needs
+a real co-op test. See [data evidence](docs/COOP_EVIDENCE.json).
+
+### New in the local 0.2.2-review.1 candidate
+
+Open **Move windows**: **Left: grouped/independent** controls run mode, damage,
+damage taken and lairs; **Right: grouped/independent** controls accessories and
+statistics. In independent mode each card keeps its own position, including
+damage taken. Grouping restores the group anchor; unlinking restores the saved
+individual positions. The money strip detaches from the compact bar when dragged.
+
+Choose **Adjust sizes**, or open **Windows → Window to resize**. Select a card,
+then set **Window width** and **Window height**. This applies to seven HUD cards,
+not the settings shell, native action buttons, player health or boss portrait frames.
+**Automatic size for this window** resets only that card's dimensions. Position
+reset/Undo leaves dimensions unchanged. Custom widths remain independent even
+when cards are grouped; cards without custom widths retain the default alignment.
+
+Widths are 220–800 UI units (money: at least 320; damage meter: at least its
+current column-format minimum). Heights are 22–800 UI units, with a dynamic
+readability minimum to fit every visible row. Text/icons are not stretched or
+cropped. Larger cards increase row spacing up to 32 units, then leave empty space.
+The controls label UI units as px; physical pixels also depend on UI scale.
+If the complete group becomes taller than the viewport, reduce its dimensions,
+collapse cards or unlink it. This candidate is not a newly published release;
+its native dragging/visual behavior still needs in-game confirmation.
+
 The left cards now share one movable stack and width: Run mode, Damage,
 Damage taken, Lairs. Collapsing or hiding a card closes the gap. Move any member
 in **Move windows** mode to move the group. **Windows → Align left HUD cards**

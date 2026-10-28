@@ -1,0 +1,39 @@
+{
+  "inspectedAt": "2026-10-28",
+  "clientBytes": 146228736,
+  "clientSha256": "de7147a2a3a01b4fb84f3a7f036bc940f9e7d4fdfc42a7fdb79f3f1b2bd798be",
+  "versionMarkers": [
+    "0.123.0"
+  ],
+  "apiSha256": "20e910f28a3e3b213ea036e7dd009429402b52beb271b5a886556533027669da",
+  "observations": {
+    "partyMeter": "AZS_GetPartyMeter() -> AZS_MeterTotals(AZS_PARTY)",
+    "partyFields": [
+      "name",
+      "class",
+      "dmg",
+      "dps",
+      "share",
+      "top",
+      "topdps"
+    ],
+    "takenParser": "AZS_List(arg2, { source, dmg })",
+    "runParser": "AZS_Fields(arg2); arbitrary observed fields including documented taken",
+    "nativePartyUnits": [
+      "party1",
+      "party2",
+      "party3",
+      "party4"
+    ]
+  },
+  "sourceReferences": [
+    "Official addon_docs.md: AZS_RUN.taken and AZS_TAKEN",
+    "Extracted Patch1 Interface/FrameXML/PartyMemberFrame.lua: PartyMemberFrameN and native unit APIs"
+  ],
+  "inGameCoopTest": false,
+  "limits": [
+    "No peer spell breakdown or peer healing/taken export identified",
+    "No proof that a particular host/client sends AZSTAKEN or AZS_RUN.taken in every co-op session",
+    "AZSPARTY totals describe only the currently received matched roster rows; no data is synthesized"
+  ]
+}

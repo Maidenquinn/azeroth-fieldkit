@@ -127,6 +127,43 @@ GameCompatibility.lua reads AZS_ZONE.heroic only during an active native phase. 
 
 RunMode.lua reads only the existing native rank/zone and phase; its versioned reference is static text, not live affix or multiplier data. HudStack.lua reanchors FieldKit-owned frames only. FieldKitDB.linkLeftCards, runModeCard and pos.FieldKitLeftStack persist configuration and a UI anchor. Legacy individual coordinates are retained; no world-position history or game progression is written.
 
+## Co-op candidate 0.2.2-review.2
+
+Coop.lua reads AZS_RUN.taken, AZS_TAKEN and AZS_GetPartyMeter/AZS_PARTY plus
+UnitExists/UnitName/UnitClass/UnitHealth/UnitHealthMax/UnitMana/UnitManaMax/
+UnitPowerType/UnitIsConnected for player/party1–party4. Optional functions are
+guarded. Packet receipts and run/roster boundaries invalidate previous samples.
+Source buckets are supplemented only by a labelled native-total remainder.
+No health-loss-derived damage, peer spell reconstruction or messaging is used.
+
+With explicit partyCards opt-in, the module hides only available named
+PartyMemberFrame1–4 when a valid replacement has HP. Their OnShow handler is
+wrapped with its original retained; no native events are unregistered and no
+native parent/scale/anchor is changed. Disable/missing unit/phase exit restores
+the handler if still owned and restores requested native visibility where the
+unit exists. Other addons wrapping the same handler can affect this cooperation.
+This is a new native UI effect for reviewer attention, not an assertion that the
+previous publication permission automatically approves changed packages.
+
+Own party cards and group meter use existing MakeMovable, collapse, theme and
+cardSizes paths. Party cards are passive; no TargetUnit or casting API is added.
+`/fieldkit coop` prints counts and totals to the local chat frame only.
+See COOP_EVIDENCE.json for inspected client hash and data-contract limitations.
+
 ## Native anchor persistence
+
+PartyDetails.lua is presentation-only. It reads the local AZS_GetMeter snapshot
+or sanitized peer top/topdps fields already exposed by AZSPARTY. It owns one
+opaque popup and ten pooled rows, retains at most 512 sanitized spell sources,
+and refreshes on the existing co-op 5 Hz tick while visible. No new native UI
+hook, write, network message, saved data or peer-detail API is introduced.
+Unknown peer spell damage/share are displayed as unknown; only the local player
+has a full per-source list. Popup anchors are temporary and clamped natively.
+
+CardLayout.lua adds per-card own-frame dimensions and a right-side group proxy.
+Only FieldKitDB.cardSizes/linkRightCards and FieldKit-owned frames are written.
+No native gameplay/HUD CVar, world position or action-slot API is added. The new
+file is loaded after HudStack.lua and before Interface.lua. Dimensions are bounded
+at settings load and by UI controls; visible-row minima prevent content cropping.
 
 Positions.lua reads GetPoint and writes only FieldKitDB.frameAnchors (validated own-frame names and point/relative-point/numeric offsets). Restoring uses UIParent-relative SetPoint; no frame pointers are serialized. Native SetClampedToScreen handles bounds of the linked group proxy, with child clamps disabled while linked. Legacy positions are retained and Reset/Undo includes both representations. No game/save/other-addon state is accessed.

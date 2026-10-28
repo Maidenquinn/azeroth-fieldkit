@@ -99,6 +99,41 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+For 0.2.2-review.3, party_details.lua checks a 23-source local list versus a
+peer's sole top spell, unknown peer damage/share, paging by wheel/buttons, gap
+crossing and delayed close, opaque materials, re-hover without new frames,
+right-edge anchoring, rank reorder, collapse/layout close, missing API and the
+explicit 512-source safety cap. In-game acceptance: hover each group member,
+cross onto the card to scroll, use the name-row wheel, move the meter to screen
+edges, change resolution/UI scale, let group ranking change and verify displayed
+identity. Compare your own spells with the local native meter; do not treat an
+ally's labelled top-spell-only view as their full damage breakdown.
+
+The 0.2.2-review.2 `coop.lua` fixture covers missing/incomplete source buckets,
+native total changes without source stamps, unknown versus zero, malformed data,
+peer damage/DPS and missing rates, duplicate/departed players, new-run freshness,
+offline/zero-HP cards, individual movement/size, opt-in original-frame hooks and
+restoration. Execute it under both Lua versions. Native unit/network delivery and
+real frame interactions are not mocked into a claim of in-game success.
+
+Live co-op recipe: enable teammate cards in Health & buffs; inspect HP/resources
+against the originals, drag/resize each slot, change roster, down/revive a peer,
+disconnect/reconnect, start another run, and toggle the replacements off. Check
+the group meter against native party totals and its received-player count. Check
+Damage taken against the native total on host and guest clients. If either data
+source is missing, retain the explicit unknown/unattributed state and collect
+`/fieldkit coop`; never infer missing damage from healing or HP changes.
+
+For 0.2.2-review.1, `individual_layout.lua` tests independent movement, left/right
+group routing, bounded dimensions, every card's width/height controls, unchanged
+native-meter refreshes, collapse, auto-size reset and retained native anchors.
+The Python runner also serializes/reloads the settings. In the client, exercise
+all seven cards at your UI scale: toggle each group, move cards to all four edges,
+resize each card, change meter format and visible stats, collapse/reopen, reload,
+and verify that totals, tooltips and settings opacity remain unchanged. Test both
+compact-bar states; a detached money strip must not snap back. No live success
+is claimed by these fixtures.
+
 Follow [UX_REVIEW.md](UX_REVIEW.md) for the new page/layout journeys. The automated
 interface fixture additionally verifies exclusive HP choice, no automatic reload,
 no native writes during language/reflow, no resize allocations, wheel bounds,
