@@ -178,7 +178,7 @@ function D.Render()
 end
 
 function D.Open(owner)
- if FieldKit.layoutEditing or not owner.fieldkitMember then return end
+ if FieldKit.layoutEditing or FieldKitCoop.meter.azsMoving or not owner.fieldkitMember then return end
  local data=D.Data(owner.fieldkitMember);if not data then D.Close();return end
  D.Build();D.owner=owner;D.member=owner.fieldkitMember;D.data=data;D.offset=0
  D.overOwner=true;D.overPopup=false;D.deadline=nil;D.Render();D.frame:Show()
@@ -197,7 +197,7 @@ end
 -- Called on the existing co-op 5 Hz tick, never on every animation frame.
 function D.Sync()
  if not D.member then return end
- if FieldKit.layoutEditing or not FieldKitCoop.phase or not FieldKitCoop.meter:IsShown()
+ if FieldKit.layoutEditing or FieldKitCoop.meter.azsMoving or not FieldKitCoop.phase or not FieldKitCoop.meter:IsShown()
   or FieldKitCoop.meter.mashCollapsed or not D.owner:IsShown() or not D.owner.fieldkitMember then D.Close();return end
  if D.owner.fieldkitMember~=D.member then
   if D.overOwner then D.Open(D.owner) else D.Close() end

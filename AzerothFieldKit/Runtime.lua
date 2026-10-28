@@ -1,7 +1,7 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.2.2-review.5", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.2.2-review.6", folder = "AzerothFieldKit" }
 
 -- The only outbound capability: explicitly opted-in meter sharing, one fixed
 -- addon prefix, PARTY distribution, printable 230-byte packets, max 4 per second.

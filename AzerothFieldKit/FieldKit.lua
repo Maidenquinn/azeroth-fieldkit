@@ -176,7 +176,8 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 	if frame.SetClampedToScreen then frame:SetClampedToScreen(1) end
 	handle:RegisterForDrag("LeftButton")
 	handle:SetScript("OnDragStart", function()
-		if not FieldKit.layoutEditing then return end
+  if DB.windowsLocked and not FieldKit.layoutEditing then return end
+  if FieldKitPartyDetails then FieldKitPartyDetails.Close() end
 		frame.azsMoving = true
 		frame:StartMoving()
 	end)
@@ -189,7 +190,7 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
   if FieldKitPositions.Save(frame,frame.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(frame) end
 	end)
 	handle.azsFreeDrag = freeDrag
-	handle:EnableMouse(not handle.fieldkitMouseProxy and freeDrag and 1 or nil)
+ handle:EnableMouse(not handle.fieldkitMouseProxy and (not DB.windowsLocked or freeDrag) and 1 or nil)
 	table.insert(movables, handle)
 end
 
@@ -210,7 +211,7 @@ local function SetMovablesUnlocked(unlocked)
   end
  end
 	for i = 1, table.getn(movables) do
-		movables[i]:EnableMouse(not movables[i].fieldkitMouseProxy and (unlocked or movables[i].azsFreeDrag) and 1 or nil)
+  movables[i]:EnableMouse(not movables[i].fieldkitMouseProxy and (unlocked or not DB.windowsLocked or movables[i].azsFreeDrag) and 1 or nil)
 	end
 end
 
@@ -2194,12 +2195,14 @@ local function TogglePanel()
  FieldKitUI.Toggle()
 end
 
--- Session-only global edit state. Commands and the minimap shortcut do not
--- require opening settings; ordinary settings navigation retains its journey.
+-- Persist the movement preference without constructing/showing any settings,
+-- arrangement dock or preview. Ordinary gameplay dragging uses this preference.
 function FieldKit.SetWindowsLocked(locked)
  if not DB then return end
- if not panel then if locked then return else CreatePanel() end end
- FieldKitUI.SetLayoutEditing(not locked,false,true)
+ DB.windowsLocked=locked and true or false
+ if FieldKit.layoutEditing and FieldKitUI.frame then FieldKitUI.SetLayoutEditing(false,false) end
+ SetMovablesUnlocked(not DB.windowsLocked)
+ if FieldKitUI.frame then FieldKitUI.Refresh() end
 end
 
 -- Create the addon settings shortcut; dragging changes only its saved rim angle.
@@ -2239,14 +2242,14 @@ local function CreateMinimapButton()
  b:RegisterForClicks("LeftButtonUp","RightButtonUp")
  b:SetScript("OnClick",function()
   GameTooltip:Hide()
-  if arg1=="RightButton" then FieldKit.SetWindowsLocked(FieldKit.layoutEditing and true or false)
+  if arg1=="RightButton" then FieldKit.SetWindowsLocked(not DB.windowsLocked)
   else TogglePanel() end
  end)
 	b:SetScript("OnEnter", function()
 		GameTooltip:SetOwner(this, "ANCHOR_LEFT")
 		GameTooltip:SetText("Azeroth FieldKit", 1.0, 1.0, 1.0)
   GameTooltip:AddLine(FieldKit_L("Left-click: settings. Right-click: lock/unlock windows. Drag: move this shortcut."),NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b)
-  GameTooltip:AddLine(FieldKit_L(FieldKit.layoutEditing and "Windows unlocked" or "Windows locked"),1,.85,.55)
+  GameTooltip:AddLine(FieldKit_L((FieldKit.layoutEditing or not DB.windowsLocked) and "Windows unlocked" or "Windows locked"),1,.85,.55)
 		GameTooltip:Show()
 	end)
 	b:SetScript("OnLeave", function() GameTooltip:Hide() end)

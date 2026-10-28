@@ -55,6 +55,9 @@ function FieldKit.BuildJourneySections(sections,actions)
   set=function(v) FieldKitDB.partyDetailSync=v;FieldKitPartySync.Watch();FieldKitCoop.Update() end})
  local sizes=FieldKitCardLayout.Options()
  for i=1,table.getn(sizes) do table.insert(windows,3+i,sizes[i]) end
+ table.insert(windows,1,{kind="check",label="Lock window positions",tip="Drag active windows during play by default. Locking keeps their current positions; grouping and dimensions stay unchanged.",
+  get=function() return FieldKitDB.windowsLocked end,
+  set=function(v) FieldKit.SetWindowsLocked(v) end})
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
@@ -319,16 +322,13 @@ function U.Reflow()
 end
 
 -- Hide settings during arrangement so the large panel cannot cover movable frames.
-function U.SetLayoutEditing(enabled,returnToSettings,external)
+function U.SetLayoutEditing(enabled,returnToSettings)
  FieldKit.layoutEditing=enabled and true or false
  if enabled then
-  U.externalLayout=external and true or false
   U.routingLayout=true;U.frame:Hide();U.routingLayout=nil
   U.context.unlock(true);U.context.bosses();FieldKitCardLayout.UpdateDock();U.dock:Show()
   if FieldKitDB.combatText then FieldKitCombat.ShowAnchors() end
  else
-  if U.externalLayout and external~=false then returnToSettings=false end
-  U.externalLayout=nil
   U.dock:Hide();U.context.unlock(false);FieldKitCombat.HideAnchors();U.context.bosses()
   if returnToSettings then U.Reflow();U.frame:Show();U.Refresh() end
  end
@@ -399,7 +399,7 @@ function U.Build(sections,context)
   FieldKitDB.linkRightCards=not FieldKitDB.linkRightCards;FieldKitCardLayout.ApplyRight();FieldKitCardLayout.UpdateDock()
  end)
  U.sizes=T.Button(dock,nil,"Adjust sizes",366,88,172,28,function()
-  U.SetLayoutEditing(false,true,false);U.Select("windows")
+  U.SetLayoutEditing(false,true);U.Select("windows")
  end)
  dock:SetScript("OnHide",function() if FieldKit.layoutEditing then U.SetLayoutEditing(false,false) end end);dock:Hide()
  frame:SetScript("OnShow",function() U.Refresh() end)
@@ -420,7 +420,7 @@ function U.Build(sections,context)
 end
 
 function U.Toggle()
- if FieldKit.layoutEditing then U.SetLayoutEditing(false,true,false)
+ if FieldKit.layoutEditing then U.SetLayoutEditing(false,true)
  elseif U.frame:IsShown() then U.frame:Hide()
  else U.Reflow();U.frame:Show();U.Refresh() end
 end

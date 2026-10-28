@@ -64,6 +64,9 @@ individual=runtime();individual.execute((base/'tests/individual_layout.lua').rea
 coop=runtime();coop.execute((base/'tests/coop.lua').read_text(encoding='utf8'))
 details=runtime();details.execute((base/'tests/party_details.lua').read_text(encoding='utf8'))
 locks=runtime();locks.execute((base/'tests/window_lock.lua').read_text(encoding='utf8'))
+locks.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+locked_reload=runtime(locks.eval('SNAPSHOT(FieldKitDB)'))
+locked_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED");assert(FieldKitDB.windowsLocked and not FieldKitUI.frame);this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")();assert(not FieldKitMeterFrame.azsMoving)')
 sync=runtime();sync.execute((base/'tests/party_sync.lua').read_text(encoding='utf8'))
 # Two isolated Lua clients, with an explicit simulated PARTY transport. This
 # proves protocol interoperability, not that this game's co-op forwards packets.
