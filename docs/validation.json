@@ -1,7 +1,7 @@
 {
-  "version": "0.2.2-review.6",
+  "version": "0.2.3-review.1",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -9,6 +9,7 @@
   "bothChatHookPaths": true,
   "officialApiFixtures": true,
   "snapshotBatchesPer20MockTicks": 5,
+  "uxSimplificationFixtures": true,
   "inGameTest": false,
   "partySyncTwoClientsSimulated": true,
   "partySyncLiveTransportConfirmed": false,
@@ -17,7 +18,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 8,
-      "sha256": "4534b491289349916efc172bbe1b3036b665c41fc43e1fe861581a9886b31a5b"
+      "sha256": "f9a99be26a9629fdab121481bad1b290b58ea882629ab3ec10a6cd68ab759520"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -27,7 +28,7 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "bf696aa8af639af811a76d5ce36aa7d880023065090382782c84f8e96a35fe2b"
+      "sha256": "f624d9d4bf1906d421eb6f484cd418a9717ccd19b4e933a8e37351de08b7dda8"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
@@ -37,7 +38,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "ecd7e7b757df01da3481c8adb15d292c59428a48f25a1660855fef56debd4a30"
+      "sha256": "815a7be092ea40cfad6b5335f46920dca17f273edc9ee320d262ab98f5a69ef3"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -72,7 +73,7 @@
     "RunMode.lua": {
       "maxUpvalues": 1,
       "functions": 9,
-      "sha256": "3cad0111778c79eb65fbd83c862230d830d8942b67bea369741e92c3442da98b"
+      "sha256": "b42e9655f9692d6e43f5cefce38a8987f7bb5ed3ab46b60f0a90bfb710920619"
     },
     "HudStack.lua": {
       "maxUpvalues": 2,
@@ -81,28 +82,28 @@
     },
     "CardLayout.lua": {
       "maxUpvalues": 2,
-      "functions": 26,
-      "sha256": "5d89bafff5429aef333db118f0118d9186def14068a40e10bdaeeb345d62c574"
+      "functions": 28,
+      "sha256": "ec00f1aea9726ec85c4bf8e530148c523d9fa8fb2d4ba0a133dca3eed1397427"
     },
     "Coop.lua": {
       "maxUpvalues": 2,
       "functions": 22,
-      "sha256": "99cda460768a25180cbfbf26412278b60498d6beffd7ffddf5ad7f242116fd02"
+      "sha256": "99676df2b0eed4370e1cf228198ee86d4e1f61f8318bfd493b35764c5c402ffe"
     },
     "PartySync.lua": {
       "maxUpvalues": 1,
-      "functions": 20,
-      "sha256": "2808e9e649078b0d73de707abdd464529c7aaf9298641ca4f55033f2dadf8a80"
+      "functions": 21,
+      "sha256": "c05b7ffaf4a274e1c287f9e8a71d5c867fe9195929c919553e003d97138f5aee"
     },
     "PartyDetails.lua": {
       "maxUpvalues": 2,
-      "functions": 24,
-      "sha256": "52ca483e38c85db1da61728936c741d463de1bf57edeafeb3a9f4681f906b41d"
+      "functions": 25,
+      "sha256": "6fcab5af0f06065cc47a568c6fa07732a02e5ad7fa6f1108953b193f7893ebc1"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
       "functions": 49,
-      "sha256": "a738b4c4279ba4db879ac0845873e51b6f40ef03ecdecd27e5cf800dd5508dc9"
+      "sha256": "c45eb20dc456b383a86cfa0404a8ea58bdaf43c4587a8359f4329ab83d4e2f7a"
     },
     "LegacyCrits.lua": {
       "maxUpvalues": 7,
@@ -111,13 +112,13 @@
     },
     "Interface.lua": {
       "maxUpvalues": 5,
-      "functions": 83,
-      "sha256": "d8a9e70f0afd72f510be6ebc8200ca74b7fdd6f43e9c345ee024d93a3b69ab5a"
+      "functions": 93,
+      "sha256": "e3c4e81e7f73ea80b42688134b0a406fc8994e995f7f011faae813641361a3ce"
     },
     "FieldKit.lua": {
       "maxUpvalues": 19,
       "functions": 167,
-      "sha256": "837e4e33269e196fcd74a6499176302811699c31ffaf6919ebac085a3ac3a549"
+      "sha256": "d8c0295c8dbc2142e6e2914915f0b6149bc6477b51f231d4467b0d85de372800"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,

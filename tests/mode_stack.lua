@@ -23,9 +23,7 @@ local function checkStack()
 end
 checkStack()
 assert(R.frame.total:GetText()=="Heroic II")
-assert(R.frame.rows[2].label:GetText()=="Modifier reference · 0.121")
-assert(R.frame.rows[3].label:GetText()=="Shorter warnings")
-assert(R.frame.rows[6].label:GetText()=="Sentinels")
+assert(R.frame.mashVisibleRows==1 and R.frame.rows[1].label:GetText()=="Elwynn Forest")
 local legacyX,legacyY=FieldKitDB.pos.FieldKitMeterFrame[1],FieldKitDB.pos.FieldKitMeterFrame[2]
 local oldHeight=FieldKitMeterFrame:GetHeight()
 local _,_,_,_,takenY=FieldKitTakenFrame:GetPoint()
@@ -63,7 +61,7 @@ align:SetChecked(true);click(align);checkStack()
 
 AZS_ZONE.heroic=5;update(FieldKitFrame,.3)
 assert(R.frame.total:GetText()=="Heroic V")
-assert(R.frame.rows[8].label:GetText()=="Active affixes: not provided")
+assert(R.frame.mashVisibleRows==1)
 local originalWidth,originalHeight=UIParent.width,UIParent.height
 UIParent.width=800;UIParent.height=600;S.Apply()
 assert(S.root.clamped and S.root:GetWidth()==S.width and S.root:GetHeight()==S.height)
@@ -71,8 +69,10 @@ assert(not S.root.mouseEnabled,"The full-size clamp proxy must not cover card co
 for i=1,4 do assert(frames[i].clamped==false,"A linked child added an independent clamp") end
 UIParent.width=originalWidth;UIParent.height=originalHeight;S.Apply()
 AZS_ZONE.heroic=nil;update(FieldKitFrame,.3)
-assert(R.frame.total:GetText()=="Mode not provided" and R.frame.mashVisibleRows==2)
+assert(not R.frame:IsShown())
+FieldKitDB.hideUnknownMode=false;update(FieldKitFrame,.3)
+assert(R.frame:IsShown() and R.frame.total:GetText()=="Mode not provided" and R.frame.mashVisibleRows==2)
 AZS_ZONE.heroic=0;update(FieldKitFrame,.3)
-assert(R.frame.total:GetText()=="Normal difficulty" and R.frame.rows[2].label:GetText()=="Normal zone rules.")
+assert(R.frame.total:GetText()=="Normal difficulty" and R.frame.mashVisibleRows==1)
 AZS_RUN.ph=nil;update(FieldKitFrame,.3)
 assert(not R.frame:IsShown() and S.height==0)

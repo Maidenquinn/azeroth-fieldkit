@@ -185,6 +185,18 @@ function S.Tick()
  if ok then S.tx=S.tx+1 end
 end
 
+-- User-facing status describes observed delivery, never API availability alone.
+function S.Status()
+ if not FieldKitDB.partyDetailSync then return "Sharing disabled" end
+ if not FieldKit.PartyTransportAvailable() then return "Sharing unavailable: no addon-message API" end
+ local _,count=FieldKitCoop.Roster()
+ if not S.Watch() or count==0 then return "Sharing waiting: join an active co-op run" end
+ for name,data in pairs(S.cache) do
+  if S.Peer(name) and GetTime()-data.received<=20 then return "Shared data received recently" end
+ end
+ return "Sharing waiting: hover a teammate; delivery is not confirmed"
+end
+
 function S.Diagnostic()
  S.Watch();local cached=0
  for name,data in pairs(S.cache) do if S.Peer(name) and GetTime()-data.received<=20 then cached=cached+1 end end

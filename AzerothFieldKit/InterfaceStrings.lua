@@ -106,5 +106,37 @@ local labels={
  ["Native text is independent of FieldKit scrolling text. Disable duplicate displays here."]="Le texte du jeu est indépendant du texte FieldKit. Désactivez les affichages en double ici.",
  ["Game text"]="Jeu",["Move windows, then choose Done to return to settings."]="Déplacez les fenêtres, puis choisissez Terminer pour revenir aux paramètres.",
 }
+-- Current UX candidate; literal protocol and native names stay untouched.
+labels["Display"]="Affichage"
+labels["Layout"]="Disposition"
+labels["Appearance"]="Apparence"
+labels["Co-op / test"]="Coop / tests"
+labels["Experimental co-op"]="Coop expérimentale"
+labels["Sharing status"]="État du partage"
+labels["Full allied spell sharing depends on a client transport that has not been confirmed in live co-op. Native group totals remain available without sharing."]="Le partage complet des sorts alliés dépend d’un canal non confirmé en coop réelle. Les totaux natifs du groupe restent disponibles sans partage."
+labels["Optional passive cards. Native teammate frames remain available for targeting and their usual interactions."]="Cartes passives facultatives. Les cadres natifs restent disponibles pour cibler les coéquipiers et conserver leurs interactions habituelles."
+labels["Hide native teammate frames"]="Masquer les cadres natifs des coéquipiers"
+labels["Advanced: hide originals only while a card has valid health. Passive cards do not provide native targeting, menus or buff interactions. Turn off to restore originals."]="Avancé : masque les originaux uniquement si les PV sont connus. Les cartes passives ne permettent ni ciblage natif, ni menus, ni interaction avec les effets. Désactivez pour rétablir les originaux."
+labels["Hide mode card without difficulty data"]="Masquer le mode si la difficulté est inconnue"
+labels["Keep the HUD clear when the client does not supply the mode. Preview arrangement still shows the card."]="Allège l’écran lorsque le client ne fournit pas le mode. La carte reste visible lors de l’organisation des aperçus."
+labels["Compact native difficulty and zone. Historical rules are available on hover, labelled with their reference version."]="Difficulté et zone natives en format compact. Les règles historiques sont accessibles au survol, avec leur version de référence."
+labels["Arrange previews"]="Organiser les aperçus"
+labels["Previews"]="Aperçus"
+labels["Arrange previews and combat areas"]="Organiser les aperçus et zones de texte"
+labels["Drag active windows directly. Arrange hidden previews and combat areas here."]="Déplacez directement les fenêtres actives. Organisez ici les aperçus masqués et les zones de texte."
+labels["Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Drag active windows directly; lock positions in Windows > Layout."]="Remplace les grandes barres du jeu par des cadres pour les boss et gardiens éveillés. Déplacez les fenêtres directement ; verrouillez-les dans Fenêtres > Disposition."
+labels["A small green bar under your hero. Drag it directly; lock positions in Windows > Layout."]="Une petite barre verte sous votre héros. Déplacez-la directement ; verrouillez-la dans Fenêtres > Disposition."
+labels["Native party-unit health and resources. Damage and DPS require a fresh group-meter sample. Drag cards directly. Native teammate frames remain interactive unless explicitly hidden."]="PV et ressources natifs du groupe. Dégâts et DPS nécessitent un relevé récent. Déplacez les cartes directement. Les cadres natifs restent interactifs sauf si vous les masquez."
+labels["Window height: %d (minimum %d)"]="Hauteur : %d (minimum %d)"
+labels["Sharing disabled"]="Partage désactivé"
+labels["Sharing unavailable: no addon-message API"]="Partage indisponible : API de messages absente"
+labels["Sharing waiting: join an active co-op run"]="Partage en attente : rejoignez une partie coop active"
+labels["Shared data received recently"]="Données partagées reçues récemment"
+labels["Sharing waiting: hover a teammate; delivery is not confirmed"]="Partage en attente : survolez un coéquipier ; réception non confirmée"
+labels["Pin"]="Épingler"
+labels["Unpin"]="Détacher"
+labels["Use essential HUD"]="Affichage essentiel"
+labels["Undo HUD preset"]="Annuler le préréglage"
+labels["Essential HUD: damage, lairs, gold and group totals. Other addons are unchanged."]="Affichage essentiel : dégâts, antres, or et totaux du groupe. Les autres addons restent inchangés."
 for key,value in pairs(labels) do fr[key]=value end
 FieldKitLocale.en={};for en,value in pairs(fr) do FieldKitLocale.en[value]=en end

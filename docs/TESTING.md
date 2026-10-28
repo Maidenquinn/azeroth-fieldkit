@@ -164,3 +164,5 @@ interface fixture additionally verifies exclusive HP choice, no automatic reload
 no native writes during language/reflow, no resize allocations, wheel bounds,
 reset/Undo and independent money-strip hiding. Native scrollbars, custom fonts,
 visual clipping, keyboard focus and screen resizing still need in-game review.
+
+For the unmerged 0.2.3-review.1 journey, use [UX_SIMPLIFICATION.md](UX_SIMPLIFICATION.md).

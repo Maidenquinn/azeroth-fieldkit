@@ -167,12 +167,14 @@ function C.Options()
     C.Refresh()
    end},
   {kind="slider",label="Window width",min=220,max=800,step=1,
+   minimum=function() return C.MinimumWidth(C.names[C.selected]) end,
    get=function() return C.Frame():GetWidth() end,
    format=function(v) return FieldKit_L("Window width")..": "..v.." px" end,
    set=function(v) C.SetDimension("width",math.max(C.MinimumWidth(C.names[C.selected]),v)) end},
   {kind="slider",label="Window height",min=22,max=800,step=1,
+   minimum=function() return C.Frame().fieldkitMinimumHeight or 22 end,
    get=function() local f=C.Frame();return f.fieldkitExpandedHeight or f:GetHeight() end,
-   format=function(v) return FieldKit_L("Window height")..": "..v.." px" end,
+   format=function(v) return string.format(FieldKit_L("Window height: %d (minimum %d)"),v,C.Frame().fieldkitMinimumHeight or 22) end,
    set=function(v)
     local f=C.Frame();C.SetDimension("height",math.max(f.fieldkitMinimumHeight or 22,v))
    end},

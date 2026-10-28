@@ -1695,6 +1695,7 @@ local function CreateMeterFrames()
 	meterFrame = CreateBarWindow("FieldKitMeterFrame", "Damage", METER_ROWS)
  meterFrame:SetWidth(FieldKit.MeterWidth(DB.meterValues));FieldKitTheme.Update(meterFrame)
  FieldKit.CreateMeterColumns(meterFrame)
+ for i=1,table.getn(meterFrame.rows) do FieldKitPartyDetails.BindRow(meterFrame.rows[i],meterFrame,true) end
 	takenFrame = CreateBarWindow("FieldKitTakenFrame", "Damage taken", TAKEN_ROWS)
 
 	takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)

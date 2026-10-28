@@ -157,7 +157,7 @@ function P.CreateMember(index,createWindow,makeMovable)
  makeMovable(frame,-UIParent:GetWidth()/2+550,UIParent:GetHeight()/2-220-(index-1)*112,true)
  frame:SetScript("OnEnter",function()
   GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L("Teammate"),1,.85,.55)
-  GameTooltip:AddLine(FieldKit_L("Native party-unit health and resources. Damage and DPS require a fresh group-meter sample. Cards are individually movable in Move windows."),.8,.8,.8,true)
+  GameTooltip:AddLine(FieldKit_L("Native party-unit health and resources. Damage and DPS require a fresh group-meter sample. Drag cards directly. Native teammate frames remain interactive unless explicitly hidden."),.8,.8,.8,true)
   GameTooltip:Show()
  end)
  frame:SetScript("OnLeave",function() GameTooltip:Hide() end)
@@ -181,6 +181,7 @@ function P.UpdateMember(index,active)
  local hp=type(UnitHealth)=="function" and FieldKit.Number(UnitHealth(frame.unit),nil,0)
  local max=type(UnitHealthMax)=="function" and FieldKit.Number(UnitHealthMax(frame.unit),nil,0)
  local known=not preview and hp~=nil and max and max>0
+ if not known and not preview then frame:Hide();P.Stock(index,false);return end
  local name=preview and FieldKit_L("Teammate").." "..index.." ("..FieldKit_L("Preview")..")" or (UnitName(frame.unit) or "?")
  local class,token
  if not preview and type(UnitClass)=="function" then class,token=UnitClass(frame.unit) end
@@ -202,7 +203,7 @@ function P.UpdateMember(index,active)
  if not preview and type(UnitIsConnected)=="function" then connected=UnitIsConnected(frame.unit) and true or false end
  local status=connected==false and "Offline" or (known and hp==0 and "0 HP" or (connected and "Online" or "Not provided"))
  P.Row(frame,4,"Status",FieldKit_L(status),0,color)
- P.fitRows(frame,4);frame:Show();P.Stock(index,known and true or false)
+ P.fitRows(frame,4);frame:Show();P.Stock(index,FieldKitDB.replacePartyFrames and known and true or false)
 end
 
 function P.UpdateMeter(active)

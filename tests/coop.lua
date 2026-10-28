@@ -71,7 +71,9 @@ assert(P.meter.rows[1].meterColumns[3]:GetText()=="50%")
 assert(PartyMemberFrame1:IsShown() and not P.frames[1]:IsShown(),"Replacement was not opt-in")
 
 local cards=control("Co-op teammate cards");cards:SetChecked(true);click(cards)
-assert(not PartyMemberFrame1:IsShown() and P.frames[1]:IsShown())
+assert(PartyMemberFrame1:IsShown() and P.frames[1]:IsShown(),"Passive cards hid native interactions by default")
+FieldKitDB.replacePartyFrames=true;P.Update()
+assert(not PartyMemberFrame1:IsShown())
 assert(P.frames[1].title:GetText()=="Denza")
 assert(P.frames[1].rows[1].value:GetText()=="400 / 800 (50%)")
 assert(P.frames[1].rows[2].label:GetText()=="Mana" and P.frames[1].rows[2].value:GetText()=="30 / 100")
@@ -100,7 +102,7 @@ members[1].hp=200;update(FieldKitFrame,.3);assert(first.rows[1].value:GetText()=
 
 -- Unknown max HP keeps native frame available; no replacement pretends it knows.
 members[1].max=0;update(FieldKitFrame,.3)
-assert(PartyMemberFrame1:IsShown() and first.rows[1].value:GetText()=="Not provided")
+assert(PartyMemberFrame1:IsShown() and not first:IsShown())
 members[1].max=800
 cards:SetChecked(false);click(cards)
 for i=1,3 do assert(not P.frames[i]:IsShown() and getglobal("PartyMemberFrame"..i):IsShown());assert(getglobal("PartyMemberFrame"..i):GetScript("OnShow")==originals[i]) end
