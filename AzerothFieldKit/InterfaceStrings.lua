@@ -1,6 +1,12 @@
 -- Presentation-only additions. Native creature/spell names are never translated.
 local fr=FieldKitLocale.fr
 local labels={
+ ["This client does not expose an addon-message transport."]="Ce client ne fournit pas de canal de messages entre addons.",
+ ["Share spell breakdowns with group"]="Partager le détail des sorts avec le groupe",
+ ["Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots."]="Échange facultatif en jeu, réservé au groupe. Chaque joueur doit avoir FieldKit et activer cette option. Partage uniquement vos dégâts/DPS par sort sur demande. Canal coop à vérifier avec /fieldkit sync.",
+ ["Waiting for shared spells. The ally must enable sharing in FieldKit too."]="En attente des sorts partagés. L’allié doit aussi activer le partage dans FieldKit.",
+ ["Shared spell snapshot · received %.0fs ago"]="Relevé des sorts partagé · reçu il y a %.0fs",
+ ["Partial shared snapshot: safety limit reached."]="Relevé partagé partiel : limite de sécurité atteinte.",
  ["Spell"]="Sort",
  ["Damage: %s   DPS: %s"]="Dégâts : %s   DPS : %s",
  ["Your native spell breakdown. Scroll for more spells."]="Vos sorts selon le compteur natif. Faites défiler pour la suite.",

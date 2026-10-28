@@ -1,4 +1,4 @@
--- One opaque, reusable hover card. AZSPARTY exposes only top/topdps for peers;
+-- One reusable HUD-themed hover card. AZSPARTY exposes only top/topdps for peers;
 -- the full spell table belongs to the local player. Never substitute our spells
 -- for an ally's or convert top DPS into an invented damage amount.
 FieldKitPartyDetails={offset=0,pool=10}
@@ -10,6 +10,14 @@ function D.Data(name)
  if not peer then return nil end
  local result={name=name,rows={},damage=peer.dmg,dps=peer.dps,own=name==UnitName("player")}
  if not result.own then
+  local shared=FieldKitPartySync.Get(name)
+  if shared then
+   result.rows=shared.rows;result.damage=shared.damage;result.dps=shared.dps
+   result.shared=true;result.truncated=shared.truncated;result.age=math.max(0,GetTime()-shared.received)
+   return result
+  end
+  result.waiting=FieldKitDB.partyDetailSync
+  result.noTransport=result.waiting and not FieldKit.PartyTransportAvailable()
   if peer.top then table.insert(result.rows,{name=peer.top,dps=peer.topdps}) end
   return result
  end
@@ -63,17 +71,19 @@ function D.Build()
  if D.frame then return end
  local frame=CreateFrame("Frame","FieldKitPartyDetailsFrame",UIParent);D.frame=frame
  frame:SetWidth(560);frame:SetHeight(400);frame:SetFrameStrata("TOOLTIP");frame:SetFrameLevel(220)
- frame:SetClampedToScreen(true);frame:EnableMouse(true);T.Surface(frame,"card")
+ frame:SetClampedToScreen(true);frame:EnableMouse(true);T.Surface(frame,"card",true)
  D.title=T.Label(frame,nil,16,10,480,26,18,T.gold,true)
  D.summary=T.Label(frame,nil,16,40,520,22,12,T.text)
  D.hint=T.Label(frame,nil,16,64,520,36,11,T.muted)
  D.header=CreateFrame("Frame",nil,frame);D.header:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-106);D.header:SetHeight(18)
  D.spell=T.Label(D.header,"Spell",3,0,260,18,11,T.muted)
  local captions={"Damage","DPS","%"};local offsets={131,45,3};local widths={92,78,34}
+ D.captions={}
  for i=1,3 do
   local label=D.header:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
   label:SetPoint("RIGHT",D.header,"RIGHT",-offsets[i],0);label:SetWidth(widths[i]);label:SetHeight(18)
   label:SetJustifyH("RIGHT");T.Font(label,11,T.muted);FieldKit_Text(label,captions[i])
+  D.captions[i]=label
  end
  frame.rows={}
  for i=1,D.pool do
@@ -125,10 +135,21 @@ function D.Render()
  frame:SetWidth(width);frame:SetHeight(height);D.title:SetWidth(width-56)
  D.summary:SetWidth(width-32);D.hint:SetWidth(width-32);D.header:SetWidth(width-24)
  D.spell:SetWidth(width-270);D.title:SetText(data.name)
+ local limited=not data.own and not data.shared
+ for i=1,3 do
+  local caption=D.captions[i];caption:ClearAllPoints()
+  caption:SetPoint("RIGHT",D.header,"RIGHT",limited and -3 or -({131,45,3})[i],0)
+  caption:SetWidth(limited and 110 or ({92,78,34})[i])
+  if limited and i~=2 then caption:Hide() else caption:Show() end
+ end
+ if limited then D.spell:SetWidth(width-164) end
  D.summary:SetText(string.format(FieldKit_L("Damage: %s   DPS: %s"),data.damage and string.format("%.0f",data.damage) or "?",data.dps and string.format("%.0f",data.dps) or "?"))
  local hint=data.own and "Your native spell breakdown. Scroll for more spells." or "Allies: only their top spell is exposed. Full breakdown unavailable."
+ if data.waiting then hint="Waiting for shared spells. The ally must enable sharing in FieldKit too." end
+ if data.noTransport then hint="This client does not expose an addon-message transport." end
+ if data.shared then hint=string.format(FieldKit_L("Shared spell snapshot · received %.0fs ago"),data.age) end
  if data.unavailable then hint="Your spell breakdown is not provided by the client." end
- if data.truncated then hint="Partial view: the 512-source safety limit was reached." end
+ if data.truncated then hint=data.shared and "Partial shared snapshot: safety limit reached." or "Partial view: the 512-source safety limit was reached." end
  FieldKit_Text(D.hint,hint)
  local top=data.rows[1] and data.rows[1].dmg or 1
  for i=1,D.pool do
@@ -136,6 +157,11 @@ function D.Render()
   if line then
    row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-128-(i-1)*22);row:SetWidth(width-24)
    row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,3,width-12)
+   if limited then
+    row.meterColumns[1]:Hide();row.meterColumns[3]:Hide()
+    row.meterColumns[2]:ClearAllPoints();row.meterColumns[2]:SetPoint("RIGHT",row,"RIGHT",-3,0);row.meterColumns[2]:SetWidth(110)
+    row.label:SetWidth(width-164);row.meterMode=nil
+   end
    row:SetValue(line.dmg and line.dmg/math.max(top or 0,1) or 0)
    if line.proc==1 then row:SetStatusBarColor(.25,.45,.9,.55) else row:SetStatusBarColor(.8,.55,.1,.55) end
    row:Show()
@@ -143,7 +169,7 @@ function D.Render()
  end
  D.footer:ClearAllPoints();D.footer:SetPoint("BOTTOMLEFT",frame,"BOTTOMLEFT",16,10);D.footer:SetWidth(width-112)
  if count==0 then FieldKit_Text(D.footer,"No spell detail provided")
- elseif data.own then D.footer:SetText(string.format(FieldKit_L("Spells %d–%d / %d"),D.offset+1,D.offset+shown,count))
+ elseif data.own or data.shared then D.footer:SetText(string.format(FieldKit_L("Spells %d–%d / %d"),D.offset+1,D.offset+shown,count))
  else FieldKit_Text(D.footer,"Top spell only · missing values stay unknown") end
  D.previous:ClearAllPoints();D.previous:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-50,10)
  D.next:ClearAllPoints();D.next:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-14,10)

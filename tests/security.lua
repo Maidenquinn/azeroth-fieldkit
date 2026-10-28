@@ -1,5 +1,6 @@
 -- Assert the properties relevant to review, using actual production callbacks.
 assert(FieldKitDB.chatCopy==false and FieldKitDB.compactBar==false)
+assert(FieldKitDB.partyDetailSync==false)
 assert(FieldKitDB.chestPins==false and FieldKitDB.guardianPins==false)
 assert(FieldKitDB.hidePlates==false and FieldKitDB.bossFrame==false)
 -- A disabled filter must not overwrite transparency set by another UI component.

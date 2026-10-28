@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.2-review.4 — 2026-10-28 (experimental party-sharing candidate)
+
+- Apply the selected Classic/Decorative HUD style and opacity to hover cards,
+  including their paging controls. Settings opacity remains separate.
+- Add off-by-default, request-driven PARTY spell snapshot sharing, explicitly
+  authorized by the maintainer. Both peers need FieldKit and must opt in.
+- Full received peer snapshots render real per-spell damage, DPS and share;
+  native-only fallback shows only the known top-spell DPS, without empty columns.
+- Centralize the sole send capability in Runtime.lua: fixed prefix/channel,
+  printable 230-byte packets, four calls/second. No visible chat fallback.
+- Bound and validate requests, nonces, roster membership, fragments, source/byte
+  counts, numeric values, caches, timers and opt-out/run invalidation.
+- Add `/fieldkit sync` diagnostics. Accepted API calls are not delivery evidence.
+- Verify isolated Lua-client round trips, fragmentation, exact damage, malformed
+  packets, opt-in and theme behavior. Real co-op forwarding remains unconfirmed;
+  the candidate does not replace the current public release.
+
 ## 0.2.2-review.3 — 2026-10-28 (local hover-detail candidate)
 
 - Add a reusable themed detail card when hovering a player's group-meter row.

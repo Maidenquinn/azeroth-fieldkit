@@ -22,7 +22,11 @@ for name in loaded:
  assert '--[[' not in text and '[[' not in text,'Update tokenizer before adding long literals'
  code=tokens.sub(' ',text)
  identifiers=set(re.findall(r'\b[A-Za-z_]\w*\b',code))
- assert not identifiers&forbidden,(name,identifiers&forbidden)
+ allowed={'SendAddonMessage'} if name=='Runtime.lua' else set()
+ assert not identifiers&(forbidden-allowed),(name,identifiers&(forbidden-allowed))
+ if name=='Runtime.lua':
+  assert 'pcall(SendAddonMessage,"AFKDETAIL1",payload,"PARTY")' in text,'Unexpected outbound transport boundary'
+  assert len(re.findall(r'pcall\(SendAddonMessage\b',code))==1,'Unexpected additional send call'
  assert not re.search(r'\bAZS_\w+\s*=(?!=)',code),(name,'native AZS write')
  assert 'MASHDB' not in identifiers,(name,'old DB access')
  if name!='Runtime.lua':
@@ -61,7 +65,8 @@ assert all((root/name).is_file() for name in media)
 report={'kind':'maintainer static inventory; not certification','candidate':version,
  'runtimeModules':len(loaded),'textureCount':len(textures),'forbiddenTokenGatePassed':True,
  'dynamicCombatEventNames':'See CombatText.lua events list; not all registrations are string literals.',
- 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':'not approved'}
+ 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':'not approved',
+ 'optionalPartyDetailTransport':{'defaultEnabled':False,'nativeCallBoundary':'Runtime.lua','prefix':'AFKDETAIL1','distribution':'PARTY','maxBytes':230,'maxCallsPerSecond':4,'liveCoopTransportConfirmed':False}}
 docs=base/'docs';docs.mkdir(exist_ok=True)
 (docs/'AUDIT_INVENTORY.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n',encoding='utf8',newline='\n')
 (docs/'CODE_INDEX.md').write_text('\n'.join(index)+'\n',encoding='utf8',newline='\n')

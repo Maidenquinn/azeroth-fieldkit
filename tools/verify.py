@@ -63,6 +63,36 @@ edges=runtime();edges.execute((base/'tests/edge_positions.lua').read_text(encodi
 individual=runtime();individual.execute((base/'tests/individual_layout.lua').read_text(encoding='utf8'))
 coop=runtime();coop.execute((base/'tests/coop.lua').read_text(encoding='utf8'))
 details=runtime();details.execute((base/'tests/party_details.lua').read_text(encoding='utf8'))
+sync=runtime();sync.execute((base/'tests/party_sync.lua').read_text(encoding='utf8'))
+# Two isolated Lua clients, with an explicit simulated PARTY transport. This
+# proves protocol interoperability, not that this game's co-op forwards packets.
+clients=[]
+for name,peer,damage in [('Maiden','Denza',300),('Denza','Maiden',123456789012)]:
+ client=runtime('{partyDetailSync=true}')
+ client.execute('''
+ OUT={}
+ function UnitExists(unit) return unit=="player" or unit=="party1" end
+ function SendAddonMessage(prefix,body,channel) table.insert(OUT,{prefix,body,channel,UnitName("player")}) end
+ function SIMULATED_ADDON(prefix,body,channel,sender)
+  event="CHAT_MSG_ADDON";arg1=prefix;arg2=body;arg3=channel;arg4=sender;this=FieldKitFrame
+  FieldKitFrame:GetScript("OnEvent")()
+ end
+ ''')
+ client.execute('function UnitName(unit) return unit=="player" and '+json.dumps(name)+' or '+json.dumps(peer)+' end')
+ client.execute('function AZS_GetMeter() return {{name="Éclair; feu, 100%",dmg='+str(damage)+',dps=45.125,share=1}},'+str(damage)+',45.125 end')
+ client.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+ clients.append(client)
+clients[0].execute('FieldKitPartySync.Request("Denza")')
+for _ in range(40):
+ for source,target in [(clients[0],clients[1]),(clients[1],clients[0])]:
+  source.execute('NOW=NOW+.3;FieldKitPartySync.Tick()')
+  outgoing=source.globals().OUT
+  for i in range(1,len(outgoing)+1):
+   packet=outgoing[i]
+   target.globals().SIMULATED_ADDON(packet[1],packet[2],packet[3],packet[4])
+  source.execute('OUT={}')
+ if clients[0].globals().FieldKitPartySync.completed:break
+clients[0].execute('local d=FieldKitPartySync.Get("Denza");assert(d and d.shared and d.damage==123456789012 and d.rows[1].dmg==123456789012);assert(d.rows[1].name=="Éclair; feu, 100%")')
 individual.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 restored=runtime(individual.eval('SNAPSHOT(FieldKitDB)'))
 restored.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("");update(FieldKitFrame,.3)')
@@ -95,7 +125,7 @@ if args.lua50:
 result={'version':version,'lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
  'freshDefaultsNoCVarOrHudWrites':True,'manualActionSwapFixture':True,'bothChatHookPaths':True,
  'officialApiFixtures':True,'snapshotBatchesPer20MockTicks':official.globals().OFFICIAL_API_BATCHES,
- 'inGameTest':False,'approval':'not approved','files':prototypes}
+ 'inGameTest':False,'partySyncTwoClientsSimulated':True,'partySyncLiveTransportConfirmed':False,'approval':'not approved','files':prototypes}
 out=base/'build';out.mkdir(exist_ok=True)
 (out/'validation.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf8',newline='\n')
 print(json.dumps(result,indent=2))

@@ -1,7 +1,26 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.2.2-review.3", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.2.2-review.4", folder = "AzerothFieldKit" }
+
+-- The only outbound capability: explicitly opted-in meter sharing, one fixed
+-- addon prefix, PARTY distribution, printable 230-byte packets, max 4 per second.
+-- A successful call means queued by the API, never proof of peer delivery.
+function FieldKit.PartyTransportAvailable() return type(SendAddonMessage)=="function" end
+function FieldKit.SendPartyDetail(payload)
+ if not FieldKitDB or not FieldKitDB.partyDetailSync then return false,"disabled" end
+ if type(AZS_GetPhase)~="function" or not AZS_GetPhase() then return false,"no run" end
+ local peer=false;for i=1,4 do if UnitExists("party"..i) then peer=true end end
+ if not peer then return false,"no party" end
+ if not FieldKit.PartyTransportAvailable() then return false,"unavailable" end
+ if type(payload)~="string" or string.len(payload)>230 or not string.find(payload,"^[QR]:") or string.find(payload,"[^ -~]") then return false,"invalid" end
+ local now=FieldKit.Number(GetTime())
+ if not now then return false,"clock" end
+ if FieldKit.partyDetailSentAt and now-FieldKit.partyDetailSentAt<.25 then return false,"throttled" end
+ FieldKit.partyDetailSentAt=now
+ local ok=pcall(SendAddonMessage,"AFKDETAIL1",payload,"PARTY")
+ return ok,ok and "queued" or "api error"
+end
 
 -- Return a finite numeric value, optionally clamped. Strings are parsed as numbers,
 -- never evaluated as Lua. A missing/invalid value returns the caller's fallback.
