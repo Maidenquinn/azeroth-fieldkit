@@ -59,16 +59,11 @@ function R.Update()
  local level=FieldKit.GetHeroicLevel()
  FieldKit_Text(f.total,FieldKit.GetHeroicLabel() or (active and "Mode not provided" or "Preview"))
  local zone=type(AZS_ZONE)=="table" and (AZS_ZONE.zname or AZS_ZONE.zone)
+ -- Keep only current native context on the HUD. Historical mechanic reference
+ -- remains in the tooltip and never masquerades as current measured modifiers.
+ if level==nil and FieldKitDB.hideUnknownMode and not FieldKit.layoutEditing then f:Hide();return end
  local lines={zone or FieldKit_L("Zone not provided")}
- if level==nil then table.insert(lines,FieldKit_L("No difficulty data received."))
- elseif level==0 then table.insert(lines,FieldKit_L("Normal zone rules."))
- else
-  table.insert(lines,FieldKit_L("Modifier reference").." · "..R.reference)
-  local first=math.max(1,level*2-3)
-  for i=first,level*2 do table.insert(lines,FieldKit_L(R.modifiers[i][1])) end
-  if first>1 then table.insert(lines,string.format(FieldKit_L("+%d earlier modifiers (hover)"),first-1)) end
-  if level>=3 then table.insert(lines,FieldKit_L("Active affixes: not provided")) end
- end
+ if level==nil then table.insert(lines,FieldKit_L("No difficulty data received.")) end
  for i=1,table.getn(lines) do
   local row=f.rows[i];row:SetValue(0);row.value:Hide();row.label:SetText(lines[i]);row:Show()
  end

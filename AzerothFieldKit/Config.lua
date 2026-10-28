@@ -1,6 +1,6 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={windowsLocked=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+local defaults={windowsLocked=false,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
@@ -55,6 +55,7 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  local valid={home=true,combat=true,health=true,bosses=true,alerts=true,windows=true,map=true,nameplates=true,interface=true}
  if not valid[d.uiPage] then d.uiPage="home" end
+ if d.windowPage~="layout" and d.windowPage~="appearance" and d.windowPage~="coop" then d.windowPage="display" end
  d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,9))
  d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)
  d.playerBarY=FieldKit.Number(d.playerBarY,-70,-10000,10000)

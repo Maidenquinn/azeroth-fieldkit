@@ -8,6 +8,7 @@ local SECTIONS = {
 		items = {
 			{
 				kind = "check",
+				id = "hidePlates",
 				label = "Show only elites and bosses",
 				tip = "Common monsters get no nameplate. The V key shows or hides the elite and boss plates.",
 				get = function() return FieldKitDB.hidePlates end,
@@ -15,6 +16,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "hideUnknown",
 				label = "Hide unclassified monsters",
 				tip = "Monsters FieldKit has not learned yet are hidden too. They are learned when you target or mouse over them.",
 				get = function() return FieldKitDB.hideUnknown end,
@@ -27,6 +29,7 @@ local SECTIONS = {
 		items = {
 			{
 				kind = "check",
+				id = "targetHealth",
 				label = "Enemy target health numbers",
 				tip = "Shows current / max health on the target frame.",
 				get = function() return FieldKitDB.targetHealth end,
@@ -40,13 +43,15 @@ local SECTIONS = {
 		items = {
 			{
 				kind = "check",
+				id = "bossFrame",
 				label = "Replace the game's boss bars",
-				tip = "Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Use Move windows to position them.",
+				tip = "Hides the big boss bars of the HUD and shows bosses and awake guardians in target-style frames instead. Drag active windows directly; lock positions in Windows > Layout.",
 				get = function() return FieldKitDB.bossFrame end,
 				set = function(v) FieldKitDB.bossFrame = v; actions.SyncHudBosses(); actions.UpdateBossFrame() end,
 			},
 			{
 				kind = "check",
+				id = "hideDamage",
 				label = "Hide damage numbers",
 				tip = "Hides the damage numbers that pop over monsters (yours and your pet's).",
 				get = function() return FieldKitDB.hideDamage end,
@@ -54,6 +59,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "showCrits",
 				label = "Show my crits above the hero",
 				tip = "Your critical hits pop up above your character. Pair it with Hide damage numbers to see only crits.",
 				get = function() return FieldKitDB.showCrits end,
@@ -61,6 +67,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "groupCrits",
 				label = "Group crits",
 				tip = "Crits that land within a quarter second become one line: the biggest, with how many there were (x7).",
 				get = function() return FieldKitDB.groupCrits end,
@@ -73,14 +80,16 @@ local SECTIONS = {
 		items = {
 			{
 				kind = "check",
+				id = "playerBar",
 				label = "Health bar under the character",
-				tip = "A small green bar under your hero. Use Move windows to position it.",
+				tip = "A small green bar under your hero. Drag it directly; lock positions in Windows > Layout.",
 				get = function() return FieldKitDB.playerBar end,
 				set = function(v) FieldKitDB.playerBar = v; actions.UpdatePlayerBar() end,
 			},
 
 			{
 				kind = "check",
+				id = "playerBuffs",
 				label = "Buff icons under the health bar",
 				tip = "Your active buffs with their time left.",
 				get = function() return FieldKitDB.playerBuffs end,
@@ -88,6 +97,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "playerShield",
 				label = "Shield on the health bar",
 				tip = "Your absorb shield shows as a light blue band over the health bar, with its value in numbers.",
 				get = function() return FieldKitDB.playerShield end,
@@ -129,6 +139,7 @@ local SECTIONS = {
 		items = {
 			{
 				kind = "check",
+				id = "statsFrame",
 				label = "Stats",
 				tip = "Your run stats on screen, with gold and the next chest price below.",
 				get = function() return FieldKitDB.statsFrame end,
@@ -137,6 +148,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "replaceTally",
 				label = "Kills under the gold",
 				tip = "Shows your kills below the gold and chest price, and hides the game's Kills / Gold / cache box.",
 				get = function() return FieldKitDB.replaceTally end,
@@ -144,6 +156,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "meterFrame",
 				label = "Damage meter",
 				tip = "Damage, DPS and share of each spell this run. The game's own meter stays as it is.",
 				get = function() return FieldKitDB.meterFrame end,
@@ -151,6 +164,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "takenFrame",
 				label = "Damage taken",
 				tip = "Where the damage you took came from: bosses, elites, monsters or ground effects.",
 				get = function() return FieldKitDB.takenFrame end,
@@ -158,6 +172,7 @@ local SECTIONS = {
 			},
 			{
 				kind = "check",
+				id = "gearFrame",
 				label = "Accessories",
 				tip = "Your amulet, trinkets and rings with rarity colors. Empty slots show in red.",
 				get = function() return FieldKitDB.gearFrame end,
@@ -189,6 +204,7 @@ local SECTIONS = {
 		items = {
 			{
 				kind = "check",
+				id = "compactBar",
 				label = "Compact action bar",
 				tip = "Your 6 spells and racial in a small bar with the XP bar below and the kills, gold and chest line above, and the menu buttons in the bottom right corner. Changing this reloads the interface.",
 				get = function() return FieldKitDB.compactBar end,

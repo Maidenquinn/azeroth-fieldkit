@@ -1,5 +1,7 @@
 # Interface review — 0.2.0-review.1
 
+Current unmerged UX candidate: [0.2.3-review.1](UX_SIMPLIFICATION.md). Historical behavior below is superseded where stated there.
+
 Reviewed on 2026-10-27 against the installed FieldKit 0.1.0-review.3 and the
 maintainer-provided Azeroth Stats 1.6.0-dev.6 design. This document records source
 and offline checks; it is not a claim of in-game acceptance or developer approval.

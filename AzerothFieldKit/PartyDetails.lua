@@ -7,8 +7,9 @@ local T=FieldKitTheme
 
 function D.Data(name)
  local peer=FieldKitCoop.MemberDamage(name)
- if not peer then return nil end
- local result={name=name,rows={},damage=peer.dmg,dps=peer.dps,own=name==UnitName("player")}
+ local own=name==UnitName("player")
+ if not peer and not own then return nil end
+ local result={name=name,rows={},damage=peer and peer.dmg,dps=peer and peer.dps,own=own}
  if not result.own then
   local shared=FieldKitPartySync.Get(name)
   if shared then
@@ -43,8 +44,9 @@ end
 function D.DelayClose() D.deadline=GetTime()+.18 end
 
 function D.Close()
+ D.pinned=false
  if D.frame then D.frame:Hide() end
- D.owner=nil;D.member=nil;D.data=nil;D.overOwner=false;D.overPopup=false;D.deadline=nil
+ D.owner=nil;D.member=nil;D.data=nil;D.overOwner=false;D.overPopup=false;D.deadline=nil;D.source=nil
 end
 
 -- Preserve the theme's hover callbacks on buttons; crossing the eight-pixel
@@ -96,6 +98,10 @@ function D.Build()
  end
  FieldKit.CreateMeterColumns(frame)
  for i=1,D.pool do for j=1,3 do T.Font(frame.rows[i].meterColumns[j],12,T.text) end end
+ D.pin=T.Button(frame,nil,"Pin",0,0,80,24,function()
+  D.pinned=not D.pinned;D.deadline=nil;D.Render()
+ end)
+ D.pin:ClearAllPoints();D.pin:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-40,-8);D.BindHover(D.pin)
  D.footer=T.Label(frame,nil,16,0,390,24,11,T.muted)
  D.previous=T.Button(frame,nil,"<",0,0,30,24,function() D.Page(-D.visible) end)
  D.next=T.Button(frame,nil,">",0,0,30,24,function() D.Page(D.visible) end)
@@ -108,15 +114,15 @@ function D.Build()
   frame:EnableMouseWheel(true);frame:SetScript("OnMouseWheel",function() D.Page(-(arg1 or 0)*3) end)
  end
  frame:SetScript("OnUpdate",function()
-  if D.deadline and GetTime()>=D.deadline and not D.overOwner and not D.overPopup then D.Close() end
+  if not D.pinned and D.deadline and GetTime()>=D.deadline and not D.overOwner and not D.overPopup then D.Close() end
  end)
- frame:SetScript("OnHide",function() D.member=nil;D.data=nil;D.owner=nil end)
+ frame:SetScript("OnHide",function() D.pinned=false;D.member=nil;D.data=nil;D.owner=nil;D.source=nil;D.deadline=nil end)
  if type(UISpecialFrames)=="table" then table.insert(UISpecialFrames,"FieldKitPartyDetailsFrame") end
  frame:Hide()
 end
 
 function D.Anchor()
- if not D.owner then return end
+ if not D.owner or D.pinned then return end
  local right=D.owner.GetRight and D.owner:GetRight()
  if not right then local x=D.owner:GetCenter();right=(x or 0)+D.owner:GetWidth()/2 end
  D.frame:ClearAllPoints()
@@ -132,7 +138,7 @@ function D.Render()
  local count=table.getn(data.rows)
  D.offset=math.max(0,math.min(D.offset,math.max(0,count-D.visible)))
  local shown=math.min(D.visible,count);local height=174+22*math.max(shown,1)
- frame:SetWidth(width);frame:SetHeight(height);D.title:SetWidth(width-56)
+ frame:SetWidth(width);frame:SetHeight(height);D.title:SetWidth(width-142)
  D.summary:SetWidth(width-32);D.hint:SetWidth(width-32);D.header:SetWidth(width-24)
  D.spell:SetWidth(width-270);D.title:SetText(data.name)
  local limited=not data.own and not data.shared
@@ -174,20 +180,24 @@ function D.Render()
  D.previous:ClearAllPoints();D.previous:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-50,10)
  D.next:ClearAllPoints();D.next:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-14,10)
  if count>D.visible then D.previous:Show();D.next:Show() else D.previous:Hide();D.next:Hide() end
- T.Update(frame);D.Anchor()
+ FieldKit_Text(D.pin,D.pinned and "Unpin" or "Pin");T.Update(frame);D.Anchor()
 end
 
 function D.Open(owner)
- if FieldKit.layoutEditing or FieldKitCoop.meter.azsMoving or not owner.fieldkitMember then return end
+ if D.pinned or FieldKit.layoutEditing or (owner.fieldkitDetailSource or FieldKitCoop.meter).azsMoving or not owner.fieldkitMember then return end
  local data=D.Data(owner.fieldkitMember);if not data then D.Close();return end
- D.Build();D.owner=owner;D.member=owner.fieldkitMember;D.data=data;D.offset=0
+ D.Build();D.owner=owner;D.source=owner.fieldkitDetailSource or FieldKitCoop.meter;D.member=owner.fieldkitMember;D.data=data;D.offset=0
  D.overOwner=true;D.overPopup=false;D.deadline=nil;D.Render();D.frame:Show()
 end
 
-function D.BindRow(row)
- row:SetScript("OnEnter",function() D.Open(this) end)
+function D.BindRow(row,source,own)
+ row.fieldkitDetailSource=source
+ row:SetScript("OnEnter",function()
+  if own then this.fieldkitMember=UnitName("player") end
+  D.Open(this)
+ end)
  row:SetScript("OnLeave",function() D.overOwner=false;D.DelayClose() end)
- row:SetScript("OnHide",function() if D.owner==this then D.Close() end end)
+ row:SetScript("OnHide",function() if D.owner==this and not D.pinned then D.Close() end end)
  if row.EnableMouseWheel then
   row:EnableMouseWheel(true)
   row:SetScript("OnMouseWheel",function() if D.owner==this then D.Page(-(arg1 or 0)*3) end end)
@@ -197,9 +207,10 @@ end
 -- Called on the existing co-op 5 Hz tick, never on every animation frame.
 function D.Sync()
  if not D.member then return end
- if FieldKit.layoutEditing or FieldKitCoop.meter.azsMoving or not FieldKitCoop.phase or not FieldKitCoop.meter:IsShown()
-  or FieldKitCoop.meter.mashCollapsed or not D.owner:IsShown() or not D.owner.fieldkitMember then D.Close();return end
- if D.owner.fieldkitMember~=D.member then
+ local source=D.source or FieldKitCoop.meter
+ if FieldKit.layoutEditing or source.azsMoving or not FieldKitCoop.phase or not source:IsShown()
+  or source.mashCollapsed or (not D.pinned and (not D.owner:IsShown() or not D.owner.fieldkitMember)) then D.Close();return end
+ if not D.pinned and D.owner.fieldkitMember~=D.member then
   if D.overOwner then D.Open(D.owner) else D.Close() end
   return
  end

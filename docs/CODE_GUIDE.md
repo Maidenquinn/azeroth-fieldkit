@@ -1,5 +1,7 @@
 # Reading and maintaining the code
 
+Current unmerged UX candidate: [0.2.3-review.1](UX_SIMPLIFICATION.md). Historical behavior below is superseded where stated there.
+
 This guide is intended for a developer new to legacy WoW-style Lua. Start with
 the TOC: the client executes its listed files in order. Tests and Python tools
 are never in that list. There is no modern module loader or required library.

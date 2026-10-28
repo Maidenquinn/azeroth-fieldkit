@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.3-review.1 — UX simplification candidate (unmerged)
+
+- Split Windows into Display, Layout, Appearance and Co-op / test with saved routing.
+- Clarify direct dragging versus preview arrangement, in English and French.
+- Keep native teammate interactions by default; make passive-frame replacement explicit.
+- Separate experimental sharing and show observed receive/availability status.
+- Compact mode rank/zone; hide unknown mode by default, keep versioned rules on hover.
+- Expose dimension minima, add an optional reversible Essential HUD visibility preset.
+- Allow solo spell details and pin a player's breakdown through pointer/rank changes.
+- Replace positional option bindings with stable ids; rewrite both getting-started guides.
+- Add Lua 5.0/5.1 regression coverage. Pending in-game acceptance; no new release.
+
+
 ## 0.2.2-review.6 — 2026-10-28 (normal gameplay dragging)
 
 - Correct the movement model: active HUD windows drag directly during play by

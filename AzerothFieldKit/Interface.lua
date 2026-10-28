@@ -14,60 +14,70 @@ end
 -- Reuse existing option actions/data; reorganize the journey without losing keys.
 function FieldKit.BuildJourneySections(sections,actions)
  local old={};for i=1,table.getn(sections) do old[sections[i].title]=sections[i] end
- local player,target,combat=old.Player.items,old.Target.items,old.Combat.items
- U.nativeTextOptions={combat[2],combat[3],combat[4]}
+ -- Schema ids remain stable when options are reordered or translated.
+ local options={}
+ for _,section in ipairs(sections) do
+  for _,item in ipairs(section.items) do if item.id then options[item.id]=item end end
+ end
+ U.hudActions=actions
+ U.nativeTextOptions={options.hideDamage,options.showCrits,options.groupCrits}
  local interface=old.Interface.items
  for i=1,table.getn(interface) do
-  if interface[i].label=="Compact action bar" then
-   interface[i].set=function(value) FieldKitDB.compactBar=value end
+  if interface[i].id=="compactBar" then
    interface[i].tip="Saved now. Use Reload UI below to apply the compact bar; your current run is not reloaded automatically."
   end
  end
  table.insert(interface,{kind="camera"})
- local windows=old.Windows.items
- table.insert(windows,1,{kind="choice",label="Card style",values={"Decorative","Classic"},
-  get=function() return FieldKitDB.cardStyle end,
-  set=function(value) FieldKitDB.cardStyle=value;T.Refresh() end})
- table.insert(windows,2,{kind="slider",label="Card background opacity",min=0,max=100,step=1,
-  format=function(v) return FieldKit_L("Card background opacity")..": "..v.."%" end,
-  get=function() return FieldKitDB.cardOpacity end,
-  set=function(value) FieldKitDB.cardOpacity=value;T.Refresh() end})
- table.insert(windows,3,{kind="choice",label="Damage meter values",values={"DPS + share","Damage + DPS","Damage + DPS + share"},
-  get=function() return FieldKitDB.meterValues end,
-  set=function(value) FieldKitDB.meterValues=value;actions.UpdateMeterFrames(true) end})
- table.insert(windows,5,{kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
-  get=function() return FieldKitDB.moneyFrame end,
-  set=function(value) FieldKitDB.moneyFrame=value;actions.SyncHudTally();actions.UpdateMoneyFrame() end})
- table.insert(windows,1,{kind="check",label="Align left HUD cards",tip="Move the left cards together. Turn off to move every card independently. Custom sizes are kept in both modes.",
-  get=function() return FieldKitDB.linkLeftCards end,
-  set=function(value) FieldKitDB.linkLeftCards=value;actions.UpdateHudStack() end})
- table.insert(windows,2,{kind="check",label="Run mode card",tip="Native difficulty rank with a labelled 0.121 modifier reference. Hover for full rules; unexposed live multipliers and affixes remain unknown.",
-  get=function() return FieldKitDB.runModeCard end,
-  set=function(value) FieldKitDB.runModeCard=value;actions.UpdateRunMode() end})
- table.insert(windows,3,{kind="check",label="Group accessories and statistics",tip="Move the right cards together. Turn off to move each window independently.",
-  get=function() return FieldKitDB.linkRightCards end,
-  set=function(v) FieldKitDB.linkRightCards=v;FieldKitCardLayout.ApplyRight() end})
- table.insert(windows,{kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
-  get=function() return FieldKitDB.partyMeter end,
-  set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end})
- table.insert(windows,{kind="check",label="Share spell breakdowns with group",tip="Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots.",
-  get=function() return FieldKitDB.partyDetailSync end,
-  set=function(v) FieldKitDB.partyDetailSync=v;FieldKitPartySync.Watch();FieldKitCoop.Update() end})
- local sizes=FieldKitCardLayout.Options()
- for i=1,table.getn(sizes) do table.insert(windows,3+i,sizes[i]) end
- table.insert(windows,1,{kind="check",label="Lock window positions",tip="Drag active windows during play by default. Locking keeps their current positions; grouping and dimensions stay unchanged.",
-  get=function() return FieldKitDB.windowsLocked end,
-  set=function(v) FieldKit.SetWindowsLocked(v) end})
+ local display={
+  {kind="check",label="Run mode card",tip="Compact native difficulty and zone. Historical rules are available on hover, labelled with their reference version.",
+   get=function() return FieldKitDB.runModeCard end,set=function(v) FieldKitDB.runModeCard=v;actions.UpdateRunMode() end},
+  {kind="check",label="Hide mode card without difficulty data",tip="Keep the HUD clear when the client does not supply the mode. Preview arrangement still shows the card.",
+   get=function() return FieldKitDB.hideUnknownMode end,set=function(v) FieldKitDB.hideUnknownMode=v;actions.UpdateRunMode() end},
+  options.statsFrame,
+  {kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
+   get=function() return FieldKitDB.moneyFrame end,set=function(v) FieldKitDB.moneyFrame=v;actions.SyncHudTally();actions.UpdateMoneyFrame() end},
+  options.replaceTally,options.meterFrame,options.takenFrame,options.gearFrame,
+  {kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
+   get=function() return FieldKitDB.partyMeter end,set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end},
+ }
+ local layout={
+  {kind="check",label="Lock window positions",tip="Drag active windows during play by default. Locking keeps their current positions; grouping and dimensions stay unchanged.",
+   get=function() return FieldKitDB.windowsLocked end,set=function(v) FieldKit.SetWindowsLocked(v) end},
+  {kind="check",label="Align left HUD cards",tip="Move the left cards together. Turn off to move every card independently. Custom sizes are kept in both modes.",
+   get=function() return FieldKitDB.linkLeftCards end,set=function(v) FieldKitDB.linkLeftCards=v;actions.UpdateHudStack() end},
+  {kind="check",label="Group accessories and statistics",tip="Move the right cards together. Turn off to move each window independently.",
+   get=function() return FieldKitDB.linkRightCards end,set=function(v) FieldKitDB.linkRightCards=v;FieldKitCardLayout.ApplyRight() end},
+ }
+ for _,item in ipairs(FieldKitCardLayout.Options()) do table.insert(layout,item) end
+ local appearance={
+  {kind="choice",label="Card style",values={"Decorative","Classic"},get=function() return FieldKitDB.cardStyle end,
+   set=function(v) FieldKitDB.cardStyle=v;T.Refresh() end},
+  {kind="slider",label="Card background opacity",min=0,max=100,step=1,
+   format=function(v) return FieldKit_L("Card background opacity")..": "..v.."%" end,
+   get=function() return FieldKitDB.cardOpacity end,set=function(v) FieldKitDB.cardOpacity=v;T.Refresh() end},
+  {kind="choice",label="Damage meter values",values={"DPS + share","Damage + DPS","Damage + DPS + share"},
+   get=function() return FieldKitDB.meterValues end,set=function(v) FieldKitDB.meterValues=v;actions.UpdateMeterFrames(true) end},
+ }
+ local coop={
+  {kind="note",label="Experimental co-op",tip="Full allied spell sharing depends on a client transport that has not been confirmed in live co-op. Native group totals remain available without sharing."},
+  {kind="check",label="Co-op teammate cards",tip="Optional passive cards. Native teammate frames remain available for targeting and their usual interactions.",
+   get=function() return FieldKitDB.partyCards end,set=function(v) FieldKitDB.partyCards=v;FieldKitCoop.Update() end},
+  HealthChoice("partyHealthMode","Teammate health format",FieldKitCoop.Update),
+  {kind="check",label="Hide native teammate frames",tip="Advanced: hide originals only while a card has valid health. Passive cards do not provide native targeting, menus or buff interactions. Turn off to restore originals.",
+   get=function() return FieldKitDB.replacePartyFrames end,set=function(v) FieldKitDB.replacePartyFrames=v;FieldKitCoop.Update() end},
+  {kind="check",label="Share spell breakdowns with group",tip="Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots.",
+   get=function() return FieldKitDB.partyDetailSync end,set=function(v) FieldKitDB.partyDetailSync=v;FieldKitPartySync.Watch();FieldKitCoop.Update() end},
+  {kind="syncStatus"},
+ }
+ local windows={{id="display",title="Display",items=display},{id="layout",title="Layout",items=layout},
+  {id="appearance",title="Appearance",items=appearance},{id="coop",title="Co-op / test",items=coop}}
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
-  {id="health",title="Health & buffs",glyph=16,items={player[1],HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),player[2],player[3],target[1],HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth),
-   {kind="check",label="Co-op teammate cards",tip="Replace available native party frames with individually movable cards. Health, resource, status and group damage use native data. Turn off to restore the original frames.",
-    get=function() return FieldKitDB.partyCards end,set=function(v) FieldKitDB.partyCards=v;FieldKitCoop.Update() end},
-   HealthChoice("partyHealthMode","Teammate health format",FieldKitCoop.Update)}},
-  {id="bosses",title="Bosses",glyph=5,items={combat[1],HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
+  {id="health",title="Health & buffs",glyph=16,items={options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}},
+  {id="bosses",title="Bosses",glyph=5,items={options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
   {id="alerts",title="Alerts",glyph=12,items=old.Warnings.items},
-  {id="windows",title="Windows",glyph=9,group="Your interface",items=windows},
+  {id="windows",title="Windows",glyph=9,group="Your interface",items={},windowTabs=windows},
   {id="map",title="Minimap",glyph=1,items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,items=old.Nameplates.items},
   {id="interface",title="Interface",glyph=11,items=interface},
@@ -162,6 +172,9 @@ local function Slider(page,item,y,camera)
  s.item=item;s.label=item.label
  s:SetMinMaxValues(item.min or 15,item.max or 50);s:SetValueStep(item.step or 1)
  s.Refresh=function()
+  local minimum=item.minimum and item.minimum() or item.min or 15
+  s:SetMinMaxValues(minimum,item.max or 50)
+  local minimumLabel=getglobal(name.."Low");if minimumLabel then minimumLabel:SetText(minimum) end
   local v=item.get();s:SetValue(v)
   FieldKit_Text(label,item.format and item.format(v) or (FieldKit_L(item.label)..": "..v..FieldKit_L(" yd")))
  end
@@ -173,6 +186,22 @@ local function Slider(page,item,y,camera)
  local detail=camera and T.Label(row,"Camera changes apply immediately; other settings stay unchanged.",0,69,500,28,12,T.muted)
  row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);s:SetWidth(w-16);if detail then detail:SetWidth(w) end end
  table.insert(U.controls,s);table.insert(page.flow,{frame=row,y=y});return y+(camera and 106 or 84)
+end
+
+-- A small visibility preset only. Existing geometry/style and other addons are
+-- untouched; its in-memory Undo lasts until reload and is never auto-applied.
+function U.EssentialHud(undo)
+ local keys={statsFrame=false,gearFrame=false,runModeCard=false,takenFrame=false,meterFrame=true,moneyFrame=true,lairFrame=true,partyMeter=true}
+ if undo then keys=U.previousHud;if not keys then return end;U.previousHud=nil
+ else
+  if not U.previousHud then
+   U.previousHud={};for key in pairs(keys) do U.previousHud[key]=FieldKitDB[key] end
+  end
+ end
+ for key,value in pairs(keys) do FieldKitDB[key]=value end
+ local a=U.hudActions
+ a.UpdateStatsFrame();a.UpdateGearFrame();a.UpdateRunMode();a.SyncHudTally();a.UpdateMoneyFrame();a.UpdateMeterFrames(true);a.UpdateLairFrame();FieldKitCoop.Update()
+ U.Refresh()
 end
 
 -- Small cards lead to the relevant page; no implicit presets/native changes.
@@ -193,9 +222,28 @@ local function BuildHome(page)
  end
  page.layoutCard=CreateFrame("Frame",nil,page);page.layoutCard:SetHeight(96);T.Surface(page.layoutCard,"card")
  page.layoutTitle=T.Label(page.layoutCard,"Arrange your HUD",16,12,400,26,19,T.gold,true)
- page.layoutHint=T.Label(page.layoutCard,"Move enabled windows without the settings panel covering them.",16,44,400,38,12,T.muted)
- page.layoutAction=T.Button(page.layoutCard,nil,"Move windows",0,32,164,30,function() U.SetLayoutEditing(true,false) end)
- page.contentHeight=520
+ page.layoutHint=T.Label(page.layoutCard,"Drag active windows directly. Arrange hidden previews and combat areas here.",16,44,400,38,12,T.muted)
+ page.layoutAction=T.Button(page.layoutCard,nil,"Arrange previews",0,32,164,30,function() U.SetLayoutEditing(true,false) end)
+ page.presetHint=T.Label(page,"Essential HUD: damage, lairs, gold and group totals. Other addons are unchanged.",0,540,650,46,12,T.muted)
+ page.essential=T.Button(page,nil,"Use essential HUD",0,594,190,30,function() U.EssentialHud(false) end)
+ page.undoPreset=T.Button(page,nil,"Undo HUD preset",202,594,190,30,function() U.EssentialHud(true) end)
+ U.presetUndo=page.undoPreset
+ page.contentHeight=640
+end
+
+-- Each window subpage has its own content height and stable saved id. Reading a
+-- page never applies preferences; only its visible controls are interactive.
+function U.SelectWindowTab(page,id)
+ local selected=page.windowTabs[1]
+ for _,tab in ipairs(page.windowTabs) do if tab.id==id then selected=tab end end
+ FieldKitDB.windowPage=selected.id;page.windowSelected=selected.id
+ for _,tab in ipairs(page.windowTabs) do T.State(tab.button,tab==selected) end
+ for _,entry in ipairs(page.flow) do
+  if entry.windowTab==selected.id then entry.frame:Show() else entry.frame:Hide() end
+ end
+ page.contentHeight=selected.height;page:SetHeight(math.max(page.contentHeight,page.scroll:GetHeight()))
+ if page.scroll.SetVerticalScroll then page.scroll:SetVerticalScroll(0) end
+ U.CloseMenus()
 end
 
 -- Every page owns a scroll viewport, so smaller screens retain full-size text.
@@ -205,9 +253,27 @@ function U.BuildPage(section,index)
  scroll:SetScrollChild(page);page.scroll=scroll;U.Wheel(scroll,page)
  page.heading=T.Label(page,section.title,0,0,640,36,26,T.gold,true)
  local y=56
- for i=1,table.getn(section.items) do
-  local item=section.items[i]
+ local items=section.items
+ if section.windowTabs then
+  items={};page.windowTabs=section.windowTabs;U.windowPage=page
+  for _,tab in ipairs(page.windowTabs) do
+   local tabId=tab.id
+   tab.button=T.Button(page,nil,tab.title,0,50,120,32,function() U.SelectWindowTab(page,tabId) end)
+   for _,item in ipairs(tab.items) do item.windowTab=tab.id;table.insert(items,item) end
+  end
+ end
+ local previous
+ for i=1,table.getn(items) do
+  local item=items[i];local before=table.getn(page.flow)
+  if section.windowTabs and previous~=item.windowTab then y=104;previous=item.windowTab end
   if item.kind=="home" then BuildHome(page);y=page.contentHeight
+  elseif item.kind=="note" or item.kind=="syncStatus" then
+   local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(104)
+   local label=T.Label(row,item.label or "Sharing status",0,0,500,24,15,T.gold,true)
+   local detail=T.Label(row,item.tip or "",0,30,500,68,12,T.muted)
+   row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);detail:SetWidth(w) end
+   if item.kind=="syncStatus" then U.syncStatus=detail end
+   table.insert(page.flow,{frame=row,y=y});y=y+110
   elseif item.kind=="combat" then FieldKit_CreateCombatOptions(page);y=570
   elseif item.kind=="check" then y=Checkbox(page,item,y)
   elseif item.kind=="slider" then y=Slider(page,item,y)
@@ -228,8 +294,13 @@ function U.BuildPage(section,index)
    y=Slider(page,{label="Max camera distance",get=function() return FieldKitDB.cameraMax or 15 end,
     set=function(v) U.context.camera(v) end},y,true)
   end
+  if section.windowTabs then
+   for j=before+1,table.getn(page.flow) do page.flow[j].windowTab=item.windowTab end
+   for _,tab in ipairs(page.windowTabs) do if tab.id==item.windowTab then tab.height=y+16 end end
+  end
  end
  page.contentHeight=y+16;U.pages[index]=page
+ if section.windowTabs then U.SelectWindowTab(page,FieldKitDB.windowPage) end
  return page
 end
 
@@ -241,9 +312,12 @@ function U.UpdateRunContext()
  if heroic then label=label.." · "..heroic end
  if U.runContext~=label then U.runContext=label;FieldKit_Text(U.subtitle,label) end
 end
+function U.UpdateSharingStatus()
+ if U.syncStatus then FieldKit_Text(U.syncStatus,FieldKitPartySync.Status()) end
+end
 function U.Refresh()
  if not U.frame or not FieldKitDB then return end
- U.UpdateRunContext()
+ U.UpdateRunContext();U.UpdateSharingStatus()
  U.refreshing=true
  for i=1,table.getn(U.controls) do U.controls[i].Refresh() end
  for i=1,table.getn(U.homeCards) do
@@ -261,6 +335,7 @@ function U.Refresh()
  if U.contentWidth then U.status:SetWidth(reload and U.contentWidth-166 or U.contentWidth) end
  if reload then U.reload:Show() else U.reload:Hide() end
  if U.undoPositions then U.undo:Show() else U.undo:Hide() end
+ if U.presetUndo then if U.previousHud then U.presetUndo:Show() else U.presetUndo:Hide() end end
  FieldKit_Text(U.status,reload and "Compact bar saved. Reload UI when you are ready." or "Changes apply immediately. Your preferences are kept.")
  U.refreshing=false
 end
@@ -303,10 +378,17 @@ function U.Reflow()
   scroll:SetWidth(content);scroll:SetHeight(h-232);page:SetWidth(content-10);page:SetHeight(math.max(page.contentHeight,h-232))
   page.heading:SetWidth(content-14)
   for j=1,table.getn(page.flow) do page.flow[j].frame.Reflow(content-16) end
+  if page.windowTabs then
+   local tw=(content-22)/4
+   for j,tab in ipairs(page.windowTabs) do
+    tab.button:ClearAllPoints();tab.button:SetPoint("TOPLEFT",page,"TOPLEFT",(j-1)*(tw+2),-50)
+    tab.button:SetWidth(tw);tab.button.fieldkitLabel:SetWidth(tw-10);T.Update(tab.button)
+   end
+  end
   if page.combatEditor and page.combatEditor.Reflow then page.combatEditor.Reflow(content-16) end
   local tab=U.frame.tabs[i];tab:SetWidth(sidebar-14);tab.fieldkitLabel:SetWidth(sidebar-59);T.Update(tab)
   if page.intro then
-   page.intro:SetWidth(content-16)
+   page.intro:SetWidth(content-16);page.presetHint:SetWidth(content-16)
    local cw=(content-28)/2
    for j=1,4 do
     local c=U.homeCards[j];c:ClearAllPoints();c:SetPoint("TOPLEFT",page,"TOPLEFT",math.mod(j-1,2)*(cw+12),-108-math.floor((j-1)/2)*154)
@@ -382,14 +464,14 @@ function U.Build(sections,context)
   T.Glyph(b,section.glyph,7,6,21);b.page=U.BuildPage(section,i);frame.tabs[i]=b;y=y+34
  end
  U.status=T.Label(frame,"",240,680,650,24,12,T.muted)
- U.move=T.Button(frame,"FieldKitMoveWindows","Move windows",240,716,142,28,function() U.SetLayoutEditing(true,false) end)
+ U.move=T.Button(frame,"FieldKitMoveWindows","Previews",240,716,142,28,function() U.SetLayoutEditing(true,false) end)
  U.reset=T.Button(frame,"FieldKitPanelReset","Reset HUD positions",392,716,158,28,U.ResetPositions)
  U.undo=T.Button(frame,nil,"Undo",560,716,66,28,U.UndoPositions)
  U.close=T.Button(frame,nil,"Close",874,716,100,28,function() frame:Hide() end)
  U.reload=T.Button(frame,nil,"Reload UI",824,680,150,26,function() if U.reloadNeeded then context.reload() end end)
  local dock=CreateFrame("Frame","FieldKitLayoutDock",UIParent);U.dock=dock
  dock:SetWidth(560);dock:SetHeight(136);dock:SetPoint("TOP",UIParent,"TOP",0,-30);dock:SetFrameStrata("DIALOG");dock:SetFrameLevel(150);T.Surface(dock,"window")
- T.Label(dock,"Move your enabled windows",18,12,380,26,20,T.gold,true)
+ T.Label(dock,"Arrange previews and combat areas",18,12,380,26,20,T.gold,true)
  T.Label(dock,"Drag a window or a combat area, then choose Done.",18,44,370,30,12,T.muted)
  U.done=T.Button(dock,"FieldKitLayoutDone","Done",438,29,100,30,function() U.SetLayoutEditing(false,true) end)
  U.groupLeft=T.Button(dock,nil,"",18,88,166,28,function()
@@ -399,7 +481,7 @@ function U.Build(sections,context)
   FieldKitDB.linkRightCards=not FieldKitDB.linkRightCards;FieldKitCardLayout.ApplyRight();FieldKitCardLayout.UpdateDock()
  end)
  U.sizes=T.Button(dock,nil,"Adjust sizes",366,88,172,28,function()
-  U.SetLayoutEditing(false,true);U.Select("windows")
+  U.SetLayoutEditing(false,true);U.Select("windows");U.SelectWindowTab(U.windowPage,"layout")
  end)
  dock:SetScript("OnHide",function() if FieldKit.layoutEditing then U.SetLayoutEditing(false,false) end end);dock:Hide()
  frame:SetScript("OnShow",function() U.Refresh() end)
@@ -411,7 +493,7 @@ function U.Build(sections,context)
  local elapsed=0
  frame:SetScript("OnUpdate",function()
   elapsed=elapsed+(arg1 or 0);if elapsed<.25 then return end;elapsed=0
-  U.UpdateRunContext()
+  U.UpdateRunContext();U.UpdateSharingStatus()
   if U.screenWidth~=UIParent:GetWidth() or U.screenHeight~=UIParent:GetHeight() then U.Reflow() end
  end)
  if type(UISpecialFrames)=="table" then table.insert(UISpecialFrames,"FieldKitPanel");table.insert(UISpecialFrames,"FieldKitLayoutDock") end

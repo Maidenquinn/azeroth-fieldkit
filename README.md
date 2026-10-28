@@ -1,316 +1,118 @@
 # Azeroth FieldKit
 
-**A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
+An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
+**Kevin Radlowski / Maidenhead**, derived from **MASH by Malk**.
 
-Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-On **2026-10-28**, the maintainer reported permission from the game team to post
-FieldKit as a **verified addon**, together with the corresponding Discord role.
-Download **0.2.1-review.3** from the [release page](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3).
-The existing version name and ZIP are retained; publication permission does not
-turn the offline checks into live testing or settle inherited rights.
-See the [publication record](docs/PUBLICATION.md) for scope and file identity.
-Renaming identifies this maintained fork; Malk's authorship is retained.
+[Français](README.fr.md) · [Changelog](CHANGELOG.md) · [Review dossier](docs/REVIEW.md)
 
-[Français](README.fr.md) · [Review dossier](docs/REVIEW.md) ·
-[Security assessment](SECURITY.md) · [Code guide](docs/CODE_GUIDE.md) ·
-[Native API effects](docs/API_SURFACE.md) · [Credits and provenance](NOTICE.md)
+## Versions and downloads
 
-## Why this project exists
+- **Public package:** [0.2.1-review.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3).
+- **This branch:** `0.2.3-review.1`, an unmerged UX review candidate. It includes
+  preceding co-op/layout candidates; it is not a new public release.
+- On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
+  addon. That publication permission does not certify this new candidate or settle
+  inherited code/assets rights. See [publication scope](docs/PUBLICATION.md),
+  [NOTICE](NOTICE.md) and [LICENSE](LICENSE.md).
 
-MASH already combined many useful UI improvements. FieldKit makes that work easier
-to inspect: explicit ownership boundaries, documented native effects, conservative
-defaults, bounded optional chat capture, isolated settings and repeatable checks.
-The maintainer reports authorization to publish in the game's verified-addon channel.
-Future changes remain subject to the team's addon policy.
+## Install
 
-## Features
+1. Back up your existing FieldKit folder. Download the version's named ZIP from
+   release **Assets**, not GitHub's automatic source archives.
+2. Copy its `AzerothFieldKit` folder into the **actual launched client's** AddOns
+   directory. Check `AddOns/AzerothFieldKit/AzerothFieldKit.toc` exists; avoid nesting
+   the folder twice. Disable the legacy MASH addon to avoid duplicate behavior.
+3. Enable FieldKit in the client's addon selector and restart the game.
 
-- **Combat text:** an integrated MSBT-style renderer, with event categories,
-  incoming/outgoing/healing filters, ability exclusions, colors, fonts, opacity,
-  critical sizes, grouped hits, animation, lifetime and visible-message limits.
-  One editor contains General, Events, Fonts, Filters and Areas. No MSBT install.
-- **Health:** player/target/boss values, percentages or both; player shield and
-  buffs; adjustable low-health visual warning and optional sound.
-- **Boss frames:** movable native-state displays and static independent portraits.
-  Changing or clearing the player's target does not select another portrait.
-- **Run displays:** selected stats, equipment with tooltips, damage/source meters,
-  lair states and a separate gold/next-chest-price/kills strip. Windows can collapse.
-- **Optional minimap markers:** native chest positions as chest icons; native lair
-  positions with guardian state/countdown. A lair pin is **not** a moving guardian.
-- **Optional layout tools:** elite/boss nameplate filtering, a compact action bar,
-  decorative gryphon visibility and a 15–50 yard camera setting.
-- **EN/FR:** immediate, persisted language switch. Native creature, ability and
-  item names retain the language provided by the game.
-- **Optional local chat copy:** disabled by default. Up to 100 messages from
-  the main chat frame, at most 512 bytes each, in memory only. Whispers may be
-  included. Nothing is uploaded, posted or automatically copied to the clipboard.
+The candidate ZIP is a separate review build; the public download above has the
+older interface. No external executable or companion addon is required. FieldKit
+never imports MASHDB automatically or modifies your game saves.
 
-## Getting started with the interface
+## Start here
 
-**Normal dragging (0.2.2-review.6):** enabled FieldKit HUD windows are draggable
-by default during ordinary play. No settings panel, arrangement dock or preview
-mode is required. In **Windows → Lock window positions**, optionally lock them;
-this preference persists across reloads. Right-click the FieldKit minimap icon
-or use `/fieldkit lock` / `/fieldkit unlock` to change the same preference without
-opening any panel. Grouped windows still move together, independent ones move
-separately. Collapse, tooltips and size options remain usable when locked.
-**Move windows** remains an explicit preview/arrangement tool for hidden frames
-and combat-text areas; finishing it restores the saved movement preference.
-The switch affects FieldKit HUD frames only, not other addons or native UI.
+Open `/fieldkit` or left-click its minimap compass. Choose English or French in
+**Interface**; native spell and creature names retain the game's language.
 
-Open `/fieldkit` or click the compass beside the minimap. **Overview** shows the
-main tools and their current status. Choose **Configure** to change one area.
-All preferences apply immediately except the optional compact action bar, which
-shows an explicit **Reload UI** action when changed.
+Active FieldKit windows **drag directly by default**. In **Windows → Layout**, lock
+positions, group/unlink left or right cards, or adjust a selected card's dimensions.
+The saved lock can also be changed with `/fieldkit lock`, `/fieldkit unlock` or a
+right-click on the minimap compass. **Previews** is for arranging hidden cards and
+combat-text areas; it temporarily overrides the lock and restores it on Done.
 
-- **Combat text:** General, Events, Fonts, Filters, Areas, Game text. Use Game text
-  to turn off duplicate native damage/critical displays.
-- **Health & buffs / Bosses:** select Numbers, Percentage or both in one control.
-- **Windows:** choose Decorative or Classic styling and 0–100% background opacity for in-game HUD cards. Settings, menus and previews keep their original opaque theme. Text and borders stay readable. Select DPS + share, exact Damage + DPS, or all three in fixed right-aligned columns for each ability; damage comes directly from native cumulative totals, never a DPS/time estimate.
-- **Windows / Minimap:** independently enable the windows and pins you need.
-- **Interface:** English/Français, compact bar, native decorations, optional chat
-  copy and camera. Native creature/spell/item names are not translated.
-- **Move windows:** temporarily hides settings; drag the enabled HUD windows or
-  combat-area handles, then **Done** returns to settings. Escape exits this mode.
-- **Reset HUD positions:** restores HUD window defaults and offers **Undo**.
-  Combat-area offsets have their own controls in Areas.
+**Overview → Use essential HUD** shows damage, lairs, gold and group totals while
+hiding stats, accessories, mode and damage taken. It is an explicit visibility-only
+preset: positions, dimensions, style, combat options and other addons are unchanged.
+**Undo HUD preset** restores the visibility choices until the next reload.
 
-Pages keep readable font sizes and scroll on smaller screens. Close with the
-upper-right cross, **Close**, Escape or `/fieldkit`. The [UX review](docs/UX_REVIEW.md)
-records findings, migration and live acceptance checks. The slate/gold theme is
-shared with Azeroth Stats but bundled locally: that addon is not required.
+## Settings
 
-## Left HUD stack and run mode
+- **Combat text:** one editor for categories, filters, fonts, colors, grouping,
+  duration, animation, areas and native text. Optional; no MSBT dependency.
+- **Health & buffs / Bosses / Alerts:** health formats, shields, buffs, independent
+  boss portraits and low-health warnings. Boss portraits use an identified static
+  catalog; future maps/models are not automatically covered.
+- **Windows → Display:** visible HUD cards. The native damage meter stays available;
+  choose your preferred display in its own options to avoid duplicates.
+- **Windows → Layout:** lock, grouping and individual width/height. Slider minima
+  follow the selected card and visible rows. Increasing height changes spacing,
+  not font size; very large cards can leave unused space.
+- **Windows → Appearance:** Classic/Decorative style, HUD background opacity and
+  damage/DPS/share columns. Settings and menus retain their readable background.
+- **Windows → Co-op / test:** optional passive teammate cards, health format and
+  experimental spell sharing. Native teammate frames remain interactive by default.
+  Explicitly hiding them removes their targeting/menu/buff interactions until restored.
+- **Minimap / Nameplates / Interface:** independent chest/lair markers, optional
+  enemy filtering, language, camera, compact bar and optional local chat copy.
 
-### Co-op in the local 0.2.2-review.2 candidate
+Hover a spell in your own meter or a player in the group meter for detail. **Pin**
+keeps that player's detail open while you scroll; Unpin, Escape or the close button
+releases it. Rank changes do not select a different player in a pinned card.
+The card closes when its source meter closes or the run ends.
 
-**Experimental 0.2.2-review.4 update:** the hover card follows your HUD preset
-and background opacity. To obtain an ally's full spell snapshot, both players
-must install this candidate and enable **Windows → Share spell breakdowns with
-group**, then hover the ally's row. This sends only own native meter data on
-request through a bounded PARTY addon channel. It is off by default. Shared
-data shows its receipt age; without a response the native fallback remains limited.
-The protocol passes simulated two-client tests, but **delivery in the actual
-co-op client is not confirmed**. `/fieldkit sync` distinguishes accepted API
-calls from received complete snapshots. There is no visible chat or external
-helper fallback. See [setup, privacy, bounds and real test](docs/PARTY_SYNC.md).
+## Data and limits
 
-**Hover detail in 0.2.2-review.3:** hover a name in Group damage. Your own card
-shows the native per-spell table, including sources beyond the main meter's
-eight visible rows. Wheel over the name/card or use its arrows; the card remains
-open while hovered. It uses an opaque theme and closes on exit, Escape, collapse
-or layout editing. On an ally, the native API supplies only their top spell name
-and its DPS: the card labels that limit and leaves missing spell damage/share
-unknown. It cannot show their complete spell list with the current API. Own
-spell totals are read independently of the party snapshot and can differ while
-packets update. One ten-row pool renders up to 512 supplied sources; larger
-inputs are explicitly labelled partial. That native-only mode sends no messages;
-the new optional sharing mode is described above.
+Damage values come from native counters, never DPS multiplied by time. Damage taken
+can include an explicitly **Unattributed (native total)** remainder. Missing values
+stay unknown; healing totals are not evidence of individual healing ticks.
 
-- **Health & buffs → Co-op teammate cards** opts into rectangular party cards
-  instead of available stock party frames. Off by default. Each has native
-  health, resource, connection/zero-HP status and party damage/DPS when received.
-  **Teammate health format** chooses numbers, percentage or both.
-- **Windows → Group damage meter** shows native damage, DPS and contribution per
-  player, including you, separately from your own per-spell meter. Enabled by
-  default, visible only with a party or an explicit layout preview. Its title
-  counts received players/current roster; missing DPS stays `?`.
-- **Move windows** moves each teammate card and group meter independently.
-  **Window to resize** now also includes Group damage and Teammates 1–4. Numbered
-  labels in layout mode match party slots; saved placement follows the slot,
-  not a permanent player identity. Outside a party, previews show no fake HP/DPS.
-- **Damage taken** prefers received source buckets and supplements them with
-  **Unattributed (native total)** when `AZS_RUN.taken` exceeds their sum. This
-  cannot recover an unexposed source or count individual hits. No data means
-  Not provided; a native zero is the only empty-list case displayed as zero.
+Native group data supplies player totals and at most the top allied spell.
+Experimental sharing is **off by default**: both players must opt in, and only own
+spell counters are sent via bounded `AFKDETAIL1` PARTY addon messages on request.
+Live co-op transport is **not confirmed**. The status reports recent received data,
+not a successful send call as proof of delivery. [Protocol and limits](docs/PARTY_SYNC.md).
 
-The cards are passive displays: they do not implement native target clicks,
-unit menus, buff buttons or casting. Turn the replacement off to regain stock
-party-frame interactions. Unknown HP does not justify hiding the native frame.
-Peer damage requires the native party API; other players do not need FieldKit.
-No peer healing/taken or full per-spell export was identified. Diagnostics:
-`/fieldkit coop` prints only API counts and native/shown taken totals locally.
-Do not post private chat or game saves when reporting problems. The installed
-client's **0.123.0** API was inspected read-only; native UI behavior still needs
-a real co-op test. See [data evidence](docs/COOP_EVIDENCE.json).
+The mode card is compact and hidden without a native difficulty rank by default.
+Its hover rules are explicitly a **0.121 reference**, not verified current mechanics
+or measured live multipliers. No active affix/marks/star data is invented. Runes on
+the ground are not tracked; lair pins are not moving guardian coordinates.
 
-### New in the local 0.2.2-review.1 candidate
+## Commands and privacy
 
-Open **Move windows**: **Left: grouped/independent** controls run mode, damage,
-damage taken and lairs; **Right: grouped/independent** controls accessories and
-statistics. In independent mode each card keeps its own position, including
-damage taken. Grouping restores the group anchor; unlinking restores the saved
-individual positions. The money strip detaches from the compact bar when dragged.
+- `/fieldkit`, `/fieldkitcombat`: settings and combat editor.
+- `/fieldkit lock`, `/fieldkit unlock`: saved movement lock, without opening settings.
+- `/fieldkit money`: reattach the gold/chest strip above the action bar.
+- `/fieldkit coop`, `/fieldkit sync`: local co-op diagnostics.
+- `/fieldkitlog on`, `off`, `clear`: optional in-memory chat-copy buffer. It may include
+  private messages; disabling clears it. It is not saved or transmitted.
 
-Choose **Adjust sizes**, or open **Windows → Window to resize**. Select a card,
-then set **Window width** and **Window height**. This applies to seven HUD cards,
-not the settings shell, native action buttons, player health or boss portrait frames.
-**Automatic size for this window** resets only that card's dimensions. Position
-reset/Undo leaves dimensions unchanged. Custom widths remain independent even
-when cards are grouped; cards without custom widths retain the default alignment.
+No downloaded code is executed. Native writes are restricted to documented visual
+settings and optional action-bar behavior. Native CVars may outlive addon disabling;
+restore preferences in the game's options as needed. [API surface](docs/API_SURFACE.md)
+and [security scope](SECURITY.md) explain these effects and possible addon conflicts.
 
-Widths are 220–800 UI units (money: at least 320; damage meter: at least its
-current column-format minimum). Heights are 22–800 UI units, with a dynamic
-readability minimum to fit every visible row. Text/icons are not stretched or
-cropped. Larger cards increase row spacing up to 32 units, then leave empty space.
-The controls label UI units as px; physical pixels also depend on UI scale.
-If the complete group becomes taller than the viewport, reduce its dimensions,
-collapse cards or unlink it. This candidate is not a newly published release;
-its native dragging/visual behavior still needs in-game confirmation.
+## Validation and development
 
-The left cards now share one movable stack and width: Run mode, Damage,
-Damage taken, Lairs. Collapsing or hiding a card closes the gap. Move any member
-in **Move windows** mode to move the group. **Windows → Align left HUD cards**
-turns linking off; individual old positions are retained. The stack has its own
-saved anchor, separate from those positions. Native drag anchors are retained
-without an addon-imposed screen inset. The native client clamps the full group;
-this avoids a second center-coordinate calculation on release.
+Offline tests cover Lua 5.0.3/5.1, nested-function upvalues, malformed settings,
+persistence, native-data provenance, movement, co-op fallbacks and UI callbacks.
+They do **not** certify live rendering, performance or network delivery.
 
-**Windows → Run mode card** controls the new card. Its rank and zone come from
-the client. Mechanic names are explicitly a **0.121 reference**, with cumulative
-details on hover. The four latest mechanics stay visible; any earlier mechanics
-are counted and listed in the tooltip. Current weekly affix identities and exact
-HP/damage multipliers remain unknown when not exposed by the native API. This
-card does not alter the difficulty, calculate scaled rewards or claim live data
-for the reference rules. See [details and tests](docs/HUD_STACK.md).
-
-## Game 0.121.0
-
-Settings show the native Normal / Heroic I–V rank when provided during a run.
-Stat bonuses retain tenths, and the ordinary-mob filter preserves explosive-orb
-nameplates while respecting V. Multiple boss frames keep using live native
-health; damage/healing and equipment tooltips remain authoritative native values.
-There is no local reapplication of Heroic or star bonuses.
-
-A marks, star-upgrade or weekly-affix tracker is not included: no corresponding
-read-only export has been confirmed in the inspected client. See the
-[compatibility evidence, limits and tests](docs/GAME_0_121.md).
-
-## Conservative defaults
-
-Fresh settings leave **nameplate filtering, chest/lair minimap pins, native boss
-HUD replacement, tally replacement, compact action bar, scrolling combat text,
-chat copy and low-health audio disabled**. They remain configurable for review.
-The camera is unchanged until configured. Native damage-number settings remain
-unchanged until that option is explicitly chosen.
-
-Addon-owned health/stats/equipment/meter/lair/money windows are enabled. These can
-also be disabled independently. Conservative defaults are not a certification
-that an enabled feature complies with the game's rules.
-
-## Installation
-
-1. Download `AzerothFieldKit-0.2.1-review.3.zip` from the linked release's **Assets**
-   section. Use the addon ZIP, not GitHub's automatic source archives.
-2. Disable MASH before enabling FieldKit: they modify some of the same native UI.
-   Do not run both concurrently, even though their saved variables are separate.
-3. Copy the **inner `AzerothFieldKit` folder** into the launcher's AddOns directory
-   (or `Interface/AddOns`). Its TOC must be `AzerothFieldKit/AzerothFieldKit.toc`.
-4. Enable it in the game selector and restart/reload the UI. A restart may be
-   required for the client to discover the new folder.
-5. Open `/fieldkit`. Select English/Français in Interface and enable only the
-   features you want to use under the current game policy.
-
-There is no installer, companion executable, injection, process reader, external
-service or required third-party addon. Python/Lua test tooling is for developers
-only and is not included in the addon runtime ZIP.
-
-## Commands
-
-- `/fieldkit`: open/close settings; the minimap book icon opens the same panel.
-- `/fieldkitcombat`: open the single combat-text editor.
-- `/fieldkit money`: restore the gold/chest strip above the compact bar if enabled.
-- `/fieldkit stats`: choose displayed stats.
-- `/fieldkit chests`: show the observed/legacy chest count and next price locally.
-- `/fieldkit status`: display local nameplate/camera diagnostics.
-- `/fieldkitportrait coverage`: catalog coverage; `/fieldkitportrait`: current source.
-- `/fieldkitlog on` / `off`: explicitly enable/disable local chat capture.
-- `/fieldkitlog`: open retained main-chat text for manual Ctrl+A / Ctrl+C.
-- `/fieldkitlog clear`: clear retained chat and the copy editbox immediately.
-
-Chat capture can also be toggled in Interface. Disabling clears its memory on the
-next watcher tick (at most 0.2 seconds); `/fieldkitlog off` clears it immediately.
-Messages received while disabled are never retained or reconstructed later.
-
-## Data accuracy and limitations
-
-The addon displays information already exposed by the native Lua run API and
-legacy combat events. Native tables are **not authenticated by FieldKit**. Other
-addons sharing the Lua environment could falsify them or interfere with frames.
-Packet text is parsed as data, never executed.
-
-Combat categories appear only when a recognized corresponding event is received.
-English legacy combat templates are supported; unrecognized messages do not
-generate invented hits. Healing displays positive cumulative-meter deltas, not a
-claim to exact individual tick times, overhealing or every heal event.
-
-The static portrait catalog describes the **examined client version**: 100
-definitions (60 scheduled bosses and 40 special/elite/guardian definitions), 12
-maps, 98 displays and 1,063 localized aliases. It does not automatically discover
-new bosses or transformation appearances. A conflicting explicit display id or
-unresolved identity produces a question-mark fallback. Multiple native instance
-ids keep separate health/state even if they share an appearance.
-
-Markers require exposed native coordinates. Rotation disables the custom pins
-instead of projecting them incorrectly. Unknown minimap shapes use a round-map
-assumption. Edge markers show direction outside the displayed range. Countdowns display the native remaining value without subtracting wall-clock time
-during a pause/card choice; zero does not confirm a respawn.
-
-There is **no ground-rune tracking**. Old pickup observations, probes, external
-helpers and experimental modules are not distributed. Chest pricing/counting on
-older clients can use a historical estimate; native price and `AZS_RUN.ck` cache
-count take priority. Run-owned displays are hidden when the native phase is nil.
-
-## Saved data, migration and removal
-
-The client owns serialization of **`FieldKitDB`**: settings, window positions,
-collapsed states, learned enemy-name classifications, last native stats and the
-legacy chest-count state. Chat content is not in SavedVariables. There is no
-automatic import, rename or edit of `MASHDB`, game saves or other addon settings.
-
-To stop using FieldKit, disable it and reload/restart. Stock frame hooks and
-reparenting are session-local. **Native CVars/HUD visibility can persist**: restore
-your preferred damage/camera/HUD options in the game settings. Disabling an addon
-does not guarantee restoration of every native preference it changed. No data
-needs to be deleted; keeping a disabled backup of MASH is optional.
-
-## For developers and reviewers
-
-Start with [REVIEW](docs/REVIEW.md), then [SECURITY](SECURITY.md). The
-[code guide](docs/CODE_GUIDE.md) describes initialization, data flow and module
-order. [CODE_INDEX](docs/CODE_INDEX.md) links named functions to source.
-[API_SURFACE](docs/API_SURFACE.md) lists native writes and hooks, including the
-manual action-slot swap. [TESTING](docs/TESTING.md) explains what the checks prove
-and which in-game tests remain outstanding.
-
-Run from the repository root with Python 3.12+:
-
-```sh
-python -m pip install -r requirements-dev.txt
+```text
 python tools/audit.py
-python tools/verify.py
+python tools/verify.py --lua50 PATH_TO_LUA_5_0_3
 python tools/package.py
 ```
 
-For an additional native Lua 5.0.3 run:
-
-```sh
-python tools/verify.py --lua50 /path/to/lua50
-```
-
-Lua 5.1 bytecode is inspected for every nested function against the old
-32-upvalue limit. The provided local Lua 5.0.3 run also executes actual modules
-and behavioral fixtures. Neither is a test inside the running game. Runtime ZIPs
-are generated deterministically with a file manifest and external SHA-256 sum.
-Developer tests/dependencies and obsolete experiments are excluded from them.
-
-## Provenance and release status
-
-[NOTICE](NOTICE.md) and [LICENSE](LICENSE.md) describe unresolved upstream and
-asset permissions. No project-wide open-source license or author approval is
-claimed. The Git history retains the exact inspected MASH 1.3.9 snapshot before
-the fork changes, so reviewers can compare the changes rather than trust a rename.
-The reported verified-channel publication permission is recorded separately
-from unresolved upstream and asset licensing; it is not a project-wide license
-grant. Historical reports and the existing ZIP predate that permission and keep
-their original metadata. See [CHANGELOG](CHANGELOG.md) for the concrete changes.
+Packaging requires committed source and fresh inventory/validation snapshots.
+See [contributing](CONTRIBUTING.md), [code guide](docs/CODE_GUIDE.md),
+[testing](docs/TESTING.md), and the [candidate acceptance checklist](docs/UX_SIMPLIFICATION.md).
+No new release should be merged until that checklist is reviewed in game.

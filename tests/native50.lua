@@ -55,3 +55,8 @@ dofile("tests/party_sync.lua")
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 dofile("tests/window_lock.lua")
+
+-- The simplified journey uses the same native Lua 5.0 constructors.
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/ux_simplification.lua")
