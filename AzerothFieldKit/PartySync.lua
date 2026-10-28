@@ -52,7 +52,9 @@ end
 
 function S.Peer(name)
  if type(name)~="string" or name==UnitName("player") then return false end
- local roster=FieldKitCoop.Roster();return roster[name]==true
+ local matches=0
+ for i=1,4 do if UnitExists("party"..i) and UnitName("party"..i)==name then matches=matches+1 end end
+ return matches==1
 end
 
 function S.Value(value)

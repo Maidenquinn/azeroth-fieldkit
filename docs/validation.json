@@ -92,7 +92,7 @@
     "PartySync.lua": {
       "maxUpvalues": 1,
       "functions": 20,
-      "sha256": "ead62ba3befb1cbe95acf4a1c14f86279b92d9f54ffab55ee52c3030f01fda36"
+      "sha256": "2808e9e649078b0d73de707abdd464529c7aaf9298641ca4f55033f2dadf8a80"
     },
     "PartyDetails.lua": {
       "maxUpvalues": 2,

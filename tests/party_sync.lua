@@ -69,4 +69,9 @@ S.cache.Denza={received=GetTime(),rows={}};S.pending.Denza={at=GetTime(),id="1-2
 AZS_RUN.t=0;S.Watch();assert(S.cache.Denza==nil and S.pending.Denza==nil and table.getn(S.queue)==0)
 FieldKitDB.partyDetailSync=false;S.Watch()
 assert(not FieldKit.SendPartyDetail("Q:1-4:Denza:0"))
+local exists,name=UnitExists,UnitName
+function UnitExists(unit) return unit=="player" or unit=="party1" or unit=="party2" end
+function UnitName(unit) return unit=="player" and "Maiden" or "Denza" end
+assert(not S.Peer("Denza"),"Duplicate roster names were treated as one authenticated peer")
+UnitExists=exists;UnitName=name
 print("Opt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed")
