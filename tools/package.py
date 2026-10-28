@@ -5,6 +5,8 @@ from pathlib import Path
 import hashlib,json,subprocess,zipfile
 base=Path(__file__).resolve().parent.parent;root=base/'AzerothFieldKit'
 version=next(s.split(':',1)[1].strip() for s in (root/'AzerothFieldKit.toc').read_text().splitlines() if s.startswith('## Version:'))
+publication=json.loads((base/'data/publication-status.json').read_text(encoding='utf8'))
+assert publication['version']==version,'Refresh publication metadata explicitly for this version'
 validation=json.loads((base/'build/validation.json').read_text())
 inventory=json.loads((base/'docs/AUDIT_INVENTORY.json').read_text())
 for name,result in validation['files'].items():
@@ -31,8 +33,8 @@ try:
  dirty=subprocess.check_output(['git','status','--porcelain'],cwd=base,text=True)
  assert not dirty,'Commit reviewed source/docs first; refusing a dirty sourceCommit claim'
 except (subprocess.CalledProcessError,FileNotFoundError):commit=None
-manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':'not approved',
- 'distribution':'public technical-review candidate; permissions unresolved','inGameTest':False,
+manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':'maintainer accepted for publication; not independently certified','publication':publication,
+ 'distribution':'public maintainer-accepted update; GitHub prerelease; inherited rights unresolved','inGameTest':False,
  'files':{name:{'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)} for name,data in sorted(payload.items())}}
 payload['MANIFEST.json']=(json.dumps(manifest,indent=2)+'\n').encode()
 out=base/'dist';out.mkdir(exist_ok=True);archive=out/f'AzerothFieldKit-{version}.zip'

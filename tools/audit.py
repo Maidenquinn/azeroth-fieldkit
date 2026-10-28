@@ -6,6 +6,8 @@ import hashlib,json,re,struct
 base=Path(__file__).resolve().parent.parent;root=base/'AzerothFieldKit'
 toc=(root/'AzerothFieldKit.toc').read_text(encoding='utf8')
 version=next(s.split(':',1)[1].strip() for s in toc.splitlines() if s.startswith('## Version:'))
+publication=json.loads((base/'data/publication-status.json').read_text(encoding='utf8'))
+assert publication['version']==version,'Refresh publication metadata explicitly for this version'
 loaded=[line for line in toc.splitlines() if line.endswith('.lua')]
 assert set(loaded)=={p.name for p in root.glob('*.lua')},'Unexpected/unloaded Lua file'
 # Quoted text and comments must not make a documented example look executable.
@@ -65,7 +67,7 @@ assert all((root/name).is_file() for name in media)
 report={'kind':'maintainer static inventory; not certification','candidate':version,
  'runtimeModules':len(loaded),'textureCount':len(textures),'forbiddenTokenGatePassed':True,
  'dynamicCombatEventNames':'See CombatText.lua events list; not all registrations are string literals.',
- 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':'not approved',
+ 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':'maintainer accepted for publication; not independently certified','publication':publication,
  'optionalPartyDetailTransport':{'defaultEnabled':False,'nativeCallBoundary':'Runtime.lua','prefix':'AFKDETAIL1','distribution':'PARTY','maxBytes':230,'maxCallsPerSecond':4,'liveCoopTransportConfirmed':False}}
 docs=base/'docs';docs.mkdir(exist_ok=True)
 (docs/'AUDIT_INVENTORY.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n',encoding='utf8',newline='\n')

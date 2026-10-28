@@ -1,8 +1,10 @@
-# UX simplification candidate — 0.2.3-review.1
+# UX simplification acceptance — 0.2.3
 
-Branch: `codex/ux-simplification`, based on `codex/default-window-drag`.
-This is a separate review candidate, not a merged/public release. The installed
-client is deliberately not overwritten while review is pending.
+The maintainer accepted the candidate on 2026-10-28 and explicitly requested
+merging the pending PRs and publishing the update. PR #7 is merged into main.
+Version 0.2.3 contains the accepted behavior; the checklist below remains a useful
+post-update test plan. Acceptance is not an agent-performed in-game test.
+The installed client was not overwritten by the publication workflow.
 
 ## Accepted audit findings addressed
 
@@ -38,9 +40,9 @@ reload of the selected subpage; native Lua 5.0 runs the same fixture.
 Existing behavioral, provenance, privacy, Lua compatibility and layout tests remain.
 No live game, frame-rate or real peer-transport result is claimed.
 
-## In-game acceptance before merge
+## In-game checks for update feedback
 
-1. Confirm `0.2.3-review.1` in the candidate; test both languages at 1920×1080 and
+1. Confirm `0.2.3` in the published package; test both languages at 1920×1080 and
    around 800×600, including tab labels, text clipping, scrolling and close controls.
 2. Drag active cards without settings; lock/unlock, group/unlink, resize to the
    displayed minima, collapse and reload. Verify source positions remain yours.
@@ -59,5 +61,5 @@ No live game, frame-rate or real peer-transport result is claimed.
    the originating native counters. Collect `/fieldkit sync` if nothing arrives.
    Unconfirmed delivery remains a release limitation, not a passed feature.
 
-Approval of this branch and any release remains the maintainer's decision after
-these checks. Do not merge, tag or replace the public package automatically.
+The maintainer authorized publication in the working conversation. No independent
+certification, new live-transport result or package-specific team approval is inferred.

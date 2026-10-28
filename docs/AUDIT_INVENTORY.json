@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.3-review.1",
+  "candidate": "0.2.3",
   "runtimeModules": 25,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
-      "bytes": 3659,
-      "sha256": "f9a99be26a9629fdab121481bad1b290b58ea882629ab3ec10a6cd68ab759520",
+      "bytes": 3650,
+      "sha256": "89144778183fce8183b7eeba94c9cf7a6765963856bac7ac193a4b3f00b16020",
       "namedFunctions": [
         {
           "name": "FieldKit.PartyTransportAvailable",
@@ -1999,7 +1999,18 @@
     }
   },
   "inGameTest": false,
-  "approval": "not approved",
+  "approval": "maintainer accepted for publication; not independently certified",
+  "publication": {
+    "version": "0.2.3",
+    "maintainerAcceptedForPublication": true,
+    "maintainerAcceptanceDate": "2026-10-28",
+    "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
+    "packageSpecificGameApprovalConfirmed": false,
+    "independentSecurityCertification": false,
+    "inGameTestByAgent": false,
+    "githubPrerelease": true,
+    "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved."
+  },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,
     "nativeCallBoundary": "Runtime.lua",
