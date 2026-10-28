@@ -3,9 +3,13 @@
 **A configurable, entirely in-game combat and HUD toolkit for Azeroth Survivors.**
 
 Maintained by **Kevin Radlowski / Maidenhead**. Derived from **MASH by Malk**.
-Version **0.2.1-review.3** is a public **review candidate** shared for technical examination,
-not a developer-approved or stable release. Renaming identifies this maintained fork; it does not
-change the authorship or rights of the inherited code.
+On **2026-10-28**, the maintainer reported permission from the game team to post
+FieldKit as a **verified addon**, together with the corresponding Discord role.
+Download **0.2.1-review.3** from the [release page](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3).
+The existing version name and ZIP are retained; publication permission does not
+turn the offline checks into live testing or settle inherited rights.
+See the [publication record](docs/PUBLICATION.md) for scope and file identity.
+Renaming identifies this maintained fork; Malk's authorship is retained.
 
 [Français](README.fr.md) · [Review dossier](docs/REVIEW.md) ·
 [Security assessment](SECURITY.md) · [Code guide](docs/CODE_GUIDE.md) ·
@@ -16,8 +20,8 @@ change the authorship or rights of the inherited code.
 MASH already combined many useful UI improvements. FieldKit makes that work easier
 to inspect: explicit ownership boundaries, documented native effects, conservative
 defaults, bounded optional chat capture, isolated settings and repeatable checks.
-It is submitted for discussion under the game's manual addon approval process.
-No statement here substitutes for a decision from the game's developers.
+The maintainer reports authorization to publish in the game's verified-addon channel.
+Future changes remain subject to the team's addon policy.
 
 ## Features
 
@@ -107,9 +111,10 @@ Addon-owned health/stats/equipment/meter/lair/money windows are enabled. These c
 also be disabled independently. Conservative defaults are not a certification
 that an enabled feature complies with the game's rules.
 
-## Installation for an authorized review
+## Installation
 
-1. Obtain permission to test this candidate under the current game policy.
+1. Download `AzerothFieldKit-0.2.1-review.3.zip` from the linked release's **Assets**
+   section. Use the addon ZIP, not GitHub's automatic source archives.
 2. Disable MASH before enabling FieldKit: they modify some of the same native UI.
    Do not run both concurrently, even though their saved variables are separate.
 3. Copy the **inner `AzerothFieldKit` folder** into the launcher's AddOns directory
@@ -117,7 +122,7 @@ that an enabled feature complies with the game's rules.
 4. Enable it in the game selector and restart/reload the UI. A restart may be
    required for the client to discover the new folder.
 5. Open `/fieldkit`. Select English/Français in Interface and enable only the
-   features authorized for the test.
+   features you want to use under the current game policy.
 
 There is no installer, companion executable, injection, process reader, external
 service or required third-party addon. Python/Lua test tooling is for developers
@@ -180,7 +185,7 @@ To stop using FieldKit, disable it and reload/restart. Stock frame hooks and
 reparenting are session-local. **Native CVars/HUD visibility can persist**: restore
 your preferred damage/camera/HUD options in the game settings. Disabling an addon
 does not guarantee restoration of every native preference it changed. No data
-needs to be deleted; retain the old MASH installation until review is resolved.
+needs to be deleted; keeping a disabled backup of MASH is optional.
 
 ## For developers and reviewers
 
@@ -218,5 +223,7 @@ Developer tests/dependencies and obsolete experiments are excluded from them.
 asset permissions. No project-wide open-source license or author approval is
 claimed. The Git history retains the exact inspected MASH 1.3.9 snapshot before
 the fork changes, so reviewers can compare the changes rather than trust a rename.
-No public release should be advertised as approved until rights and the developer
-review are resolved. See [CHANGELOG](CHANGELOG.md) for the concrete changes.
+The reported verified-channel publication permission is recorded separately
+from unresolved upstream and asset licensing; it is not a project-wide license
+grant. Historical reports and the existing ZIP predate that permission and keep
+their original metadata. See [CHANGELOG](CHANGELOG.md) for the concrete changes.

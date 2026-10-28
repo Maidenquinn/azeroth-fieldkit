@@ -1,6 +1,15 @@
 # Release procedure
 
-## Public technical-review candidate
+## Current publication status
+
+On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
+addon. See PUBLICATION.md for scope and the retained package identity, and
+DISCORD_ANNOUNCEMENT.md for the prepared message. Keep the existing ZIP/tag and
+prerelease maturity label; do not silently replace them or change client checks.
+The current permission does not resolve upstream licensing or authorize future
+feature changes automatically.
+
+## Original public technical-review procedure (historical)
 
 The maintainer explicitly requested a public repository and review prerelease on
 2026-10-27 to share the addon with DK, a game developer. Preserve the attribution,

@@ -4,8 +4,12 @@ Outils de combat et d'interface **entièrement en jeu**, maintenus par Kevin
 Radlowski / Maidenhead. **Fork de MASH, créé par Malk**, et non réécriture dont
 Kevin posséderait tout le code. Le nouveau nom identifie la maintenance actuelle.
 
-La version `0.2.1-review.3` est une candidate publique à examiner par les développeurs. Aucune approbation
-des développeurs du jeu ou autorisation de l'auteur d'origine n'est annoncée.
+Le **28 octobre 2026**, le mainteneur a indiqué avoir reçu l'autorisation de
+l'équipe pour publier FieldKit comme **addon vérifié**, avec le rôle Discord
+correspondant. La [release 0.2.1-review.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3)
+conserve son nom et son ZIP existants. Cette autorisation de publication ne
+constitue pas une nouvelle validation en jeu ni une permission de Malk.
+Le [suivi de publication](docs/PUBLICATION.md) précise le périmètre et l'archive.
 Le [README anglais](README.md) décrit toutes les fonctionnalités et commandes.
 
 ## Ce qui change
@@ -37,8 +41,11 @@ Voir [OFFICIAL_API](docs/OFFICIAL_API.md).
 
 ## Installation et usage
 
-Tester uniquement dans le cadre autorisé par les développeurs. Désactiver MASH,
-puis copier le dossier interne `AzerothFieldKit` dans AddOns et recharger le jeu.
+Télécharger `AzerothFieldKit-0.2.1-review.3.zip` dans **Assets** sur la release
+(pas les archives automatiques du code source). Désactiver MASH, puis copier le
+dossier interne `AzerothFieldKit` dans le dossier AddOns du client réellement
+lancé. Le fichier doit se trouver dans `AddOns/AzerothFieldKit/AzerothFieldKit.toc`.
+Activer l'addon dans le sélecteur du jeu et redémarrer le client.
 `/fieldkit` ouvre la configuration ; `/fieldkitcombat` ouvre le texte de combat.
 La langue se choisit dans Interface.
 
@@ -69,8 +76,9 @@ Le [dossier de revue](docs/REVIEW.md), l'[audit](SECURITY.md), les
 [effets natifs](docs/API_SURFACE.md), le [guide du code](docs/CODE_GUIDE.md) et le
 [plan de test](docs/TESTING.md) servent de base aux développeurs pour décider.
 Les crédits et droits non résolus figurent dans [NOTICE](NOTICE.md) et
-[LICENSE](LICENSE.md). Le dépôt et la préversion sont publics pour faciliter la revue. Cet accès public
-ne confirme ni les permissions de redistribution ni l’approbation du jeu.
+[LICENSE](LICENSE.md). L'autorisation de publication en addon vérifié est
+désormais rapportée par le mainteneur ; les droits hérités restent distincts.
+Les anciens rapports et le ZIP conservent les mentions de leur date de création.
 
 ## Nouveau parcours des paramètres
 

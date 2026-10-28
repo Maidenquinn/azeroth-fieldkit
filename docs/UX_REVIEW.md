@@ -46,8 +46,8 @@ combat filters/colors/fonts, collapse state and saved HUD coordinates remain.
 
 UI migrations are confined to FieldKitDB: legacy page indices/titles map to
 stable ids under uiSchema=2. Other addons and client saves are outside scope.
-The inherited code/game-data licensing and manual approval blockers in
-REVIEW.md still apply; restyling is not a clean-room rewrite or a rights transfer.
+The inherited code/game-data licensing questions in REVIEW.md still apply;
+see PUBLICATION.md for the subsequently reported publication permission; restyling is not a clean-room rewrite or a rights transfer.
 
 ## Verification
 
