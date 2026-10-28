@@ -38,12 +38,17 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(windows,5,{kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
   get=function() return FieldKitDB.moneyFrame end,
   set=function(value) FieldKitDB.moneyFrame=value;actions.SyncHudTally();actions.UpdateMoneyFrame() end})
- table.insert(windows,1,{kind="check",label="Align left HUD cards",tip="Use one width and one movable stack for run mode, damage, damage taken and lairs. Individual positions are kept when unlinked.",
+ table.insert(windows,1,{kind="check",label="Align left HUD cards",tip="Move the left cards together. Turn off to move every card independently. Custom sizes are kept in both modes.",
   get=function() return FieldKitDB.linkLeftCards end,
   set=function(value) FieldKitDB.linkLeftCards=value;actions.UpdateHudStack() end})
  table.insert(windows,2,{kind="check",label="Run mode card",tip="Native difficulty rank with a labelled 0.121 modifier reference. Hover for full rules; unexposed live multipliers and affixes remain unknown.",
   get=function() return FieldKitDB.runModeCard end,
   set=function(value) FieldKitDB.runModeCard=value;actions.UpdateRunMode() end})
+ table.insert(windows,3,{kind="check",label="Group accessories and statistics",tip="Move the right cards together. Turn off to move each window independently.",
+  get=function() return FieldKitDB.linkRightCards end,
+  set=function(v) FieldKitDB.linkRightCards=v;FieldKitCardLayout.ApplyRight() end})
+ local sizes=FieldKitCardLayout.Options()
+ for i=1,table.getn(sizes) do table.insert(windows,3+i,sizes[i]) end
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
@@ -142,6 +147,7 @@ local function Slider(page,item,y,camera)
  local label=T.Label(row,item.label or "Max camera distance",0,0,500,24,14)
  local name="FieldKitJourneySlider"..(table.getn(U.controls)+1)
  local s=CreateFrame("Slider",name,row,"OptionsSliderTemplate");s:SetPoint("TOPLEFT",row,"TOPLEFT",8,-36);s:SetHeight(18)
+ s.item=item;s.label=item.label
  s:SetMinMaxValues(item.min or 15,item.max or 50);s:SetValueStep(item.step or 1)
  s.Refresh=function()
   local v=item.get();s:SetValue(v)
@@ -308,7 +314,7 @@ function U.SetLayoutEditing(enabled,returnToSettings)
  FieldKit.layoutEditing=enabled and true or false
  if enabled then
   U.routingLayout=true;U.frame:Hide();U.routingLayout=nil
-  U.context.unlock(true);U.context.bosses();U.dock:Show()
+  U.context.unlock(true);U.context.bosses();FieldKitCardLayout.UpdateDock();U.dock:Show()
   if FieldKitDB.combatText then FieldKitCombat.ShowAnchors() end
  else
   U.dock:Hide();U.context.unlock(false);FieldKitCombat.HideAnchors();U.context.bosses()
@@ -369,10 +375,19 @@ function U.Build(sections,context)
  U.close=T.Button(frame,nil,"Close",874,716,100,28,function() frame:Hide() end)
  U.reload=T.Button(frame,nil,"Reload UI",824,680,150,26,function() if U.reloadNeeded then context.reload() end end)
  local dock=CreateFrame("Frame","FieldKitLayoutDock",UIParent);U.dock=dock
- dock:SetWidth(560);dock:SetHeight(92);dock:SetPoint("TOP",UIParent,"TOP",0,-30);dock:SetFrameStrata("DIALOG");dock:SetFrameLevel(150);T.Surface(dock,"window")
+ dock:SetWidth(560);dock:SetHeight(136);dock:SetPoint("TOP",UIParent,"TOP",0,-30);dock:SetFrameStrata("DIALOG");dock:SetFrameLevel(150);T.Surface(dock,"window")
  T.Label(dock,"Move your enabled windows",18,12,380,26,20,T.gold,true)
  T.Label(dock,"Drag a window or a combat area, then choose Done.",18,44,370,30,12,T.muted)
  U.done=T.Button(dock,"FieldKitLayoutDone","Done",438,29,100,30,function() U.SetLayoutEditing(false,true) end)
+ U.groupLeft=T.Button(dock,nil,"",18,88,166,28,function()
+  FieldKitDB.linkLeftCards=not FieldKitDB.linkLeftCards;FieldKitHudStack.Apply();FieldKitCardLayout.UpdateDock()
+ end)
+ U.groupRight=T.Button(dock,nil,"",192,88,166,28,function()
+  FieldKitDB.linkRightCards=not FieldKitDB.linkRightCards;FieldKitCardLayout.ApplyRight();FieldKitCardLayout.UpdateDock()
+ end)
+ U.sizes=T.Button(dock,nil,"Adjust sizes",366,88,172,28,function()
+  U.SetLayoutEditing(false,true);U.Select("windows")
+ end)
  dock:SetScript("OnHide",function() if FieldKit.layoutEditing then U.SetLayoutEditing(false,false) end end);dock:Hide()
  frame:SetScript("OnShow",function() U.Refresh() end)
  frame:SetScript("OnHide",function()

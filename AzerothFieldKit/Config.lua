@@ -1,6 +1,6 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+local defaults={linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
@@ -20,6 +20,15 @@ function FieldKit.InitializeSettings(defaultStats)
  d.meterValues=math.floor(FieldKit.Number(d.meterValues,3,1,3))
  for _,key in ipairs({"known","pos","collapsedWindows","frameAnchors"}) do
   if type(d[key])~="table" then d[key]={} end
+ end
+ if type(d.cardSizes)~="table" then d.cardSizes={} end
+ for name,size in pairs(d.cardSizes) do
+  if not FieldKitCardLayout.ValidName(name) or type(size)~="table" then d.cardSizes[name]=nil
+  else
+   local width=FieldKit.Number(size.width,nil,220,800)
+   local height=FieldKit.Number(size.height,nil,22,800)
+   d.cardSizes[name]=(width or height) and {width=width,height=height} or nil
+  end
  end
  local anchors=0
  for name,a in pairs(d.frameAnchors) do

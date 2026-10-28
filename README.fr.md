@@ -114,6 +114,30 @@ valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md
 
 ## Carte du mode et alignement à gauche
 
+### Nouvelle candidate locale 0.2.2-review.1
+
+Dans **Déplacer**, choisissez **Gauche : groupées/séparées** et
+**Droite : groupées/séparées**. La gauche comprend le mode, les dégâts, les dégâts
+subis et les antres ; la droite comprend les accessoires et les statistiques.
+Les fenêtres séparées gardent chacune leur position, sans être rattachées à la
+prochaine actualisation. Regrouper retrouve l'ancrage du groupe ; séparer retrouve
+les positions individuelles enregistrées. Glisser la barre d'or la détache de
+la barre compacte.
+
+**Régler les tailles** ouvre **Fenêtres** : choisissez la **Fenêtre à redimensionner**,
+puis sa **Largeur** et sa **Hauteur**. Les sept cartes du HUD sont concernées,
+pas les paramètres, les boutons d'action, la vie du joueur ou les portraits de boss.
+**Taille automatique pour cette fenêtre** réinitialise uniquement ses dimensions.
+Les tailles personnalisées sont conservées en mode groupé comme séparé.
+
+Les textes et icônes ne sont pas étirés. Une hauteur minimale protège les lignes
+visibles ; une grande hauteur augmente leur espacement, puis laisse du fond vide.
+La largeur minimale du compteur protège ses colonnes, celle de l'or ses valeurs.
+Les valeurs « px » sont des unités d'interface soumises à l'échelle du client.
+Si une pile dépasse la hauteur de l'écran, réduisez les tailles, repliez des cartes
+ou séparez-les. La candidate doit encore être vérifiée visuellement en jeu ;
+elle ne remplace pas la release publique existante.
+
 Le mode de jeu, les dégâts, les dégâts subis et les antres partagent désormais
 une largeur et une pile avec six pixels d'espacement. Réduire ou masquer une
 carte referme l'espace. Déplacez n'importe quelle carte en mode **Déplacer** pour

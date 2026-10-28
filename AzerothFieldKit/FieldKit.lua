@@ -1005,7 +1005,8 @@ end
 local function ApplyCompactPanel(f, key, expandedHeight)
     if not f then return end
     local collapsed = DB[key]
-    f:SetHeight(collapsed and 23 or expandedHeight)
+    local count=f.slots and table.getn(f.slots) or math.max(1,math.floor((expandedHeight-14)/13))
+    FieldKitCardLayout.Rows(f,expandedHeight,count,f.slots and "gear" or "stats",collapsed)
     FieldKitTheme.Update(f)
     local rows = f.rows or f.slots or {}
     for i = 1, table.getn(rows) do
@@ -1277,6 +1278,7 @@ local function UpdateMoneyFrame()
 		end
 	end
 	local gold = RunGold()
+ FieldKitCardLayout.Money(moneyFrame)
 	FieldKit_Text(moneyFrame.gold,Compact(gold))
 	local chestCost = ChestCost()
 	if ( chestCost ) then
@@ -1353,7 +1355,11 @@ local function CreateMoneyFrame()
 	moneyFrame.kills:SetPoint("LEFT", moneyFrame.killsLabel, "RIGHT", 3, 0)
 
 
-	MakeMovable(statsFrame, UIParent:GetWidth() / 2 - 100, 0, true, moneyFrame)
+ MakeMovable(moneyFrame,UIParent:GetWidth()/2-100,-110,true)
+ local stop=moneyFrame:GetScript("OnDragStop")
+ moneyFrame:SetScript("OnDragStop",function()
+  if moneyFrame.azsMoving then stop();DB.moneyDetached=true end
+ end)
 	UpdateMoneyFrame()
 end
 
@@ -1474,7 +1480,7 @@ local function CreateGearFrame()
 	end
 
 	gearFrame:SetPoint("BOTTOMLEFT", statsFrame, "TOPLEFT", 0, 2)
-	MakeMovable(statsFrame, UIParent:GetWidth() / 2 - 100, 0, true, gearFrame)
+ MakeMovable(gearFrame,UIParent:GetWidth()/2-100,150,true)
 	UpdateGearFrame()
 end
 
@@ -1537,6 +1543,7 @@ local function CreateBarWindow(name, title, rows)
 			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
 			f.total:Show(); FieldKit_Text(this,"-")
    for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
+   FieldKitCardLayout.Rows(f,28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1),f.mashVisibleRows or 0,"bar",false)
 		end
 	end)
 	f.mashCollapseButton = collapse
@@ -1583,7 +1590,7 @@ local function FitRows(f, n)
 		for i = 1, table.getn(f.rows) do f.rows[i]:Hide() end
 		f:SetHeight(24)
 	else f:SetHeight(height); f.total:Show() end
- FieldKitTheme.Update(f)
+ f.mashExpandHeight=FieldKitCardLayout.Rows(f,height,n,"bar",f.mashCollapsed)
 end
 
 -- Require the native API and a non-nil native phase before using run data.
@@ -1602,7 +1609,7 @@ local function UpdateMeterFrame(force)
 	end
 	local lines, total, dps = AZS_GetMeter()
 	lines = lines or {}
- local width=FieldKit.MeterWidth(DB.meterValues)
+ local width=FieldKitCardLayout.Width(meterFrame,FieldKit.MeterWidth(DB.meterValues))
  if meterFrame:GetWidth()~=width then
   local previous=meterFrame:GetWidth()
   meterFrame:SetWidth(width);FieldKitTheme.Update(meterFrame)
@@ -1689,7 +1696,7 @@ local function CreateMeterFrames()
 
 	takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)
 	MakeMovable(meterFrame, -( UIParent:GetWidth() / 2 - 140 ), 60, true)
-	MakeMovable(meterFrame, -( UIParent:GetWidth() / 2 - 140 ), 60, true, takenFrame)
+ MakeMovable(takenFrame,-(UIParent:GetWidth()/2-140),-60,true)
 	meterFrame:Hide()
 	takenFrame:Hide()
 end
@@ -1699,15 +1706,7 @@ local function UpdateMeterFrames(force)
 	UpdateMeterFrame(force)
 	UpdateTakenFrame(force)
 
-	if ( takenFrame and not DB.linkLeftCards ) then
-		takenFrame:ClearAllPoints()
-		if ( meterFrame:IsShown() ) then
-			takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)
-		else
-			takenFrame:SetPoint("TOPLEFT", meterFrame, "TOPLEFT", 0, 0)
-		end
-	end
- FieldKitHudStack.Apply()
+ FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end
 
 local UpdateChestPins, UpdateLairFrame, CreateLairFrame
@@ -2079,6 +2078,7 @@ function AttachMoneyToBar(force)
 		local width = compactBar:GetWidth()
 		if width and width > 0 then moneyFrame:SetWidth(width);FieldKitTheme.Update(moneyFrame) end
 		moneyFrame:SetHeight(22)
+  FieldKitCardLayout.Money(moneyFrame)
 		local point, relative, relativePoint, x, y = moneyFrame:GetPoint(1)
 		if point ~= "BOTTOM" or relative ~= compactBar or relativePoint ~= "TOP" or x ~= 0 or y ~= 2 then
 			moneyFrame:ClearAllPoints()
@@ -2165,12 +2165,12 @@ local function ResetPositions()
   local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
  end
  if AttachMoneyToBar then AttachMoneyToBar(true) end
- FieldKitHudStack.Apply()
+ FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
  RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true)
- UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply()
+ UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
 end
 local function CreatePanel()
@@ -2179,7 +2179,7 @@ local function CreatePanel()
   dismiss=function() if statsPicker then statsPicker:Hide() end end,
   positions=function()
    for i=1,table.getn(movableFrames) do PlaceMovable(movableFrames[i]) end
-   AttachMoneyToBar(false);FieldKitHudStack.Apply()
+   AttachMoneyToBar(false);FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
   end,
   camera=function(v) DB.cameraMax=v;ApplyCamera(true) end,
   reload=function() ReloadUI() end,
@@ -2275,6 +2275,7 @@ local function FieldKitEventLifecycle()
   local mode=FieldKitRunMode.Create(CreateBarWindow,FitRows)
   MakeMovable(mode,-(UIParent:GetWidth()/2-140),260,true)
   FieldKitHudStack.Initialize({mode,meterFrame,takenFrame,lairs},MakeMovable,PlaceMovable)
+  FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
@@ -2397,7 +2398,7 @@ frame:SetScript("OnUpdate", function()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
 	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData();FieldKitRunMode.Update() end
- FieldKitHudStack.Apply()
+ FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end)
 
 SLASH_FieldKit1 = "/fieldkit"

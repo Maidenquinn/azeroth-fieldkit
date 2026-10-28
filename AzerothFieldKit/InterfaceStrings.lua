@@ -1,6 +1,16 @@
 -- Presentation-only additions. Native creature/spell names are never translated.
 local fr=FieldKitLocale.fr
 local labels={
+ ["Left: grouped"]="Gauche : groupées",["Left: independent"]="Gauche : séparées",
+ ["Right: grouped"]="Droite : groupées",["Right: independent"]="Droite : séparées",
+ ["Adjust sizes"]="Régler les tailles",
+ ["Group accessories and statistics"]="Grouper les accessoires et les statistiques",
+ ["Move the right cards together. Turn off to move each window independently."]="Déplace les cartes de droite ensemble. Désactivez pour déplacer chaque fenêtre séparément.",
+ ["Move the left cards together. Turn off to move every card independently. Custom sizes are kept in both modes."]="Déplace les cartes de gauche ensemble. Désactivez pour les déplacer séparément. Les tailles personnalisées sont conservées dans les deux modes.",
+ ["Window to resize"]="Fenêtre à redimensionner",
+ ["Automatic size for this window"]="Taille automatique pour cette fenêtre",
+ ["Clear this window's custom dimensions. Height always keeps enough room for every visible row."]="Réinitialise les dimensions de cette fenêtre. La hauteur conserve toujours la place nécessaire pour toutes les lignes visibles.",
+ ["Window width"]="Largeur de la fenêtre",["Window height"]="Hauteur de la fenêtre",
  ["Align left HUD cards"]="Aligner les cartes de gauche",
  ["Use one width and one movable stack for run mode, damage, damage taken and lairs. Individual positions are kept when unlinked."]="Une même largeur et une pile déplaçable pour le mode, les dégâts, les dégâts subis et les antres. Les positions individuelles sont conservées hors de la pile.",
  ["Run mode card"]="Carte du mode de jeu",

@@ -1,7 +1,7 @@
 {
-  "version": "0.2.1-review.3",
+  "version": "0.2.2-review.1",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -15,7 +15,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "5faea6b247c1567c24ff90e5edff5cdb265261f2080ec05b6fadc48bb9def540"
+      "sha256": "c46a1f0da30dae6242697fa3f7c71e2e986671c5f63261715ffb3887f990de55"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -25,7 +25,7 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "a1acfeec6f29967fef91b8d354766e2cb533b70a7964ee39feb1dffd09aded41"
+      "sha256": "751739a71b5758aa96507e7d7e9bf06bc638b2c261cb083e26f01956b6282be2"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
@@ -35,7 +35,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "6ec3ba3a62089668870c4d1b3ce13764f76295129335d66283d405c7fadd3852"
+      "sha256": "faa6be3e9c485a9bbc400c3906ee4a83a9382e088c1a5aaa056c9d5adcb0d51f"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -75,7 +75,12 @@
     "HudStack.lua": {
       "maxUpvalues": 2,
       "functions": 5,
-      "sha256": "f7c5155c32c91c985534a7e40110d89882de388016f2a94b091958bd10a66433"
+      "sha256": "8b9c9b6178a9774c1fcf01a255fe66dfa66f1153bef9f8bd409d5cea4ae8b66e"
+    },
+    "CardLayout.lua": {
+      "maxUpvalues": 2,
+      "functions": 26,
+      "sha256": "372c70ac1dfa668315918ff25bbd3d12be7c77d672009a45d45e117795c75b14"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
@@ -89,13 +94,13 @@
     },
     "Interface.lua": {
       "maxUpvalues": 5,
-      "functions": 70,
-      "sha256": "5b3becf8726a620363253966723631b8d2d9e47026c44beda5a60d81fec7aacf"
+      "functions": 75,
+      "sha256": "57c1fdab4e63f3cefad6c3179fba409a0a5e65d4a8131749a1b2a6f65507d299"
     },
     "FieldKit.lua": {
       "maxUpvalues": 19,
-      "functions": 164,
-      "sha256": "bce6fcab5be36bfac072ffa5ed0b37527bb5329b4f9abc2fd4bf6465fc7bc3eb"
+      "functions": 165,
+      "sha256": "f3e6c8aa058f5e67b7bc08a7b5004c57fd5d142d7eb29bebf9c7b940ee2afbab"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,

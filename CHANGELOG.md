@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.2-review.1 — 2026-10-28 (local test candidate)
+
+- Truly independent damage-taken, accessories and statistics movement when their
+  left/right group is disabled; native data refreshes no longer reattach them.
+- Add left/right grouping switches and an Adjust sizes shortcut to layout mode.
+- Add per-card width/height preferences for run mode, damage, damage taken, lairs,
+  accessories, statistics and the money strip. Preserve automatic sizing as the default.
+- Retain per-card positions and sizes when grouping; right-side full-group native
+  clamping uses a mouse-disabled proxy, just like the left stack.
+- Keep text/icon sizes unchanged; heights cannot crop visible data rows. Larger
+  cards increase row spacing up to 32 pixels, then retain empty background space.
+- Normalise persisted dimensions and test real UI callbacks, collapse, group routing,
+  native anchor retention and reload under Lua 5.0.3/5.1. Live validation pending.
+
+
 ## Publication documentation — 2026-10-28 (no runtime change)
 
 - Record maintainer-reported game-team permission to post as a verified addon.

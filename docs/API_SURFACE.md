@@ -129,4 +129,10 @@ RunMode.lua reads only the existing native rank/zone and phase; its versioned re
 
 ## Native anchor persistence
 
+CardLayout.lua adds per-card own-frame dimensions and a right-side group proxy.
+Only FieldKitDB.cardSizes/linkRightCards and FieldKit-owned frames are written.
+No native gameplay/HUD CVar, world position or action-slot API is added. The new
+file is loaded after HudStack.lua and before Interface.lua. Dimensions are bounded
+at settings load and by UI controls; visible-row minima prevent content cropping.
+
 Positions.lua reads GetPoint and writes only FieldKitDB.frameAnchors (validated own-frame names and point/relative-point/numeric offsets). Restoring uses UIParent-relative SetPoint; no frame pointers are serialized. Native SetClampedToScreen handles bounds of the linked group proxy, with child clamps disabled while linked. Legacy positions are retained and Reset/Undo includes both representations. No game/save/other-addon state is accessed.

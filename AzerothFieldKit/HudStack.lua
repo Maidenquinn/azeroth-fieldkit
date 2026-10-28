@@ -32,15 +32,13 @@ function S.Apply()
  if not FieldKitDB.linkLeftCards then
   if S.linked then
    for i=1,table.getn(S.frames) do
-    local f=S.frames[i];f:SetWidth(f==S.frames[2] and FieldKit.MeterWidth(FieldKitDB.meterValues) or 220)
-    if i==3 then
-     f:ClearAllPoints();f:SetPoint("TOPLEFT",S.frames[2],S.frames[2]:IsShown() and "BOTTOMLEFT" or "TOPLEFT",0,-2)
-    elseif FieldKitDB.pos[f:GetName()] then S.place(f) end
+    local f=S.frames[i];f:SetWidth(FieldKitCardLayout.Width(f,f==S.frames[2] and FieldKit.MeterWidth(FieldKitDB.meterValues) or 220))
+    if FieldKitDB.pos[f:GetName()] then S.place(f) end
     if f.SetClampedToScreen then f:SetClampedToScreen(true) end
     FieldKitTheme.Update(f)
    end
   end
-  FieldKitRunMode.Reflow(220);S.linked=false;return
+  FieldKitRunMode.Reflow(S.frames[1]:GetWidth());S.linked=false;return
  end
  S.linked=true
  local width=FieldKit.MeterWidth(FieldKitDB.meterValues);local height,shown=0,0
@@ -48,7 +46,8 @@ function S.Apply()
   local f=S.frames[i]
   -- Clamp the complete group once; individual card clamps can move it twice.
   if f.SetClampedToScreen then f:SetClampedToScreen(false) end
-  if f:GetWidth()~=width then f:SetWidth(width);FieldKitTheme.Update(f) end
+  local ownWidth=FieldKitCardLayout.Width(f,width)
+  if f:GetWidth()~=ownWidth then f:SetWidth(ownWidth);FieldKitTheme.Update(f) end
   if f:IsShown() then
    if shown>0 then height=height+6 end
    local point,relative,rp,x,y=f:GetPoint(1)
@@ -58,7 +57,10 @@ function S.Apply()
    height=height+f:GetHeight();shown=shown+1
   end
  end
- FieldKitRunMode.Reflow(width)
+ FieldKitRunMode.Reflow(S.frames[1]:GetWidth())
+ for i=1,table.getn(S.frames) do
+  if S.frames[i]:IsShown() then width=math.max(width,S.frames[i]:GetWidth()) end
+ end
  S.width=width;S.height=height
  local changed=S.root:GetWidth()~=width or S.root:GetHeight()~=math.max(1,height)
  if changed then S.root:SetWidth(width);S.root:SetHeight(math.max(1,height)) end

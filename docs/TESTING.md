@@ -99,6 +99,16 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+For 0.2.2-review.1, `individual_layout.lua` tests independent movement, left/right
+group routing, bounded dimensions, every card's width/height controls, unchanged
+native-meter refreshes, collapse, auto-size reset and retained native anchors.
+The Python runner also serializes/reloads the settings. In the client, exercise
+all seven cards at your UI scale: toggle each group, move cards to all four edges,
+resize each card, change meter format and visible stats, collapse/reopen, reload,
+and verify that totals, tooltips and settings opacity remain unchanged. Test both
+compact-bar states; a detached money strip must not snap back. No live success
+is claimed by these fixtures.
+
 Follow [UX_REVIEW.md](UX_REVIEW.md) for the new page/layout journeys. The automated
 interface fixture additionally verifies exclusive HP choice, no automatic reload,
 no native writes during language/reflow, no resize allocations, wheel bounds,
