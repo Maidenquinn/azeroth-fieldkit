@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.2.3 — 2026-10-28 (published update; GitHub prerelease)
+
+Maintainer accepted for publication. Consolidates the layout, co-op and UX work
+since 0.2.1-review.3; original candidate entries below remain historical records.
+
+- Move active HUD windows directly without opening settings; persist an optional
+  global lock, independent/grouped anchors, collapse state and per-card dimensions.
+- Add fixed damage/DPS/share columns and native co-op totals; fill missing damage-
+  taken source coverage with an explicit unattributed native remainder.
+- Add optional passive teammate cards while retaining native interactions by default;
+  native-frame hiding now requires a separate explicit option.
+- Browse and pin spell detail from solo/group meters; preserve pinned player identity
+  through rank changes. Local native detail is complete within documented bounds;
+  native allied detail remains limited to the exposed top spell.
+- Add optional in-game spell-snapshot sharing with bounded PARTY-only messages,
+  observed status and local diagnostics. Disabled by default; live transport unconfirmed.
+- Split Windows into Display, Layout, Appearance and Co-op / test; add reversible
+  Essential HUD, clear preview arrangement, dimension minima and compact mode context.
+- Keep HUD style/opacity separate from settings; preserve EN/FR and rewrite guides.
+- Lua 5.0.3/5.1 behavioral/prototype checks pass. No new agent in-game or performance
+  test is claimed. See docs/RELEASE_0.2.3.md for update instructions and remaining limits.
+
+
 ## 0.2.3-review.1 — UX simplification candidate (unmerged)
 
 - Split Windows into Display, Layout, Appearance and Co-op / test with saved routing.

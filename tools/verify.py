@@ -12,6 +12,8 @@ root=base/'AzerothFieldKit'
 parser=argparse.ArgumentParser();parser.add_argument('--lua50',type=Path);args=parser.parse_args()
 toc=(root/'AzerothFieldKit.toc').read_text(encoding='utf8')
 version=next(s.split(':',1)[1].strip() for s in toc.splitlines() if s.startswith('## Version:'))
+publication=json.loads((base/'data/publication-status.json').read_text(encoding='utf8'))
+assert publication['version']==version,'Refresh publication metadata explicitly for this version'
 files=[s for s in toc.splitlines() if s.endswith('.lua')]
 assert len(files)==len(set(files)) and set(files)=={p.name for p in root.glob('*.lua')}
 assert '## SavedVariables: FieldKitDB' in toc
@@ -133,7 +135,7 @@ if args.lua50:
 result={'version':version,'lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
  'freshDefaultsNoCVarOrHudWrites':True,'manualActionSwapFixture':True,'bothChatHookPaths':True,
  'officialApiFixtures':True,'snapshotBatchesPer20MockTicks':official.globals().OFFICIAL_API_BATCHES,
- 'uxSimplificationFixtures':True,'inGameTest':False,'partySyncTwoClientsSimulated':True,'partySyncLiveTransportConfirmed':False,'approval':'not approved','files':prototypes}
+ 'uxSimplificationFixtures':True,'inGameTest':False,'partySyncTwoClientsSimulated':True,'partySyncLiveTransportConfirmed':False,'approval':'maintainer accepted for publication; not independently certified','publication':publication,'files':prototypes}
 out=base/'build';out.mkdir(exist_ok=True)
 (out/'validation.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf8',newline='\n')
 print(json.dumps(result,indent=2))

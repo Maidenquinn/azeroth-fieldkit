@@ -7,13 +7,13 @@ Maintenu par **Kevin Radlowski / Maidenhead**, dérivé de **MASH par Malk**.
 
 ## Version à utiliser
 
-- **Version publique :** [0.2.1-review.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3).
-- **Cette branche :** `0.2.3-review.1`, candidate de simplification UX, non fusionnée.
-  Elle inclut les candidates précédentes de disposition et de coop ; aucune nouvelle
-  release publique n’est annoncée.
+- **Dernier paquet :** [0.2.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.3), publié comme préversion GitHub.
+- Le mainteneur a validé la publication le 28 octobre 2026. Les PR de disposition,
+  coop et UX sont fusionnées sur `main`. Cette mise à jour succède à 0.2.1-review.3.
+  Voir les [notes de version](docs/RELEASE_0.2.3.md).
 - Le 28 octobre 2026, le mainteneur a rapporté l’autorisation de publier l’addon
-  comme vérifié. Cette autorisation ne constitue pas une validation de cette nouvelle
-  candidate et ne règle pas les droits hérités. Voir [publication](docs/PUBLICATION.md),
+  comme vérifié. Cette autorisation ne constitue pas une certification indépendante de ce
+  paquet et ne règle pas les droits hérités. Voir [publication](docs/PUBLICATION.md),
   [crédits](NOTICE.md) et [licence](LICENSE.md).
 
 ## Installation
@@ -25,8 +25,8 @@ Maintenu par **Kevin Radlowski / Maidenhead**, dérivé de **MASH par Malk**.
    Désactivez l’ancien MASH pour éviter les comportements en double.
 3. Activez FieldKit dans le sélecteur du client puis redémarrez le jeu.
 
-Le téléchargement public conserve son ancienne interface ; le ZIP candidat est
-séparé. Aucun programme externe ni addon compagnon n’est nécessaire. FieldKit
+Téléchargez `AzerothFieldKit-0.2.3.zip` dans la release ci-dessus pour obtenir
+l’interface actuelle. Aucun programme externe ni addon compagnon n’est nécessaire. FieldKit
 n’importe pas automatiquement MASHDB et ne modifie pas vos sauvegardes de partie.
 
 ## Prise en main
@@ -122,4 +122,4 @@ python tools/package.py
 Le paquet exige des sources commitées et des preuves de validation à jour.
 Voir [contribuer](CONTRIBUTING.md), [guide du code](docs/CODE_GUIDE.md),
 [tests](docs/TESTING.md) et [validation de la candidate](docs/UX_SIMPLIFICATION.md).
-Cette branche attend une validation en jeu avant toute fusion ou release.
+Utilisez cette liste pour les retours après mise à jour. Les tests hors jeu ne prouvent ni le rendu ni le transport coop réels.

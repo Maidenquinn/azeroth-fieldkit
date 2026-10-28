@@ -1,5 +1,24 @@
 # Verified-addon publication record
 
+## Current update — 0.2.3
+
+On 2026-10-28 the maintainer accepted the UX changes and explicitly requested the
+pending PRs be merged into main, followed by a public update and a prepared Discord
+changelog. This records maintainer authorization, not a new game-team or independent
+security certification. Live peer-message forwarding remains unconfirmed.
+
+- Release: https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.3
+- Asset: `AzerothFieldKit-0.2.3.zip`.
+- Maturity: GitHub prerelease, consistent with the existing publication workflow.
+- Source commit and per-file hashes: release `MANIFEST.json`.
+- Archive checksum: release `SHA256SUMS.txt` (kept outside the self-containing ZIP).
+- Offline validation: release `validation.json`; no agent-performed in-game test.
+- Notes: [RELEASE_0.2.3.md](RELEASE_0.2.3.md). Discord draft:
+  [DISCORD_ANNOUNCEMENT.md](DISCORD_ANNOUNCEMENT.md). No Discord message was sent.
+
+The older package record below is historical; its ZIP and tag remain immutable.
+
+
 ## Reported authorization — 2026-10-28
 
 Kevin / Maidenhead reports permission from the Azeroth Survivors team to post
@@ -9,7 +28,7 @@ No verbatim team message, named approver, version/hash binding, feature-specific
 conditions or permission applying automatically to future updates was provided.
 Do not invent any of those details or describe this as a security certification.
 
-## Package retained for the announcement
+## Historical package — 0.2.1-review.3
 
 - Version: **0.2.1-review.3**. The suffix remains the actual version; there is no 1.0 release.
 - Release: https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3
@@ -29,7 +48,7 @@ Lua 5.0.3/5.1 checks are offline tests; no live performance benchmark is claimed
 Game-team publication permission does not by itself grant an upstream MASH
 license or game-asset rights. Keep NOTICE.md and LICENSE.md unchanged.
 
-## Posting checklist
+## Historical 0.2.1-review.3 posting checklist
 
 1. Use the English text in DISCORD_ANNOUNCEMENT.md. Its main block fits one
    standard 2,000-character Discord message. Copy its contents, not the fences.

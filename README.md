@@ -7,11 +7,12 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 
 ## Versions and downloads
 
-- **Public package:** [0.2.1-review.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.1-review.3).
-- **This branch:** `0.2.3-review.1`, an unmerged UX review candidate. It includes
-  preceding co-op/layout candidates; it is not a new public release.
+- **Latest package:** [0.2.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.3), published as a GitHub prerelease.
+- The maintainer accepted the UX update for publication on 2026-10-28. Pending
+  layout/co-op/UX PRs are merged into `main`; this package replaces 0.2.1-review.3
+  as the latest update. [Release notes](docs/RELEASE_0.2.3.md).
 - On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
-  addon. That publication permission does not certify this new candidate or settle
+  addon. That publication permission does not independently certify this package or settle
   inherited code/assets rights. See [publication scope](docs/PUBLICATION.md),
   [NOTICE](NOTICE.md) and [LICENSE](LICENSE.md).
 
@@ -24,8 +25,8 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
    the folder twice. Disable the legacy MASH addon to avoid duplicate behavior.
 3. Enable FieldKit in the client's addon selector and restart the game.
 
-The candidate ZIP is a separate review build; the public download above has the
-older interface. No external executable or companion addon is required. FieldKit
+Download `AzerothFieldKit-0.2.3.zip` from the release above; it contains the
+current interface. No external executable or companion addon is required. FieldKit
 never imports MASHDB automatically or modifies your game saves.
 
 ## Start here
@@ -115,4 +116,4 @@ python tools/package.py
 Packaging requires committed source and fresh inventory/validation snapshots.
 See [contributing](CONTRIBUTING.md), [code guide](docs/CODE_GUIDE.md),
 [testing](docs/TESTING.md), and the [candidate acceptance checklist](docs/UX_SIMPLIFICATION.md).
-No new release should be merged until that checklist is reviewed in game.
+Please use that checklist for upgrade feedback. Offline checks do not prove live rendering or network delivery.

@@ -1,6 +1,6 @@
 # Optional party spell sharing — 0.2.2-review.4
 
-Current UX candidate: **0.2.3-review.1** on the separate `codex/ux-simplification` branch. The protocol below is unchanged; controls now live under **Windows → Co-op / test**.
+Current published update: **0.2.3** (GitHub prerelease). The protocol below is unchanged; controls now live under **Windows → Co-op / test**.
 
 ## What changed
 
@@ -13,7 +13,7 @@ on 2026-10-28. That authorization is not a game-team approval of this changed ZI
 
 ## Required real-client test
 
-1. Both players install the same candidate (currently 0.2.3-review.1) and restart the client.
+1. Both players install the same version (currently 0.2.3) and restart the client.
 2. Both enable **Windows → Co-op / test → Share spell breakdowns with group**. It is off by default.
 3. Join the same co-op run. Hover the other player's Group damage row and wait
    several seconds for the requested snapshot. Repeat in the other direction.

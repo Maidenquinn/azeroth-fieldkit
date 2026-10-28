@@ -1,6 +1,16 @@
 # Release procedure
 
-## Current publication status
+## Update authorized 2026-10-28 — v0.2.3
+
+The maintainer accepted the UX work and requested merging all pending PRs and
+publishing this update. Merge dependencies in order with checks passing; prepare
+version/docs/evidence on a release branch and PR to main; tag the tested merged
+commit. Publish a new immutable ZIP, manifest, checksum and validation report as a
+GitHub prerelease. Never overwrite the old release or claim live peer transport.
+The Discord draft is prepared for the maintainer to send manually.
+
+
+## Historical publication status — initial announcement
 
 On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
 addon. See PUBLICATION.md for scope and the retained package identity, and
