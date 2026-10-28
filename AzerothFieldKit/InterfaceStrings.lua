@@ -1,6 +1,8 @@
 -- Presentation-only additions. Native creature/spell names are never translated.
 local fr=FieldKitLocale.fr
 local labels={
+ ["Left-click: settings. Right-click: lock/unlock windows. Drag: move this shortcut."]="Clic gauche : paramètres. Clic droit : verrouiller/déverrouiller les fenêtres. Glisser : déplacer ce raccourci.",
+ ["Windows locked"]="Fenêtres verrouillées",["Windows unlocked"]="Fenêtres déverrouillées",
  ["This client does not expose an addon-message transport."]="Ce client ne fournit pas de canal de messages entre addons.",
  ["Share spell breakdowns with group"]="Partager le détail des sorts avec le groupe",
  ["Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots."]="Échange facultatif en jeu, réservé au groupe. Chaque joueur doit avoir FieldKit et activer cette option. Partage uniquement vos dégâts/DPS par sort sur demande. Canal coop à vérifier avec /fieldkit sync.",

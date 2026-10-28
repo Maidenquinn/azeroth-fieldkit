@@ -193,8 +193,22 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 	table.insert(movables, handle)
 end
 
--- Enable drag handles while the settings panel is open, then lock them again.
+-- Shared editing gate, available from settings, slash commands or the minimap.
 local function SetMovablesUnlocked(unlocked)
+ if not unlocked then
+  -- A lock issued while a button is held must finish the native drag too.
+  for i=1,table.getn(movableFrames) do
+   local f=movableFrames[i]
+   if f.azsMoving then
+    local stop=f:GetScript("OnDragStop");local previous=this;this=f
+    if stop then stop() else
+     f:StopMovingOrSizing();f.azsMoving=nil
+     if FieldKitPositions.Save(f,f.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(f) end
+    end
+    this=previous
+   end
+  end
+ end
 	for i = 1, table.getn(movables) do
 		movables[i]:EnableMouse(not movables[i].fieldkitMouseProxy and (unlocked or movables[i].azsFreeDrag) and 1 or nil)
 	end
@@ -2180,6 +2194,14 @@ local function TogglePanel()
  FieldKitUI.Toggle()
 end
 
+-- Session-only global edit state. Commands and the minimap shortcut do not
+-- require opening settings; ordinary settings navigation retains its journey.
+function FieldKit.SetWindowsLocked(locked)
+ if not DB then return end
+ if not panel then if locked then return else CreatePanel() end end
+ FieldKitUI.SetLayoutEditing(not locked,false,true)
+end
+
 -- Create the addon settings shortcut; dragging changes only its saved rim angle.
 local function CreateMinimapButton()
 	if ( not Minimap ) then
@@ -2214,11 +2236,17 @@ local function CreateMinimapButton()
 	icon:SetTexture(FieldKitTheme.media.."ChronicleSeal.tga")
 	icon:SetAllPoints(b)
 	b:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-	b:SetScript("OnClick", TogglePanel)
+ b:RegisterForClicks("LeftButtonUp","RightButtonUp")
+ b:SetScript("OnClick",function()
+  GameTooltip:Hide()
+  if arg1=="RightButton" then FieldKit.SetWindowsLocked(FieldKit.layoutEditing and true or false)
+  else TogglePanel() end
+ end)
 	b:SetScript("OnEnter", function()
 		GameTooltip:SetOwner(this, "ANCHOR_LEFT")
 		GameTooltip:SetText("Azeroth FieldKit", 1.0, 1.0, 1.0)
-		GameTooltip:AddLine(FieldKit_L("Click to open the panel. Drag to move."), NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+  GameTooltip:AddLine(FieldKit_L("Left-click: settings. Right-click: lock/unlock windows. Drag: move this shortcut."),NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b)
+  GameTooltip:AddLine(FieldKit_L(FieldKit.layoutEditing and "Windows unlocked" or "Windows locked"),1,.85,.55)
 		GameTooltip:Show()
 	end)
 	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -2401,6 +2429,7 @@ SlashCmdList["FieldKit"] = function(msg)
 		return
 	end
 	msg = string.lower(msg or "")
+ if msg=="lock" or msg=="unlock" then FieldKit.SetWindowsLocked(msg=="lock");return end
 	if msg == "money" then
 		AttachMoneyToBar(true)
 		UpdateMoneyFrame()

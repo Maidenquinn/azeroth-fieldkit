@@ -51,3 +51,7 @@ dofile("tests/party_details.lua")
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 dofile("tests/party_sync.lua")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/window_lock.lua")

@@ -47,6 +47,16 @@ Future changes remain subject to the team's addon policy.
 
 ## Getting started with the interface
 
+**Global lock (0.2.2-review.5):** use `/fieldkit unlock` to move all enabled
+FieldKit HUD windows without opening settings, and `/fieldkit lock` to finish.
+Right-click the FieldKit minimap shortcut toggles the same state; left-click
+still opens settings. The small layout dock retains group switches and sizing.
+Done/Escape from external placement locks without opening the panel; Adjust sizes
+explicitly opens Windows. Grouped cards move together and independent ones keep
+their own anchors. Active drags finish/save when locking. This edit state is
+session-only: restart/reload starts locked, with saved positions/sizes retained.
+The switch controls FieldKit HUD frames, not other addons or the game UI.
+
 Open `/fieldkit` or click the compass beside the minimap. **Overview** shows the
 main tools and their current status. Choose **Configure** to change one area.
 All preferences apply immediately except the optional compact action bar, which

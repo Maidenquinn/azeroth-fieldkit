@@ -319,13 +319,16 @@ function U.Reflow()
 end
 
 -- Hide settings during arrangement so the large panel cannot cover movable frames.
-function U.SetLayoutEditing(enabled,returnToSettings)
+function U.SetLayoutEditing(enabled,returnToSettings,external)
  FieldKit.layoutEditing=enabled and true or false
  if enabled then
+  U.externalLayout=external and true or false
   U.routingLayout=true;U.frame:Hide();U.routingLayout=nil
   U.context.unlock(true);U.context.bosses();FieldKitCardLayout.UpdateDock();U.dock:Show()
   if FieldKitDB.combatText then FieldKitCombat.ShowAnchors() end
  else
+  if U.externalLayout and external~=false then returnToSettings=false end
+  U.externalLayout=nil
   U.dock:Hide();U.context.unlock(false);FieldKitCombat.HideAnchors();U.context.bosses()
   if returnToSettings then U.Reflow();U.frame:Show();U.Refresh() end
  end
@@ -396,7 +399,7 @@ function U.Build(sections,context)
   FieldKitDB.linkRightCards=not FieldKitDB.linkRightCards;FieldKitCardLayout.ApplyRight();FieldKitCardLayout.UpdateDock()
  end)
  U.sizes=T.Button(dock,nil,"Adjust sizes",366,88,172,28,function()
-  U.SetLayoutEditing(false,true);U.Select("windows")
+  U.SetLayoutEditing(false,true,false);U.Select("windows")
  end)
  dock:SetScript("OnHide",function() if FieldKit.layoutEditing then U.SetLayoutEditing(false,false) end end);dock:Hide()
  frame:SetScript("OnShow",function() U.Refresh() end)
@@ -417,7 +420,7 @@ function U.Build(sections,context)
 end
 
 function U.Toggle()
- if FieldKit.layoutEditing then U.SetLayoutEditing(false,true)
+ if FieldKit.layoutEditing then U.SetLayoutEditing(false,true,false)
  elseif U.frame:IsShown() then U.frame:Hide()
  else U.Reflow();U.frame:Show();U.Refresh() end
 end
