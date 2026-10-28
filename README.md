@@ -71,6 +71,35 @@ shared with Azeroth Stats but bundled locally: that addon is not required.
 
 ## Left HUD stack and run mode
 
+### Co-op in the local 0.2.2-review.2 candidate
+
+- **Health & buffs → Co-op teammate cards** opts into rectangular party cards
+  instead of available stock party frames. Off by default. Each has native
+  health, resource, connection/zero-HP status and party damage/DPS when received.
+  **Teammate health format** chooses numbers, percentage or both.
+- **Windows → Group damage meter** shows native damage, DPS and contribution per
+  player, including you, separately from your own per-spell meter. Enabled by
+  default, visible only with a party or an explicit layout preview. Its title
+  counts received players/current roster; missing DPS stays `?`.
+- **Move windows** moves each teammate card and group meter independently.
+  **Window to resize** now also includes Group damage and Teammates 1–4. Numbered
+  labels in layout mode match party slots; saved placement follows the slot,
+  not a permanent player identity. Outside a party, previews show no fake HP/DPS.
+- **Damage taken** prefers received source buckets and supplements them with
+  **Unattributed (native total)** when `AZS_RUN.taken` exceeds their sum. This
+  cannot recover an unexposed source or count individual hits. No data means
+  Not provided; a native zero is the only empty-list case displayed as zero.
+
+The cards are passive displays: they do not implement native target clicks,
+unit menus, buff buttons or casting. Turn the replacement off to regain stock
+party-frame interactions. Unknown HP does not justify hiding the native frame.
+Peer damage requires the native party API; other players do not need FieldKit.
+No peer healing/taken or full per-spell export was identified. Diagnostics:
+`/fieldkit coop` prints only API counts and native/shown taken totals locally.
+Do not post private chat or game saves when reporting problems. The installed
+client's **0.123.0** API was inspected read-only; native UI behavior still needs
+a real co-op test. See [data evidence](docs/COOP_EVIDENCE.json).
+
 ### New in the local 0.2.2-review.1 candidate
 
 Open **Move windows**: **Left: grouped/independent** controls run mode, damage,

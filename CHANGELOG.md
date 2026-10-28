@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.2-review.2 — 2026-10-28 (local co-op candidate)
+
+- Read the native run damage-taken total when the source list is empty/incomplete;
+  label its remainder Unattributed (native total). Missing data is not shown as 0.
+- Remove source-stamp-only caching, so changes to AZS_RUN.taken appear immediately
+  at the normal 5 Hz snapshot cadence. Reject previous-run source buckets.
+- Add a separate native group damage/DPS/contribution meter, including the player.
+  Show the received-player count; reject duplicate, departed and stale-run rows.
+  Peer spell breakdowns, healing and damage taken are not fabricated.
+- Add opt-in teammate cards for party1–party4: native health/resource/status and
+  party-meter damage/DPS. Each card moves, collapses and resizes independently.
+- Preserve native party-frame OnShow handlers and restore them when replacements
+  are disabled or unavailable. No native targeting/casting action is introduced.
+- Add EN/FR options, explicit layout previews and `/fieldkit coop` diagnostics.
+- Inspect the installed 0.123.0 client's embedded API read-only; record its hash
+  and data contracts. Native Lua 5.0.3/5.1 fixtures pass; real co-op acceptance pending.
+
 ## 0.2.2-review.1 — 2026-10-28 (local test candidate)
 
 - Truly independent damage-taken, accessories and statistics movement when their

@@ -1487,10 +1487,10 @@ end
 
 local METER_WIDTH = 220
 local METER_ROWS = 8
-local TAKEN_ROWS = 6
+local TAKEN_ROWS = 7
 local ROW_HEIGHT = 15
 local meterFrame, takenFrame
-local meterStamp, takenStamp, meterSource, takenSource
+local meterStamp, meterSource
 
 local TAKEN_NAMES = {
 	["boss melee"] = "Boss melee",
@@ -1646,38 +1646,26 @@ end
 
 -- Render native damage-source totals separately; do not infer individual enemy hits.
 local function UpdateTakenFrame(force)
-	if ( not takenFrame ) then
-		return
-	end
-	if ( not DB.takenFrame or not InRun() or type(AZS_TAKEN) ~= "table" ) then
-		takenFrame:Hide()
-		return
-	end
-	if ( not force and takenStamp == AZS_TAKEN_UPDATED and takenSource == AZS_TAKEN and takenFrame:IsShown() ) then
-		return
-	end
-	takenStamp = AZS_TAKEN_UPDATED;takenSource=AZS_TAKEN
-	local sum = 0
-	for i = 1, math.min(512,table.getn(AZS_TAKEN)) do
-		sum = sum + ( Field(AZS_TAKEN[i], "dmg", 2) or 0 )
-	end
-	FieldKit_Text(takenFrame.total,ShortNumber(sum))
-	local top = AZS_TAKEN[1] and Field(AZS_TAKEN[1], "dmg", 2) or 1
-	local n = math.min(math.min(512,table.getn(AZS_TAKEN)), TAKEN_ROWS)
-	for i = 1, n do
-		local source = Field(AZS_TAKEN[i], "source", 1) or "?"
-		local dmg = Field(AZS_TAKEN[i], "dmg", 2) or 0
-		local row = takenFrame.rows[i]
-		row:SetValue(dmg / math.max(top, 1))
-		row:SetStatusBarColor(0.75, 0.1, 0.1, 0.55)
-		FieldKit_Text(row.label,TAKEN_NAMES[source] or source)
-		row.value:SetText(string.format("%s  %.0f%%", ShortNumber(dmg), 100 * dmg / math.max(sum, 1)))
-		row:Show()
-	end
-	FitRows(takenFrame, n)
-	takenFrame:Show()
+ if not takenFrame then return end
+ if not DB.takenFrame or not InRun() then takenFrame:Hide();return end
+ local lines,sum,known=FieldKitCoop.Taken()
+ FieldKit_Text(takenFrame.total,known and ShortNumber(sum) or "Not provided")
+ local n=math.min(table.getn(lines),TAKEN_ROWS)
+ local top=lines[1] and lines[1].dmg or 1
+ for i=1,n do
+  local row=takenFrame.rows[i];local line=lines[i]
+  row:SetValue(line.dmg/math.max(top,1));row:SetStatusBarColor(.75,.1,.1,.55)
+  FieldKit_Text(row.label,TAKEN_NAMES[line.source] or line.source)
+  row.value:SetText(string.format("%s  %.0f%%",ShortNumber(line.dmg),100*line.dmg/math.max(sum,1)))
+  row:Show()
+ end
+ if n==0 then
+  local row=takenFrame.rows[1];row:SetValue(0);row.value:SetText("")
+  FieldKit_Text(row.label,known and "No damage taken yet" or "Damage data not provided")
+  row:Show();n=1
+ end
+ FitRows(takenFrame,n);takenFrame:Show()
 end
-
 
 -- Restore a native meter hidden by an older configuration; this addon does not replace it.
 local function SyncHudMeter()
@@ -2171,6 +2159,7 @@ local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
  RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true)
  UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+ FieldKitCoop.Update()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
 end
 local function CreatePanel()
@@ -2276,6 +2265,7 @@ local function FieldKitEventLifecycle()
   MakeMovable(mode,-(UIParent:GetWidth()/2-140),260,true)
   FieldKitHudStack.Initialize({mode,meterFrame,takenFrame,lairs},MakeMovable,PlaceMovable)
   FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
+  FieldKitCoop.Create(CreateBarWindow,FitRows,MakeMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
@@ -2331,6 +2321,7 @@ local function FieldKitEventOther()
 	elseif ( event == "PLAYER_AURAS_CHANGED" ) then
 		UpdatePlayerBuffs()
 	elseif ( event == "CHAT_MSG_ADDON" ) then
+  FieldKitCoop.Packet(arg1)
 		if ( arg1 == "AZS" and arg2 ) then
 			-- The official parser runs before addons; avoid parsing its payload twice.
 			stats = type(AZS_STATS)=="table" and AZS_STATS or ParseStats(arg2)
@@ -2397,12 +2388,13 @@ frame:SetScript("OnUpdate", function()
 	UpdateBossFrame()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
-	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData();FieldKitRunMode.Update() end
+	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update() end
  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end)
 
 SLASH_FieldKit1 = "/fieldkit"
 SlashCmdList["FieldKit"] = function(msg)
+ if msg=="coop" then FieldKitCoop.Diagnostic();return end
 	if ( not DB ) then
 		return
 	end

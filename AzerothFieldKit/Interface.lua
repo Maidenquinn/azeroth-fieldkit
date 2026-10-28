@@ -47,12 +47,18 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(windows,3,{kind="check",label="Group accessories and statistics",tip="Move the right cards together. Turn off to move each window independently.",
   get=function() return FieldKitDB.linkRightCards end,
   set=function(v) FieldKitDB.linkRightCards=v;FieldKitCardLayout.ApplyRight() end})
+ table.insert(windows,{kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
+  get=function() return FieldKitDB.partyMeter end,
+  set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end})
  local sizes=FieldKitCardLayout.Options()
  for i=1,table.getn(sizes) do table.insert(windows,3+i,sizes[i]) end
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
-  {id="health",title="Health & buffs",glyph=16,items={player[1],HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),player[2],player[3],target[1],HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}},
+  {id="health",title="Health & buffs",glyph=16,items={player[1],HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),player[2],player[3],target[1],HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth),
+   {kind="check",label="Co-op teammate cards",tip="Replace available native party frames with individually movable cards. Health, resource, status and group damage use native data. Turn off to restore the original frames.",
+    get=function() return FieldKitDB.partyCards end,set=function(v) FieldKitDB.partyCards=v;FieldKitCoop.Update() end},
+   HealthChoice("partyHealthMode","Teammate health format",FieldKitCoop.Update)}},
   {id="bosses",title="Bosses",glyph=5,items={combat[1],HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
   {id="alerts",title="Alerts",glyph=12,items=old.Warnings.items},
   {id="windows",title="Windows",glyph=9,group="Your interface",items=windows},
@@ -320,6 +326,7 @@ function U.SetLayoutEditing(enabled,returnToSettings)
   U.dock:Hide();U.context.unlock(false);FieldKitCombat.HideAnchors();U.context.bosses()
   if returnToSettings then U.Reflow();U.frame:Show();U.Refresh() end
  end
+ FieldKitCoop.Update()
 end
 
 function U.StartLayout(combat)

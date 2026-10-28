@@ -99,6 +99,21 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+The 0.2.2-review.2 `coop.lua` fixture covers missing/incomplete source buckets,
+native total changes without source stamps, unknown versus zero, malformed data,
+peer damage/DPS and missing rates, duplicate/departed players, new-run freshness,
+offline/zero-HP cards, individual movement/size, opt-in original-frame hooks and
+restoration. Execute it under both Lua versions. Native unit/network delivery and
+real frame interactions are not mocked into a claim of in-game success.
+
+Live co-op recipe: enable teammate cards in Health & buffs; inspect HP/resources
+against the originals, drag/resize each slot, change roster, down/revive a peer,
+disconnect/reconnect, start another run, and toggle the replacements off. Check
+the group meter against native party totals and its received-player count. Check
+Damage taken against the native total on host and guest clients. If either data
+source is missing, retain the explicit unknown/unattributed state and collect
+`/fieldkit coop`; never infer missing damage from healing or HP changes.
+
 For 0.2.2-review.1, `individual_layout.lua` tests independent movement, left/right
 group routing, bounded dimensions, every card's width/height controls, unchanged
 native-meter refreshes, collapse, auto-size reset and retained native anchors.

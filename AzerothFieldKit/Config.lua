@@ -1,6 +1,6 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+local defaults={partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
@@ -62,7 +62,7 @@ function FieldKit.InitializeSettings(defaultStats)
   for key,value in pairs(d.lastStats) do d.lastStats[key]=FieldKit.Number(value) end
  else d.lastStats=nil end
  if d.cameraMax~=nil then d.cameraMax=FieldKit.Number(d.cameraMax,nil,15,50) end
- for _,key in ipairs({"playerHealthMode","targetHealthMode","bossHealthMode"}) do
+ for _,key in ipairs({"playerHealthMode","targetHealthMode","bossHealthMode","partyHealthMode"}) do
   d[key]=math.floor(FieldKit.Number(d[key],1,1,3))
  end
  for _,key in ipairs({"hideDamage","showCrits","groupCrits","hideGryphons","moneyDetached","hudBossesHidden","hudTallyHidden","hudMeterHidden","statsCollapsed","gearCollapsed"}) do

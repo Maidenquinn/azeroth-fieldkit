@@ -114,6 +114,34 @@ valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md
 
 ## Carte du mode et alignement à gauche
 
+### Candidate coop locale 0.2.2-review.2
+
+- **Vie et effets → Cartes des coéquipiers** active les cartes rectangulaires,
+  avec vie, ressource, état et dégâts/DPS natifs lorsqu'ils sont disponibles.
+  Le remplacement est désactivé par défaut ; le format des PV se règle juste dessous.
+- **Fenêtres → Compteur de dégâts du groupe** affiche chaque joueur, vous compris,
+  séparément du détail de vos sorts. Activé par défaut, il apparaît en groupe ou
+  en aperçu explicite de placement. L'en-tête indique joueurs reçus/groupe actuel.
+- **Déplacer** permet de bouger chaque carte séparément. Dans **Fenêtre à
+  redimensionner**, choisissez **Dégâts du groupe** ou **Coéquipier 1–4** pour régler
+  sa largeur/hauteur. Les numéros affichés en placement correspondent aux places
+  du groupe, pas à des identités permanentes. Les aperçus n'inventent pas de PV/DPS.
+- **Dégâts subis** complète les sources reçues avec **Non attribués (total natif)**
+  si le compteur total fourni par le jeu est supérieur. Si aucune donnée n'est
+  fournie, la carte l'indique au lieu d'afficher un faux zéro. Aucun calcul à
+  partir de pertes de PV ne remplace les vrais dégâts reçus.
+
+Les cartes personnalisées sont des affichages : pas de clic de ciblage, menu
+d'unité ou bouton de buff/sort. Désactivez le remplacement pour retrouver les
+interactions natives. Si les PV ne sont pas exploitables, le cadre natif reste
+disponible. Les alliés n'ont pas besoin d'installer FieldKit pour le compteur de
+groupe. Le détail de leurs sorts, soins et dégâts subis n'est pas inventé.
+
+`/fieldkit coop` affiche localement les compteurs de diagnostic et les dégâts
+subis natifs/affichés. En cas de problème, fournissez cette ligne plutôt qu'une
+sauvegarde ou du chat privé. Le client **0.123.0** a été inspecté en lecture seule ;
+la validation visuelle en coop reste à faire.
+
 ### Nouvelle candidate locale 0.2.2-review.1
 
 Dans **Déplacer**, choisissez **Gauche : groupées/séparées** et
