@@ -82,16 +82,17 @@ Les anciens rapports et le ZIP conservent les mentions de leur date de création
 
 ## Nouveau parcours des paramètres
 
-**Verrouillage global (0.2.2-review.5) :** `/fieldkit unlock` déverrouille les
-fenêtres FieldKit sans ouvrir les paramètres ; `/fieldkit lock` les verrouille.
-Le clic droit sur la boussole FieldKit de la minicarte bascule le même état.
-Le clic gauche ouvre toujours les paramètres. Le petit panneau de placement
-garde les options de groupe et de taille ; Terminer/Échap verrouille sans ouvrir
-les paramètres si vous êtes passé par un raccourci. Régler les tailles ouvre
-explicitement la page Fenêtres. Les déplacements en cours sont arrêtés et
-enregistrés au verrouillage. Au redémarrage/rechargement, les fenêtres sont
-verrouillées ; leurs positions et tailles restent sauvegardées. Les cadres des
-autres addons et du jeu ne sont pas concernés.
+**Déplacement normal (0.2.2-review.6) :** les fenêtres FieldKit actives sont
+mobiles par défaut, directement pendant le jeu. Aucun panneau ni mode de
+placement n'est nécessaire. Dans **Fenêtres → Verrouiller la position des
+fenêtres**, vous pouvez les verrouiller ; ce choix est conservé au rechargement.
+Le clic droit sur la boussole FieldKit, `/fieldkit lock` et `/fieldkit unlock`
+modifient la même préférence sans ouvrir de panneau. Les cartes groupées se
+déplacent ensemble ; les autres restent indépendantes. Replier, consulter les
+infobulles et modifier les dimensions reste possible quand les positions sont
+verrouillées. **Déplacer** sert uniquement à organiser les aperçus et les zones
+de texte ; terminer ce mode rétablit votre préférence de mouvement. Les cadres
+des autres addons et du jeu ne sont pas concernés.
 
 Ouvrez `/fieldkit` ou la boussole de la minicarte. L’accueil présente les outils
 et leur état ; **Configurer** ouvre la page correspondante. Neuf rubriques

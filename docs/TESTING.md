@@ -99,6 +99,15 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+0.2.2-review.6 supersedes the previous movement model: window_lock.lua now
+asserts ordinary default dragging before settings have even been constructed,
+no dock/preview from lock/unlock shortcuts, the saved Windows checkbox, stopping
+active group/independent drags, and temporary explicit arrangement override.
+The Python runner reloads the saved locked preference. In game, drag active
+windows immediately after startup with settings closed; check saved groups,
+then lock/unlock in options and verify persistence after reload. Hover details
+should remain available at rest and close only when a drag actually begins.
+
 0.2.2-review.5 window_lock.lua covers lazy settings construction, lock/unlock
 commands, case normalization, minimap right/left clicks, internal versus external
 Done, explicit sizing navigation, Escape and locking during group/individual/

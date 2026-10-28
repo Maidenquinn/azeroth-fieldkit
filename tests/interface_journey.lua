@@ -47,7 +47,7 @@ assert(writes==0,"Read-only UI paths wrote native state")
 UIParent.width=sw;UIParent.height=sh;U.Reflow()
 ReloadUI=oldReload;SetCVar=oldCVar;AZS_SetHudShown=oldHud
 
--- Settings do not unlock the HUD. Layout mode does and hides the settings panel.
+-- Settings do not enter preview arrangement. Explicit placement hides settings.
 U.frame:Show();assert(not FieldKit.layoutEditing)
 click(U.move);assert(FieldKit.layoutEditing and not U.frame:IsShown() and U.dock:IsShown())
 click(U.done);assert(not FieldKit.layoutEditing and U.frame:IsShown() and not U.dock:IsShown())

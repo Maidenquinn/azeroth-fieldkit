@@ -1,6 +1,6 @@
 # Security and player-risk assessment
 
-**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.4.
+**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.6.
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 

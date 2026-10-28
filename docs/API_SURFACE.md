@@ -163,6 +163,13 @@ See COOP_EVIDENCE.json for inspected client hash and data-contract limitations.
 
 ## Native anchor persistence
 
+0.2.2-review.6 adds FieldKitDB.windowsLocked (default false). Normal dragging of
+owned HUD windows no longer depends on the temporary arrangement-mode flag.
+The option/commands/minimap shortcut change only this saved movement preference
+and owned drag/mouse state; they do not open settings or create previews. Explicit
+arrangement can temporarily override a saved lock without changing it. Native
+party-frame and optional communication effects remain as documented separately.
+
 PartyDetails.lua reads local AZS_GetMeter snapshots, sanitized native peer
 top/topdps or an opt-in PartySync snapshot. Its requests go through the bounded
 sharing module described above. One HUD-themed popup with ten pooled rows

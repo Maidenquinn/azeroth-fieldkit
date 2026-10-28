@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.2-review.6 — 2026-10-28 (normal gameplay dragging)
+
+- Correct the movement model: active HUD windows drag directly during play by
+  default, without settings, dock, previews or a prior unlock command.
+- Add Windows → Lock window positions, saved as windowsLocked=false by default.
+  Slash/minimap shortcuts change this preference without constructing settings.
+- Keep explicit arrangement for previews/areas; finishing it restores the saved
+  preference. Remove the no-longer-needed external arrangement navigation state.
+- Preserve groups, independent anchors, dimensions, collapse and hover controls.
+  Close hover details when actually dragging so they do not obstruct placement.
+- Verify default no-panel dragging, option/shortcut locks, active drag stops and
+  saved locked preference on reload under Lua 5.0.3/5.1.
+
 ## 0.2.2-review.5 — 2026-10-28 (global window lock)
 
 - Add `/fieldkit unlock` and `/fieldkit lock` without opening settings.
