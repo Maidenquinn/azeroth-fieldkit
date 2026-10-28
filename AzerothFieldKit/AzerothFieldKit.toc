@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Title: Azeroth FieldKit (review candidate)
-## Version: 0.2.2-review.4
+## Version: 0.2.2-review.5
 ## Author: Kevin Radlowski (Maidenhead); derived from MASH by Malk
 ## Notes: Azeroth Survivors helper (/fieldkit): elite-only nameplates, boss frames with debuffs, health bar with shield, buffs and low health warning, crits, stats, gold and chest price, accessories, damage meter, chests on the minimap, lairs, camera.
 ## SavedVariables: FieldKitDB

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.2-review.5 — 2026-10-28 (global window lock)
+
+- Add `/fieldkit unlock` and `/fieldkit lock` without opening settings.
+- Right-click the FieldKit minimap shortcut to toggle the global HUD edit state;
+  left-click still opens settings and dragging still moves the shortcut itself.
+- External placement's Done/Escape locks without reopening settings. Explicit
+  settings/sizing actions retain their normal navigation.
+- Locking finishes and saves active owned-frame/group and combat-area drags.
+  Grouping, individual dimensions and positions remain intact. Reload starts locked.
+- Exercise real command/click callbacks and in-progress drag handling under
+  Lua 5.0.3/5.1. No new network or gameplay capability is introduced.
+
 ## 0.2.2-review.4 — 2026-10-28 (experimental party-sharing candidate)
 
 - Apply the selected Classic/Decorative HUD style and opacity to hover cards,

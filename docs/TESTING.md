@@ -99,6 +99,13 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+0.2.2-review.5 window_lock.lua covers lazy settings construction, lock/unlock
+commands, case normalization, minimap right/left clicks, internal versus external
+Done, explicit sizing navigation, Escape and locking during group/individual/
+combat-area drags. The existing edit gate remains session-only. In game, test
+right-clicking the minimap shortcut and issuing commands during a drag; confirm
+positions survive reload and no parameters panel appears after external Done.
+
 0.2.2-review.4 adds party_sync.lua plus an explicit two-VM simulated PARTY relay
 in tools/verify.py. Validate opt-out/default silence, fixed channel/prefix/rate,
 ASCII escaping, large exact integers, out-of-order fragments, duplicate/replay

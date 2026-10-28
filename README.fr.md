@@ -82,6 +82,17 @@ Les anciens rapports et le ZIP conservent les mentions de leur date de création
 
 ## Nouveau parcours des paramètres
 
+**Verrouillage global (0.2.2-review.5) :** `/fieldkit unlock` déverrouille les
+fenêtres FieldKit sans ouvrir les paramètres ; `/fieldkit lock` les verrouille.
+Le clic droit sur la boussole FieldKit de la minicarte bascule le même état.
+Le clic gauche ouvre toujours les paramètres. Le petit panneau de placement
+garde les options de groupe et de taille ; Terminer/Échap verrouille sans ouvrir
+les paramètres si vous êtes passé par un raccourci. Régler les tailles ouvre
+explicitement la page Fenêtres. Les déplacements en cours sont arrêtés et
+enregistrés au verrouillage. Au redémarrage/rechargement, les fenêtres sont
+verrouillées ; leurs positions et tailles restent sauvegardées. Les cadres des
+autres addons et du jeu ne sont pas concernés.
+
 Ouvrez `/fieldkit` ou la boussole de la minicarte. L’accueil présente les outils
 et leur état ; **Configurer** ouvre la page correspondante. Neuf rubriques
 regroupent les usages, avec un seul choix de format de PV par unité.

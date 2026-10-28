@@ -255,7 +255,15 @@ function C.Preview(kind)
 end
 local anchors={}
 -- Hide both drag handles on settings close.
-function C.HideAnchors() for i=1,table.getn(anchors) do anchors[i]:Hide() end end
+function C.HideAnchors()
+ for i=1,table.getn(anchors) do
+  local a=anchors[i]
+  if a.fieldkitMoving then
+   local previous=this;this=a;a:GetScript("OnDragStop")();this=previous
+  end
+  a:Hide()
+ end
+end
 -- Create at most two handles; explicit dragging persists center-relative area offsets.
 function C.ShowAnchors()
  if not C.Ensure() then return end
@@ -266,8 +274,9 @@ function C.ShowAnchors()
    local bg=a:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints(a);bg:SetTexture(0,0,0,.7)
    local text=a:CreateFontString(nil,"OVERLAY","GameFontNormal");text:SetPoint("CENTER",a,"CENTER",0,0)
    FieldKit_Text(text,i==1 and "Dégâts infligés : déplacer" or "Dégâts reçus / soins : déplacer")
-   a:SetScript("OnDragStart",function() this:StartMoving() end)
+   a:SetScript("OnDragStart",function() this.fieldkitMoving=true;this:StartMoving() end)
    a:SetScript("OnDragStop",function()
+    this.fieldkitMoving=nil
     this:StopMovingOrSizing();local x,y=this:GetCenter();local ux,uy=UIParent:GetCenter()
     if x and y and ux and uy then
      local prefix=this.index==1 and "combatText" or "combatTextIncoming"

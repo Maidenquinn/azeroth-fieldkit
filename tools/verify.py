@@ -63,6 +63,7 @@ edges=runtime();edges.execute((base/'tests/edge_positions.lua').read_text(encodi
 individual=runtime();individual.execute((base/'tests/individual_layout.lua').read_text(encoding='utf8'))
 coop=runtime();coop.execute((base/'tests/coop.lua').read_text(encoding='utf8'))
 details=runtime();details.execute((base/'tests/party_details.lua').read_text(encoding='utf8'))
+locks=runtime();locks.execute((base/'tests/window_lock.lua').read_text(encoding='utf8'))
 sync=runtime();sync.execute((base/'tests/party_sync.lua').read_text(encoding='utf8'))
 # Two isolated Lua clients, with an explicit simulated PARTY transport. This
 # proves protocol interoperability, not that this game's co-op forwards packets.
