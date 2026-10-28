@@ -73,6 +73,17 @@ shared with Azeroth Stats but bundled locally: that addon is not required.
 
 ### Co-op in the local 0.2.2-review.2 candidate
 
+**Hover detail in 0.2.2-review.3:** hover a name in Group damage. Your own card
+shows the native per-spell table, including sources beyond the main meter's
+eight visible rows. Wheel over the name/card or use its arrows; the card remains
+open while hovered. It uses an opaque theme and closes on exit, Escape, collapse
+or layout editing. On an ally, the native API supplies only their top spell name
+and its DPS: the card labels that limit and leaves missing spell damage/share
+unknown. It cannot show their complete spell list with the current API. Own
+spell totals are read independently of the party snapshot and can differ while
+packets update. One ten-row pool renders up to 512 supplied sources; larger
+inputs are explicitly labelled partial. No extra addon or messages are used.
+
 - **Health & buffs → Co-op teammate cards** opts into rectangular party cards
   instead of available stock party frames. Off by default. Each has native
   health, resource, connection/zero-HP status and party damage/DPS when received.

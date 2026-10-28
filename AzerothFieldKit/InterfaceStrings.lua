@@ -1,6 +1,15 @@
 -- Presentation-only additions. Native creature/spell names are never translated.
 local fr=FieldKitLocale.fr
 local labels={
+ ["Spell"]="Sort",
+ ["Damage: %s   DPS: %s"]="Dégâts : %s   DPS : %s",
+ ["Your native spell breakdown. Scroll for more spells."]="Vos sorts selon le compteur natif. Faites défiler pour la suite.",
+ ["Allies: only their top spell is exposed. Full breakdown unavailable."]="Alliés : seul leur meilleur sort est fourni. Détail complet indisponible.",
+ ["Your spell breakdown is not provided by the client."]="Le client ne fournit pas le détail de vos sorts.",
+ ["Partial view: the 512-source safety limit was reached."]="Vue partielle : limite de sécurité de 512 sources atteinte.",
+ ["No spell detail provided"]="Aucun détail de sort fourni",
+ ["Spells %d–%d / %d"]="Sorts %d–%d / %d",
+ ["Top spell only · missing values stay unknown"]="Meilleur sort uniquement · valeurs manquantes inconnues",
  ["The header counts received players versus the current roster. Missing players or DPS stay unknown. Peer spell breakdowns are not provided by this API."]="L’en-tête indique les joueurs reçus par rapport au groupe actuel. Les joueurs ou DPS manquants restent inconnus. Cette API ne fournit pas le détail des sorts des alliés.",
  ["Mana"]="Mana",["Rage"]="Rage",["Energy"]="Énergie",
  ["Group damage"]="Dégâts du groupe",

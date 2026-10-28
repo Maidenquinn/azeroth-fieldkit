@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.2-review.2",
-  "runtimeModules": 23,
+  "candidate": "0.2.2-review.3",
+  "runtimeModules": 24,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 2427,
-      "sha256": "d9a12c1e283bad8203eeeeb160238b25e4494733a2e2ad71df32d72a5ccf1266",
+      "sha256": "6845af0849da39e1bae29ae116251f312ff3a5e9460f962a6bc4186b36a5b8fc",
       "namedFunctions": [
         {
           "name": "FieldKit.Number",
@@ -99,8 +99,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 10404,
-      "sha256": "201c5ea830253da202d09b9e53b20050dbcc0e909f46f1d7b015acdf98d23a0f",
+      "bytes": 11212,
+      "sha256": "8dd61d0923986445ea763e0f09289e9dd2c3b3c227ed475f5c57b19220015f0e",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -338,8 +338,8 @@
       "literalEvents": []
     },
     "Coop.lua": {
-      "bytes": 12201,
-      "sha256": "fd86e834c0a75f1eef07f30f59ced3f041702ae5028aebf008ca4d0e70db0353",
+      "bytes": 12588,
+      "sha256": "3afe9cd66f19a372f785ef2e0e7cba77612a783dc593f08066de31632ef24f36",
       "namedFunctions": [
         {
           "name": "P.Taken",
@@ -363,39 +363,90 @@
         },
         {
           "name": "P.MemberDamage",
-          "line": 108
+          "line": 110
         },
         {
           "name": "P.Stock",
-          "line": 114
+          "line": 116
         },
         {
           "name": "P.Create",
-          "line": 136
+          "line": 138
         },
         {
           "name": "P.CreateMember",
-          "line": 150
+          "line": 153
         },
         {
           "name": "P.Row",
-          "line": 163
+          "line": 166
         },
         {
           "name": "P.UpdateMember",
-          "line": 172
+          "line": 175
         },
         {
           "name": "P.UpdateMeter",
-          "line": 204
+          "line": 207
         },
         {
           "name": "P.Update",
-          "line": 225
+          "line": 229
         },
         {
           "name": "P.Diagnostic",
-          "line": 232
+          "line": 237
+        }
+      ],
+      "literalEvents": []
+    },
+    "PartyDetails.lua": {
+      "bytes": 8964,
+      "sha256": "6399d1375bac807be2537522fbbaac1503e99eeaf6cfe1dd7802bf2a1864f457",
+      "namedFunctions": [
+        {
+          "name": "D.Data",
+          "line": 8
+        },
+        {
+          "name": "D.DelayClose",
+          "line": 35
+        },
+        {
+          "name": "D.Close",
+          "line": 37
+        },
+        {
+          "name": "D.BindHover",
+          "line": 44
+        },
+        {
+          "name": "D.Page",
+          "line": 56
+        },
+        {
+          "name": "D.Build",
+          "line": 62
+        },
+        {
+          "name": "D.Anchor",
+          "line": 108
+        },
+        {
+          "name": "D.Render",
+          "line": 118
+        },
+        {
+          "name": "D.Open",
+          "line": 154
+        },
+        {
+          "name": "D.BindRow",
+          "line": 161
+        },
+        {
+          "name": "D.Sync",
+          "line": 172
         }
       ],
       "literalEvents": []

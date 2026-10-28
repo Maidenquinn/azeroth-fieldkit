@@ -1,7 +1,7 @@
 {
-  "version": "0.2.2-review.2",
+  "version": "0.2.2-review.3",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -15,7 +15,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 6,
-      "sha256": "d9a12c1e283bad8203eeeeb160238b25e4494733a2e2ad71df32d72a5ccf1266"
+      "sha256": "6845af0849da39e1bae29ae116251f312ff3a5e9460f962a6bc4186b36a5b8fc"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -35,7 +35,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "201c5ea830253da202d09b9e53b20050dbcc0e909f46f1d7b015acdf98d23a0f"
+      "sha256": "8dd61d0923986445ea763e0f09289e9dd2c3b3c227ed475f5c57b19220015f0e"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -85,7 +85,12 @@
     "Coop.lua": {
       "maxUpvalues": 2,
       "functions": 22,
-      "sha256": "fd86e834c0a75f1eef07f30f59ced3f041702ae5028aebf008ca4d0e70db0353"
+      "sha256": "3afe9cd66f19a372f785ef2e0e7cba77612a783dc593f08066de31632ef24f36"
+    },
+    "PartyDetails.lua": {
+      "maxUpvalues": 2,
+      "functions": 24,
+      "sha256": "6399d1375bac807be2537522fbbaac1503e99eeaf6cfe1dd7802bf2a1864f457"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,

@@ -96,6 +96,8 @@ function P.ReadParty()
    local damage=FieldKit.Number(line.dmg,nil,0);local dps=FieldKit.Number(line.dps,nil,0)
    if damage then
     local item={name=string.sub(line.name,1,160),dmg=damage,dps=dps,share=FieldKit.Number(line.share,nil,0,1)}
+    if type(line.top)=="string" and line.top~="" then item.top=string.sub(line.top,1,160) end
+    item.topdps=FieldKit.Number(line.topdps,nil,0)
     table.insert(P.party,item);seen[line.name]=true;total=total+damage
     if dps then rate=rate+dps else ratesKnown=false end
    end
@@ -137,6 +139,7 @@ function P.Create(createWindow,fitRows,makeMovable)
  P.fitRows=fitRows
  local meter=createWindow("FieldKitPartyMeterFrame","Group damage",5);P.meter=meter
  FieldKit.CreateMeterColumns(meter);makeMovable(meter,-UIParent:GetWidth()/2+590,-270,true);meter:Hide()
+ for i=1,table.getn(meter.rows) do FieldKitPartyDetails.BindRow(meter.rows[i]) end
  meter:SetScript("OnEnter",function()
   GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L("Group damage"),1,.85,.55)
   GameTooltip:AddLine(FieldKit_L("The header counts received players versus the current roster. Missing players or DPS stay unknown. Peer spell breakdowns are not provided by this API."),.8,.8,.8,true)
@@ -210,15 +213,16 @@ function P.UpdateMeter(active)
  local lines=P.party or {};local n=math.min(5,table.getn(lines));local top=lines[1] and lines[1].dmg or 1
  frame.title:SetText(FieldKit_L("Group damage").." ("..n.."/"..(count+1)..")")
  for i=1,n do
-  local row=frame.rows[i];row.label:SetText(lines[i].name)
+  local row=frame.rows[i];row.fieldkitMember=lines[i].name;row.label:SetText(lines[i].name)
   FieldKit.UpdateMeterColumns(row,lines[i],FieldKitDB.meterValues,frame:GetWidth())
   row:SetValue(lines[i].dmg/math.max(top,1));row:SetStatusBarColor(.25,.5,.85,.55);row:Show()
  end
  if n==0 then
-  local row=frame.rows[1];row.label:SetText(FieldKit_L("Waiting for group data"));row.label:SetWidth(frame:GetWidth()-20)
+  local row=frame.rows[1];row.fieldkitMember=nil;row.label:SetText(FieldKit_L("Waiting for group data"));row.label:SetWidth(frame:GetWidth()-20)
   for i=1,3 do row.meterColumns[i]:Hide() end
   row.meterMode=nil;row.value:Hide();row:SetValue(0);row:Show();n=1
  end
+ for i=n+1,table.getn(frame.rows) do frame.rows[i].fieldkitMember=nil end
  P.fitRows(frame,n);frame:Show()
 end
 
@@ -227,6 +231,7 @@ function P.Update()
  if active then P.ReadParty() else P.party={} end
  P.UpdateMeter(active)
  for i=1,4 do P.UpdateMember(i,active) end
+ FieldKitPartyDetails.Sync()
 end
 
 function P.Diagnostic()

@@ -152,6 +152,14 @@ See COOP_EVIDENCE.json for inspected client hash and data-contract limitations.
 
 ## Native anchor persistence
 
+PartyDetails.lua is presentation-only. It reads the local AZS_GetMeter snapshot
+or sanitized peer top/topdps fields already exposed by AZSPARTY. It owns one
+opaque popup and ten pooled rows, retains at most 512 sanitized spell sources,
+and refreshes on the existing co-op 5 Hz tick while visible. No new native UI
+hook, write, network message, saved data or peer-detail API is introduced.
+Unknown peer spell damage/share are displayed as unknown; only the local player
+has a full per-source list. Popup anchors are temporary and clamped natively.
+
 CardLayout.lua adds per-card own-frame dimensions and a right-side group proxy.
 Only FieldKitDB.cardSizes/linkRightCards and FieldKit-owned frames are written.
 No native gameplay/HUD CVar, world position or action-slot API is added. The new

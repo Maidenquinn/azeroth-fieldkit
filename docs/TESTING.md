@@ -99,6 +99,16 @@ does not approve a changed ZIP or establish author/asset distribution permission
 
 ## 0.2 interface acceptance
 
+For 0.2.2-review.3, party_details.lua checks a 23-source local list versus a
+peer's sole top spell, unknown peer damage/share, paging by wheel/buttons, gap
+crossing and delayed close, opaque materials, re-hover without new frames,
+right-edge anchoring, rank reorder, collapse/layout close, missing API and the
+explicit 512-source safety cap. In-game acceptance: hover each group member,
+cross onto the card to scroll, use the name-row wheel, move the meter to screen
+edges, change resolution/UI scale, let group ranking change and verify displayed
+identity. Compare your own spells with the local native meter; do not treat an
+ally's labelled top-spell-only view as their full damage breakdown.
+
 The 0.2.2-review.2 `coop.lua` fixture covers missing/incomplete source buckets,
 native total changes without source stamps, unknown versus zero, malformed data,
 peer damage/DPS and missing rates, duplicate/departed players, new-run freshness,

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.2-review.3 — 2026-10-28 (local hover-detail candidate)
+
+- Add a reusable themed detail card when hovering a player's group-meter row.
+  It stays open when crossing onto it; wheel or arrow buttons browse the list.
+- Show every available local spell source (bounded to 512, explicit partial label
+  beyond that) in damage/DPS/share columns with a ten-row reusable pool.
+- For allies, show only their native best spell/top DPS with an explicit full-list
+  limitation. Unknown spell damage/share remain unknown; own spells are never
+  assigned to a peer and no DPS-to-damage estimate is used.
+- Keep popup materials opaque, choose the side with room and use native screen
+  clamping. Close on exit/collapse/run loss/layout, with Escape and close button.
+- Test provenance, pagination, row-rank changes, hover lifetime, missing fields,
+  bounded allocation and Lua 5.0.3/5.1 compatibility. Live visual acceptance pending.
+
 ## 0.2.2-review.2 — 2026-10-28 (local co-op candidate)
 
 - Read the native run damage-taken total when the source list is empty/incomplete;

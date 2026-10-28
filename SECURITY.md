@@ -1,10 +1,15 @@
 # Security and player-risk assessment
 
-**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.2.
+**Assessment updated:** 2026-10-28. **Candidate:** 0.2.2-review.3.
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
 ## Scope and evidence
+
+The hover-detail addition reads local spell snapshots and existing peer top/topdps
+fields only. Its bounded reusable popup is memory-only, with no new native write,
+communication or persisted player-data history. It explicitly discloses that a
+full peer spell breakdown is unavailable from the inspected API.
 
 Co-op addition: `Coop.lua` reads native party-unit and group-meter snapshots.
 With explicit user opt-in it wraps/hides only PartyMemberFrame1–4 while valid

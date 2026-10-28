@@ -116,6 +116,19 @@ valeurs ne sont donc pas simulées. Voir [preuves et limites](docs/GAME_0_121.md
 
 ### Candidate coop locale 0.2.2-review.2
 
+**Survol dans la 0.2.2-review.3 :** survolez un pseudo dans Dégâts du groupe.
+Votre fiche montre les sorts fournis par le compteur natif, y compris au-delà
+des huit lignes visibles du compteur principal. Défilez avec la molette sur le
+pseudo ou la fiche, ou utilisez les flèches. La fiche reste ouverte au survol,
+avec un fond opaque ; Échap, la croix, la sortie du survol ou le mode Déplacer
+la ferment. Pour un allié, le client ne fournit que son meilleur sort et le DPS
+de ce sort : la limite est indiquée et ses dégâts/contribution restent inconnus.
+La liste complète des sorts des alliés nécessite une extension de l'API du jeu.
+Vos totaux détaillés peuvent différer temporairement du relevé de groupe car les
+sources sont actualisées séparément. Dix lignes réutilisables parcourent jusqu'à
+512 sources ; au-delà, la vue est explicitement partielle. Aucun échange de
+messages ou addon supplémentaire n'est ajouté.
+
 - **Vie et effets → Cartes des coéquipiers** active les cartes rectangulaires,
   avec vie, ressource, état et dégâts/DPS natifs lorsqu'ils sont disponibles.
   Le remplacement est désactivé par défaut ; le format des PV se règle juste dessous.

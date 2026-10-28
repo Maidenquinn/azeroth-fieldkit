@@ -62,6 +62,7 @@ stack=runtime();stack.execute((base/'tests/mode_stack.lua').read_text(encoding='
 edges=runtime();edges.execute((base/'tests/edge_positions.lua').read_text(encoding='utf8'))
 individual=runtime();individual.execute((base/'tests/individual_layout.lua').read_text(encoding='utf8'))
 coop=runtime();coop.execute((base/'tests/coop.lua').read_text(encoding='utf8'))
+details=runtime();details.execute((base/'tests/party_details.lua').read_text(encoding='utf8'))
 individual.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 restored=runtime(individual.eval('SNAPSHOT(FieldKitDB)'))
 restored.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("");update(FieldKitFrame,.3)')
