@@ -1,50 +1,54 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.3.2-review.1",
+  "candidate": "0.3.2-review.2",
   "runtimeModules": 32,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
-      "bytes": 4520,
-      "sha256": "b2f649bbfd5095e84b5dd0e8f68652199377d20a2c9f0b00aa0cca396f8e4d9b",
+      "bytes": 4837,
+      "sha256": "ced8641f3e1e316cb4f3833ae87851c5b10e0b5fc0848e710460242334fee6e7",
       "namedFunctions": [
         {
+          "name": "FieldKit.IsChoiceScreen",
+          "line": 8
+        },
+        {
           "name": "FieldKit.PartyTransportAvailable",
-          "line": 9
+          "line": 17
         },
         {
           "name": "FieldKit.SendPartyDetail",
-          "line": 10
+          "line": 18
         },
         {
           "name": "FieldKit.Number",
-          "line": 27
+          "line": 35
         },
         {
           "name": "FieldKit.GetCVar",
-          "line": 36
+          "line": 44
         },
         {
           "name": "FieldKit.SetCVar",
-          "line": 45
+          "line": 53
         },
         {
           "name": "FieldKit.SetHudShown",
-          "line": 57
-        },
-        {
-          "name": "FieldKit.RememberClassification",
           "line": 65
         },
         {
+          "name": "FieldKit.RememberClassification",
+          "line": 73
+        },
+        {
           "name": "FieldKit.SetFrameOnTop",
-          "line": 75
+          "line": 83
         },
         {
           "name": "FieldKit.FrameOverlayAvailable",
-          "line": 88
+          "line": 96
         }
       ],
       "literalEvents": []
@@ -983,8 +987,8 @@
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 85425,
-      "sha256": "4ff41faf85aa1109a66d1d31797bc0e73cf78f86e89b9e57cd91eb34b20afb3c",
+      "bytes": 86313,
+      "sha256": "e0039f229774f7f25fb0d66ec9d2d4f330e3be393b1886c68a3b31c4541e68cd",
       "namedFunctions": [
         {
           "name": "Print",
@@ -1204,171 +1208,171 @@
         },
         {
           "name": "SyncHudTally",
-          "line": 1327
+          "line": 1330
         },
         {
           "name": "CreateMoneyFrame",
-          "line": 1341
+          "line": 1344
         },
         {
           "name": "ReadSlot",
-          "line": 1399
+          "line": 1402
         },
         {
           "name": "UpdateGearFrame",
-          "line": 1423
+          "line": 1426
         },
         {
           "name": "CreateGearFrame",
-          "line": 1460
+          "line": 1463
         },
         {
           "name": "CreateBarWindow",
-          "line": 1527
+          "line": 1530
         },
         {
           "name": "FitRows",
-          "line": 1603
+          "line": 1606
         },
         {
           "name": "InRun",
-          "line": 1619
+          "line": 1622
         },
         {
           "name": "UpdateMeterFrame",
-          "line": 1624
+          "line": 1627
         },
         {
           "name": "UpdateTakenFrame",
-          "line": 1661
+          "line": 1664
         },
         {
           "name": "SyncHudMeter",
-          "line": 1685
+          "line": 1688
         },
         {
           "name": "CreateMeterFrames",
-          "line": 1693
+          "line": 1696
         },
         {
           "name": "UpdateMeterFrames",
-          "line": 1712
+          "line": 1715
         },
         {
           "name": "UpdateChestPins",
-          "line": 1724
+          "line": 1727
         },
         {
           "name": "FormatClock",
-          "line": 1734
+          "line": 1737
         },
         {
           "name": "UpdateLairFrame",
-          "line": 1740
+          "line": 1743
         },
         {
           "name": "CreateLairFrame",
-          "line": 1832
+          "line": 1835
         },
         {
           "name": "ApplyDamageNumbers",
-          "line": 1860
+          "line": 1863
         },
         {
           "name": "FieldKit_UseCombatTextOnly",
-          "line": 1871
+          "line": 1874
         },
         {
           "name": "SlotOf",
-          "line": 1895
+          "line": 1898
         },
         {
           "name": "SwapSlots",
-          "line": 1903
+          "line": 1906
         },
         {
           "name": "HookBarDrag",
-          "line": 1913
+          "line": 1916
         },
         {
           "name": "PlaceMicroMenu",
-          "line": 1947
+          "line": 1950
         },
         {
           "name": "PlaceBarButtons",
-          "line": 1977
+          "line": 1980
         },
         {
           "name": "UpdateCompactXP",
-          "line": 1994
+          "line": 1997
         },
         {
           "name": "CreateCompactBar",
-          "line": 2005
+          "line": 2008
         },
         {
           "name": "AttachMoneyToBar",
-          "line": 2087
+          "line": 2091
         },
         {
           "name": "KeepCompactBar",
-          "line": 2108
+          "line": 2114
         },
         {
           "name": "UpdateGryphons",
-          "line": 2137
+          "line": 2158
         },
         {
           "name": "ResetPositions",
-          "line": 2178
+          "line": 2199
         },
         {
           "name": "RefreshPanel",
-          "line": 2186
+          "line": 2207
         },
         {
           "name": "FieldKit_RefreshInterfaceLanguage",
-          "line": 2187
+          "line": 2208
         },
         {
           "name": "CreatePanel",
-          "line": 2193
+          "line": 2214
         },
         {
           "name": "TogglePanel",
-          "line": 2206
+          "line": 2227
         },
         {
           "name": "FieldKit.SetWindowsLocked",
-          "line": 2213
+          "line": 2234
         },
         {
           "name": "CreateMinimapButton",
-          "line": 2222
+          "line": 2243
         },
         {
           "name": "PlaceOnRim",
-          "line": 2232
+          "line": 2253
         },
         {
           "name": "InitDB",
-          "line": 2273
+          "line": 2294
         },
         {
           "name": "FieldKitEventLifecycle",
-          "line": 2295
+          "line": 2316
         },
         {
           "name": "FieldKitEventWorld",
-          "line": 2327
+          "line": 2348
         },
         {
           "name": "FieldKitEventOther",
-          "line": 2354
+          "line": 2375
         },
         {
           "name": "RefreshNativeData",
-          "line": 2405
+          "line": 2429
         }
       ],
       "literalEvents": [
@@ -2308,7 +2312,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.3.2-review.1",
+    "version": "0.3.2-review.2",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.2-review.2 — 2026-10-31 (local compact-bar fix candidate)
+
+- Hide FieldKit's compact action bar, XP surface and docked money strip during
+  native level-up/chest choices. Stop repairing hidden native action buttons in
+  that phase; restore only visibility suppressed by FieldKit when play resumes.
+- React to native run-phase packets as well as polling. Keep intentionally
+  detached money windows and saved positions/preferences unchanged.
+- Add regression fixtures for phase transitions, money events, repeated polls,
+  hidden bars, missing phase API and absence of automatic action-slot changes.
+- Native confirmation of the reported gray rectangle is still pending.
+
 ## 0.3.2-review.1 — 2026-10-31 (unpublished loadout candidate)
 
 - Add a movable, collapsible Spells card with native ranks and current green

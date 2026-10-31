@@ -1281,7 +1281,10 @@ local function UpdateMoneyFrame()
 	if ( not moneyFrame ) then
 		return
 	end
-	if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide();return end
+	if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase())
+  or (DB.compactBar and not DB.moneyDetached and FieldKit.IsChoiceScreen()) then
+  moneyFrame:Hide();return
+ end
 	local exact=HasAPI() and type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.ck,nil,0)
 	if exact then DB.chestsOpened=exact end
 
@@ -2080,6 +2083,7 @@ function CreateCompactBar()
 	MainMenuBar:Hide()
 	MainMenuBar:SetScript("OnShow", function() this:Hide() end)
 	UpdateCompactXP()
+	KeepCompactBar()
 end
 
 
@@ -2100,7 +2104,9 @@ function AttachMoneyToBar(force)
 			moneyFrame:ClearAllPoints()
 			moneyFrame:SetPoint("BOTTOM", compactBar, "TOP", 0, 2)
 		end
-		if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide() else moneyFrame:Show() end
+		if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) or FieldKit.IsChoiceScreen() then
+   moneyFrame:Hide()
+  else moneyFrame:Show() end
 	end
 end
 
@@ -2109,6 +2115,21 @@ function KeepCompactBar()
 	if ( not compactBar ) then
 		return
 	end
+ -- The old repair loop resurrected action buttons hidden by native choices.
+ -- Suppress our whole compact surface, including XP, before touching buttons.
+ -- Remember only visibility we changed, so unrelated hidden state stays hidden.
+ if FieldKit.IsChoiceScreen() then
+  if compactBar:IsShown() then
+   compactBar.fieldkitChoiceHidden=true
+   compactBar:Hide()
+  end
+  if moneyFrame and not DB.moneyDetached then moneyFrame:Hide() end
+  return
+ end
+ if compactBar.fieldkitChoiceHidden then
+  compactBar.fieldkitChoiceHidden=nil
+  compactBar:Show()
+ end
 	AttachMoneyToBar(false)
 	if ( ( ActionButton1 and ActionButton1:GetParent() ~= compactBar )
 		or ( MainMenuMicroButton and microMenu and MainMenuMicroButton:GetParent() ~= microMenu ) ) then
@@ -2368,6 +2389,9 @@ local function FieldKitEventOther()
 	elseif ( event == "PLAYER_AURAS_CHANGED" ) then
 		UpdatePlayerBuffs()
 	elseif ( event == "CHAT_MSG_ADDON" ) then
+  -- The official AZSRUN parser runs before addon event handlers. React now,
+  -- rather than leaving an extra polling interval of compact HUD on choices.
+  if arg1=="AZSRUN" then KeepCompactBar() end
   FieldKitNative.Packet(arg1)
   FieldKitPartySync.Receive(arg1,arg2,arg3,arg4)
   FieldKitCoop.Packet(arg1)

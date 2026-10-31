@@ -1,7 +1,15 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.3.2-review.1", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.3.2-review.2", folder = "AzerothFieldKit" }
+
+-- Native level-up/chest choices own the action controls during this phase.
+-- Read the official phase; do not inspect or modify native screen frames.
+function FieldKit.IsChoiceScreen()
+ if type(AZS_GetPhase)~="function" then return false end
+ local ok,phase=pcall(AZS_GetPhase)
+ return ok and phase=="choosing"
+end
 
 -- The only outbound capability: explicitly opted-in meter sharing, one fixed
 -- addon prefix, PARTY distribution, printable 230-byte packets, max 4 per second.

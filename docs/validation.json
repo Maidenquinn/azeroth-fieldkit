@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2-review.1",
+  "version": "0.3.2-review.2",
   "lua51": true,
   "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed",
   "persistence": true,
@@ -18,7 +18,7 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.3.2-review.1",
+    "version": "0.3.2-review.2",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -32,8 +32,8 @@
   "files": {
     "Runtime.lua": {
       "maxUpvalues": 1,
-      "functions": 10,
-      "sha256": "b2f649bbfd5095e84b5dd0e8f68652199377d20a2c9f0b00aa0cca396f8e4d9b"
+      "functions": 11,
+      "sha256": "ced8641f3e1e316cb4f3833ae87851c5b10e0b5fc0848e710460242334fee6e7"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -168,7 +168,7 @@
     "FieldKit.lua": {
       "maxUpvalues": 20,
       "functions": 169,
-      "sha256": "4ff41faf85aa1109a66d1d31797bc0e73cf78f86e89b9e57cd91eb34b20afb3c"
+      "sha256": "e0039f229774f7f25fb0d66ec9d2d4f330e3be393b1886c68a3b31c4541e68cd"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,
