@@ -207,7 +207,7 @@ toggle. Originals are restored on exit, without invoking Show/Hide, replacing
 foreign methods/scripts, reparenting or changing saved/native HUD settings.
 UIParent and WorldFrame are excluded. See PREVIEWS.md for boundaries and tests.
 
-## Loadout and taken details (0.3.2-review.1)
+## Historical first loadout reader (0.3.2-review.1; superseded below)
 
 Uses optional GetSpellName/GetSpellTexture and hidden GameTooltip SetSpell, SetAction
 and SetInventoryItem readers; HasAction/GetActionTexture provide additional native
@@ -221,3 +221,13 @@ CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS listener can supply partial named melee
 observations. AZS_UNITS/AZS_TARGET must be fresh after reset and give an unambiguous
 normal/elite kind. No health-delta inference, static seed classification, per-hit
 network traffic or persistent combat log is introduced.
+
+## Integrated loadout correction (0.3.2-review.3)
+
+The existing equipment frame owns both Accessories and Spells tabs. Learned rows
+and ranks come only from fresh AZS_SPELLS. Hidden SetAction tooltips supply current
+localized names and labelled bonus/upgrade paragraphs, including embedded newlines.
+SpellAssets.lua is an independent local DBC name/icon index, not copied Azerloot
+data. GetSpellName is retained only for icon hints. No foreign addon API or saved
+variables are accessed. Portrait requests now include the explicit .tga extension;
+failed SetTexture results and raw zone keys remain diagnostic, not proof of render.

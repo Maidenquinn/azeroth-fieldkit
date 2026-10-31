@@ -4,7 +4,8 @@ FieldKit_Portraits = { last = {}, catalog = FieldKit_PortraitCatalog or {} }
 local P = FieldKit_Portraits
 -- Resolve by zone/name plus explicit display conflict checks. Instance ids track identity, not appearance.
 function P.Apply(frame,name,kind,id)
- local zone=type(AZS_ZONE)=="table" and AZS_ZONE.zone
+ local rawZone=type(AZS_ZONE)=="table" and AZS_ZONE.zone
+ local zone=type(rawZone)=="string" and string.lower(string.gsub(string.gsub(rawZone,"^%s+",""),"%s+$","")) or nil
  local data=P.catalog[zone] and P.catalog[zone][name]
  local stamp=AZS_UNITS_UPDATED
  local language=FieldKit_Language()
@@ -36,13 +37,16 @@ function P.Apply(frame,name,kind,id)
   end
   if conflict then reason=FieldKit_L("explicit display conflicts with verified catalog")
   elseif matches<=1 or data.sharedAppearance then
-   path="Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key;reason=FieldKit_L("native static render; entry=")..data.entry..FieldKit_L(" display=")..data.display.." instances="..matches
+   path="Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key..".tga";reason=FieldKit_L("native static render; entry=")..data.entry..FieldKit_L(" display=")..data.display.." instances="..matches
   else reason=FieldKit_L("duplicate name: appearance not verified as shared") end
  elseif data then reason=FieldKit_L("zone unavailable or outside verified portrait catalog") end
- if frame.mashPortraitPath~=path then frame.portrait:SetTexture(path);frame.mashPortraitPath=path end
+ if frame.mashPortraitPath~=path then
+  local result=frame.portrait:SetTexture(path);frame.mashPortraitPath=path
+  if result==false then reason=FieldKit_L("Portrait texture rejected by client");frame.mashPortraitPath=nil end
+ end
  frame.mashPortraitReason=reason
  frame.mashPortraitIdentity=tostring(zone)..":"..tostring(kind)..":"..tostring(id)
- P.last={name=name,id=id,zone=zone,path=path,reason=reason,display=data and data.display}
+ P.last={name=name,id=id,zone=zone,path=path,reason=reason,display=data and data.display,rawZone=rawZone}
  if type(stamp)=="number" then
   frame.fieldkitPortraitCache={stamp=stamp,source=AZS_UNITS,zone=zone,name=name,
    kind=kind,id=id,language=language,data=data,diagnostic=P.last}
@@ -60,5 +64,5 @@ SlashCmdList["FieldKitPORTRAIT"]=function(msg)
   if f and f:IsShown() then DEFAULT_CHAT_FRAME:AddMessage(FieldKit_L("FieldKit portrait ")..i..": "..tostring(f.mashPortraitIdentity)..FieldKit_L(" texture=")..tostring(f.mashPortraitPath)..FieldKit_L(" source=")..tostring(f.mashPortraitReason)) end
  end
  local d=P.last
- DEFAULT_CHAT_FRAME:AddMessage(FieldKit_L("FieldKit portrait: ")..tostring(d.name)..FieldKit_L(" display=")..tostring(d.display)..FieldKit_L(" source=")..tostring(d.reason)..FieldKit_L(" zone=")..tostring(d.zone))
+ DEFAULT_CHAT_FRAME:AddMessage(FieldKit_L("FieldKit portrait: ")..tostring(d.name)..FieldKit_L(" display=")..tostring(d.display)..FieldKit_L(" source=")..tostring(d.reason)..FieldKit_L(" zone=")..tostring(d.zone).." rawZone="..tostring(d.rawZone).." path="..tostring(d.path))
 end

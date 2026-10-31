@@ -237,5 +237,7 @@ labels["No attributable creature hits received. The client only provided categor
 labels["%d more sources"]="%d autres sources"
 labels["Not identified"]="Non identifié"
 labels["Combat log and native totals are not synchronized."]="Le journal de combat et les totaux natifs ne sont pas synchronisés."
+labels["Spell data not provided"]="Données des sorts non fournies"
+labels["Portrait texture rejected by client"]="Texture du portrait refusée par le client"
 for key,value in pairs(labels) do fr[key]=value end
 FieldKitLocale.en={};for en,value in pairs(fr) do FieldKitLocale.en[value]=en end

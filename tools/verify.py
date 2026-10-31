@@ -67,6 +67,8 @@ coop=runtime();coop.execute((base/'tests/coop.lua').read_text(encoding='utf8'))
 details=runtime();details.execute((base/'tests/party_details.lua').read_text(encoding='utf8'))
 previews=runtime();previews.execute((base/"tests/previews.lua").read_text(encoding="utf8"))
 
+portrait_native=runtime();portrait_native.execute((base/"tests/portraits_native.lua").read_text(encoding="utf8"))
+
 loadout=runtime();loadout.execute((base/"tests/loadout.lua").read_text(encoding="utf8"))
 
 native_tools=runtime();native_tools.execute((base/'tests/native_tools.lua').read_text(encoding='utf8'))

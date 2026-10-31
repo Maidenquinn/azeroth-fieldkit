@@ -1,6 +1,6 @@
 # Azeroth FieldKit
 
-> **Candidat de branche 0.3.2-review.1 :** bonus des bijoux/sorts, icônes et détails des dégâts reçus.
+> **Candidat de branche 0.3.2-review.3 :** bonus des bijoux/sorts, icônes et détails des dégâts reçus.
 > Mise à jour non publiée. Voir [guide et vérifications en jeu](docs/LOADOUT_AND_TAKEN.md).
 
 > **Mise à jour 0.3.0 :** effets, réanimation, compteurs Soins/Boss et outils

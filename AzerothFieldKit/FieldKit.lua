@@ -1024,7 +1024,7 @@ local function ApplyCompactPanel(f, key, expandedHeight)
     if not f then return end
     local collapsed = DB[key]
     local count=f.slots and table.getn(f.slots) or math.max(1,math.floor((expandedHeight-14)/13))
-    FieldKitCardLayout.Rows(f,expandedHeight,count,f.slots and "gearDetails" or "stats",collapsed)
+    FieldKitCardLayout.Rows(f,expandedHeight,count,f.slots and "gear" or "stats",collapsed)
     FieldKitTheme.Update(f)
     local rows = f.rows or f.slots or {}
     for i = 1, table.getn(rows) do
@@ -1424,39 +1424,9 @@ end
 
 -- Refresh equipment rows and the visible collapse state from current inventory data.
 local function UpdateGearFrame()
-	if ( not gearFrame ) then
-		return
-	end
-	if ( not DB.gearFrame or (HasAPI() and not AZS_GetPhase()) ) then
-		gearFrame:Hide()
-		return
-	end
-	local y = -8
-	for i = 1, table.getn(GEAR_SLOTS) do
-		local slot = GEAR_SLOTS[i]
-		local row = gearFrame.slots[i]
-		local name, texture = ReadSlot(slot[1])
-  local detail=FieldKitLoadout.items[slot[1]]
-  row.bonus:SetText((name or texture) and detail and table.concat(detail.bonuses," · ") or "")
-  row.bonus:SetWidth(gearFrame:GetWidth()-34)
-		FieldKit_Text(row.label,slot[2])
-		if ( name or texture ) then
-			row.value:SetText(name or "|cff9d9d9d"..FieldKit_L("(worn)").."|r")
-			row.icon:SetTexture(texture)
-			row.icon:Show()
-		else
-			row.value:SetText("|cffff5555"..FieldKit_L("empty").."|r")
-			row.icon:Hide()
-		end
-		row:ClearAllPoints()
-		row:SetPoint("TOPLEFT", gearFrame, "TOPLEFT", 6, y)
-		row:SetPoint("RIGHT", gearFrame, "RIGHT", i == 1 and -26 or -6, 0)
-		y = y - 32
-	end
-
-	gearFrame:SetHeight(-y + 6)
-	ApplyCompactPanel(gearFrame, "gearCollapsed", -y + 6)
-	gearFrame:Show()
+ if not gearFrame then return end
+ if not DB.gearFrame or (HasAPI() and not AZS_GetPhase()) then gearFrame:Hide();return end
+ FieldKitLoadout.Render(gearFrame)
 end
 
 -- Build equipment labels/tooltips and a saved, collapsible movable container.
@@ -1506,6 +1476,7 @@ local function CreateGearFrame()
 
 	gearFrame:SetPoint("BOTTOMLEFT", statsFrame, "TOPLEFT", 0, 2)
  MakeMovable(gearFrame,UIParent:GetWidth()/2-100,150,true)
+ FieldKitLoadout.Attach(gearFrame,ReadSlot,UpdateGearFrame)
 	UpdateGearFrame()
 end
 
@@ -2332,7 +2303,7 @@ local function FieldKitEventLifecycle()
   FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
   FieldKitCoop.Create(CreateBarWindow,FitRows,MakeMovable)
   FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
-  FieldKitLoadout.Create(CreateBarWindow,MakeMovable);FieldKitTakenDetails.Reset();FieldKitLoadout.Update()
+  FieldKitTakenDetails.Reset();FieldKitLoadout.Update()
   FieldKitPreview.Initialize(CreateBarWindow,CreateBossFrame,PlaceMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true

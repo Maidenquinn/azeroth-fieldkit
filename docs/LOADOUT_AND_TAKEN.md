@@ -1,8 +1,9 @@
-# Loadout and observed taken details — 0.3.2-review.1
+# Loadout and observed taken details — 0.3.2-review.3
 
-Unpublished development candidate. AZSSpellMeter was inspected read-only for the
-native tooltip/icon discovery approach. No files from that addon are modified,
-required, or copied into FieldKit. No modern combat-log API is assumed.
+Unpublished development candidate. Azerloot was inspected read-only for the
+behavior of its action-tooltip bonus display. Its code/data/translations/assets
+are not copied or required. The readers below are independent and use native
+client data and locally extracted DBC spell icon/name facts.
 
 ## Utilisation
 
@@ -12,10 +13,12 @@ required, or copied into FieldKit. No modern combat-log API is assumed.
   Le survol garde l’infobulle native complète. Un rang de bijou n’est pas inventé
   lorsque le client ne le fournit pas : compter des changements de bonus ne
   prouverait pas le vrai niveau, notamment après un rechargement.
-- **Sorts** est une carte indépendante, déplaçable et repliable, avec icône, rang
-  disponible et bonus natifs. Fenêtres → Affichage → **Rangs et bonus des sorts**
-  l’active ou la masque. Disposition permet de la dimensionner ; les styles
-  Classique/Travaillé et l’opacité s’appliquent. Son aperçu est disponible en solo.
+- **Accessoires / Sorts** sont deux onglets du même panneau existant. Aucune
+  fenêtre supplémentaire n’est créée. Position, taille, repli, opacité et style
+  restent ceux du panneau Accessoires. Sorts n’affiche que la liste apprise de
+  `AZS_SPELLS`, avec son rang natif, son nom localisé de barre d’actions et ses
+  bonus. Le survol donne aussi les améliorations reçues. Les cases inconnues du
+  grimoire ne sont pas ajoutées. Les anciens réglages de fenêtre Sorts sont retirés.
 - Les compteurs de dégâts/soins et leurs détails de groupe montrent les icônes
   natives connues à gauche du nom. Une icône non identifiée reste absente. Les
   colonnes numériques gardent leurs positions. Il n’y a aucune dépendance à
@@ -30,15 +33,21 @@ required, or copied into FieldKit. No modern combat-log API is assumed.
 
 ## Data contracts and limits
 
-Spellbook and hidden native tooltip readers supply current names, native textures,
-Rank/Rang headers and green bonus lines (color or native green markup). Stable
-native spell keys can match normalized names to AZS_SPELLS.rank. In another game
-language the explicit native tooltip header is used when the key does not match.
-No formula derives a bonus from rank, and no missing rank is assumed to be one.
-If the spellbook API is absent, exposed spell keys/ranks remain a literal fallback.
-No spell card is shown without spell data. Up to nine rows are displayed; the total
-count makes a larger source list explicit. At most 128 book entries, 120 actions,
-24 tooltip lines and five equipment slots are scanned once per second.
+Only the fresh native AZS_SPELLS learned list defines spell rows and rank. Native
+spell IDs resolve through SpellAssets.lua, generated independently from local
+173-field Spell.dbc (name=120, icon=117, rank=129, family=160) and SpellIcon.dbc.
+The generated index includes base class spells only; it is not a bonus formula.
+Evidence/hashes are in data/spell-assets-evidence.json; rebuilding is optional.
+
+Action textures match only a unique learned native ability. Action tooltip titles
+provide localized names; bounded multiline text parsing reads Your bonuses / Vos
+bonus and Upgrades / Improvements / Améliorations labels separately. Talents and
+other unlabeled text do not become run bonuses. Shared textures are rejected as
+ambiguous. Native ranks do not depend on English/French spellbook names. At most
+32 learned entries, 128 icon hints, 120 actions and 24 tooltip regions are scanned
+once per second; each multiline region is limited to 4096 bytes and 32 segments.
+Equipment still uses native inventory tooltips. No rank-one or item-rank guess is
+introduced. Up to nine spell rows are displayed inside the existing card.
 
 Taken-category data exposes aggregate source totals. The optional named ledger
 accepts exact supported English melee/critical templates and one French melee
@@ -58,7 +67,7 @@ No ledger, tooltip text or observed damage is saved or sent to peers.
    within about one second; compare to the native tooltip and actual rank.
 2. Check English and French game/UI combinations. Unavailable rank/icon stays
    unknown/absent. No name should be replaced by another player's spell.
-3. Resize/reposition/collapse Spells and Accessories with Classic and Decorative
+3. Switch tabs and resize/reposition/collapse the Accessories/Spells card with Classic and Decorative
    styles. Preview mode still masks real HUD and restores it correctly.
 4. Verify damage/Healing/Boss numeric columns and icons, including group hover.
 5. Compare Lairs' next-boss countdown with the native timer, including no schedule,

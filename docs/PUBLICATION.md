@@ -1,6 +1,6 @@
 # Verified-addon publication record
 
-## Working branch — 0.3.2-review.1
+## Working branch — 0.3.2-review.3
 
 Loadout/observed-attacker candidate, including the previous preview work. Development authorized by the maintainer; not
 accepted for publication, tagged, merged or released. The public release below

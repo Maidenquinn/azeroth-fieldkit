@@ -90,7 +90,7 @@ function P.Frame(index)
  else
   f=P.createBar("FieldKitPreviewCard"..index,P.labels[index],8)
   f.mashCollapseButton:Hide();f.mashCollapsed=false;FieldKit.CreateMeterColumns(f)
-  if index==5 or P.names[index]=="FieldKitSpellsFrame" then
+  if index==5 then
    for _,row in ipairs(f.rows) do row.sampleBonus=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.sampleBonus:SetPoint("TOPLEFT",row,"TOPLEFT",3,-15);row.sampleBonus:SetHeight(12);row.sampleBonus:SetTextColor(.3,1,.4) end
   end
  end
@@ -104,7 +104,6 @@ end
 -- Local deterministic examples, with familiar categories and non-player names.
 -- Values are presentation fixtures, not a hypothetical damage attribution.
 function P.Rows(index)
- if P.names[index]=="FieldKitSpellsFrame" then return {{"Fireball","Rank 3","+8% / -16%"},{"Melee","Rank 3","+4%"}} end
  local hp=FieldKit_FormatHealth(6705,12200,FieldKitDB.partyHealthMode)
  if index==1 then return {{"Heroic II","Example"},{"Bolstering","Example"},{"Next boss","1:24"}} end
  if index==2 then
@@ -114,6 +113,7 @@ function P.Rows(index)
  end
  if index==3 then return {{"Monster melee",720,24,.6},{"Boss spells",360,12,.3},{"Elites",120,4,.1}} end
  if index==4 then return {{"Guardian","Awake"},{"Guardian","2:14"},{"Guardian","Asleep"},{"Guardian","0:32"}} end
+ if index==5 and FieldKitDB.loadoutTab==2 then return {{"Fireball","Rank 3","+8% / -16%"},{"Melee","Rank 3","+4%"}} end
  if index==5 then return {{"Amulet","Example"},{"Trinket 1","Example"},{"Trinket 2","Example"},{"Ring 1","Example"},{"Ring 2","Example"}} end
  if index==6 then return {{"Damage","+120%"},{"Haste","+30%"},{"Crit Chance","25%"},{"Lifesteal","3%"}} end
  if index==7 then return {{"Kills","1250"},{"Gold","640"},{"Chest","86"}} end
@@ -152,7 +152,7 @@ function P.Render(index)
   f.bar:SetMinMaxValues(0,12200);f.bar:SetValue(6705);f.level:SetText("7")
   FieldKit_Text(f.tag,"Preview — sample data")
   local data=FieldKit_PortraitCatalog.feralas and FieldKit_PortraitCatalog.feralas["Brute gordunni"]
-  f.portrait:SetTexture(data and "Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key or "Interface\\Icons\\INV_Misc_QuestionMark")
+  f.portrait:SetTexture(data and "Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key..".tga" or "Interface\\Icons\\INV_Misc_QuestionMark")
   local icons={"Spell_Shadow_ShadowWordPain","Ability_Rogue_Rupture","Spell_Frost_FrostShock"}
   for i=1,table.getn(f.debuffs) do
    local d=f.debuffs[i]
@@ -163,7 +163,7 @@ function P.Render(index)
   local rows=P.Rows(index);local size=FieldKitDB.cardSizes[P.names[index]]
   local width=math.max(280,size and size.width or source:GetWidth())
   if index==2 or index==8 or index==3 then width=math.max(width,FieldKit.MeterWidth(FieldKitDB.meterValues)) end
-  local rowHeight=(index==5 or P.names[index]=="FieldKitSpellsFrame") and 32 or 14
+  local rowHeight=(index==5) and 32 or 14
   f:SetWidth(width);f:SetHeight(math.max(28+rowHeight*table.getn(rows),size and size.height or 0))
   FieldKit_Text(f.title,"Preview");f.title:SetWidth(width*.28)
   FieldKit_Text(f.total,P.labels[index]);f.total:SetWidth(width*.6)

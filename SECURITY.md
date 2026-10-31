@@ -191,3 +191,11 @@ hits require a supported exact template and fresh native classification, with
 conflicting names rejected. Its 128-source in-memory ledger is reset at run changes
 and never saved or shared. Native category totals remain separate and authoritative.
 See docs/LOADOUT_AND_TAKEN.md for limits and validation steps.
+
+## 0.3.2-review.3 correction
+
+No separate spell HUD is created. Existing equipment geometry owns the two tabs.
+Ranks use the native learned list, and labelled action-tooltip data is kept apart
+from talents or unrelated grimoire entries. Icon/name facts are generated from
+local DBC resources; no Azerloot code, catalogs or artwork are incorporated.
+Portrait lookup retains the native instance/display conflict guards.

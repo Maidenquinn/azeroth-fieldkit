@@ -52,7 +52,6 @@ function FieldKit.BuildJourneySections(sections,actions)
   {kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
    get=function() return FieldKitDB.partyMeter end,set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end},
  }
- table.insert(display,{kind="check",label="Spell ranks and bonuses",tip="Read current spell ranks and green bonus lines from native tooltips. No formulas or guessed jewelry ranks.",get=function() return FieldKitDB.spellsFrame end,set=function(v) FieldKitDB.spellsFrame=v;FieldKitLoadout.Update() end})
  table.insert(display,{kind="check",label="Next boss in Lairs",tip="Show the next native scheduled boss and countdown in the lair card.",get=function() return FieldKitDB.lairNextBoss end,set=function(v) FieldKitDB.lairNextBoss=v;actions.UpdateLairFrame() end})
  local layout={
   {kind="preview",preview=0},
@@ -76,7 +75,7 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(appearance,{kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
   get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
   set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end})
- local health={{kind="preview",preview=19},options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
+ local health={{kind="preview",preview=18},options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
  for _,def in ipairs({{"effectTotems","Track totems"},{"effectSummons","Track summons"},{"effectTimers","Track native effect timers"}}) do
   local key,label=def[1],def[2]
   table.insert(health,{kind="check",label=label,tip="Filters the Effects tracker. Counts and remaining times come from the native API; unavailable data is never invented.",
@@ -117,7 +116,7 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
   {id="health",title="Health & buffs",glyph=16,items=health},
-  {id="bosses",title="Bosses",glyph=5,items={{kind="preview",preview=18},options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
+  {id="bosses",title="Bosses",glyph=5,items={{kind="preview",preview=17},options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
   {id="alerts",title="Alerts",glyph=12,items=alerts},
   {id="windows",title="Windows",glyph=9,group="Your interface",items={},windowTabs=windows},
   {id="map",title="Minimap",glyph=1,items=old.Map.items},

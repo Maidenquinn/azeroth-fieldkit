@@ -9,12 +9,14 @@ local function line(name,text,green)
  fs:SetText(text);fs.GetTextColor=function() if green then return .1,1,.1 else return 1,1,1 end end
 end
 function tip:NumLines() return 3 end
-function tip:SetSpell(i,book)
- line("FieldKitLoadoutScanTextLeft1","Fireball",false)
- line("FieldKitLoadoutScanTextRight1","Rank 3",false)
- line("FieldKitLoadoutScanTextLeft2","+8% damage",true)
- line("FieldKitLoadoutScanTextLeft3","-16% cooldown",true)
+function tip:SetAction(i)
+ line("FieldKitLoadoutScanTextLeft1","Boule de feu",false)
+ line("FieldKitLoadoutScanTextRight1","",false)
+ line("FieldKitLoadoutScanTextLeft2","Description\nAméliorations : +4% de dégâts\nTalents : +50%\n|cff1eff00Vos bonus : +8% de dégâts, -16% de recharge|r",false)
+ line("FieldKitLoadoutScanTextLeft3","",false)
 end
+function HasAction(slot) return slot==1 end
+function GetActionTexture() return "Interface\\Icons\\Spell_Fire_FlameBolt" end
 function tip:SetInventoryItem(unit,slot)
  line("FieldKitLoadoutScanTextLeft1","Example Ring III",false)
  line("FieldKitLoadoutScanTextRight1","",false)
@@ -25,12 +27,14 @@ function GetSpellName(i) if i==1 then return "Fireball","Rank 3" end end
 function GetSpellTexture() return "Interface\\Icons\\Spell_Fire_FlameBolt" end
 AZS_SPELLS={{key="fireball",spell=133,rank=7}}
 L.scanAt=0;L.Update()
-assert(L.spells[1].rank=="Rank 7" and L.spells[1].bonuses[1]=="+8% damage")
-assert(L.frame:IsShown() and L.frame.rows[1].bonus:GetText()=="+8% damage · -16% cooldown")
+assert(L.spells[1].rank=="Rank 7" and L.spells[1].name=="Boule de feu" and L.spells[1].bonuses[1]=="+8% de dégâts, -16% de recharge")
+assert(L.spells[1].upgrades[1]=="+4% de dégâts" and table.getn(L.spells)==1)
+assert(L.frame==FieldKitGearFrame and not getglobal("FieldKitSpellsFrame"),"A separate spell window was created")
+click(L.frame.loadoutTabs[2]);assert(L.frame.spellRows[1].bonus:GetText()=="+8% de dégâts, -16% de recharge")
 assert(L.items[11].bonuses[1]=="+82% damage" and not L.items[11].rank,"Jewelry rank was guessed")
 assert(L.frame.fieldkitMinimumHeight>=60)
-L.frame.mashCollapsed=true;L.Update();assert(not L.frame.rows[1]:IsShown())
-L.frame.mashCollapsed=false;L.Update()
+FieldKitDB.gearCollapsed=true;L.Render(L.frame);assert(not L.frame.spellRows[1]:IsShown())
+FieldKitDB.gearCollapsed=false;L.Render(L.frame);click(L.frame.loadoutTabs[1])
 local meter=FieldKitMeterFrame.rows[1]
 FieldKit.UpdateMeterColumns(meter,{name="Fireball",dmg=100,dps=10,share=1},3,360)
 assert(meter.fieldkitSpellIcon:IsShown() and meter.fieldkitIconInset==18)
@@ -58,5 +62,5 @@ local count=0;GameTooltip.AddLine=function(self,text) if string.find(text,"Wolf:
 D.Show({takenSource="mob melee",takenDamage=100});assert(count==1)
 local previous=FieldKitNative.serial;AZS_RUN.t=1;FieldKitNative.Watch()
 D.Capture("Ogre hits you for 12.");assert(D.count==0 and FieldKitNative.serial>previous)
-L.Update();assert(L.spells[1].rank=="Rank 3","Stale native rank survived a run change")
+L.Update();assert(table.getn(L.spells)==0,"Stale native learned spells survived a run change")
 print("Native loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed")

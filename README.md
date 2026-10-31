@@ -1,6 +1,6 @@
 # Azeroth FieldKit
 
-> **Branch candidate 0.3.2-review.1:** native loadout bonuses, spell icons and partial attacker details.
+> **Branch candidate 0.3.2-review.3:** native loadout bonuses, spell icons and partial attacker details.
 > Not a published update. See [guide and game-test checklist](docs/LOADOUT_AND_TAKEN.md).
 
 > **0.3.0 native-tools update:** optional effects, revive progress, Healing/Boss

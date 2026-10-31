@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.2-review.3 — 2026-10-31 (unpublished integrated loadout correction)
+
+- Remove the separate Spells window. Accessories/Spells tabs now share the existing
+  equipment card, position, sizing, collapse state, opacity and visual style.
+- Populate spells only from the native learned list; ranks no longer come from
+  unlearned or unrelated spellbook entries. Read localized run bonuses and upgrade
+  lines from action tooltips, including multiple paragraphs in one text region.
+- Associate action textures with native spell IDs using an independently generated
+  local Spell.dbc/SpellIcon.dbc base-class asset index. Reject ambiguous textures.
+  Azerloot is a behavioral reference only, with no copied code/data or dependency.
+- Request explicit .tga portrait files and normalize ASCII zone-key whitespace/case.
+  Add regression fixtures for Jeklik, Gurubashi Berserker, rejected textures and the
+  full existing portrait catalog. Keep display/identity conflict protection.
+- Extend the portrait diagnostic with the raw zone key and attempted resource.
+  In-game confirmation is still required; no all-map success is claimed.
+
 ## 0.3.2-review.2 — 2026-10-31 (local compact-bar fix candidate)
 
 - Hide FieldKit's compact action bar, XP surface and docked money strip during

@@ -1,0 +1,13 @@
+{
+  "source": "independent local DBC extraction",
+  "spellSha256": "913d01c0376d88310ed4a44ea1115f30fd8be15af64ce304f4f17b6bc51cf15b",
+  "iconsSha256": "938e8c333fe914938994fc331c04655d7eb5719bc2d1b29eaf5fad4239abdfdc",
+  "records": 1747,
+  "fields": {
+    "name": 120,
+    "rank": 129,
+    "iconId": 117,
+    "family": 160
+  },
+  "inGameTest": false
+}
