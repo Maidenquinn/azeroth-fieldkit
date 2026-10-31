@@ -2,6 +2,9 @@
 
 ## 0.3.1-review.1 — 2026-10-31 (unpublished UX candidate)
 
+- Keep audit JSON, review docs and the manifest out of the install ZIP; retain
+  the evidence in the repository and separate release attachments. Validate exact
+  ZIP membership, allowed file types and per-file sidecar hashes.
 - Add a reusable English/French example inspector for cards, boss portraits and
   debuffs, player/target HP formats, teammate cards, revive, effects and reminders.
 - Test disabled modules without a party, boss, combat, or native API provider.
