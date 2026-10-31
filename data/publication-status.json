@@ -1,7 +1,7 @@
 {
-  "version": "0.3.0-review.1",
-  "maintainerAcceptedForPublication": false,
-  "maintainerAcceptanceDate": null,
+  "version": "0.3.0",
+  "maintainerAcceptedForPublication": true,
+  "maintainerAcceptanceDate": "2026-10-31",
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,

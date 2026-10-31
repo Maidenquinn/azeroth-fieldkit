@@ -1,9 +1,10 @@
-# Native tools — 0.3.0-review.1 test candidate
+# Native tools — 0.3.0
 
 Based on the read-only audit of the installed **0.130.1** client on 2026-10-31.
 Evidence: [CLIENT_0_130_EVIDENCE.json](CLIENT_0_130_EVIDENCE.json). Exe hash:
 `e8ff033544095e81d74087ff400d50286b26af02291e649f4c5e4d76cbcf8863`.
-Branch: `codex/native-tools-0-130`. Public release remains **0.2.3**.
+The maintainer authorized publication on 2026-10-31. Version **0.3.0** contains
+the accepted native-tools work (PR #9), published as a GitHub prerelease.
 
 ## Where to enable things / Activation
 
@@ -92,7 +93,7 @@ revives, schedules, banners, healing and overlay registration/removal passed.
 The template's native HUD placeholder was neutralized in that offline harness.
 These are **synthetic/offline** checks, not live game success or FPS measurements.
 
-Before merging or publishing:
+Recommended in-game checks:
 
 1. Install the candidate in the launched client, restart, confirm version and EN/FR.
 2. Compare Damage/Healing/Boss to the native meter. Check HPS and details, then
@@ -108,5 +109,6 @@ Before merging or publishing:
 7. Opt a small window into foreground above level/jewelry choices. Check clicks,
    disabling and phase exit, including at small resolution. Do not infer death-modal support.
 
-The installed candidate is for maintainer testing, not a public release. No game
-save, executable, MPQ, account enable file or manually edited saved variable is needed.
+Maintainer acceptance is not an agent-performed in-game test or independent
+certification. No game save, executable, MPQ, account enable file or manually
+edited saved variable is needed. Publication does not automatically install the update.

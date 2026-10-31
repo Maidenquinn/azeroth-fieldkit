@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.0 — 2026-10-31 (native tools update; GitHub prerelease)
+
+Maintainer accepted for publication. Changes since 0.2.3:
+
+- Add optional contextual tracking of native totems, grouped summons and published
+  talent/item timers, preserving native counts and remaining-time semantics.
+- Add local Healing/HPS and Boss Damage views to the existing meter and pinned
+  detail, keeping native rates and each fight's time base.
+- Add passive local co-op revive progress; preserve the native revive HUD.
+- Add optional native banner filters, bounded/deduplicated warnings, native boss-
+  arrival alerts, stored-level reminders and flagged-lair emphasis. No attack prediction.
+- Add per-window opt-in foreground above level/jewelry choices, restricted to
+  owned FieldKit frames. Other modals are not guaranteed.
+- Show received literal affix names when recognized; unknown encodings stay raw.
+- Preserve positions, sizes, locks, collapse states, EN/FR, and disabled defaults
+  for new panels/warnings. Add `/fieldkit native` diagnostics.
+- Full offline Lua 5.0.3/5.1 and CI checks pass; an additional extracted-API harness
+  used synthetic messages. Live rendering and real affix encoding remain to verify.
+
+Historical candidate entries below describe their state when written.
+
+
 ## 0.3.0-review.1 — 2026-10-31 (unreleased native-tools candidate)
 
 - Add opt-in passive Effects, Revive and Run reminders cards, reusing existing

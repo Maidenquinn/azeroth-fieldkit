@@ -1,30 +1,27 @@
-# Discord announcement — 0.2.3
+# Discord announcement — 0.3.0
 
-English message prepared for manual posting; no message was sent by tools.
-Copy the contents of the block, not the fences. Fits the standard 2,000-character limit.
+English message for manual posting; no message has been sent by tools.
+Copy the block contents, not the fences. Under 2,000 characters.
 
 ```md
-# Azeroth FieldKit 0.2.3 is out!
-**Layout, co-op and a simpler settings menu · EN / FR**
+# Azeroth FieldKit 0.3.0 is out!
+**Native effects, co-op support and new meter views · EN / FR**
 
-An update to my maintained fork of **MASH by Malk** — full credit to him for the original addon.
+**New since 0.2.3**
+• **Effects tracker:** active totems, summons and native talent/item timers, with counts and remaining durations.
+• **Healing / Boss Damage views:** switch the existing local meter between Damage, Healing and Boss damage. Includes HPS and pinnable spell details.
+• **Co-op revive progress:** see native progress and the ally involved, while keeping the original revive UI.
+• **Warnings & reminders:** filtered boss/mechanic messages, duplicate suppression, configurable boss-arrival alerts and stored-level count.
+• **Foreground option:** keep selected FieldKit windows or pinned details above level-up/jewelry choices, when supported by the client.
+• Received affix names when recognized, plus a highlight for the lair selected by the game's flag.
 
-**New since 0.2.1-review.3**
-• Drag active windows directly during play, without opening settings. Lock/unlock them in the options or by right-clicking the FieldKit minimap icon.
-• Move cards separately or in groups; adjust each card’s width and height.
-• Aligned damage / DPS / contribution columns, plus improved native damage-taken coverage in co-op.
-• Group damage and DPS totals, with optional teammate cards. Native teammate interactions remain available by default.
-• Hover spell rows or group members for details, scroll the list and **Pin** it to keep following the same player.
-• Cleaner **Windows** settings: Display, Layout, Appearance and Co-op / test. New **Essential HUD** preset with Undo.
-• Detail cards respect Classic/Decorative style and opacity. Compact run-mode card and updated EN/FR guides.
+**Enable what you need:** `/fieldkit` → **Windows → Display** for effects, reminders and meter views; **Co-op / test** for revive progress; **Alerts** for warnings. New panels and warnings start **OFF**. Your existing layout and preferences are kept.
 
-**Experimental:** optional in-game spell sharing between FieldKit users. Both players must enable it; actual co-op delivery is still unconfirmed. Native allied details otherwise remain limited to the top spell. Sharing is OFF by default.
+Unknown affix formats stay labelled as raw data. Ground runes remain unsupported, and full allied spell sharing still depends on unconfirmed client transport. Foreground support does not guarantee every modal screen.
 
-**Update:** download `AzerothFieldKit-0.2.3.zip` from Assets, replace the addon folder in your active client and restart. Keep your saved settings; disable legacy MASH. No external program needed.
+**Update:** download `AzerothFieldKit-0.3.0.zip` from Assets, replace the addon folder and restart. No external program needed.
 
-`/fieldkit` → settings · `/fieldkit lock` / `/fieldkit unlock` → movement lock
+Maintained fork of **MASH by Malk** — credit to him for the original addon. Published as a GitHub prerelease; feedback welcome!
 
-Ground runes are still not tracked. Published as a GitHub prerelease; feedback welcome!
-
-**Download & changelog:** https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.3
+**Download & full changelog:** https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.0
 ```
