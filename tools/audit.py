@@ -13,7 +13,7 @@ assert set(loaded)=={p.name for p in root.glob('*.lua')},'Unexpected/unloaded Lu
 # Quoted text and comments must not make a documented example look executable.
 tokens=re.compile(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|--[^\n]*')
 forbidden={'load','loadstring','loadfile','dofile','require','getfenv','setfenv','RunScript',
- 'SendChatMessage','SendAddonMessage','CastSpellByName','CastSpell','UseAction','TargetUnit',
+ 'SendChatMessage','SendAddonMessage','AZS_SetOnTopOfScreens','CastSpellByName','CastSpell','UseAction','TargetUnit',
  'MoveForwardStart','InteractUnit','EquipItemByName','io','os','package','debug'}
 files={};index=['# Named function index','',
  'Generated from runtime declarations. Read the preceding source comments for contracts.',
@@ -24,7 +24,7 @@ for name in loaded:
  assert '--[[' not in text and '[[' not in text,'Update tokenizer before adding long literals'
  code=tokens.sub(' ',text)
  identifiers=set(re.findall(r'\b[A-Za-z_]\w*\b',code))
- allowed={'SendAddonMessage'} if name=='Runtime.lua' else set()
+ allowed={'SendAddonMessage','AZS_SetOnTopOfScreens'} if name=='Runtime.lua' else set()
  assert not identifiers&(forbidden-allowed),(name,identifiers&(forbidden-allowed))
  if name=='Runtime.lua':
   assert 'pcall(SendAddonMessage,"AFKDETAIL1",payload,"PARTY")' in text,'Unexpected outbound transport boundary'
@@ -67,7 +67,7 @@ assert all((root/name).is_file() for name in media)
 report={'kind':'maintainer static inventory; not certification','candidate':version,
  'runtimeModules':len(loaded),'textureCount':len(textures),'forbiddenTokenGatePassed':True,
  'dynamicCombatEventNames':'See CombatText.lua events list; not all registrations are string literals.',
- 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':'maintainer accepted for publication; not independently certified','publication':publication,
+ 'files':files,'textures':textures,'themeMedia':media,'inGameTest':False,'approval':('maintainer accepted for publication; not independently certified' if publication['maintainerAcceptedForPublication'] else 'development candidate; not accepted for publication'),'publication':publication,
  'optionalPartyDetailTransport':{'defaultEnabled':False,'nativeCallBoundary':'Runtime.lua','prefix':'AFKDETAIL1','distribution':'PARTY','maxBytes':230,'maxCallsPerSecond':4,'liveCoopTransportConfirmed':False}}
 docs=base/'docs';docs.mkdir(exist_ok=True)
 (docs/'AUDIT_INVENTORY.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n',encoding='utf8',newline='\n')

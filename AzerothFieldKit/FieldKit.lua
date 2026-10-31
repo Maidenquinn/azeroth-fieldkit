@@ -1505,7 +1505,6 @@ local METER_ROWS = 8
 local TAKEN_ROWS = 7
 local ROW_HEIGHT = 15
 local meterFrame, takenFrame
-local meterStamp, meterSource
 
 local TAKEN_NAMES = {
 	["boss melee"] = "Boss melee",
@@ -1615,48 +1614,39 @@ end
 
 -- Refresh native total DPS at snapshot cadence; rebuild rows only when their list changes.
 local function UpdateMeterFrame(force)
-	if ( not meterFrame ) then
-		return
-	end
-	if ( not DB.meterFrame or not InRun() or not AZS_GetMeter ) then
-		meterFrame:Hide()
-		return
-	end
-	local lines, total, dps = AZS_GetMeter()
-	lines = lines or {}
+ if not meterFrame then return end
+ if not DB.meterFrame or not InRun() then meterFrame:Hide();return end
+ local mode=FieldKitMeters.Mode()
+ local lines,total,rate,known=FieldKitMeters.Read(mode)
+ FieldKit_Text(meterFrame.title,FieldKitMeters.labels[mode])
+ meterFrame.fieldkitMeterView=mode
  local width=FieldKitCardLayout.Width(meterFrame,FieldKit.MeterWidth(DB.meterValues))
  if meterFrame:GetWidth()~=width then
-  local previous=meterFrame:GetWidth()
-  meterFrame:SetWidth(width);FieldKitTheme.Update(meterFrame)
+  local previous=meterFrame:GetWidth();meterFrame:SetWidth(width);FieldKitTheme.Update(meterFrame)
   if not DB.linkLeftCards and meterFrame.azsDefault and not meterFrame.azsMoving then
    local position=DB.pos[meterFrame:GetName()]
    if position then position[1]=position[1]+(width-previous)/2 end
    PlaceMovable(meterFrame)
   end
  end
-	FieldKit_Text(meterFrame.total,ShortNumber(total or 0).."  ("..ShortNumber(dps or 0).." dps)")
-	-- Total DPS can change with the run clock even when no new hit arrived.
-	-- Only the spell rows are stamp-cached; their values come from the native list.
-	if ( not force and meterStamp == AZS_METER_UPDATED and meterSource == lines and meterFrame:IsShown() ) then return end
-	meterStamp = AZS_METER_UPDATED;meterSource=lines
-	local top = lines[1] and lines[1].dmg or 1
-	local n = math.min(table.getn(lines), METER_ROWS)
-	for i = 1, n do
-		local line = lines[i]
-		local row = meterFrame.rows[i]
-		row:SetValue(( line.dmg or 0 ) / math.max(top, 1))
-		if ( line.proc == 1 ) then
-
-			row:SetStatusBarColor(0.25, 0.45, 0.9, 0.55)
-		else
-			row:SetStatusBarColor(0.8, 0.55, 0.1, 0.55)
-		end
-		row.label:SetText(line.name or "?")
-		FieldKit.UpdateMeterColumns(row,line,DB.meterValues,width)
-		row:Show()
-	end
-	FitRows(meterFrame, n)
-	meterFrame:Show()
+ local rateLabel=mode==2 and "hps" or "dps"
+ if known then meterFrame.total:SetText((total and ShortNumber(total) or "?").."  ("..(rate and ShortNumber(rate) or "?").." "..FieldKit_L(rateLabel)..")")
+ else FieldKit_Text(meterFrame.total,"Not provided") end
+ local top=lines[1] and lines[1].dmg or 1
+ local n=math.min(table.getn(lines),METER_ROWS)
+ for i=1,n do
+  local line,row=lines[i],meterFrame.rows[i]
+  row:SetValue((line.dmg or 0)/math.max(top or 0,1))
+  if line.proc==1 then row:SetStatusBarColor(.25,.45,.9,.55)
+  else row:SetStatusBarColor(mode==2 and .2 or .8,mode==2 and .7 or .55,.2,.55) end
+  row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,DB.meterValues,width,rateLabel);row:Show()
+ end
+ if n==0 and not known then
+  local row=meterFrame.rows[1];FieldKit_Text(row.label,"Meter data not provided");row.label:SetWidth(width-24)
+  row:SetValue(0);row.value:Hide();for _,column in ipairs(row.meterColumns) do column:Hide() end
+  row.meterMode=nil;row:Show();n=1
+ end
+ FitRows(meterFrame,n);meterFrame:Show()
 end
 
 -- Render native damage-source totals separately; do not infer individual enemy hits.
@@ -1750,6 +1740,7 @@ function UpdateLairFrame()
 	local px = type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.px)
 	local py = type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.py)
 	local held = 0
+ local flagged=DB.highlightFlaggedLair and FieldKitNative.Read("AZS_GetFlaggedLair")
 	local n = math.min(table.getn(lairs), LAIR_ROWS)
 
 
@@ -1796,7 +1787,8 @@ function UpdateLairFrame()
 			state, r, g, b = "empty", 0.6, 0.6, 0.6
 		end
 		row:SetValue(0)
-		row.label:SetText(l.name or "?")
+		local flaggedRow=type(flagged)=="table" and ((flagged.index and flagged.index==l.index) or (flagged.id and flagged.id==l.id))
+		row.label:SetText((flaggedRow and "> " or "")..(l.name or "?"))
 		row.label:SetTextColor(r, g, b)
 		row.value:SetText(FieldKit_L(state))
 		row.value:SetTextColor(r, g, b)
@@ -2173,7 +2165,7 @@ local function ResetPositions()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
- RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true)
+ RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true);FieldKitNativeTools.Update();FieldKitScreenLayers.Update()
  UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
  FieldKitCoop.Update()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
@@ -2298,6 +2290,7 @@ local function FieldKitEventLifecycle()
   FieldKitHudStack.Initialize({mode,meterFrame,takenFrame,lairs},MakeMovable,PlaceMovable)
   FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
   FieldKitCoop.Create(CreateBarWindow,FitRows,MakeMovable)
+  FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
@@ -2353,6 +2346,7 @@ local function FieldKitEventOther()
 	elseif ( event == "PLAYER_AURAS_CHANGED" ) then
 		UpdatePlayerBuffs()
 	elseif ( event == "CHAT_MSG_ADDON" ) then
+  FieldKitNative.Packet(arg1)
   FieldKitPartySync.Receive(arg1,arg2,arg3,arg4)
   FieldKitCoop.Packet(arg1)
 		if ( arg1 == "AZS" and arg2 ) then
@@ -2421,7 +2415,7 @@ frame:SetScript("OnUpdate", function()
 	UpdateBossFrame()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
-	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update() end
+	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update();FieldKitNativeTools.Update();FieldKitScreenLayers.Update() end
  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitPartySync.Tick()
 end)
 
@@ -2433,6 +2427,7 @@ SlashCmdList["FieldKit"] = function(msg)
 		return
 	end
 	msg = string.lower(msg or "")
+ if msg=="native" then FieldKitNativeTools.Diagnostic();return end
  if msg=="lock" or msg=="unlock" then FieldKit.SetWindowsLocked(msg=="lock");return end
 	if msg == "money" then
 		AttachMoneyToBar(true)

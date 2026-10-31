@@ -166,3 +166,5 @@ reset/Undo and independent money-strip hiding. Native scrollbars, custom fonts,
 visual clipping, keyboard focus and screen resizing still need in-game review.
 
 For the published 0.2.3 journey, use [UX_SIMPLIFICATION.md](UX_SIMPLIFICATION.md).
+
+Native 0.130 fixtures and live acceptance: [NATIVE_TOOLS_0_130.md](NATIVE_TOOLS_0_130.md).

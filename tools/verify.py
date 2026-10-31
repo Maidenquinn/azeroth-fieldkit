@@ -65,6 +65,12 @@ edges=runtime();edges.execute((base/'tests/edge_positions.lua').read_text(encodi
 individual=runtime();individual.execute((base/'tests/individual_layout.lua').read_text(encoding='utf8'))
 coop=runtime();coop.execute((base/'tests/coop.lua').read_text(encoding='utf8'))
 details=runtime();details.execute((base/'tests/party_details.lua').read_text(encoding='utf8'))
+native_tools=runtime();native_tools.execute((base/'tests/native_tools.lua').read_text(encoding='utf8'))
+native_tools.execute('FieldKitDB.meterView=2;FieldKitDB.onTopWindows.FieldKitEffectsFrame=true;FieldKitDB.onTopWindows.UIParent=true')
+native_tools.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+native_reload=runtime(native_tools.eval('SNAPSHOT(FieldKitDB)'))
+native_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED");assert(FieldKitDB.meterView==2 and FieldKitDB.onTopWindows.FieldKitEffectsFrame and not FieldKitDB.onTopWindows.UIParent);assert(FieldKitDB.cardSizes.FieldKitEffectsFrame.width==420)')
+
 ux=runtime();ux.execute((base/'tests/ux_simplification.lua').read_text(encoding='utf8'))
 ux.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 ux_reload=runtime(ux.eval('SNAPSHOT(FieldKitDB)'))
@@ -135,7 +141,7 @@ if args.lua50:
 result={'version':version,'lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
  'freshDefaultsNoCVarOrHudWrites':True,'manualActionSwapFixture':True,'bothChatHookPaths':True,
  'officialApiFixtures':True,'snapshotBatchesPer20MockTicks':official.globals().OFFICIAL_API_BATCHES,
- 'uxSimplificationFixtures':True,'inGameTest':False,'partySyncTwoClientsSimulated':True,'partySyncLiveTransportConfirmed':False,'approval':'maintainer accepted for publication; not independently certified','publication':publication,'files':prototypes}
+ 'nativeToolsFixtures':True,'uxSimplificationFixtures':True,'inGameTest':False,'partySyncTwoClientsSimulated':True,'partySyncLiveTransportConfirmed':False,'approval':('maintainer accepted for publication; not independently certified' if publication['maintainerAcceptedForPublication'] else 'development candidate; not accepted for publication'),'publication':publication,'files':prototypes}
 out=base/'build';out.mkdir(exist_ok=True)
 (out/'validation.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf8',newline='\n')
 print(json.dumps(result,indent=2))

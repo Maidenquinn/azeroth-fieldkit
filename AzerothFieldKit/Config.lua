@@ -1,6 +1,8 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={windowsLocked=false,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+local defaults={windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,reviveFrame=false,
+ nextBossCard=false,nextBossAlert=false,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,
+ highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
@@ -17,6 +19,12 @@ function FieldKit.InitializeSettings(defaultStats)
  d.schema=1;d.language=d.language=="fr" and "fr" or "en"
  d.cardStyle=math.floor(FieldKit.Number(d.cardStyle,1,1,2))
  d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
+ d.meterView=math.floor(FieldKit.Number(d.meterView,1,1,3))
+ d.bossWarningLead=math.floor(FieldKit.Number(d.bossWarningLead,10,3,30))
+ if type(d.onTopWindows)~="table" then d.onTopWindows={} end
+ for name,value in pairs(d.onTopWindows) do
+  if (not FieldKitCardLayout.ValidName(name) and name~="FieldKitPartyDetailsFrame") or value~=true then d.onTopWindows[name]=nil end
+ end
  d.meterValues=math.floor(FieldKit.Number(d.meterValues,3,1,3))
  for _,key in ipairs({"known","pos","collapsedWindows","frameAnchors"}) do
   if type(d[key])~="table" then d[key]={} end

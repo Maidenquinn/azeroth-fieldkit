@@ -1,7 +1,7 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.2.3", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.3.0-review.1", folder = "AzerothFieldKit" }
 
 -- The only outbound capability: explicitly opted-in meter sharing, one fixed
 -- addon prefix, PARTY distribution, printable 230-byte packets, max 4 per second.
@@ -69,3 +69,20 @@ function FieldKit.RememberClassification(cache,name,class)
  end
  cache[name]=class
 end
+
+-- Optional level-up/jewelry overlay registration, restricted to our own named
+-- HUD. Never register UIParent, native frames, foreign addons or arbitrary names.
+function FieldKit.SetFrameOnTop(name,enabled)
+ if type(name)~="string" or type(enabled)~="boolean" then return false end
+ if name~="FieldKitPartyDetailsFrame" and (not FieldKitCardLayout or not FieldKitCardLayout.ValidName(name)) then return false end
+ if type(AZS_SetOnTopOfScreens)~="function" then return false end
+ local ok,result=pcall(AZS_SetOnTopOfScreens,name,enabled)
+ if not ok or result==false then return false end
+ if type(AZS_IsOnTopOfScreens)=="function" then
+  local read,value=pcall(AZS_IsOnTopOfScreens,name)
+  return read and ((value and true or false)==enabled)
+ end
+ return true
+end
+
+function FieldKit.FrameOverlayAvailable() return type(AZS_SetOnTopOfScreens)=="function" end

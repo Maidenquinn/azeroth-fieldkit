@@ -5,9 +5,9 @@ FieldKitCardLayout={selected=1}
 local C=FieldKitCardLayout
 C.names={"FieldKitModeFrame","FieldKitMeterFrame","FieldKitTakenFrame","FieldKitLairFrame",
  "FieldKitGearFrame","FieldKitStatsFrame","FieldKitMoneyFrame","FieldKitPartyMeterFrame",
- "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4"}
+ "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings"}
 C.labels={"Run mode","Damage","Damage taken","Lairs","Accessories","Statistics","Gold and chest price","Group damage",
- "Teammate 1","Teammate 2","Teammate 3","Teammate 4"}
+ "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings"}
 
 function C.ValidName(name)
  for i=1,table.getn(C.names) do if C.names[i]==name then return true end end
@@ -15,6 +15,7 @@ function C.ValidName(name)
 end
 
 function C.MinimumWidth(name)
+ if name=="FieldKitNativeWarnings" then return 300 end
  if name=="FieldKitMeterFrame" or name=="FieldKitPartyMeterFrame" then return FieldKit.MeterWidth(FieldKitDB.meterValues) end
  if string.find(name,"^FieldKitPartyCard[1-4]$") then return 280 end
  return name=="FieldKitMoneyFrame" and 320 or 220
@@ -178,5 +179,8 @@ function C.Options()
    set=function(v)
     local f=C.Frame();C.SetDimension("height",math.max(f.fieldkitMinimumHeight or 22,v))
    end},
+  {kind="check",label="Keep this window above card choices",tip="Optional native overlay for level-up and jewelry choices. Not a guarantee for other screens. Requires a recent client.",
+   get=function() return FieldKitDB.onTopWindows[C.names[C.selected]] end,
+   set=function(v) FieldKitDB.onTopWindows[C.names[C.selected]]=v and true or nil;FieldKitScreenLayers.Update() end},
  }
 end

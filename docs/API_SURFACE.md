@@ -186,3 +186,13 @@ file is loaded after HudStack.lua and before Interface.lua. Dimensions are bound
 at settings load and by UI controls; visible-row minima prevent content cropping.
 
 Positions.lua reads GetPoint and writes only FieldKitDB.frameAnchors (validated own-frame names and point/relative-point/numeric offsets). Restoring uses UIParent-relative SetPoint; no frame pointers are serialized. Native SetClampedToScreen handles bounds of the linked group proxy, with child clamps disabled while linked. Legacy positions are retained and Reset/Undo includes both representations. No game/save/other-addon state is accessed.
+
+## Native 0.130 tools (0.3.0-review.1 candidate)
+
+NativeData.lua adds fixed, protected reads for totems, grouped summons, effect timers,
+revives, schedules, stored counts and local healing/boss meters. NativeTools.lua only
+displays that data and optionally subscribes to native banner callbacks; no native HUD
+is hidden and no levels are spent. ScreenLayers.lua uses Runtime.lua's own-frame-only
+AZS_SetOnTopOfScreens wrapper, solely under explicit per-window opt-in, reversing it
+when hidden/disabled. This new native visual write is not a network/gameplay action.
+See [native tools scope and tests](NATIVE_TOOLS_0_130.md).
