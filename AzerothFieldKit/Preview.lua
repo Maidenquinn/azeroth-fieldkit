@@ -230,6 +230,7 @@ function P.Refresh()
   if FieldKitDB.linkLeftCards then P.Stack(1,4,FieldKitHudStack.root) end
   if FieldKitDB.linkRightCards then P.Stack(5,6,FieldKitCardLayout.root) end
  end
+ FieldKitPreviewVisibility.Update()
  if P.inspector then
   FieldKit_Text(P.inspector.place,P.selected>=18 and "Health preview only; drag the active player bar directly" or "Place this window")
   FieldKit_Text(P.inspector.reset,P.selected>=18 and "Health preview only; drag the active player bar directly" or P.Group(P.selected) and "Ungroup this side to reset one window" or "Reset this window position")
@@ -245,7 +246,7 @@ function P.Stop()
  for _,root in pairs(P.roots) do
   if root.moving then root:StopMovingOrSizing();root.moving=nil;P.Commit(root,root.source) end
  end
- P.mode=nil;P.all=nil
+ P.mode=nil;P.all=nil;FieldKitPreviewVisibility.Clear()
  if P.inspector then
   P.inspector.choice.menu:Hide();P.inspector:StopMovingOrSizing();P.inspector:Hide()
  end

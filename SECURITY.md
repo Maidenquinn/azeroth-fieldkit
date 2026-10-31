@@ -172,3 +172,12 @@ renderer, never native tables, counters or optional peer sharing. Explicit drags
 and per-window resets can save owned HUD geometry; viewing/closing does not
 change module enable flags. No new native write, process, transport, saved chat
 or game-data access is introduced. See [PREVIEWS.md](docs/PREVIEWS.md).
+
+## 0.3.1-review.2 placement isolation
+
+At the user's request the explicit placement mode temporarily masks live FieldKit
+and other Lua UI; its button can show the other UI again. This changes transient
+alpha and available mouse state on foreign UIParent descendants, then restores the
+captured state at exit. It does not hide UIParent/WorldFrame, replace scripts or
+methods, modify other addons' preferences, or call native gameplay/HUD setters.
+This presentation scope is documented in docs/PREVIEWS.md and API_SURFACE.md.

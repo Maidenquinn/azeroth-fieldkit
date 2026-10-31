@@ -1,6 +1,6 @@
 # Verified-addon publication record
 
-## Working branch — 0.3.1-review.1
+## Working branch — 0.3.1-review.2
 
 Context-free preview candidate. Development authorized by the maintainer; not
 accepted for publication, tagged, merged or released. The public release below

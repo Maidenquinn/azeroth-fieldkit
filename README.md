@@ -1,6 +1,6 @@
 # Azeroth FieldKit
 
-> **Branch candidate 0.3.1-review.1:** context-free HUD previews and composition.
+> **Branch candidate 0.3.1-review.2:** context-free HUD previews and composition.
 > Not a published update. See [preview guide and game-test checklist](docs/PREVIEWS.md).
 
 > **0.3.0 native-tools update:** optional effects, revive progress, Healing/Boss

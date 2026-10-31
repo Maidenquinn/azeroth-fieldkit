@@ -1,7 +1,10 @@
 # Changelog
 
-## 0.3.1-review.1 — 2026-10-31 (unpublished UX candidate)
+## 0.3.1-review.2 — 2026-10-31 (unpublished UX candidate)
 
+- Isolate placement from the real FieldKit HUD. Add a Show/Hide other interface
+  elements button (hidden initially), with temporary alpha/input masking and exact
+  exit restoration. Keep UI update/event handlers and normal visibility untouched.
 - Keep audit JSON, review docs and the manifest out of the install ZIP; retain
   the evidence in the repository and separate release attachments. Validate exact
   ZIP membership, allowed file types and per-file sidecar hashes.

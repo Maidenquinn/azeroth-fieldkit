@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Title: Azeroth FieldKit
-## Version: 0.3.1-review.1
+## Version: 0.3.1-review.2
 ## Author: Kevin Radlowski (Maidenhead); derived from MASH by Malk
 ## Notes: Azeroth Survivors helper (/fieldkit): elite-only nameplates, boss frames with debuffs, health bar with shield, buffs and low health warning, crits, stats, gold and chest price, accessories, damage meter, chests on the minimap, lairs, camera.
 ## SavedVariables: FieldKitDB
@@ -25,6 +25,7 @@ PartyDetails.lua
 ScreenLayers.lua
 NativeTools.lua
 Preview.lua
+PreviewVisibility.lua
 OptionsSchema.lua
 LegacyCrits.lua
 Interface.lua

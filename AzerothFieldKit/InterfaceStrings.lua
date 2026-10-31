@@ -220,5 +220,7 @@ labels["Summons"]="Invocations"
 labels["Next boss"]="Prochain boss"
 labels["Filters"]="Filtres"
 labels["Health preview only; drag the active player bar directly"]="Aperçu des PV ; déplacez directement la barre joueur active"
+labels["Show other interface elements"]="Afficher les autres éléments de l’interface"
+labels["Hide other interface elements"]="Masquer les autres éléments de l’interface"
 for key,value in pairs(labels) do fr[key]=value end
 FieldKitLocale.en={};for en,value in pairs(fr) do FieldKitLocale.en[value]=en end

@@ -1,6 +1,6 @@
 # Azeroth FieldKit
 
-> **Candidat de branche 0.3.1-review.1 :** aperçus hors contexte et composition du HUD.
+> **Candidat de branche 0.3.1-review.2 :** aperçus hors contexte et composition du HUD.
 > Mise à jour non publiée. Voir [guide et vérifications en jeu](docs/PREVIEWS.md).
 
 > **Mise à jour 0.3.0 :** effets, réanimation, compteurs Soins/Boss et outils

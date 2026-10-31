@@ -78,3 +78,38 @@ U.frame:Show();P.Open(17);P.Refresh();assert(P.inspector:IsShown())
 UIParent.width=oldW;UIParent.height=oldH;P.Stop()
 assert(writes==0 and AZS_METER==meter and AZS_TAKEN==taken)
 print("Context-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed")
+
+-- Placement isolates live FieldKit even when the rest of the HUD is restored.
+local V=FieldKitPreviewVisibility
+local foreign=CreateFrame("Frame","UnrelatedAddonPanel",UIParent)
+foreign:SetAlpha(.37);foreign.mouse=true
+foreign.IsMouseEnabled=function(self) return self.mouse end
+foreign.EnableMouse=function(self,v) self.mouse=v end
+local child=CreateFrame("Button",nil,foreign);child.mouse=true
+child.IsMouseEnabled=foreign.IsMouseEnabled;child.EnableMouse=foreign.EnableMouse
+foreign.GetChildren=function() return child end
+local children=UIParent.GetChildren
+UIParent.GetChildren=function() return foreign,FieldKitMeterFrame,FieldKitUI.dock,P.frames[2],WorldFrame end
+local events=0;foreign:SetScript("OnHide",function() events=events+1 end)
+FieldKitMeterFrame:SetAlpha(.61);P.selected=2;V.hideOthers=true
+U.SetLayoutEditing(true,false)
+assert(FieldKitMeterFrame:GetAlpha()==0 and foreign:GetAlpha()==0)
+assert(not foreign.mouse and not child.mouse)
+assert(P.frames[2]:GetAlpha()==1 and FieldKitUI.dock:GetAlpha()==1)
+assert(foreign:IsShown() and events==0,"Isolation invoked foreign Hide callbacks")
+click(U.otherUI)
+assert(not V.hideOthers and foreign:GetAlpha()==.37 and foreign.mouse and child.mouse)
+assert(FieldKitMeterFrame:GetAlpha()==0,"Showing other UI exposed live FieldKit")
+click(U.otherUI);assert(foreign:GetAlpha()==0)
+-- Renderers can still change visibility and data behind the alpha mask.
+foreign:Hide();foreign:SetAlpha(.8);P.Refresh();assert(foreign:GetAlpha()==0)
+U.SetLayoutEditing(false,true)
+assert(foreign:GetAlpha()==.37 and FieldKitMeterFrame:GetAlpha()==.61)
+assert(not foreign:IsShown() and foreign.mouse and child.mouse and events==0)
+assert(next(V.masked)==nil)
+-- Escape cleanup takes the same restoration path; already transparent UI stays so.
+foreign:SetAlpha(0);U.SetLayoutEditing(true,false)
+U.dock:Hide();U.dock:GetScript("OnHide")()
+assert(foreign:GetAlpha()==0 and next(V.masked)==nil)
+UIParent.GetChildren=children
+print("Preview isolation: live HUD masking, other-UI toggle, input and exact restoration passed")

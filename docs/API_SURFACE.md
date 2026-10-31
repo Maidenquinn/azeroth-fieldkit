@@ -196,3 +196,13 @@ is hidden and no levels are spent. ScreenLayers.lua uses Runtime.lua's own-frame
 AZS_SetOnTopOfScreens wrapper, solely under explicit per-window opt-in, reversing it
 when hidden/disabled. This new native visual write is not a network/gameplay action.
 See [native tools scope and tests](NATIVE_TOOLS_0_130.md).
+
+## Temporary preview isolation (0.3.1-review.2 candidate)
+
+During explicit HUD placement only, PreviewVisibility.lua reads UIParent children/
+regions and uses GetAlpha/SetAlpha plus optional IsMouseEnabled/EnableMouse to
+mask live displays and other Lua UI. This is a temporary presentation change to
+foreign frames when the user enters placement; the dock includes its visibility
+toggle. Originals are restored on exit, without invoking Show/Hide, replacing
+foreign methods/scripts, reparenting or changing saved/native HUD settings.
+UIParent and WorldFrame are excluded. See PREVIEWS.md for boundaries and tests.

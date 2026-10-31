@@ -1,7 +1,7 @@
 {
-  "version": "0.3.1-review.1",
+  "version": "0.3.1-review.2",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -17,7 +17,7 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.3.1-review.1",
+    "version": "0.3.1-review.2",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -32,7 +32,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 10,
-      "sha256": "d2471e57aa75d7d2151ad84fb802589f6a79f677e6be4e41f679b273c45d8fac"
+      "sha256": "60088fc77cb90c6b82dfb55b658140e13a8ae8e0f16397a9b989dad551910e85"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -52,7 +52,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "ea386bab66b968531925d131a17e780075a0c7a64809ca1fad2d2a40ebcb5f77"
+      "sha256": "a1da7bebabee37e6b740eb4b546300eea1458a703fc84091f71b6e0086857691"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -132,7 +132,12 @@
     "Preview.lua": {
       "maxUpvalues": 3,
       "functions": 27,
-      "sha256": "db48ae5f8e00c5d25f3dca2674a641585f5c814f5b443aab1d0a16f1c3d04f3d"
+      "sha256": "154386fa64324909fa3c0f6c377bd387c034c8270ecc1f8a1ad82c72c36d6615"
+    },
+    "PreviewVisibility.lua": {
+      "maxUpvalues": 1,
+      "functions": 7,
+      "sha256": "50db73fd7b5f7064279e44be04fa3a1ba91d1566a952d8c6ab129258c72f8336"
     },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
@@ -147,7 +152,7 @@
     "Interface.lua": {
       "maxUpvalues": 5,
       "functions": 120,
-      "sha256": "1aca7c7d51003a59a7e8a0ec2465f8c86e88846a266f0a292b213f529e3178e9"
+      "sha256": "e308285780f0a9902df55d51a57caa38defd895341cacb14283dd98925c1de70"
     },
     "FieldKit.lua": {
       "maxUpvalues": 20,
