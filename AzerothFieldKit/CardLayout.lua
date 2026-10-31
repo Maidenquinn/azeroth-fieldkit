@@ -157,7 +157,10 @@ end
 function C.Options()
  return {
   {kind="choice",label="Window to resize",values=C.labels,
-   get=function() return C.selected end,set=function(v) C.selected=v end},
+   get=function() return C.selected end,set=function(v)
+    C.selected=v
+    if FieldKitPreview.mode=="inspect" then FieldKitPreview.selected=v;FieldKitPreview.Refresh() end
+   end},
   {kind="check",label="Automatic size for this window",tip="Clear this window's custom dimensions. Height always keeps enough room for every visible row.",
    get=function() return FieldKitDB.cardSizes[C.names[C.selected]]==nil end,
    set=function(v)

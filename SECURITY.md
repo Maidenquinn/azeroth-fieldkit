@@ -164,3 +164,11 @@ UIParent, gameplay action, level spending, new network transport or process is a
 See [scope, defaults and remaining tests](docs/NATIVE_TOOLS_0_130.md). The older
 assessment/version above remains the historical 0.2.3 record. No new live game
 result or independent certification is inferred from publication acceptance.
+
+## 0.3.1-review.1 visual preview candidate (2026-10-31)
+
+Preview.lua creates only owned sample frames. Example values remain in that
+renderer, never native tables, counters or optional peer sharing. Explicit drags
+and per-window resets can save owned HUD geometry; viewing/closing does not
+change module enable flags. No new native write, process, transport, saved chat
+or game-data access is introduced. See [PREVIEWS.md](docs/PREVIEWS.md).

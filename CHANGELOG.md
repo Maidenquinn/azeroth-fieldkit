@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.1-review.1 — 2026-10-31 (unpublished UX candidate)
+
+- Add a reusable English/French example inspector for cards, boss portraits and
+  debuffs, player/target HP formats, teammate cards, revive, effects and reminders.
+- Test disabled modules without a party, boss, combat, or native API provider.
+- Reflect card style, opacity, dimensions, meter columns and HP formats live;
+  synchronize the inspector selection with Windows → Layout.
+- Place a selected window with settings hidden, or compose selected examples,
+  including disabled cards. Preserve grouped movement and the saved lock.
+- Keep sample data out of native tables, counters, party sharing and saved gameplay
+  data. Close/Escape/Done clean up examples without changing module enable flags.
+- Reset a single independent window position; grouped cards request ungrouping
+  first so unrelated windows are not reset.
+- Player/target format examples are read-only; the live player bar remains directly
+  draggable and target text remains attached to the native target frame.
+- Validate isolation, no native writes, frame reuse, EN/FR, style, geometry and
+  lifecycle under Lua 5.0.3 and 5.1. Actual visual/game validation remains pending.
+
 ## 0.3.0 — 2026-10-31 (native tools update; GitHub prerelease)
 
 Maintainer accepted for publication. Changes since 0.2.3:

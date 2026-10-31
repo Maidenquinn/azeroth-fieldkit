@@ -1,7 +1,7 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1-review.1",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed",
+  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -11,14 +11,15 @@
   "snapshotBatchesPer20MockTicks": 5,
   "nativeToolsFixtures": true,
   "uxSimplificationFixtures": true,
+  "contextFreePreviewFixtures": true,
   "inGameTest": false,
   "partySyncTwoClientsSimulated": true,
   "partySyncLiveTransportConfirmed": false,
-  "approval": "maintainer accepted for publication; not independently certified",
+  "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.3.0",
-    "maintainerAcceptedForPublication": true,
-    "maintainerAcceptanceDate": "2026-10-31",
+    "version": "0.3.1-review.1",
+    "maintainerAcceptedForPublication": false,
+    "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
@@ -31,7 +32,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 10,
-      "sha256": "5edc1c1713a61112a80a62bf5bc6ee51fdcad6fac09af8e70803437bbe6aac83"
+      "sha256": "d2471e57aa75d7d2151ad84fb802589f6a79f677e6be4e41f679b273c45d8fac"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -51,7 +52,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "aa9d223e146323968a4a940ef217b4902827231817278272a06016ba6f8286a2"
+      "sha256": "ea386bab66b968531925d131a17e780075a0c7a64809ca1fad2d2a40ebcb5f77"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -101,7 +102,7 @@
     "CardLayout.lua": {
       "maxUpvalues": 2,
       "functions": 30,
-      "sha256": "d91f6b3ab1bb6cc9d3bdde8faecbe9f3445cf9403ea534defab228219494492f"
+      "sha256": "9fa0000578198de1b7682010357a9010844ca012650f80e012d2a4edda5192c0"
     },
     "Coop.lua": {
       "maxUpvalues": 2,
@@ -128,6 +129,11 @@
       "functions": 18,
       "sha256": "6bf5db540bfcc3c2220c9e761838e49a16f6a1674d174fecd608714d4cd9a38e"
     },
+    "Preview.lua": {
+      "maxUpvalues": 3,
+      "functions": 27,
+      "sha256": "db48ae5f8e00c5d25f3dca2674a641585f5c814f5b443aab1d0a16f1c3d04f3d"
+    },
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
       "functions": 49,
@@ -140,13 +146,13 @@
     },
     "Interface.lua": {
       "maxUpvalues": 5,
-      "functions": 116,
-      "sha256": "0e058c61ac4b0eb4d05d58ff2b1897eec50f2f862735350338c0a642ac9cc02c"
+      "functions": 120,
+      "sha256": "1aca7c7d51003a59a7e8a0ec2465f8c86e88846a266f0a292b213f529e3178e9"
     },
     "FieldKit.lua": {
-      "maxUpvalues": 19,
+      "maxUpvalues": 20,
       "functions": 167,
-      "sha256": "dbc8636cd6ed8d8d88c2bca5840af37a5bc74c7878b413d80c9bf20b256c9484"
+      "sha256": "cd7989fb565e546210de96ceaa78918002a5bbcf50dcd28192663e66ba67019e"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,

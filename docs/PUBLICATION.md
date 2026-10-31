@@ -1,6 +1,12 @@
 # Verified-addon publication record
 
-## Current update — 0.3.0
+## Working branch — 0.3.1-review.1
+
+Context-free preview candidate. Development authorized by the maintainer; not
+accepted for publication, tagged, merged or released. The public release below
+remains 0.3.0. Visual game validation is still required. See [PREVIEWS.md](PREVIEWS.md).
+
+## Latest public update — 0.3.0
 
 The maintainer authorized publication on 2026-10-31 after implementation of the
 native tools. This is maintainer acceptance, not a newly supplied package-specific

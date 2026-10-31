@@ -243,37 +243,38 @@ local function MirrorTarget(owner, region, sourceName, fallbackPoint, fallbackX,
 end
 
 -- Build one of four display frames. The portrait module supplies an independent texture.
-local function CreateBossFrame(i)
-	local f = CreateFrame("Frame", "FieldKitBossFrame"..i, UIParent)
+local function CreateBossFrame(i,preview)
+	local prefix=preview and "FieldKitPreviewBoss" or "FieldKitBossFrame"..i
+	local f = CreateFrame("Frame", prefix, UIParent)
 	f:SetWidth(232)
 	f:SetHeight(100)
 	f:SetFrameStrata("LOW")
 
-	f.portrait = f:CreateTexture("FieldKitBossFrame"..i.."Portrait", "BACKGROUND")
+	f.portrait = f:CreateTexture(prefix.."Portrait", "BACKGROUND")
 	MirrorTarget(f, f.portrait, "TargetPortrait", "TOPRIGHT", -42, -12, 64, 64)
 
-	local nameBg = f:CreateTexture("FieldKitBossFrame"..i.."NameBackground", "BACKGROUND")
+	local nameBg = f:CreateTexture(prefix.."NameBackground", "BACKGROUND")
 	nameBg:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
 	nameBg:SetVertexColor(1.0, 0.0, 0.0)
 	MirrorTarget(f, nameBg, "TargetFrameNameBackground", "TOPRIGHT", -88, -22, 119, 19)
 
-	f.bar = CreateFrame("StatusBar", "FieldKitBossFrame"..i.."HealthBar", f)
+	f.bar = CreateFrame("StatusBar", prefix.."HealthBar", f)
 	MirrorTarget(f, f.bar, "TargetFrameHealthBar", "TOPRIGHT", -106, -41, 119, 12)
 	f.bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
 	f.bar:SetStatusBarColor(0.0, 1.0, 0.0)
 
-	local border = CreateFrame("Frame", "FieldKitBossFrame"..i.."TextureFrame", f)
+	local border = CreateFrame("Frame", prefix.."TextureFrame", f)
 	border:SetAllPoints(f)
 	border:SetFrameLevel(f.bar:GetFrameLevel() + 2)
-	local tex = border:CreateTexture("FieldKitBossFrame"..i.."Texture", "BORDER")
+	local tex = border:CreateTexture(prefix.."Texture", "BORDER")
 	tex:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite")
 	tex:SetTexCoord(0.09375, 1.0, 0.0, 0.78125)
 	tex:SetWidth(232)
 	tex:SetHeight(100)
 	tex:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
 
-	f.level = border:CreateFontString("FieldKitBossFrame"..i.."Level", "OVERLAY", "GameFontNormalSmall")
-	f.skull = border:CreateTexture("FieldKitBossFrame"..i.."Skull", "OVERLAY")
+	f.level = border:CreateFontString(prefix.."Level", "OVERLAY", "GameFontNormalSmall")
+	f.skull = border:CreateTexture(prefix.."Skull", "OVERLAY")
 	f.skull:SetTexture(PLATE_SKULL)
 	MirrorTarget(f, f.skull, "TargetHighLevelTexture", "CENTER", 63, -16, 16, 16)
 	if ( TargetLevelText ) then
@@ -285,34 +286,36 @@ local function CreateBossFrame(i)
 	end
 	f.level:SetPoint("CENTER", f.skull, "CENTER", 0, 0)
 
-	f.name = border:CreateFontString("FieldKitBossFrame"..i.."Name", "OVERLAY", "GameFontNormalSmall")
+	f.name = border:CreateFontString(prefix.."Name", "OVERLAY", "GameFontNormalSmall")
 	MirrorTarget(f, f.name, "TargetName", "CENTER", -50, 19, 100, 10)
-	f.hp = border:CreateFontString("FieldKitBossFrame"..i.."HealthText", "OVERLAY", "GameFontHighlightSmall")
+	f.hp = border:CreateFontString(prefix.."HealthText", "OVERLAY", "GameFontHighlightSmall")
 	f.hp:SetPoint("CENTER", f.bar, "CENTER", 0, 0)
-	f.tag = border:CreateFontString("FieldKitBossFrame"..i.."Tag", "OVERLAY", "GameFontNormalSmall")
+	f.tag = border:CreateFontString(prefix.."Tag", "OVERLAY", "GameFontNormalSmall")
 	f.tag:SetPoint("TOP", f.bar, "BOTTOM", 0, -2)
 
 
 	f.debuffs = {}
 	for d = 1, BOSS_DEBUFFS do
-		local icon = border:CreateTexture("FieldKitBossFrame"..i.."Debuff"..d, "OVERLAY")
+		local icon = border:CreateTexture(prefix.."Debuff"..d, "OVERLAY")
 		icon:SetWidth(DEBUFF_SIZE)
 		icon:SetHeight(DEBUFF_SIZE)
 		icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 		icon:SetPoint("TOPLEFT", f.bar, "BOTTOMLEFT", ( d - 1 ) * ( DEBUFF_SIZE + 1 ), -15)
 		icon:Hide()
-		icon.count = border:CreateFontString("FieldKitBossFrame"..i.."Debuff"..d.."Count", "OVERLAY", "NumberFontNormalSmall")
+		icon.count = border:CreateFontString(prefix.."Debuff"..d.."Count", "OVERLAY", "NumberFontNormalSmall")
 		icon.count:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 1, -1)
 		icon.count:Hide()
 
-		icon.time = border:CreateFontString("FieldKitBossFrame"..i.."Debuff"..d.."Time", "OVERLAY", "GameFontHighlightSmall")
+		icon.time = border:CreateFontString(prefix.."Debuff"..d.."Time", "OVERLAY", "GameFontHighlightSmall")
 		icon.time:SetFont(MENU_FONT, 10, "OUTLINE")
 		icon.time:SetPoint("TOP", icon, "BOTTOM", 0, -1)
 		icon.time:Hide()
 		f.debuffs[d] = icon
 	end
 
-	if ( i == 1 ) then
+	if preview then
+  -- Isolated demonstration: no movable registration, native unit or HUD action.
+ elseif ( i == 1 ) then
 
 		local handle = CreateFrame("Frame", "FieldKitBossFrame1Handle", f)
 		handle:SetAllPoints(f)
@@ -2291,6 +2294,7 @@ local function FieldKitEventLifecycle()
   FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
   FieldKitCoop.Create(CreateBarWindow,FitRows,MakeMovable)
   FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
+  FieldKitPreview.Initialize(CreateBarWindow,CreateBossFrame,PlaceMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()

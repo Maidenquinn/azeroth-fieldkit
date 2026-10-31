@@ -53,6 +53,7 @@ function FieldKit.BuildJourneySections(sections,actions)
    get=function() return FieldKitDB.partyMeter end,set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end},
  }
  local layout={
+  {kind="preview",preview=0},
   {kind="check",label="Lock window positions",tip="Drag active windows during play by default. Locking keeps their current positions; grouping and dimensions stay unchanged.",
    get=function() return FieldKitDB.windowsLocked end,set=function(v) FieldKit.SetWindowsLocked(v) end},
   {kind="check",label="Align left HUD cards",tip="Move the left cards together. Turn off to move every card independently. Custom sizes are kept in both modes.",
@@ -73,13 +74,14 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(appearance,{kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
   get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
   set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end})
- local health={options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
+ local health={{kind="preview",preview=18},options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
  for _,def in ipairs({{"effectTotems","Track totems"},{"effectSummons","Track summons"},{"effectTimers","Track native effect timers"}}) do
   local key,label=def[1],def[2]
   table.insert(health,{kind="check",label=label,tip="Filters the Effects tracker. Counts and remaining times come from the native API; unavailable data is never invented.",
    get=function() return FieldKitDB[key] end,set=function(v) FieldKitDB[key]=v;FieldKitNativeTools.Update() end})
  end
  local alerts=old.Warnings.items
+ table.insert(alerts,1,{kind="preview",preview=16})
  for _,def in ipairs({{"nativeWarnings","Native mechanic warnings","Show filtered received boss/mechanic messages, with duplicates suppressed. The native banner display is unchanged."},
   {"bossBannerWarnings","Boss banner messages","Include received banners explicitly flagged as boss messages."},
   {"mechanicWarnings","Mechanic banner messages","Include received banners whose kind is mechanic."},
@@ -94,6 +96,7 @@ function FieldKit.BuildJourneySections(sections,actions)
  table.insert(old.Map.items,{kind="check",label="Highlight the flagged lair",tip="Mark the lair selected by the game's flag in the existing lair list. Does not track a moving guardian.",
   get=function() return FieldKitDB.highlightFlaggedLair end,set=function(v) FieldKitDB.highlightFlaggedLair=v;actions.UpdateLairFrame() end})
  local coop={
+  {kind="preview",preview=8},
   {kind="note",label="Experimental co-op",tip="Full allied spell sharing depends on a client transport that has not been confirmed in live co-op. Native group totals remain available without sharing."},
   {kind="check",label="Co-op teammate cards",tip="Optional passive cards. Native teammate frames remain available for targeting and their usual interactions.",
    get=function() return FieldKitDB.partyCards end,set=function(v) FieldKitDB.partyCards=v;FieldKitCoop.Update() end},
@@ -112,7 +115,7 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
   {id="health",title="Health & buffs",glyph=16,items=health},
-  {id="bosses",title="Bosses",glyph=5,items={options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
+  {id="bosses",title="Bosses",glyph=5,items={{kind="preview",preview=17},options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
   {id="alerts",title="Alerts",glyph=12,items=alerts},
   {id="windows",title="Windows",glyph=9,group="Your interface",items={},windowTabs=windows},
   {id="map",title="Minimap",glyph=1,items=old.Map.items},
@@ -304,6 +307,13 @@ function U.BuildPage(section,index)
   local item=items[i];local before=table.getn(page.flow)
   if section.windowTabs and previous~=item.windowTab then y=104;previous=item.windowTab end
   if item.kind=="home" then BuildHome(page);y=page.contentHeight
+  elseif item.kind=="preview" then
+   local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(76)
+   local hint=T.Label(row,"Test without a party, boss or active module.",0,0,500,26,12,T.muted)
+   local example=T.Button(row,nil,"Test display",0,32,190,28,function() FieldKitPreview.Open(item.preview>0 and item.preview or FieldKitCardLayout.selected) end)
+   local compose=T.Button(row,nil,"Compose interface",202,32,190,28,function() U.SetLayoutEditing(true,false) end)
+   row.Reflow=function(w) row:SetWidth(w);hint:SetWidth(w) end
+   table.insert(page.flow,{frame=row,y=y});y=y+84
   elseif item.kind=="note" or item.kind=="syncStatus" then
    local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(104)
    local label=T.Label(row,item.label or "Sharing status",0,0,500,24,15,T.gold,true)
@@ -445,10 +455,10 @@ function U.SetLayoutEditing(enabled,returnToSettings)
  FieldKit.layoutEditing=enabled and true or false
  if enabled then
   U.routingLayout=true;U.frame:Hide();U.routingLayout=nil
-  U.context.unlock(true);U.context.bosses();FieldKitCardLayout.UpdateDock();U.dock:Show()
+  U.context.unlock(true);U.context.bosses();FieldKitCardLayout.UpdateDock();U.dock:Show();FieldKitPreview.Start(true)
   if FieldKitDB.combatText then FieldKitCombat.ShowAnchors() end
  else
-  U.dock:Hide();U.context.unlock(false);FieldKitCombat.HideAnchors();U.context.bosses()
+  FieldKitPreview.Stop();U.dock:Hide();U.context.unlock(false);FieldKitCombat.HideAnchors();U.context.bosses()
   if returnToSettings then U.Reflow();U.frame:Show();U.Refresh() end
  end
  FieldKitCoop.Update()
@@ -508,8 +518,8 @@ function U.Build(sections,context)
  U.reload=T.Button(frame,nil,"Reload UI",824,680,150,26,function() if U.reloadNeeded then context.reload() end end)
  local dock=CreateFrame("Frame","FieldKitLayoutDock",UIParent);U.dock=dock
  dock:SetWidth(560);dock:SetHeight(136);dock:SetPoint("TOP",UIParent,"TOP",0,-30);dock:SetFrameStrata("DIALOG");dock:SetFrameLevel(150);T.Surface(dock,"window")
- T.Label(dock,"Arrange previews and combat areas",18,12,380,26,20,T.gold,true)
- T.Label(dock,"Drag a window or a combat area, then choose Done.",18,44,370,30,12,T.muted)
+ T.Label(dock,"Preview — sample data",18,12,380,26,20,T.gold,true)
+ T.Label(dock,"Drag examples to place windows. Done restores live data.",18,44,370,30,12,T.muted)
  U.done=T.Button(dock,"FieldKitLayoutDone","Done",438,29,100,30,function() U.SetLayoutEditing(false,true) end)
  U.groupLeft=T.Button(dock,nil,"",18,88,166,28,function()
   FieldKitDB.linkLeftCards=not FieldKitDB.linkLeftCards;FieldKitHudStack.Apply();FieldKitCardLayout.UpdateDock()
@@ -520,12 +530,14 @@ function U.Build(sections,context)
  U.sizes=T.Button(dock,nil,"Adjust sizes",366,88,172,28,function()
   U.SetLayoutEditing(false,true);U.Select("windows");U.SelectWindowTab(U.windowPage,"layout")
  end)
+ local previewElapsed=0
+ dock:SetScript("OnUpdate",function() previewElapsed=previewElapsed+(arg1 or 0);if previewElapsed>=.15 then previewElapsed=0;FieldKitPreview.Refresh() end end)
  dock:SetScript("OnHide",function() if FieldKit.layoutEditing then U.SetLayoutEditing(false,false) end end);dock:Hide()
  frame:SetScript("OnShow",function() U.Refresh() end)
  frame:SetScript("OnHide",function()
   U.CloseMenus()
   if context.dismiss then context.dismiss() end
-  if not U.routingLayout then FieldKit.layoutEditing=false;context.unlock(false);FieldKitCombat.HideAnchors();context.bosses() end
+  if not U.routingLayout then FieldKitPreview.Stop();FieldKit.layoutEditing=false;context.unlock(false);FieldKitCombat.HideAnchors();context.bosses() end
  end)
  local elapsed=0
  frame:SetScript("OnUpdate",function()
