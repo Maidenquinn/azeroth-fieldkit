@@ -156,7 +156,7 @@ function D.Render()
    if limited then
     row.meterColumns[1]:Hide();row.meterColumns[3]:Hide()
     row.meterColumns[2]:ClearAllPoints();row.meterColumns[2]:SetPoint("RIGHT",row,"RIGHT",-3,0);row.meterColumns[2]:SetWidth(110)
-    row.label:SetWidth(width-164);row.meterMode=nil
+    row.label:SetWidth(width-164-(row.fieldkitIconInset or 0));row.meterMode=nil
    end
    row:SetValue(line.dmg and line.dmg/math.max(top or 0,1) or 0)
    if line.proc==1 then row:SetStatusBarColor(.25,.45,.9,.55) else row:SetStatusBarColor(.8,.55,.1,.55) end

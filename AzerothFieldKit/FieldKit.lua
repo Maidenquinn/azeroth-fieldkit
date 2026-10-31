@@ -1024,7 +1024,7 @@ local function ApplyCompactPanel(f, key, expandedHeight)
     if not f then return end
     local collapsed = DB[key]
     local count=f.slots and table.getn(f.slots) or math.max(1,math.floor((expandedHeight-14)/13))
-    FieldKitCardLayout.Rows(f,expandedHeight,count,f.slots and "gear" or "stats",collapsed)
+    FieldKitCardLayout.Rows(f,expandedHeight,count,f.slots and "gearDetails" or "stats",collapsed)
     FieldKitTheme.Update(f)
     local rows = f.rows or f.slots or {}
     for i = 1, table.getn(rows) do
@@ -1433,6 +1433,9 @@ local function UpdateGearFrame()
 		local slot = GEAR_SLOTS[i]
 		local row = gearFrame.slots[i]
 		local name, texture = ReadSlot(slot[1])
+  local detail=FieldKitLoadout.items[slot[1]]
+  row.bonus:SetText((name or texture) and detail and table.concat(detail.bonuses," · ") or "")
+  row.bonus:SetWidth(gearFrame:GetWidth()-34)
 		FieldKit_Text(row.label,slot[2])
 		if ( name or texture ) then
 			row.value:SetText(name or "|cff9d9d9d"..FieldKit_L("(worn)").."|r")
@@ -1445,7 +1448,7 @@ local function UpdateGearFrame()
 		row:ClearAllPoints()
 		row:SetPoint("TOPLEFT", gearFrame, "TOPLEFT", 6, y)
 		row:SetPoint("RIGHT", gearFrame, "RIGHT", i == 1 and -26 or -6, 0)
-		y = y - 18
+		y = y - 32
 	end
 
 	gearFrame:SetHeight(-y + 6)
@@ -1473,14 +1476,15 @@ local function CreateGearFrame()
 		row.icon = row:CreateTexture("FieldKitGearSlot"..i.."Icon", "ARTWORK")
 		row.icon:SetWidth(14)
 		row.icon:SetHeight(14)
-		row.icon:SetPoint("LEFT", row, "LEFT", 2, 0)
+		row.icon:SetPoint("TOPLEFT", row, "TOPLEFT", 2, 0)
 		row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 		row.label = row:CreateFontString("FieldKitGearSlot"..i.."Label", "OVERLAY", "GameFontNormalSmall")
-		row.label:SetPoint("LEFT", row, "LEFT", 20, 0)
+		row.label:SetPoint("TOPLEFT", row, "TOPLEFT", 20, 0)
 		row.value = row:CreateFontString("FieldKitGearSlot"..i.."Value", "OVERLAY", "GameFontHighlightSmall")
-		row.value:SetPoint("RIGHT", row, "RIGHT", -2, 0)
-		row.value:SetPoint("LEFT", row, "LEFT", 80, 0)
+		row.value:SetPoint("TOPRIGHT", row, "TOPRIGHT", -2, 0)
+		row.value:SetPoint("TOPLEFT", row, "TOPLEFT", 80, 0)
 		row.value:SetJustifyH("RIGHT")
+  row.bonus=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.bonus:SetPoint("TOPLEFT",row,"TOPLEFT",20,-16);row.bonus:SetHeight(12);row.bonus:SetTextColor(.3,1,.4)
 
 		row:SetScript("OnEnter", function()
 			if ( GetInventoryItemLink and GetInventoryItemLink("player", slotId) ) then
@@ -1548,6 +1552,7 @@ local function CreateBarWindow(name, title, rows)
 	collapse:SetFrameLevel(f:GetFrameLevel() + 10)
 	collapse:SetScript("OnClick", function()
 		local collapsed = not f.mashCollapsed
+  if f.nextBoss then if collapsed then f.nextBoss:Hide();f.nextBossTime:Hide() elseif (f.fieldkitFooterHeight or 0)>0 then f.nextBoss:Show();f.nextBossTime:Show() end end
 		f.mashCollapsed = collapsed
 		DB.collapsedWindows = DB.collapsedWindows or {}
 		DB.collapsedWindows[name] = collapsed or nil
@@ -1560,7 +1565,7 @@ local function CreateBarWindow(name, title, rows)
 			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
 			f.total:Show(); FieldKit_Text(this,"-")
    for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
-   FieldKitCardLayout.Rows(f,28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1),f.mashVisibleRows or 0,"bar",false)
+   FieldKitCardLayout.Rows(f,f.fieldkitNaturalHeight or (28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1)),f.mashVisibleRows or 0,f.fieldkitRowKind or "bar",false)
 		end
 	end)
 	f.mashCollapseButton = collapse
@@ -1600,7 +1605,7 @@ local function FitRows(f, n)
 	for i = n + 1, table.getn(f.rows) do
 		f.rows[i]:Hide()
 	end
-	local height = 28 + ROW_HEIGHT * math.max(n, 1)
+	local height = 28 + (f.fieldkitFooterHeight or 0) + ROW_HEIGHT * math.max(n, 1)
 	f.mashExpandHeight = height
 	if f.mashCollapsed then
 		f.total:Hide()
@@ -1645,7 +1650,7 @@ local function UpdateMeterFrame(force)
   row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,DB.meterValues,width,rateLabel);row:Show()
  end
  if n==0 and not known then
-  local row=meterFrame.rows[1];FieldKit_Text(row.label,"Meter data not provided");row.label:SetWidth(width-24)
+  local row=meterFrame.rows[1];FieldKitLoadout.ClearIcon(row);FieldKit_Text(row.label,"Meter data not provided");row.label:SetWidth(width-24)
   row:SetValue(0);row.value:Hide();for _,column in ipairs(row.meterColumns) do column:Hide() end
   row.meterMode=nil;row:Show();n=1
  end
@@ -1662,13 +1667,14 @@ local function UpdateTakenFrame(force)
  local top=lines[1] and lines[1].dmg or 1
  for i=1,n do
   local row=takenFrame.rows[i];local line=lines[i]
+  row.takenSource=line.source;row.takenDamage=line.dmg
   row:SetValue(line.dmg/math.max(top,1));row:SetStatusBarColor(.75,.1,.1,.55)
   FieldKit_Text(row.label,TAKEN_NAMES[line.source] or line.source)
   row.value:SetText(string.format("%s  %.0f%%",ShortNumber(line.dmg),100*line.dmg/math.max(sum,1)))
   row:Show()
  end
  if n==0 then
-  local row=takenFrame.rows[1];row:SetValue(0);row.value:SetText("")
+  local row=takenFrame.rows[1];row.takenSource=nil;row:SetValue(0);row.value:SetText("")
   FieldKit_Text(row.label,known and "No damage taken yet" or "Damage data not provided")
   row:Show();n=1
  end
@@ -1690,6 +1696,10 @@ local function CreateMeterFrames()
  FieldKit.CreateMeterColumns(meterFrame)
  for i=1,table.getn(meterFrame.rows) do FieldKitPartyDetails.BindRow(meterFrame.rows[i],meterFrame,true) end
 	takenFrame = CreateBarWindow("FieldKitTakenFrame", "Damage taken", TAKEN_ROWS)
+ for _,row in ipairs(takenFrame.rows) do
+  row:SetScript("OnEnter",function() FieldKitTakenDetails.Show(this) end)
+  row:SetScript("OnLeave",function() GameTooltip:Hide() end)
+ end
 
 	takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)
 	MakeMovable(meterFrame, -( UIParent:GetWidth() / 2 - 140 ), 60, true)
@@ -1736,7 +1746,8 @@ function UpdateLairFrame()
 		return
 	end
 	local lairs = AZS_GetLairs()
-	if ( table.getn(lairs) == 0 ) then
+	local nextBoss=DB.lairNextBoss and FieldKitNativeTools.NextBoss()
+ if ( table.getn(lairs) == 0 and not nextBoss ) then
 		lairFrame:Hide()
 		return
 	end
@@ -1809,13 +1820,19 @@ function UpdateLairFrame()
 		row:Show()
 	end
 	FieldKit_Text(lairFrame.total,held.." / "..table.getn(lairs)..FieldKit_L(" held"))
-	FitRows(lairFrame, n)
+	lairFrame.fieldkitFooterHeight=nextBoss and 20 or 0
+ if nextBoss and not lairFrame.mashCollapsed then
+  lairFrame.nextBoss:SetText(FieldKit_L("Next boss")..": "..nextBoss.name);lairFrame.nextBoss:SetWidth(lairFrame:GetWidth()-70);lairFrame.nextBoss:Show();lairFrame.nextBossTime:SetText(FieldKitNative.Clock(nextBoss.left));lairFrame.nextBossTime:Show()
+ else lairFrame.nextBoss:Hide();lairFrame.nextBossTime:Hide() end
+ FitRows(lairFrame, n)
 	lairFrame:Show()
 end
 
 -- Allocate the ten-row lair window with separate distance/state columns.
 function CreateLairFrame()
 	lairFrame = CreateBarWindow("FieldKitLairFrame", "Lairs", LAIR_ROWS)
+ lairFrame.nextBoss=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall");lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",8,6);lairFrame.nextBoss:SetHeight(14);lairFrame.nextBoss:Hide()
+ lairFrame.nextBossTime=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall");lairFrame.nextBossTime:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-8,6);lairFrame.nextBossTime:SetWidth(50);lairFrame.nextBossTime:SetHeight(14);lairFrame.nextBossTime:SetJustifyH("RIGHT");lairFrame.nextBossTime:Hide()
 
 	for i = 1, LAIR_ROWS do
 		local row = lairFrame.rows[i]
@@ -2168,7 +2185,7 @@ local function ResetPositions()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
- RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true);FieldKitNativeTools.Update();FieldKitScreenLayers.Update()
+ RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true);FieldKitNativeTools.Update();FieldKitLoadout.Update();FieldKitScreenLayers.Update()
  UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
  FieldKitCoop.Update()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
@@ -2294,6 +2311,7 @@ local function FieldKitEventLifecycle()
   FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
   FieldKitCoop.Create(CreateBarWindow,FitRows,MakeMovable)
   FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
+  FieldKitLoadout.Create(CreateBarWindow,MakeMovable);FieldKitTakenDetails.Reset();FieldKitLoadout.Update()
   FieldKitPreview.Initialize(CreateBarWindow,CreateBossFrame,PlaceMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
@@ -2419,7 +2437,7 @@ frame:SetScript("OnUpdate", function()
 	UpdateBossFrame()
 	UpdatePlayerBuffs()
 	UpdatePlayerBar()
-	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update();FieldKitNativeTools.Update();FieldKitScreenLayers.Update() end
+	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update();FieldKitNativeTools.Update();FieldKitLoadout.Update();FieldKitScreenLayers.Update() end
  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitPartySync.Tick()
 end)
 

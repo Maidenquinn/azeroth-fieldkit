@@ -5,9 +5,9 @@ FieldKitCardLayout={selected=1}
 local C=FieldKitCardLayout
 C.names={"FieldKitModeFrame","FieldKitMeterFrame","FieldKitTakenFrame","FieldKitLairFrame",
  "FieldKitGearFrame","FieldKitStatsFrame","FieldKitMoneyFrame","FieldKitPartyMeterFrame",
- "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings"}
+ "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings","FieldKitSpellsFrame"}
 C.labels={"Run mode","Damage","Damage taken","Lairs","Accessories","Statistics","Gold and chest price","Group damage",
- "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings"}
+ "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings","Spells"}
 
 function C.ValidName(name)
  for i=1,table.getn(C.names) do if C.names[i]==name then return true end end
@@ -31,18 +31,20 @@ end
 function C.Rows(frame,natural,count,kind,collapsed)
  local name=frame:GetName();local size=FieldKitDB.cardSizes[name]
  frame.fieldkitNaturalHeight=natural;frame.fieldkitRowCount=count;frame.fieldkitRowKind=kind
- local padding=kind=="bar" and 28 or 14
- local minimum=padding+math.max(count,1)*(kind=="gear" and 16 or 14)
+ local bar=kind=="bar" or kind=="spells"
+ local padding=bar and 28+(frame.fieldkitFooterHeight or 0) or 14
+ local rowMinimum=(kind=="spells" or kind=="gearDetails") and 32 or (kind=="gear" and 16 or 14)
+ local minimum=padding+math.max(count,1)*rowMinimum
  frame.fieldkitMinimumHeight=minimum
  local height=size and size.height and math.max(minimum,size.height) or natural
  frame.fieldkitExpandedHeight=height
  frame:SetWidth(C.Width(frame,frame:GetWidth()))
- frame:SetHeight(collapsed and (kind=="bar" and 24 or 23) or height)
+ frame:SetHeight(collapsed and (bar and 24 or 23) or height)
  local step=math.min(32,(height-padding)/math.max(count,1))
  local rows=frame.rows or frame.slots or {}
  for i=1,table.getn(rows) do
   local row=rows[i]
-  if kind=="bar" then
+  if bar then
    row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-22-step*(i-1))
    row:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-6,-22-step*(i-1));row:SetHeight(math.max(12,step-2))
   elseif kind=="stats" then

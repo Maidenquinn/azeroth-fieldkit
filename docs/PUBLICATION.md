@@ -1,10 +1,10 @@
 # Verified-addon publication record
 
-## Working branch — 0.3.1-review.2
+## Working branch — 0.3.2-review.1
 
-Context-free preview candidate. Development authorized by the maintainer; not
+Loadout/observed-attacker candidate, including the previous preview work. Development authorized by the maintainer; not
 accepted for publication, tagged, merged or released. The public release below
-remains 0.3.0. Visual game validation is still required. See [PREVIEWS.md](PREVIEWS.md).
+remains 0.3.0. Visual game validation is still required. See [LOADOUT_AND_TAKEN.md](LOADOUT_AND_TAKEN.md).
 
 ## Latest public update — 0.3.0
 

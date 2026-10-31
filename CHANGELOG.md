@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.2-review.1 — 2026-10-31 (unpublished loadout candidate)
+
+- Add a movable, collapsible Spells card with native ranks and current green
+  tooltip bonus lines. Reuse the card styles, opacity, sizing and preview editor.
+- Add native jewelry bonus summaries to Accessories. Keep rarity/item names and
+  their native tier suffix; never infer jewelry rank from observed upgrades.
+- Show learned native icons beside spell names in local/party detail meters.
+  Unknown icons remain absent; no dependency on AZSSpellMeter is installed.
+- Add the next scheduled boss and a separate countdown column inside Lairs.
+- Add taken-category hover details for unambiguously named melee hits observed
+  during this run and classified by fresh native unit/target data. Explicitly show
+  incomplete coverage and unassigned totals; no guessed monster breakdown.
+- Validate the readers, geometry, icons, attribution guards and run resets under
+  Lua 5.0.3/5.1. Real-client visual and event coverage validation is still pending.
+
 ## 0.3.1-review.2 — 2026-10-31 (unpublished UX candidate)
 
 - Isolate placement from the real FieldKit HUD. Add a Show/Hide other interface

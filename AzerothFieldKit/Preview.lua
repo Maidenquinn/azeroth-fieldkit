@@ -12,7 +12,8 @@ function P.Initialize(createBar,createBoss,place)
   P.names[i]=FieldKitCardLayout.names[i];P.labels[i]=FieldKitCardLayout.labels[i]
   P.included[i]=i<9 or i>12
  end
- table.insert(P.names,"FieldKitBossFrame1");table.insert(P.labels,"Bosses");P.included[17]=true
+ P.bossIndex=table.getn(P.names)+1;P.playerIndex=P.bossIndex+1;P.targetIndex=P.bossIndex+2
+ table.insert(P.names,"FieldKitBossFrame1");table.insert(P.labels,"Bosses");P.included[P.bossIndex]=true
  table.insert(P.names,"FieldKitPlayerBar");table.insert(P.labels,"Player health format")
  table.insert(P.names,"FieldKitTargetHealth");table.insert(P.labels,"Target health format")
  -- Health formats are available in the inspector. Existing player-bar dragging
@@ -52,7 +53,7 @@ function P.Commit(proxy,source)
 end
 
 function P.Drag(frame,start)
- if P.mode~="place" or frame.index>=18 then return end
+ if P.mode~="place" or frame.index>=P.playerIndex then return end
  local source=P.Group(frame.index) or getglobal(P.names[frame.index])
  local proxy=P.Group(frame.index) and frame:GetParent() or frame
  if start then proxy.moving=true;proxy:StartMoving()
@@ -84,11 +85,14 @@ end
 function P.Frame(index)
  if P.frames[index] then return P.frames[index] end
  local f
- if index>=18 then f=P.HealthFrame()
- elseif index==17 then f=P.createBoss(1,true)
+ if index>=P.playerIndex then f=P.HealthFrame()
+ elseif index==P.bossIndex then f=P.createBoss(1,true)
  else
   f=P.createBar("FieldKitPreviewCard"..index,P.labels[index],8)
   f.mashCollapseButton:Hide();f.mashCollapsed=false;FieldKit.CreateMeterColumns(f)
+  if index==5 or P.names[index]=="FieldKitSpellsFrame" then
+   for _,row in ipairs(f.rows) do row.sampleBonus=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.sampleBonus:SetPoint("TOPLEFT",row,"TOPLEFT",3,-15);row.sampleBonus:SetHeight(12);row.sampleBonus:SetTextColor(.3,1,.4) end
+  end
  end
  f.index=index;f:EnableMouse(true);f:SetMovable(true);f:RegisterForDrag("LeftButton")
  f:SetScript("OnDragStart",function() P.Drag(f,true) end)
@@ -100,6 +104,7 @@ end
 -- Local deterministic examples, with familiar categories and non-player names.
 -- Values are presentation fixtures, not a hypothetical damage attribution.
 function P.Rows(index)
+ if P.names[index]=="FieldKitSpellsFrame" then return {{"Fireball","Rank 3","+8% / -16%"},{"Melee","Rank 3","+4%"}} end
  local hp=FieldKit_FormatHealth(6705,12200,FieldKitDB.partyHealthMode)
  if index==1 then return {{"Heroic II","Example"},{"Bolstering","Example"},{"Next boss","1:24"}} end
  if index==2 then
@@ -133,15 +138,15 @@ end
 
 function P.Render(index)
  local f=P.Frame(index);local source=getglobal(P.names[index])
- if index>=18 then
-  local player=index==18
+ if index>=P.playerIndex then
+  local player=index==P.playerIndex
   local mode=player and FieldKitDB.playerHealthMode or FieldKitDB.targetHealthMode
   f.health:SetWidth(player and FieldKitPlayerBar:GetWidth() or 180)
   f.hp:SetText(FieldKit_FormatHealth(6705,12200,mode));FieldKit_Text(f.title,"Preview — sample data")
   f.shield:SetWidth(f.health:GetWidth()*.2)
   if player and FieldKitDB.playerShield then f.shield:Show() else f.shield:Hide() end
   for _,icon in ipairs(f.buffs) do if player and FieldKitDB.playerBuffs then icon:Show() else icon:Hide() end end
- elseif index==17 then
+ elseif index==P.bossIndex then
   f.name:SetText(FieldKit_L("Boss").." · "..FieldKit_L("Preview"))
   f.hp:SetText(FieldKit_FormatHealth(6705,12200,FieldKitDB.bossHealthMode))
   f.bar:SetMinMaxValues(0,12200);f.bar:SetValue(6705);f.level:SetText("7")
@@ -158,7 +163,8 @@ function P.Render(index)
   local rows=P.Rows(index);local size=FieldKitDB.cardSizes[P.names[index]]
   local width=math.max(280,size and size.width or source:GetWidth())
   if index==2 or index==8 or index==3 then width=math.max(width,FieldKit.MeterWidth(FieldKitDB.meterValues)) end
-  f:SetWidth(width);f:SetHeight(math.max(28+14*table.getn(rows),size and size.height or 0))
+  local rowHeight=(index==5 or P.names[index]=="FieldKitSpellsFrame") and 32 or 14
+  f:SetWidth(width);f:SetHeight(math.max(28+rowHeight*table.getn(rows),size and size.height or 0))
   FieldKit_Text(f.title,"Preview");f.title:SetWidth(width*.28)
   FieldKit_Text(f.total,P.labels[index]);f.total:SetWidth(width*.6)
   for i=1,table.getn(f.rows) do
@@ -166,10 +172,11 @@ function P.Render(index)
    if d then
     row:ClearAllPoints();row:SetPoint("TOPLEFT",f,"TOPLEFT",6,-22-(i-1)*math.min(32,(f:GetHeight()-28)/table.getn(rows)))
     row:SetPoint("TOPRIGHT",f,"TOPRIGHT",-6,-22-(i-1)*math.min(32,(f:GetHeight()-28)/table.getn(rows)))
+    if row.sampleBonus then row.sampleBonus:SetWidth(width-24);row.sampleBonus:SetText(type(d[3])=="string" and d[3] or "+8%") end
     row:SetHeight(12);row.label:SetText(FieldKit_L(d[1]));row.value:Show()
     if type(d[2])=="number" then
      row.meterMode=nil
-     FieldKit.UpdateMeterColumns(row,{dmg=d[2],dps=d[3],share=d[4]},FieldKitDB.meterValues,width,index==2 and FieldKitMeters.Mode()==2 and FieldKit_L("hps") or nil)
+     FieldKit.UpdateMeterColumns(row,{name=d[1],dmg=d[2],dps=d[3],share=d[4]},FieldKitDB.meterValues,width,index==2 and FieldKitMeters.Mode()==2 and FieldKit_L("hps") or nil)
     else
      if row.meterColumns then for j=1,3 do row.meterColumns[j]:Hide() end end
      row.meterMode=nil;row.label:ClearAllPoints();row.label:SetPoint("LEFT",row,"LEFT",3,0);row.label:SetWidth(width*.48);row.value:SetWidth(width*.45);row.value:SetText(FieldKit_L(d[2]));row.value:SetJustifyH("RIGHT")
@@ -223,7 +230,7 @@ end
 function P.Refresh()
  if not P.mode then return end
  for i=1,table.getn(P.names) do
-  if (P.all and i<18 and P.included[i]) or (not P.all and i==P.selected) then P.Render(i)
+  if (P.all and i<P.playerIndex and P.included[i]) or (not P.all and i==P.selected) then P.Render(i)
   elseif P.frames[i] then P.frames[i]:Hide() end
  end
  if P.all then
@@ -232,8 +239,8 @@ function P.Refresh()
  end
  FieldKitPreviewVisibility.Update()
  if P.inspector then
-  FieldKit_Text(P.inspector.place,P.selected>=18 and "Health preview only; drag the active player bar directly" or "Place this window")
-  FieldKit_Text(P.inspector.reset,P.selected>=18 and "Health preview only; drag the active player bar directly" or P.Group(P.selected) and "Ungroup this side to reset one window" or "Reset this window position")
+  FieldKit_Text(P.inspector.place,P.selected>=P.playerIndex and "Health preview only; drag the active player bar directly" or "Place this window")
+  FieldKit_Text(P.inspector.reset,P.selected>=P.playerIndex and "Health preview only; drag the active player bar directly" or P.Group(P.selected) and "Ungroup this side to reset one window" or "Reset this window position")
  end
 end
 
@@ -258,7 +265,7 @@ end
 
 function P.Reset()
  if P.Group(P.selected) then return end
- if P.selected>=18 then return end
+ if P.selected>=P.playerIndex then return end
  local source=getglobal(P.names[P.selected]);local d=source and source.azsDefault
  if not d then return end
  FieldKitDB.frameAnchors[source:GetName()]=nil;FieldKitDB.pos[source:GetName()]={d[1],d[2]}
@@ -279,11 +286,11 @@ function P.Open(index)
   T.Label(f,"Preview — sample data",12,12,390,28,18,T.gold,true)
   T.Label(f,"Examples only. No combat data is recorded or shared.",12,43,410,32,12,T.muted)
   local x=CreateFrame("Button",nil,f,"UIPanelCloseButton");x:SetWidth(24);x:SetHeight(24);x:SetPoint("TOPRIGHT",f,"TOPRIGHT",-4,-4);x:SetScript("OnClick",P.Stop)
-  f.choice=FieldKitUI.Choice(f,"FieldKitPreviewChoice","Test display",12,90,416,P.labels,function() return P.selected end,function(v) P.selected=v;if v<=16 then FieldKitCardLayout.selected=v;FieldKitUI.Refresh() end;P.Refresh() end,P.Refresh)
+  f.choice=FieldKitUI.Choice(f,"FieldKitPreviewChoice","Test display",12,90,416,P.labels,function() return P.selected end,function(v) P.selected=v;if v<=table.getn(FieldKitCardLayout.names) then FieldKitCardLayout.selected=v;FieldKitUI.Refresh() end;P.Refresh() end,P.Refresh)
   f.include=CreateFrame("CheckButton",nil,f,"UICheckButtonTemplate");f.include:SetWidth(24);f.include:SetHeight(24);f.include:SetPoint("TOPLEFT",f,"TOPLEFT",12,-414)
   T.Label(f,"Include in interface composition",42,414,380,24,12)
-  f.include:SetScript("OnClick",function() if P.selected<18 then P.included[P.selected]=this:GetChecked() and true or false else this:SetChecked(false) end end)
-  f.place=T.Button(f,nil,"Place this window",12,448,202,26,function() if P.selected<18 then FieldKitUI.SetLayoutEditing(true,false);P.Start(false) end end)
+  f.include:SetScript("OnClick",function() if P.selected<P.playerIndex then P.included[P.selected]=this:GetChecked() and true or false else this:SetChecked(false) end end)
+  f.place=T.Button(f,nil,"Place this window",12,448,202,26,function() if P.selected<P.playerIndex then FieldKitUI.SetLayoutEditing(true,false);P.Start(false) end end)
   f.reset=T.Button(f,nil,"Reset this window position",12,480,416,24,P.Reset)
   f.all=T.Button(f,nil,"Compose interface",226,448,202,26,function() FieldKitUI.SetLayoutEditing(true,false) end)
   local elapsed=0

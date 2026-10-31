@@ -181,3 +181,13 @@ alpha and available mouse state on foreign UIParent descendants, then restores t
 captured state at exit. It does not hide UIParent/WorldFrame, replace scripts or
 methods, modify other addons' preferences, or call native gameplay/HUD setters.
 This presentation scope is documented in docs/PREVIEWS.md and API_SURFACE.md.
+
+## 0.3.2-review.1 loadout and observed attacker details
+
+Loadout.lua reads bounded native tooltip/spellbook/action/inventory data, at most
+once per second. It never activates an action or copies third-party runtime tables.
+TakenDetails.lua listens only to the local creature-versus-self melee event; named
+hits require a supported exact template and fresh native classification, with
+conflicting names rejected. Its 128-source in-memory ledger is reset at run changes
+and never saved or shared. Native category totals remain separate and authoritative.
+See docs/LOADOUT_AND_TAKEN.md for limits and validation steps.

@@ -1,7 +1,7 @@
 # Azeroth FieldKit
 
-> **Candidat de branche 0.3.1-review.2 :** aperçus hors contexte et composition du HUD.
-> Mise à jour non publiée. Voir [guide et vérifications en jeu](docs/PREVIEWS.md).
+> **Candidat de branche 0.3.2-review.1 :** bonus des bijoux/sorts, icônes et détails des dégâts reçus.
+> Mise à jour non publiée. Voir [guide et vérifications en jeu](docs/LOADOUT_AND_TAKEN.md).
 
 > **Mise à jour 0.3.0 :** effets, réanimation, compteurs Soins/Boss et outils
 > natifs facultatifs. Voir [activation et limites](docs/NATIVE_TOOLS_0_130.md).

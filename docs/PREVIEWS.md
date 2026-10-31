@@ -1,4 +1,4 @@
-# Context-free preview guide — 0.3.1-review.2
+# Context-free preview guide — 0.3.2-review.1
 
 Unpublished branch candidate. No actual game rendering test by the agent.
 
@@ -6,7 +6,7 @@ Unpublished branch candidate. No actual game rendering test by the agent.
 
 1. `/fieldkit` → Vie et effets / Boss suivis / Alertes / Fenêtres → Disposition ou Coop.
 2. **Tester l’affichage** ouvre un petit inspecteur déplaçable. Son menu propose
-   19 exemples, même en solo et avec les modules désactivés. Les compteurs ont des
+   20 exemples, même en solo et avec les modules désactivés. Les compteurs ont des
    lignes remplies ; le groupe montre quatre joueurs fictifs. Les PV joueur/cible
    ont leur propre exemple. Les noms et valeurs sont explicitement fictifs.
 3. Gardez cet inspecteur visible et modifiez les options dans les paramètres :
@@ -33,7 +33,7 @@ Le texte de combat conserve son bouton Aperçu et ses zones déplaçables dans s
 
 ## Implementation and limits for reviewers
 
-`Preview.lua` owns a lazy, bounded pool (19 examples, at most eight rows per card),
+`Preview.lua` owns a lazy, bounded pool (20 examples, at most eight rows per card),
 a single inspector and up to two noninteractive group proxies. No frames are
 allocated by steady-state refresh. Work runs at most every 150ms while the
 inspector/composition dock is visible; there is no additional background loop.

@@ -5,7 +5,7 @@ local N=FieldKitNative
 local reads={["AZS_GetPhase"]=true,["AZS_GetRunTime"]=true,["AZS_GetTotems"]=true,["AZS_GetSummonGroups"]=true,
  ["AZS_GetTimers"]=true,["AZS_GetRevive"]=true,["AZS_GetUpcomingBosses"]=true,["AZS_GetStoredLevels"]=true,
  ["AZS_GetFlaggedLair"]=true,["AZS_GetMeter"]=true,["AZS_GetHealing"]=true,["AZS_GetBossMeter"]=true}
-local sources={AZSTOTEMS="AZS_TOTEMS",AZSPETS="AZS_PETS",AZSTIMERS="AZS_TIMERS",AZSREVIVE="AZS_REVIVE"}
+local sources={AZSSPELLS="AZS_SPELLS",AZSTOTEMS="AZS_TOTEMS",AZSPETS="AZS_PETS",AZSTIMERS="AZS_TIMERS",AZSREVIVE="AZS_REVIVE"}
 function N.Read(name)
  if not reads[name] then return nil end
  local fn=getglobal(name);if type(fn)~="function" then return nil end

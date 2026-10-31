@@ -1,7 +1,7 @@
 # Azeroth FieldKit
 
-> **Branch candidate 0.3.1-review.2:** context-free HUD previews and composition.
-> Not a published update. See [preview guide and game-test checklist](docs/PREVIEWS.md).
+> **Branch candidate 0.3.2-review.1:** native loadout bonuses, spell icons and partial attacker details.
+> Not a published update. See [guide and game-test checklist](docs/LOADOUT_AND_TAKEN.md).
 
 > **0.3.0 native-tools update:** optional effects, revive progress, Healing/Boss
 > meters and guarded HUD tools. See [activation and limits](docs/NATIVE_TOOLS_0_130.md).

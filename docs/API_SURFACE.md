@@ -206,3 +206,18 @@ foreign frames when the user enters placement; the dock includes its visibility
 toggle. Originals are restored on exit, without invoking Show/Hide, replacing
 foreign methods/scripts, reparenting or changing saved/native HUD settings.
 UIParent and WorldFrame are excluded. See PREVIEWS.md for boundaries and tests.
+
+## Loadout and taken details (0.3.2-review.1)
+
+Uses optional GetSpellName/GetSpellTexture and hidden GameTooltip SetSpell, SetAction
+and SetInventoryItem readers; HasAction/GetActionTexture provide additional native
+icon headers. Readers use protected calls, 128 spellbook/120 action/24 tooltip-line
+limits and a one-second refresh interval. No action is executed. AZS_SPELLS.rank is
+used when a normalized spell name matches its stable key; otherwise only an explicit
+Rank/Rang tooltip header is displayed. Inventory ranks are never extrapolated.
+
+The existing upcoming-boss getter populates a footer within Lairs. A single local
+CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS listener can supply partial named melee
+observations. AZS_UNITS/AZS_TARGET must be fresh after reset and give an unambiguous
+normal/elite kind. No health-delta inference, static seed classification, per-hit
+network traffic or persistent combat log is introduced.
