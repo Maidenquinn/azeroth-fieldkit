@@ -1,5 +1,10 @@
 # Azeroth FieldKit
 
+> **Candidate de test : 0.3.0-review.1.** La release publique reste 0.2.3.
+> Cette branche intègre les outils natifs du client 0.130.1, sans fusion ni nouvelle
+> publication. Voir [activation et tests](docs/NATIVE_TOOLS_0_130.md).
+
+
 Outils de combat et d’interface entièrement en jeu pour Azeroth Survivors.
 Maintenu par **Kevin Radlowski / Maidenhead**, dérivé de **MASH par Malk**.
 

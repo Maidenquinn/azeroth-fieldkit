@@ -11,12 +11,12 @@ function FieldKit_FormatHealth(current,maximum,mode)
 end
 -- These are observed native meter fields, not damage inferred from DPS/time.
 -- Missing fields remain visibly unknown. Damage totals are displayed unabridged.
-local function MeterParts(line)
+local function MeterParts(line,rateLabel)
  local damage=FieldKit.Number(line.dmg,nil,0)
  local rate=FieldKit.Number(line.dps,nil,0)
  local share=FieldKit.Number(line.share,nil,0)
  local amount=damage and string.format("%.0f",damage) or "?"
- local dps=(rate and string.format("%.0f",rate) or "?").." dps"
+ local dps=(rate and string.format("%.0f",rate) or "?").." "..FieldKit_L(rateLabel or "dps")
  local percent=share and string.format("%.0f%%",share*100) or "?"
  return amount,dps,percent
 end
@@ -42,9 +42,9 @@ function FieldKit.CreateMeterColumns(frame)
  end
 end
 
-function FieldKit.UpdateMeterColumns(row,line,mode,width)
+function FieldKit.UpdateMeterColumns(row,line,mode,width,rateLabel)
  local columns=row.meterColumns
- local damage,rate,share=MeterParts(line)
+ local damage,rate,share=MeterParts(line,rateLabel)
  columns[1]:SetText(damage);columns[2]:SetText(rate);columns[3]:SetText(share)
  if row.meterMode~=mode or row.meterWidth~=width then
   row.meterMode=mode;row.meterWidth=width

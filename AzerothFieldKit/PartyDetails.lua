@@ -5,7 +5,7 @@ FieldKitPartyDetails={offset=0,pool=10}
 local D=FieldKitPartyDetails
 local T=FieldKitTheme
 
-function D.Data(name)
+function D.Data(name,mode)
  local peer=FieldKitCoop.MemberDamage(name)
  local own=name==UnitName("player")
  if not peer and not own then return nil end
@@ -22,22 +22,11 @@ function D.Data(name)
   if peer.top then table.insert(result.rows,{name=peer.top,dps=peer.topdps}) end
   return result
  end
- if type(AZS_GetMeter)~="function" then result.unavailable=true;return result end
- local ok,lines,total,dps=pcall(AZS_GetMeter)
- if not ok or type(lines)~="table" then result.unavailable=true;return result end
- local sum=0
- for i=1,math.min(512,table.getn(lines)) do
-  local line=lines[i]
-  if type(line)=="table" and type(line.name)=="string" then
-   local damage=FieldKit.Number(line.dmg,nil,0)
-   table.insert(result.rows,{name=string.sub(line.name,1,160),dmg=damage,
-    dps=FieldKit.Number(line.dps,nil,0),share=FieldKit.Number(line.share,nil,0,1),proc=line.proc==1 and 1 or 0})
-   sum=sum+(damage or 0)
-  end
- end
- result.damage=FieldKit.Number(total,sum,0);result.dps=FieldKit.Number(dps,nil,0)
- result.truncated=table.getn(lines)>512
- table.sort(result.rows,function(a,b) return (a.dmg or 0)>(b.dmg or 0) end)
+ local lines,total,rate,known,truncated=FieldKitMeters.Read(mode or 1)
+ result.mode=mode or 1
+ if not known then result.unavailable=true;return result end
+ result.rows=lines;result.damage=total;result.dps=rate;result.truncated=truncated
+
  return result
 end
 
@@ -149,7 +138,8 @@ function D.Render()
   if limited and i~=2 then caption:Hide() else caption:Show() end
  end
  if limited then D.spell:SetWidth(width-164) end
- D.summary:SetText(string.format(FieldKit_L("Damage: %s   DPS: %s"),data.damage and string.format("%.0f",data.damage) or "?",data.dps and string.format("%.0f",data.dps) or "?"))
+ FieldKit_Text(D.captions[1],data.mode==2 and "Healing" or "Damage");FieldKit_Text(D.captions[2],data.mode==2 and "HPS" or "DPS")
+ D.summary:SetText(string.format(FieldKit_L(data.mode==2 and "Healing: %s   HPS: %s" or "Damage: %s   DPS: %s"),data.damage and string.format("%.0f",data.damage) or "?",data.dps and string.format("%.0f",data.dps) or "?"))
  local hint=data.own and "Your native spell breakdown. Scroll for more spells." or "Allies: only their top spell is exposed. Full breakdown unavailable."
  if data.waiting then hint="Waiting for shared spells. The ally must enable sharing in FieldKit too." end
  if data.noTransport then hint="This client does not expose an addon-message transport." end
@@ -162,7 +152,7 @@ function D.Render()
   local row=frame.rows[i];local line=i<=shown and data.rows[D.offset+i]
   if line then
    row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-128-(i-1)*22);row:SetWidth(width-24)
-   row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,3,width-12)
+   row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,3,width-12,data.mode==2 and "hps" or "dps")
    if limited then
     row.meterColumns[1]:Hide();row.meterColumns[3]:Hide()
     row.meterColumns[2]:ClearAllPoints();row.meterColumns[2]:SetPoint("RIGHT",row,"RIGHT",-3,0);row.meterColumns[2]:SetWidth(110)
@@ -185,8 +175,10 @@ end
 
 function D.Open(owner)
  if D.pinned or FieldKit.layoutEditing or (owner.fieldkitDetailSource or FieldKitCoop.meter).azsMoving or not owner.fieldkitMember then return end
- local data=D.Data(owner.fieldkitMember);if not data then D.Close();return end
- D.Build();D.owner=owner;D.source=owner.fieldkitDetailSource or FieldKitCoop.meter;D.member=owner.fieldkitMember;D.data=data;D.offset=0
+ local source=owner.fieldkitDetailSource or FieldKitCoop.meter
+ local mode=source==FieldKitMeterFrame and FieldKitMeters.Mode() or 1
+ local data=D.Data(owner.fieldkitMember,mode);if not data then D.Close();return end
+ D.Build();D.owner=owner;D.source=owner.fieldkitDetailSource or FieldKitCoop.meter;D.member=owner.fieldkitMember;D.data=data;D.offset=0;D.mode=mode
  D.overOwner=true;D.overPopup=false;D.deadline=nil;D.Render();D.frame:Show()
 end
 
@@ -208,12 +200,13 @@ end
 function D.Sync()
  if not D.member then return end
  local source=D.source or FieldKitCoop.meter
+ if source==FieldKitMeterFrame and D.mode~=FieldKitMeters.Mode() then D.Close();return end
  if FieldKit.layoutEditing or source.azsMoving or not FieldKitCoop.phase or not source:IsShown()
   or source.mashCollapsed or (not D.pinned and (not D.owner:IsShown() or not D.owner.fieldkitMember)) then D.Close();return end
  if not D.pinned and D.owner.fieldkitMember~=D.member then
   if D.overOwner then D.Open(D.owner) else D.Close() end
   return
  end
- local data=D.Data(D.member);if not data then D.Close();return end
+ local data=D.Data(D.member,D.mode);if not data then D.Close();return end
  D.data=data;D.Render()
 end

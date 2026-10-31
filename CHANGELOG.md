@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.0-review.1 — 2026-10-31 (unreleased native-tools candidate)
+
+- Add opt-in passive Effects, Revive and Run reminders cards, reusing existing
+  theme, dragging, lock, independent sizes, collapse and language controls.
+- Track native totem counts/caps/soonest expiry, permanent/temporary summons and
+  published talent/item cooldowns. Reject retained snapshots across run boundaries.
+- Add local Healing/HPS and Boss Damage views to the existing meter and pinned
+  details, preserving native rate time bases and honest unsupported states.
+- Add bounded/deduplicated native boss/mechanic warnings and one configurable
+  arrival warning per observed boss schedule; no attack prediction or native HUD hiding.
+- Add optional stored-level count and native flagged-lair emphasis. No level spending.
+- Read native affix names only when supplied; unrecognized numeric/string formats
+  remain explicitly raw. No invented weekly rotation or bitmask interpretation.
+- Add individually opted-in overlays above level/jewelry choices through the new
+  native API, allowlisted to FieldKit frames. No guarantee for death/other modals.
+- Add guarded older-client fallbacks, local `/fieldkit native` diagnostics and
+  EN/FR help. New panels/warnings start off; existing preferences are retained.
+- Offline Lua 5.0.3/5.1 behavioral fixtures cover data fidelity, old APIs, run resets,
+  packet ordering, bounds, overlays, persistence and navigation. Live rendering,
+  co-op delivery and the real affix encoding still require game testing.
+
+
 ## 0.2.3 — 2026-10-28 (published update; GitHub prerelease)
 
 Maintainer accepted for publication. Consolidates the layout, co-op and UX work

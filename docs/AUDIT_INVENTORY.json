@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.2.3",
-  "runtimeModules": 25,
+  "candidate": "0.3.0-review.1",
+  "runtimeModules": 28,
   "textureCount": 120,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
-      "bytes": 3650,
-      "sha256": "89144778183fce8183b7eeba94c9cf7a6765963856bac7ac193a4b3f00b16020",
+      "bytes": 4520,
+      "sha256": "18d36ddf6440949e8865561b60b269b18fdec80d77789088b21bff9455c006af",
       "namedFunctions": [
         {
           "name": "FieldKit.PartyTransportAvailable",
@@ -37,6 +37,14 @@
         {
           "name": "FieldKit.RememberClassification",
           "line": 65
+        },
+        {
+          "name": "FieldKit.SetFrameOnTop",
+          "line": 75
+        },
+        {
+          "name": "FieldKit.FrameOverlayAvailable",
+          "line": 88
         }
       ],
       "literalEvents": []
@@ -61,12 +69,12 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 4822,
-      "sha256": "f624d9d4bf1906d421eb6f484cd418a9717ccd19b4e933a8e37351de08b7dda8",
+      "bytes": 5475,
+      "sha256": "11c06bed819ff5619f48d82dd302f3270be51ad9c72f35f5174ce7a7a29fada0",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
-          "line": 11
+          "line": 13
         }
       ],
       "literalEvents": []
@@ -107,8 +115,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 17046,
-      "sha256": "815a7be092ea40cfad6b5335f46920dca17f273edc9ee320d262ab98f5a69ef3",
+      "bytes": 22803,
+      "sha256": "aa9d223e146323968a4a940ef217b4902827231817278272a06016ba6f8286a2",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -183,8 +191,8 @@
       "literalEvents": []
     },
     "Settings.lua": {
-      "bytes": 4009,
-      "sha256": "155a7e0ab196fb85012560ec1b56b169caefc6fee9164681586f59ce609ded28",
+      "bytes": 4068,
+      "sha256": "99467cda7c10b33cbf2755156b31a43136d491976fd1b78031774963afa7a58d",
       "namedFunctions": [
         {
           "name": "FieldKit_FormatHealth",
@@ -249,24 +257,79 @@
       "literalEvents": []
     },
     "RunMode.lua": {
-      "bytes": 3638,
-      "sha256": "b42e9655f9692d6e43f5cefce38a8987f7bb5ed3ab46b60f0a90bfb710920619",
+      "bytes": 4932,
+      "sha256": "bdc4982da5b94424d6dc7b6280660761c27906e1681fd37ee5512d6006bb42e4",
       "namedFunctions": [
         {
+          "name": "R.Affixes",
+          "line": 21
+        },
+        {
           "name": "R.Tooltip",
-          "line": 19
+          "line": 40
         },
         {
           "name": "R.Create",
-          "line": 34
+          "line": 57
         },
         {
           "name": "R.Reflow",
-          "line": 48
+          "line": 71
         },
         {
           "name": "R.Update",
+          "line": 78
+        }
+      ],
+      "literalEvents": []
+    },
+    "NativeData.lua": {
+      "bytes": 4142,
+      "sha256": "0163e70268eefe36c5bc5b6869226857aadd871c26f04d401d9bb0a81afb2316",
+      "namedFunctions": [
+        {
+          "name": "N.Read",
+          "line": 9
+        },
+        {
+          "name": "N.Has",
+          "line": 14
+        },
+        {
+          "name": "N.Active",
+          "line": 15
+        },
+        {
+          "name": "N.Text",
+          "line": 19
+        },
+        {
+          "name": "N.Time",
+          "line": 32
+        },
+        {
+          "name": "N.Clock",
+          "line": 37
+        },
+        {
+          "name": "N.Watch",
+          "line": 41
+        },
+        {
+          "name": "N.Packet",
           "line": 55
+        },
+        {
+          "name": "N.Fresh",
+          "line": 58
+        },
+        {
+          "name": "M.Mode",
+          "line": 70
+        },
+        {
+          "name": "M.Read",
+          "line": 71
         }
       ],
       "literalEvents": []
@@ -287,8 +350,8 @@
       "literalEvents": []
     },
     "CardLayout.lua": {
-      "bytes": 8643,
-      "sha256": "ec00f1aea9726ec85c4bf8e530148c523d9fa8fb2d4ba0a133dca3eed1397427",
+      "bytes": 9225,
+      "sha256": "d91f6b3ab1bb6cc9d3bdde8faecbe9f3445cf9403ea534defab228219494492f",
       "namedFunctions": [
         {
           "name": "C.ValidName",
@@ -300,47 +363,47 @@
         },
         {
           "name": "C.Width",
-          "line": 23
+          "line": 24
         },
         {
           "name": "C.Rows",
-          "line": 30
+          "line": 31
         },
         {
           "name": "C.Money",
-          "line": 61
+          "line": 62
         },
         {
           "name": "C.Initialize",
-          "line": 70
+          "line": 71
         },
         {
           "name": "C.Bind",
-          "line": 95
+          "line": 96
         },
         {
           "name": "C.ApplyRight",
-          "line": 105
+          "line": 106
         },
         {
           "name": "C.Refresh",
-          "line": 135
+          "line": 136
         },
         {
           "name": "C.Frame",
-          "line": 140
+          "line": 141
         },
         {
           "name": "C.UpdateDock",
-          "line": 142
+          "line": 143
         },
         {
           "name": "C.SetDimension",
-          "line": 149
+          "line": 150
         },
         {
           "name": "C.Options",
-          "line": 156
+          "line": 157
         }
       ],
       "literalEvents": []
@@ -484,8 +547,8 @@
       "literalEvents": []
     },
     "PartyDetails.lua": {
-      "bytes": 11166,
-      "sha256": "6fcab5af0f06065cc47a568c6fa07732a02e5ad7fa6f1108953b193f7893ebc1",
+      "bytes": 11045,
+      "sha256": "b99352ec53d47ec4f130a3e070d27f6172e877164d58c490d626a4e38507a1c8",
       "namedFunctions": [
         {
           "name": "D.Data",
@@ -493,43 +556,113 @@
         },
         {
           "name": "D.DelayClose",
-          "line": 44
+          "line": 33
         },
         {
           "name": "D.Close",
-          "line": 46
+          "line": 35
         },
         {
           "name": "D.BindHover",
-          "line": 54
+          "line": 43
         },
         {
           "name": "D.Page",
-          "line": 66
+          "line": 55
         },
         {
           "name": "D.Build",
-          "line": 72
+          "line": 61
         },
         {
           "name": "D.Anchor",
-          "line": 124
+          "line": 113
         },
         {
           "name": "D.Render",
-          "line": 134
+          "line": 123
         },
         {
           "name": "D.Open",
-          "line": 186
+          "line": 176
         },
         {
           "name": "D.BindRow",
-          "line": 193
+          "line": 185
         },
         {
           "name": "D.Sync",
-          "line": 208
+          "line": 200
+        }
+      ],
+      "literalEvents": []
+    },
+    "ScreenLayers.lua": {
+      "bytes": 937,
+      "sha256": "fa41024b7e27d166757536028246524fc2f10865deafbe4b529ec817c4805668",
+      "namedFunctions": [
+        {
+          "name": "S.Update",
+          "line": 5
+        }
+      ],
+      "literalEvents": []
+    },
+    "NativeTools.lua": {
+      "bytes": 11383,
+      "sha256": "6bf5db540bfcc3c2220c9e761838e49a16f6a1674d174fecd608714d4cd9a38e",
+      "namedFunctions": [
+        {
+          "name": "Count",
+          "line": 6
+        },
+        {
+          "name": "T.Create",
+          "line": 7
+        },
+        {
+          "name": "T.ShowRows",
+          "line": 40
+        },
+        {
+          "name": "T.Effects",
+          "line": 61
+        },
+        {
+          "name": "T.Revive",
+          "line": 97
+        },
+        {
+          "name": "T.NextBoss",
+          "line": 113
+        },
+        {
+          "name": "T.Reminders",
+          "line": 137
+        },
+        {
+          "name": "T.Push",
+          "line": 157
+        },
+        {
+          "name": "T.Banner",
+          "line": 163
+        },
+        {
+          "name": "T.Subscription",
+          "line": 168
+        },
+        {
+          "name": "T.Warnings",
+          "line": 175
+        },
+        {
+          "name": "T.Update",
+          "line": 201
+        },
+        {
+          "name": "T.Diagnostic",
+          "line": 213
         }
       ],
       "literalEvents": []
@@ -577,8 +710,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 31851,
-      "sha256": "e3c4e81e7f73ea80b42688134b0a406fc8994e995f7f011faae813641361a3ce",
+      "bytes": 35892,
+      "sha256": "0e058c61ac4b0eb4d05d58ff2b1897eec50f2f862735350338c0a642ac9cc02c",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -590,94 +723,94 @@
         },
         {
           "name": "U.Tip",
-          "line": 88
+          "line": 125
         },
         {
           "name": "U.Choice",
-          "line": 95
+          "line": 132
         },
         {
           "name": "U.CloseMenus",
-          "line": 133
+          "line": 170
         },
         {
           "name": "U.Wheel",
-          "line": 138
+          "line": 175
         },
         {
           "name": "Checkbox",
-          "line": 149
+          "line": 186
         },
         {
           "name": "Slider",
-          "line": 167
+          "line": 204
         },
         {
           "name": "U.EssentialHud",
-          "line": 193
+          "line": 230
         },
         {
           "name": "BuildHome",
-          "line": 208
+          "line": 245
         },
         {
           "name": "U.SelectWindowTab",
-          "line": 236
+          "line": 273
         },
         {
           "name": "U.BuildPage",
-          "line": 250
+          "line": 287
         },
         {
           "name": "U.UpdateRunContext",
-          "line": 308
+          "line": 345
         },
         {
           "name": "U.UpdateSharingStatus",
-          "line": 315
+          "line": 352
         },
         {
           "name": "U.Refresh",
-          "line": 318
+          "line": 355
         },
         {
           "name": "U.Select",
-          "line": 344
+          "line": 381
         },
         {
           "name": "U.Reflow",
-          "line": 359
+          "line": 396
         },
         {
           "name": "U.SetLayoutEditing",
-          "line": 407
+          "line": 444
         },
         {
           "name": "U.StartLayout",
-          "line": 420
+          "line": 457
         },
         {
           "name": "U.ResetPositions",
-          "line": 425
+          "line": 462
         },
         {
           "name": "U.UndoPositions",
-          "line": 432
+          "line": 469
         },
         {
           "name": "U.Build",
-          "line": 440
+          "line": 477
         },
         {
           "name": "U.Toggle",
-          "line": 504
+          "line": 541
         }
       ],
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 82567,
-      "sha256": "d8c0295c8dbc2142e6e2914915f0b6149bc6477b51f231d4467b0d85de372800",
+      "bytes": 83265,
+      "sha256": "dbc8636cd6ed8d8d88c2bca5840af37a5bc74c7878b413d80c9bf20b256c9484",
       "namedFunctions": [
         {
           "name": "Print",
@@ -917,151 +1050,151 @@
         },
         {
           "name": "CreateBarWindow",
-          "line": 1521
+          "line": 1520
         },
         {
           "name": "FitRows",
-          "line": 1596
+          "line": 1595
         },
         {
           "name": "InRun",
-          "line": 1612
+          "line": 1611
         },
         {
           "name": "UpdateMeterFrame",
-          "line": 1617
+          "line": 1616
         },
         {
           "name": "UpdateTakenFrame",
-          "line": 1663
+          "line": 1653
         },
         {
           "name": "SyncHudMeter",
-          "line": 1686
+          "line": 1676
         },
         {
           "name": "CreateMeterFrames",
-          "line": 1694
+          "line": 1684
         },
         {
           "name": "UpdateMeterFrames",
-          "line": 1709
+          "line": 1699
         },
         {
           "name": "UpdateChestPins",
-          "line": 1721
+          "line": 1711
         },
         {
           "name": "FormatClock",
-          "line": 1731
+          "line": 1721
         },
         {
           "name": "UpdateLairFrame",
-          "line": 1737
+          "line": 1727
         },
         {
           "name": "CreateLairFrame",
-          "line": 1822
+          "line": 1814
         },
         {
           "name": "ApplyDamageNumbers",
-          "line": 1848
+          "line": 1840
         },
         {
           "name": "FieldKit_UseCombatTextOnly",
-          "line": 1859
+          "line": 1851
         },
         {
           "name": "SlotOf",
-          "line": 1883
+          "line": 1875
         },
         {
           "name": "SwapSlots",
-          "line": 1891
+          "line": 1883
         },
         {
           "name": "HookBarDrag",
-          "line": 1901
+          "line": 1893
         },
         {
           "name": "PlaceMicroMenu",
-          "line": 1935
+          "line": 1927
         },
         {
           "name": "PlaceBarButtons",
-          "line": 1965
+          "line": 1957
         },
         {
           "name": "UpdateCompactXP",
-          "line": 1982
+          "line": 1974
         },
         {
           "name": "CreateCompactBar",
-          "line": 1993
+          "line": 1985
         },
         {
           "name": "AttachMoneyToBar",
-          "line": 2075
+          "line": 2067
         },
         {
           "name": "KeepCompactBar",
-          "line": 2096
+          "line": 2088
         },
         {
           "name": "UpdateGryphons",
-          "line": 2125
+          "line": 2117
         },
         {
           "name": "ResetPositions",
-          "line": 2166
+          "line": 2158
         },
         {
           "name": "RefreshPanel",
-          "line": 2174
+          "line": 2166
         },
         {
           "name": "FieldKit_RefreshInterfaceLanguage",
-          "line": 2175
+          "line": 2167
         },
         {
           "name": "CreatePanel",
-          "line": 2181
+          "line": 2173
         },
         {
           "name": "TogglePanel",
-          "line": 2194
+          "line": 2186
         },
         {
           "name": "FieldKit.SetWindowsLocked",
-          "line": 2201
+          "line": 2193
         },
         {
           "name": "CreateMinimapButton",
-          "line": 2210
+          "line": 2202
         },
         {
           "name": "PlaceOnRim",
-          "line": 2220
+          "line": 2212
         },
         {
           "name": "InitDB",
-          "line": 2261
+          "line": 2253
         },
         {
           "name": "FieldKitEventLifecycle",
-          "line": 2283
+          "line": 2275
         },
         {
           "name": "FieldKitEventWorld",
-          "line": 2312
+          "line": 2305
         },
         {
           "name": "FieldKitEventOther",
-          "line": 2339
+          "line": 2332
         },
         {
           "name": "RefreshNativeData",
-          "line": 2389
+          "line": 2383
         }
       ],
       "literalEvents": [
@@ -1999,17 +2132,18 @@
     }
   },
   "inGameTest": false,
-  "approval": "maintainer accepted for publication; not independently certified",
+  "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.2.3",
-    "maintainerAcceptedForPublication": true,
-    "maintainerAcceptanceDate": "2026-10-28",
+    "version": "0.3.0-review.1",
+    "maintainerAcceptedForPublication": false,
+    "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
     "inGameTestByAgent": false,
     "githubPrerelease": true,
-    "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved."
+    "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved.",
+    "developmentAuthorizedDate": "2026-10-31"
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

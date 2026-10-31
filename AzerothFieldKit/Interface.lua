@@ -20,6 +20,7 @@ function FieldKit.BuildJourneySections(sections,actions)
   for _,item in ipairs(section.items) do if item.id then options[item.id]=item end end
  end
  U.hudActions=actions
+ options.meterFrame.label="Combat meter"
  U.nativeTextOptions={options.hideDamage,options.showCrits,options.groupCrits}
  local interface=old.Interface.items
  for i=1,table.getn(interface) do
@@ -36,7 +37,18 @@ function FieldKit.BuildJourneySections(sections,actions)
   options.statsFrame,
   {kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
    get=function() return FieldKitDB.moneyFrame end,set=function(v) FieldKitDB.moneyFrame=v;actions.SyncHudTally();actions.UpdateMoneyFrame() end},
-  options.replaceTally,options.meterFrame,options.takenFrame,options.gearFrame,
+  options.replaceTally,options.meterFrame,
+  {kind="choice",label="Local meter view",values={"Damage","Healing","Boss damage"},
+   get=function() return FieldKitMeters.Mode() end,set=function(v) FieldKitDB.meterView=v;FieldKitPartyDetails.Close();actions.UpdateMeterFrames(true) end},
+  options.takenFrame,options.gearFrame,
+  {kind="check",label="Effects tracker",tip="Contextual totems, summons and native talent timers. Hidden without relevant data; filters are in Health & buffs.",
+   get=function() return FieldKitDB.effectsFrame end,set=function(v) FieldKitDB.effectsFrame=v;FieldKitNativeTools.Update() end},
+  {kind="check",label="Next boss reminder",tip="Compact native arrival countdown, not a prediction of boss attacks. Hidden when no schedule is available.",
+   get=function() return FieldKitDB.nextBossCard end,set=function(v) FieldKitDB.nextBossCard=v;FieldKitNativeTools.Update() end},
+  {kind="check",label="Stored level-up reminder",tip="Show a count only while native stored level-ups are waiting. Does not open, spend or choose them.",
+   get=function() return FieldKitDB.storedLevelsBadge end,set=function(v) FieldKitDB.storedLevelsBadge=v;FieldKitNativeTools.Update() end},
+  {kind="check",label="Show received active affixes",tip="Display recognized names only when supplied by the client. Unknown formats stay labelled as raw data; no calendar guessing.",
+   get=function() return FieldKitDB.showNativeAffixes end,set=function(v) FieldKitDB.showNativeAffixes=v;actions.UpdateRunMode() end},
   {kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
    get=function() return FieldKitDB.partyMeter end,set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end},
  }
@@ -58,11 +70,36 @@ function FieldKit.BuildJourneySections(sections,actions)
   {kind="choice",label="Damage meter values",values={"DPS + share","Damage + DPS","Damage + DPS + share"},
    get=function() return FieldKitDB.meterValues end,set=function(v) FieldKitDB.meterValues=v;actions.UpdateMeterFrames(true) end},
  }
+ table.insert(appearance,{kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
+  get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
+  set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end})
+ local health={options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
+ for _,def in ipairs({{"effectTotems","Track totems"},{"effectSummons","Track summons"},{"effectTimers","Track native effect timers"}}) do
+  local key,label=def[1],def[2]
+  table.insert(health,{kind="check",label=label,tip="Filters the Effects tracker. Counts and remaining times come from the native API; unavailable data is never invented.",
+   get=function() return FieldKitDB[key] end,set=function(v) FieldKitDB[key]=v;FieldKitNativeTools.Update() end})
+ end
+ local alerts=old.Warnings.items
+ for _,def in ipairs({{"nativeWarnings","Native mechanic warnings","Show filtered received boss/mechanic messages, with duplicates suppressed. The native banner display is unchanged."},
+  {"bossBannerWarnings","Boss banner messages","Include received banners explicitly flagged as boss messages."},
+  {"mechanicWarnings","Mechanic banner messages","Include received banners whose kind is mechanic."},
+  {"nextBossAlert","Warn before the next boss","One warning before each observed arrival. Based on native scheduling; no attack prediction."}}) do
+  local key,label,tip=def[1],def[2],def[3]
+  table.insert(alerts,{kind="check",label=label,tip=tip,get=function() return FieldKitDB[key] end,
+   set=function(v) FieldKitDB[key]=v;FieldKitNativeTools.Update() end})
+ end
+ table.insert(alerts,{kind="slider",label="Boss arrival warning",min=3,max=30,step=1,
+  get=function() return FieldKitDB.bossWarningLead end,format=function(v) return string.format(FieldKit_L("Warn %ds before a boss"),v) end,
+  set=function(v) FieldKitDB.bossWarningLead=v end})
+ table.insert(old.Map.items,{kind="check",label="Highlight the flagged lair",tip="Mark the lair selected by the game's flag in the existing lair list. Does not track a moving guardian.",
+  get=function() return FieldKitDB.highlightFlaggedLair end,set=function(v) FieldKitDB.highlightFlaggedLair=v;actions.UpdateLairFrame() end})
  local coop={
   {kind="note",label="Experimental co-op",tip="Full allied spell sharing depends on a client transport that has not been confirmed in live co-op. Native group totals remain available without sharing."},
   {kind="check",label="Co-op teammate cards",tip="Optional passive cards. Native teammate frames remain available for targeting and their usual interactions.",
    get=function() return FieldKitDB.partyCards end,set=function(v) FieldKitDB.partyCards=v;FieldKitCoop.Update() end},
   HealthChoice("partyHealthMode","Teammate health format",FieldKitCoop.Update),
+  {kind="check",label="Co-op revive progress",tip="Show native local revive progress and the ally involved. Original revive HUD stays available; no automatic actions.",
+   get=function() return FieldKitDB.reviveFrame end,set=function(v) FieldKitDB.reviveFrame=v;FieldKitNativeTools.Update() end},
   {kind="check",label="Hide native teammate frames",tip="Advanced: hide originals only while a card has valid health. Passive cards do not provide native targeting, menus or buff interactions. Turn off to restore originals.",
    get=function() return FieldKitDB.replacePartyFrames end,set=function(v) FieldKitDB.replacePartyFrames=v;FieldKitCoop.Update() end},
   {kind="check",label="Share spell breakdowns with group",tip="Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots.",
@@ -74,9 +111,9 @@ function FieldKit.BuildJourneySections(sections,actions)
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
-  {id="health",title="Health & buffs",glyph=16,items={options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}},
+  {id="health",title="Health & buffs",glyph=16,items=health},
   {id="bosses",title="Bosses",glyph=5,items={options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
-  {id="alerts",title="Alerts",glyph=12,items=old.Warnings.items},
+  {id="alerts",title="Alerts",glyph=12,items=alerts},
   {id="windows",title="Windows",glyph=9,group="Your interface",items={},windowTabs=windows},
   {id="map",title="Minimap",glyph=1,items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,items=old.Nameplates.items},

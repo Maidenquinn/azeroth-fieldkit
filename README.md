@@ -1,5 +1,10 @@
 # Azeroth FieldKit
 
+> **Development candidate: 0.3.0-review.1.** Public release remains 0.2.3. Native
+> tools for the inspected 0.130.1 client are ready for testing on this branch,
+> not merged or published. See [setup and test guide](docs/NATIVE_TOOLS_0_130.md).
+
+
 An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 **Kevin Radlowski / Maidenhead**, derived from **MASH by Malk**.
 

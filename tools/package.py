@@ -33,8 +33,8 @@ try:
  dirty=subprocess.check_output(['git','status','--porcelain'],cwd=base,text=True)
  assert not dirty,'Commit reviewed source/docs first; refusing a dirty sourceCommit claim'
 except (subprocess.CalledProcessError,FileNotFoundError):commit=None
-manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':'maintainer accepted for publication; not independently certified','publication':publication,
- 'distribution':'public maintainer-accepted update; GitHub prerelease; inherited rights unresolved','inGameTest':False,
+manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':('maintainer accepted for publication; not independently certified' if publication['maintainerAcceptedForPublication'] else 'development candidate; not accepted for publication'),'publication':publication,
+ 'distribution':'versioned addon package; maturity/permission scope in publication metadata','inGameTest':False,
  'files':{name:{'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)} for name,data in sorted(payload.items())}}
 payload['MANIFEST.json']=(json.dumps(manifest,indent=2)+'\n').encode()
 out=base/'dist';out.mkdir(exist_ok=True);archive=out/f'AzerothFieldKit-{version}.zip'

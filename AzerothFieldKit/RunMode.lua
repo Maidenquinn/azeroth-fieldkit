@@ -9,12 +9,33 @@ R.modifiers={
  {"Relentless","Bosses start enraged and become fiercer below 30% health."},
  {"Sentinels","Slain guardians strengthen the others; lairs refill sooner."},
  {"Lean purse","One free reroll; caches cost a quarter more."},
- {"Horde affix","A weekly horde affix applies. Its active identity is not supplied to FieldKit."},
+ {"Horde affix","A weekly horde affix applies. Current names are displayed only when supplied by the client."},
  {"Old mechanics","Boss towers and gazes return."},
  {"Unforgiving","A failed boss mechanic deals triple damage."},
  {"Withering","Regeneration, healing and leech are halved; revives are slower and weaker."},
  {"Council","The final boss brings an earlier boss; two weekly affixes apply."},
 }
+
+-- Accept only explicit names from the packet. Numeric/unknown encodings remain
+-- raw evidence, never a guessed weekly rotation or bitmask.
+function R.Affixes()
+ if not FieldKitDB.showNativeAffixes or type(AZS_ZONE)~="table" then return nil end
+ local value=AZS_ZONE.affixes
+ if type(value)~="string" and type(value)~="number" then return nil end
+ local raw=FieldKitNative.Text(tostring(value),160)
+ if raw=="" then return nil end
+ local names={bolstering="Bolstering",sanguine="Sanguine",explosive="Explosive"}
+ local result,seen={},{};local at=1
+ while at<=string.len(raw) and table.getn(result)<3 do
+  local a,b,token=string.find(raw,"([^,]+)",at);if not a then break end
+  token=string.lower(string.gsub(string.gsub(token,"^%s+",""),"%s+$",""))
+  if not names[token] then return FieldKit_L("Affixes (raw)")..": "..raw,false end
+  if not seen[token] then table.insert(result,FieldKit_L(names[token]));seen[token]=true end
+  at=b+1
+ end
+ if table.getn(result)==0 or at<=string.len(raw) then return FieldKit_L("Affixes (raw)")..": "..raw,false end
+ return FieldKit_L("Active affixes")..": "..table.concat(result,", "),true
+end
 
 function R.Tooltip(owner)
  GameTooltip:SetOwner(owner,"ANCHOR_RIGHT")
@@ -27,7 +48,9 @@ function R.Tooltip(owner)
    GameTooltip:AddLine(FieldKit_L(R.modifiers[i][1])..": "..FieldKit_L(R.modifiers[i][2]),.9,.9,.85,true)
   end
  end
- GameTooltip:AddLine(FieldKit_L("Reference rules are not measured live values. Enemy HP/damage multipliers and current affix names are not supplied."),.8,.7,.45,true)
+ local affixes=R.Affixes()
+ if affixes then GameTooltip:AddLine(affixes,.9,.85,.5,true) end
+ GameTooltip:AddLine(FieldKit_L("Historical reference only. Active affixes are shown only when received; unknown formats remain raw."),.8,.7,.45,true)
  GameTooltip:Show()
 end
 
@@ -64,6 +87,7 @@ function R.Update()
  if level==nil and FieldKitDB.hideUnknownMode and not FieldKit.layoutEditing then f:Hide();return end
  local lines={zone or FieldKit_L("Zone not provided")}
  if level==nil then table.insert(lines,FieldKit_L("No difficulty data received.")) end
+ local affixes=R.Affixes();if affixes then table.insert(lines,affixes) end
  for i=1,table.getn(lines) do
   local row=f.rows[i];row:SetValue(0);row.value:Hide();row.label:SetText(lines[i]);row:Show()
  end

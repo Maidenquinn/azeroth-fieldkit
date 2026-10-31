@@ -1,0 +1,57 @@
+{
+  "clientVersion": "0.130.1",
+  "executableSha256": "e8ff033544095e81d74087ff400d50286b26af02291e649f4c5e4d76cbcf8863",
+  "executableBytes": 147173376,
+  "embeddedApiOffset": 121626330,
+  "newFunctions": [
+    "AZS_FrameName",
+    "AZS_GetTotemCount",
+    "AZS_GetTotems",
+    "AZS_IsOnTopOfScreens",
+    "AZS_SetOnTopOfScreens"
+  ],
+  "removedFunctions": [],
+  "auditDate": "2026-10-31",
+  "source": "Read-only local executable audit, extracted Lua template and native string contexts. Raw extraction remains outside the addon repository.",
+  "affixesEvidence": {
+    "fileOffset": 125281353,
+    "literal": ";affixes=",
+    "producerEncodingObserved": false
+  },
+  "offlineContracts": {
+    "client": "0.130.1",
+    "lua51": true,
+    "lua50": true,
+    "totemsAndCounts": true,
+    "pauseAwareCountdown": true,
+    "timers": true,
+    "summonGroups": true,
+    "overlayRegistry": true,
+    "reviveParsing": true,
+    "nativeMeterTotals": true,
+    "genericAffixPreservationOnly": true,
+    "bannerSubscription": true,
+    "syntheticInputs": true,
+    "inGameTest": false,
+    "overlayLiveRenderingTest": false,
+    "affixProducerEncodingObserved": false
+  },
+  "inGameTest": false,
+  "fieldkitEmbeddedApiIntegration": {
+    "client": "0.130.1",
+    "fieldkit": "0.3.0-review.1",
+    "embeddedApiTemplateUsed": true,
+    "nativeHudPlaceholderNeutralized": true,
+    "syntheticPackets": true,
+    "fieldkitModulesActual": true,
+    "effects": true,
+    "revive": true,
+    "reminders": true,
+    "literalAffixes": true,
+    "bannerSubscription": true,
+    "overlayRegistrationAndRemoval": true,
+    "healingMeter": true,
+    "inGameTest": false,
+    "realAffixEncodingObserved": false
+  }
+}

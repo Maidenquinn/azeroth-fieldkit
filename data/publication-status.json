@@ -1,11 +1,12 @@
 {
-  "version": "0.2.3",
-  "maintainerAcceptedForPublication": true,
-  "maintainerAcceptanceDate": "2026-10-28",
+  "version": "0.3.0-review.1",
+  "maintainerAcceptedForPublication": false,
+  "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
   "inGameTestByAgent": false,
   "githubPrerelease": true,
-  "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved."
+  "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved.",
+  "developmentAuthorizedDate": "2026-10-31"
 }
