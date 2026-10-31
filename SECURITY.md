@@ -154,12 +154,13 @@ candidate version, client version, UI language and a minimal reproduction. Avoid
 uploading game saves or private chat. For a privacy concern, disable chat capture
 immediately and reload; no persistent chat history needs to be deleted.
 
-## 0.3.0-review.1 development addition (2026-10-31)
+## 0.3.0 published native-tools addition (2026-10-31)
 
-New native tools are a development candidate, not accepted for publication. They add
+The maintainer accepted these native tools for publication on 2026-10-31. They add
 passive reads and bounded native banner subscriptions. The only new native write is
 explicit per-window foreground registration above level/jewelry choices, restricted
 to owned names in Runtime.lua and reversed when hidden/disabled. No foreign frame,
 UIParent, gameplay action, level spending, new network transport or process is added.
 See [scope, defaults and remaining tests](docs/NATIVE_TOOLS_0_130.md). The older
-assessment/version above remains the public 0.2.3 record.
+assessment/version above remains the historical 0.2.3 record. No new live game
+result or independent certification is inferred from publication acceptance.

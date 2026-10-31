@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0-review.1",
+  "version": "0.3.0",
   "lua51": true,
   "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed",
   "persistence": true,
@@ -14,11 +14,11 @@
   "inGameTest": false,
   "partySyncTwoClientsSimulated": true,
   "partySyncLiveTransportConfirmed": false,
-  "approval": "development candidate; not accepted for publication",
+  "approval": "maintainer accepted for publication; not independently certified",
   "publication": {
-    "version": "0.3.0-review.1",
-    "maintainerAcceptedForPublication": false,
-    "maintainerAcceptanceDate": null,
+    "version": "0.3.0",
+    "maintainerAcceptedForPublication": true,
+    "maintainerAcceptanceDate": "2026-10-31",
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
@@ -31,7 +31,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 10,
-      "sha256": "18d36ddf6440949e8865561b60b269b18fdec80d77789088b21bff9455c006af"
+      "sha256": "5edc1c1713a61112a80a62bf5bc6ee51fdcad6fac09af8e70803437bbe6aac83"
     },
     "Positions.lua": {
       "maxUpvalues": 2,

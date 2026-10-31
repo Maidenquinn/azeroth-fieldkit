@@ -1,9 +1,7 @@
 # Azeroth FieldKit
 
-> **Development candidate: 0.3.0-review.1.** Public release remains 0.2.3. Native
-> tools for the inspected 0.130.1 client are ready for testing on this branch,
-> not merged or published. See [setup and test guide](docs/NATIVE_TOOLS_0_130.md).
-
+> **0.3.0 native-tools update:** optional effects, revive progress, Healing/Boss
+> meters and guarded HUD tools. See [activation and limits](docs/NATIVE_TOOLS_0_130.md).
 
 An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 **Kevin Radlowski / Maidenhead**, derived from **MASH by Malk**.
@@ -12,10 +10,10 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 
 ## Versions and downloads
 
-- **Latest package:** [0.2.3](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.2.3), published as a GitHub prerelease.
-- The maintainer accepted the UX update for publication on 2026-10-28. Pending
-  layout/co-op/UX PRs are merged into `main`; this package replaces 0.2.1-review.3
-  as the latest update. [Release notes](docs/RELEASE_0.2.3.md).
+- **Latest package:** [0.3.0](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.0), published as a GitHub prerelease.
+- Accepted for publication by the maintainer on 2026-10-31. This update adds native
+  tools for the inspected 0.130.1 client, retaining guarded older-client fallbacks.
+  [Release notes](docs/RELEASE_0.3.0.md). New cards/warnings start disabled.
 - On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
   addon. That publication permission does not independently certify this package or settle
   inherited code/assets rights. See [publication scope](docs/PUBLICATION.md),
@@ -30,7 +28,7 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
    the folder twice. Disable the legacy MASH addon to avoid duplicate behavior.
 3. Enable FieldKit in the client's addon selector and restart the game.
 
-Download `AzerothFieldKit-0.2.3.zip` from the release above; it contains the
+Download `AzerothFieldKit-0.3.0.zip` from the release above; it contains the
 current interface. No external executable or companion addon is required. FieldKit
 never imports MASHDB automatically or modifies your game saves.
 
