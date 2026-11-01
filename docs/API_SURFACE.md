@@ -196,3 +196,38 @@ is hidden and no levels are spent. ScreenLayers.lua uses Runtime.lua's own-frame
 AZS_SetOnTopOfScreens wrapper, solely under explicit per-window opt-in, reversing it
 when hidden/disabled. This new native visual write is not a network/gameplay action.
 See [native tools scope and tests](NATIVE_TOOLS_0_130.md).
+
+## Temporary preview isolation (0.3.1-review.2 candidate)
+
+During explicit HUD placement only, PreviewVisibility.lua reads UIParent children/
+regions and uses GetAlpha/SetAlpha plus optional IsMouseEnabled/EnableMouse to
+mask live displays and other Lua UI. This is a temporary presentation change to
+foreign frames when the user enters placement; the dock includes its visibility
+toggle. Originals are restored on exit, without invoking Show/Hide, replacing
+foreign methods/scripts, reparenting or changing saved/native HUD settings.
+UIParent and WorldFrame are excluded. See PREVIEWS.md for boundaries and tests.
+
+## Historical first loadout reader (0.3.2-review.1; superseded below)
+
+Uses optional GetSpellName/GetSpellTexture and hidden GameTooltip SetSpell, SetAction
+and SetInventoryItem readers; HasAction/GetActionTexture provide additional native
+icon headers. Readers use protected calls, 128 spellbook/120 action/24 tooltip-line
+limits and a one-second refresh interval. No action is executed. AZS_SPELLS.rank is
+used when a normalized spell name matches its stable key; otherwise only an explicit
+Rank/Rang tooltip header is displayed. Inventory ranks are never extrapolated.
+
+The existing upcoming-boss getter populates a footer within Lairs. A single local
+CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS listener can supply partial named melee
+observations. AZS_UNITS/AZS_TARGET must be fresh after reset and give an unambiguous
+normal/elite kind. No health-delta inference, static seed classification, per-hit
+network traffic or persistent combat log is introduced.
+
+## Integrated loadout correction (0.3.2-review.3)
+
+The existing equipment frame owns both Accessories and Spells tabs. Learned rows
+and ranks come only from fresh AZS_SPELLS. Hidden SetAction tooltips supply current
+localized names and labelled bonus/upgrade paragraphs, including embedded newlines.
+SpellAssets.lua is an independent local DBC name/icon index, not copied Azerloot
+data. GetSpellName is retained only for icon hints. No foreign addon API or saved
+variables are accessed. Portrait requests now include the explicit .tga extension;
+failed SetTexture results and raw zone keys remain diagnostic, not proof of render.

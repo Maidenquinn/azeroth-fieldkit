@@ -43,11 +43,12 @@ function FieldKit.CreateMeterColumns(frame)
 end
 
 function FieldKit.UpdateMeterColumns(row,line,mode,width,rateLabel)
+ FieldKitLoadout.Decorate(row,line.name)
  local columns=row.meterColumns
  local damage,rate,share=MeterParts(line,rateLabel)
  columns[1]:SetText(damage);columns[2]:SetText(rate);columns[3]:SetText(share)
- if row.meterMode~=mode or row.meterWidth~=width then
-  row.meterMode=mode;row.meterWidth=width
+ if row.meterMode~=mode or row.meterWidth~=width or row.meterInset~=row.fieldkitIconInset then
+  row.meterMode=mode;row.meterWidth=width;row.meterInset=row.fieldkitIconInset
   local offsets=mode==2 and {89,3,0} or {131,45,3}
   local sizes={92,78,34}
   for i=1,3 do
@@ -56,8 +57,8 @@ function FieldKit.UpdateMeterColumns(row,line,mode,width,rateLabel)
    if (i==1 and mode==1) or (i==3 and mode==2) then text:Hide() else text:Show() end
   end
   local reserved=mode==1 and 123 or (mode==2 and 181 or 223)
-  row.label:ClearAllPoints();row.label:SetPoint("LEFT",row,"LEFT",3,0)
-  row.label:SetWidth(width-12-reserved-11);row.label:SetHeight(14)
+  row.label:ClearAllPoints();row.label:SetPoint("LEFT",row,"LEFT",3+(row.fieldkitIconInset or 0),0)
+  row.label:SetWidth(width-12-reserved-11-(row.fieldkitIconInset or 0));row.label:SetHeight(14)
  end
  -- Other bar windows still use the generic value region; this meter hides it.
  row.value:Hide()

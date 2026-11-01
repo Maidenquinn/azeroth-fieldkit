@@ -1,5 +1,30 @@
 # Release procedure
 
+## Install ZIP boundary (packaging correction, 2026-10-31)
+
+The addon ZIP contains only the TOC, its Lua modules, audited bundled textures/
+fonts, the font license and README/NOTICE/LICENSE as plain-text files. No JSON,
+`docs/`, audit report or test tool belongs in the install archive. `package.py`
+checks exact runtime membership and checks the finished ZIP against the separate
+manifest, including hashes and allowed extensions.
+
+Publish MANIFEST.json, SHA256SUMS.txt and validation.json as **separate release
+attachments**; keep detailed evidence and documentation in the repository. The
+sidecar manifest describes the ZIP contents but is not itself inside the ZIP.
+Do not silently overwrite an already published release asset: ship this correction
+in a new authorized release. Local installers must read dist/MANIFEST.json rather
+than expecting a manifest inside the addon folder.
+
+## Update authorized 2026-11-01 — v0.3.2
+
+The maintainer requested this loadout / Difficulty / HUD polish release. Keep the
+branch → PR → CI → main → immutable tag workflow. Build the merged commit twice and
+compare the ZIP hash, publish ZIP/manifest/checksum/validation as a GitHub
+prerelease, and verify uploaded assets before publication. Preserve older
+tags/assets. Prepare the Discord changelog for manual posting; do not claim real
+game/network testing.
+
+
 ## Update authorized 2026-10-31 — v0.3.0
 
 The maintainer requested this native-tools release. Keep the branch → PR → CI →

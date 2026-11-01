@@ -2,7 +2,7 @@
 -- Read docs/CODE_GUIDE.md and SECURITY.md before changing native UI behavior.
 --
 -- Flow: VARIABLES_LOADED -> Config -> fixed frame pools; events refresh the
--- relevant windows; 0.05s maintains layout/debuffs, 0.2s reads run snapshots.
+-- relevant windows; buffs/debuffs 20 Hz, plates ~10 Hz, layout 0.5 s, snapshots 5 Hz.
 -- DB is the one normalized FieldKitDB table. AZS_* belongs to the game and is
 -- read-only here. UI settings and the explicit user-drag action-slot swap are
 -- the only intended native effects (enumerated in docs/API_SURFACE.md).
@@ -17,6 +17,8 @@ local PLATE_BORDER = "Interface\\Tooltips\\Nameplate-Border"
 local PLATE_SKULL = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull"
 local SCAN_INTERVAL = 0.05
 local DATA_INTERVAL = 0.2 -- Official native snapshots arrive at most five times/second.
+local LAYOUT_INTERVAL = 0.5
+local PLATE_INTERVAL = 0.1
 local CAMERA_BASE = 15
 
 local DB
@@ -243,37 +245,38 @@ local function MirrorTarget(owner, region, sourceName, fallbackPoint, fallbackX,
 end
 
 -- Build one of four display frames. The portrait module supplies an independent texture.
-local function CreateBossFrame(i)
-	local f = CreateFrame("Frame", "FieldKitBossFrame"..i, UIParent)
+local function CreateBossFrame(i,preview)
+	local prefix=preview and "FieldKitPreviewBoss" or "FieldKitBossFrame"..i
+	local f = CreateFrame("Frame", prefix, UIParent)
 	f:SetWidth(232)
 	f:SetHeight(100)
 	f:SetFrameStrata("LOW")
 
-	f.portrait = f:CreateTexture("FieldKitBossFrame"..i.."Portrait", "BACKGROUND")
+	f.portrait = f:CreateTexture(prefix.."Portrait", "BACKGROUND")
 	MirrorTarget(f, f.portrait, "TargetPortrait", "TOPRIGHT", -42, -12, 64, 64)
 
-	local nameBg = f:CreateTexture("FieldKitBossFrame"..i.."NameBackground", "BACKGROUND")
+	local nameBg = f:CreateTexture(prefix.."NameBackground", "BACKGROUND")
 	nameBg:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
 	nameBg:SetVertexColor(1.0, 0.0, 0.0)
 	MirrorTarget(f, nameBg, "TargetFrameNameBackground", "TOPRIGHT", -88, -22, 119, 19)
 
-	f.bar = CreateFrame("StatusBar", "FieldKitBossFrame"..i.."HealthBar", f)
+	f.bar = CreateFrame("StatusBar", prefix.."HealthBar", f)
 	MirrorTarget(f, f.bar, "TargetFrameHealthBar", "TOPRIGHT", -106, -41, 119, 12)
 	f.bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
 	f.bar:SetStatusBarColor(0.0, 1.0, 0.0)
 
-	local border = CreateFrame("Frame", "FieldKitBossFrame"..i.."TextureFrame", f)
+	local border = CreateFrame("Frame", prefix.."TextureFrame", f)
 	border:SetAllPoints(f)
 	border:SetFrameLevel(f.bar:GetFrameLevel() + 2)
-	local tex = border:CreateTexture("FieldKitBossFrame"..i.."Texture", "BORDER")
+	local tex = border:CreateTexture(prefix.."Texture", "BORDER")
 	tex:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite")
 	tex:SetTexCoord(0.09375, 1.0, 0.0, 0.78125)
 	tex:SetWidth(232)
 	tex:SetHeight(100)
 	tex:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
 
-	f.level = border:CreateFontString("FieldKitBossFrame"..i.."Level", "OVERLAY", "GameFontNormalSmall")
-	f.skull = border:CreateTexture("FieldKitBossFrame"..i.."Skull", "OVERLAY")
+	f.level = border:CreateFontString(prefix.."Level", "OVERLAY", "GameFontNormalSmall")
+	f.skull = border:CreateTexture(prefix.."Skull", "OVERLAY")
 	f.skull:SetTexture(PLATE_SKULL)
 	MirrorTarget(f, f.skull, "TargetHighLevelTexture", "CENTER", 63, -16, 16, 16)
 	if ( TargetLevelText ) then
@@ -285,34 +288,36 @@ local function CreateBossFrame(i)
 	end
 	f.level:SetPoint("CENTER", f.skull, "CENTER", 0, 0)
 
-	f.name = border:CreateFontString("FieldKitBossFrame"..i.."Name", "OVERLAY", "GameFontNormalSmall")
+	f.name = border:CreateFontString(prefix.."Name", "OVERLAY", "GameFontNormalSmall")
 	MirrorTarget(f, f.name, "TargetName", "CENTER", -50, 19, 100, 10)
-	f.hp = border:CreateFontString("FieldKitBossFrame"..i.."HealthText", "OVERLAY", "GameFontHighlightSmall")
+	f.hp = border:CreateFontString(prefix.."HealthText", "OVERLAY", "GameFontHighlightSmall")
 	f.hp:SetPoint("CENTER", f.bar, "CENTER", 0, 0)
-	f.tag = border:CreateFontString("FieldKitBossFrame"..i.."Tag", "OVERLAY", "GameFontNormalSmall")
+	f.tag = border:CreateFontString(prefix.."Tag", "OVERLAY", "GameFontNormalSmall")
 	f.tag:SetPoint("TOP", f.bar, "BOTTOM", 0, -2)
 
 
 	f.debuffs = {}
 	for d = 1, BOSS_DEBUFFS do
-		local icon = border:CreateTexture("FieldKitBossFrame"..i.."Debuff"..d, "OVERLAY")
+		local icon = border:CreateTexture(prefix.."Debuff"..d, "OVERLAY")
 		icon:SetWidth(DEBUFF_SIZE)
 		icon:SetHeight(DEBUFF_SIZE)
 		icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 		icon:SetPoint("TOPLEFT", f.bar, "BOTTOMLEFT", ( d - 1 ) * ( DEBUFF_SIZE + 1 ), -15)
 		icon:Hide()
-		icon.count = border:CreateFontString("FieldKitBossFrame"..i.."Debuff"..d.."Count", "OVERLAY", "NumberFontNormalSmall")
+		icon.count = border:CreateFontString(prefix.."Debuff"..d.."Count", "OVERLAY", "NumberFontNormalSmall")
 		icon.count:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 1, -1)
 		icon.count:Hide()
 
-		icon.time = border:CreateFontString("FieldKitBossFrame"..i.."Debuff"..d.."Time", "OVERLAY", "GameFontHighlightSmall")
+		icon.time = border:CreateFontString(prefix.."Debuff"..d.."Time", "OVERLAY", "GameFontHighlightSmall")
 		icon.time:SetFont(MENU_FONT, 10, "OUTLINE")
 		icon.time:SetPoint("TOP", icon, "BOTTOM", 0, -1)
 		icon.time:Hide()
 		f.debuffs[d] = icon
 	end
 
-	if ( i == 1 ) then
+	if preview then
+  -- Isolated demonstration: no movable registration, native unit or HUD action.
+ elseif ( i == 1 ) then
 
 		local handle = CreateFrame("Frame", "FieldKitBossFrame1Handle", f)
 		handle:SetAllPoints(f)
@@ -429,6 +434,25 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
 	f:Show()
 end
 
+-- Lair ids currently fighting. Empty/returning/asleep lairs must not keep a
+-- guardian boss frame after despawn or across a fresh run when AZS_UNITS lags.
+-- Read AZS_LAIRS directly (same source as pins) so boss refresh does not bump
+-- the documented 5 Hz GetLairs snapshot cadence.
+local function AwakeGuardianIds()
+	if type(AZS_LAIRS) ~= "table" or table.getn(AZS_LAIRS) == 0 then
+		return nil
+	end
+	local awake = {}
+	for i = 1, table.getn(AZS_LAIRS) do
+		local l = AZS_LAIRS[i]
+		local id = l and FieldKit.Number(l.id)
+		if l and l.state == "awake" and id and id > 0 then
+			awake[id] = true
+		end
+	end
+	return awake
+end
+
 -- Select live final/boss/awake-guardian entries and update the bounded frame pool.
 local function UpdateBossFrame()
 	if ( table.getn(bossFrames) == 0 ) then
@@ -438,6 +462,7 @@ local function UpdateBossFrame()
 	if ( DB.bossFrame and HasAPI() and type(AZS_UNITS) == "table" ) then
 		local phase = AZS_GetPhase()
 		if ( phase and phase ~= "ready" ) then
+			local awakeIds = AwakeGuardianIds()
 
 			for pass = 1, 2 do
 				for i = 1, math.min(512,table.getn(AZS_UNITS)) do
@@ -449,6 +474,11 @@ local function UpdateBossFrame()
 						wanted = ( kind == "final" or kind == "boss" )
 					else
 						wanted = ( kind == "guardian" and ( state == 1 or state == true ) )
+						-- Prefer the lair awake flag over a stale AZS_UNITS state=1.
+						if wanted and awakeIds then
+							local id = FieldKit.Number(Field(e, "id", 2))
+							wanted = id and awakeIds[id]
+						end
 					end
 					if ( wanted and n < BOSS_FRAMES ) then
 						n = n + 1
@@ -1278,7 +1308,10 @@ local function UpdateMoneyFrame()
 	if ( not moneyFrame ) then
 		return
 	end
-	if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide();return end
+	if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase())
+  or FieldKit.IsChoiceScreen() then
+  moneyFrame:Hide();return
+ end
 	local exact=HasAPI() and type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.ck,nil,0)
 	if exact then DB.chestsOpened=exact end
 
@@ -1418,36 +1451,9 @@ end
 
 -- Refresh equipment rows and the visible collapse state from current inventory data.
 local function UpdateGearFrame()
-	if ( not gearFrame ) then
-		return
-	end
-	if ( not DB.gearFrame or (HasAPI() and not AZS_GetPhase()) ) then
-		gearFrame:Hide()
-		return
-	end
-	local y = -8
-	for i = 1, table.getn(GEAR_SLOTS) do
-		local slot = GEAR_SLOTS[i]
-		local row = gearFrame.slots[i]
-		local name, texture = ReadSlot(slot[1])
-		FieldKit_Text(row.label,slot[2])
-		if ( name or texture ) then
-			row.value:SetText(name or "|cff9d9d9d"..FieldKit_L("(worn)").."|r")
-			row.icon:SetTexture(texture)
-			row.icon:Show()
-		else
-			row.value:SetText("|cffff5555"..FieldKit_L("empty").."|r")
-			row.icon:Hide()
-		end
-		row:ClearAllPoints()
-		row:SetPoint("TOPLEFT", gearFrame, "TOPLEFT", 6, y)
-		row:SetPoint("RIGHT", gearFrame, "RIGHT", i == 1 and -26 or -6, 0)
-		y = y - 18
-	end
-
-	gearFrame:SetHeight(-y + 6)
-	ApplyCompactPanel(gearFrame, "gearCollapsed", -y + 6)
-	gearFrame:Show()
+ if not gearFrame then return end
+ if not DB.gearFrame or (HasAPI() and not AZS_GetPhase()) then gearFrame:Hide();return end
+ FieldKitLoadout.Render(gearFrame)
 end
 
 -- Build equipment labels/tooltips and a saved, collapsible movable container.
@@ -1470,14 +1476,17 @@ local function CreateGearFrame()
 		row.icon = row:CreateTexture("FieldKitGearSlot"..i.."Icon", "ARTWORK")
 		row.icon:SetWidth(14)
 		row.icon:SetHeight(14)
-		row.icon:SetPoint("LEFT", row, "LEFT", 2, 0)
+		row.icon:SetPoint("TOPLEFT", row, "TOPLEFT", 2, 0)
 		row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 		row.label = row:CreateFontString("FieldKitGearSlot"..i.."Label", "OVERLAY", "GameFontNormalSmall")
-		row.label:SetPoint("LEFT", row, "LEFT", 20, 0)
+		row.label:SetPoint("TOPLEFT", row, "TOPLEFT", 20, 0)
+		row.label:SetJustifyH("LEFT");row.label:SetJustifyV("TOP")
 		row.value = row:CreateFontString("FieldKitGearSlot"..i.."Value", "OVERLAY", "GameFontHighlightSmall")
-		row.value:SetPoint("RIGHT", row, "RIGHT", -2, 0)
-		row.value:SetPoint("LEFT", row, "LEFT", 80, 0)
+		row.value:SetPoint("TOPRIGHT", row, "TOPRIGHT", -2, 0)
+		row.value:SetPoint("TOPLEFT", row, "TOPLEFT", 80, 0)
 		row.value:SetJustifyH("RIGHT")
+  row.bonus=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.bonus:SetPoint("TOPLEFT",row,"TOPLEFT",20,-16);row.bonus:SetHeight(12);row.bonus:SetTextColor(.3,1,.4)
+  row.bonus:SetJustifyH("LEFT");row.bonus:SetJustifyV("TOP");if row.bonus.SetNonSpaceWrap then row.bonus:SetNonSpaceWrap(true) end
 
 		row:SetScript("OnEnter", function()
 			if ( GetInventoryItemLink and GetInventoryItemLink("player", slotId) ) then
@@ -1496,6 +1505,7 @@ local function CreateGearFrame()
 
 	gearFrame:SetPoint("BOTTOMLEFT", statsFrame, "TOPLEFT", 0, 2)
  MakeMovable(gearFrame,UIParent:GetWidth()/2-100,150,true)
+ FieldKitLoadout.Attach(gearFrame,ReadSlot,UpdateGearFrame)
 	UpdateGearFrame()
 end
 
@@ -1545,6 +1555,14 @@ local function CreateBarWindow(name, title, rows)
 	collapse:SetFrameLevel(f:GetFrameLevel() + 10)
 	collapse:SetScript("OnClick", function()
 		local collapsed = not f.mashCollapsed
+  if f.nextBoss then
+   if collapsed then
+    f.nextBoss:Hide();if f.nextBossTime then f.nextBossTime:Hide() end
+    if f.bossBar then f.bossBar:Hide() end;if f.bossPct then f.bossPct:Hide() end
+   elseif (f.fieldkitFooterHeight or 0)>0 then
+    -- Content refresh decides countdown versus live boss strip.
+   end
+  end
 		f.mashCollapsed = collapsed
 		DB.collapsedWindows = DB.collapsedWindows or {}
 		DB.collapsedWindows[name] = collapsed or nil
@@ -1557,8 +1575,9 @@ local function CreateBarWindow(name, title, rows)
 			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
 			f.total:Show(); FieldKit_Text(this,"-")
    for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
-   FieldKitCardLayout.Rows(f,28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1),f.mashVisibleRows or 0,"bar",false)
+   FieldKitCardLayout.Rows(f,f.fieldkitNaturalHeight or (28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1)),f.mashVisibleRows or 0,f.fieldkitRowKind or "bar",false)
 		end
+		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 	end)
 	f.mashCollapseButton = collapse
 	f.rows = {}
@@ -1597,7 +1616,7 @@ local function FitRows(f, n)
 	for i = n + 1, table.getn(f.rows) do
 		f.rows[i]:Hide()
 	end
-	local height = 28 + ROW_HEIGHT * math.max(n, 1)
+	local height = 28 + (f.fieldkitFooterHeight or 0) + ROW_HEIGHT * math.max(n, 1)
 	f.mashExpandHeight = height
 	if f.mashCollapsed then
 		f.total:Hide()
@@ -1642,7 +1661,7 @@ local function UpdateMeterFrame(force)
   row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,DB.meterValues,width,rateLabel);row:Show()
  end
  if n==0 and not known then
-  local row=meterFrame.rows[1];FieldKit_Text(row.label,"Meter data not provided");row.label:SetWidth(width-24)
+  local row=meterFrame.rows[1];FieldKitLoadout.ClearIcon(row);FieldKit_Text(row.label,"Meter data not provided");row.label:SetWidth(width-24)
   row:SetValue(0);row.value:Hide();for _,column in ipairs(row.meterColumns) do column:Hide() end
   row.meterMode=nil;row:Show();n=1
  end
@@ -1659,13 +1678,14 @@ local function UpdateTakenFrame(force)
  local top=lines[1] and lines[1].dmg or 1
  for i=1,n do
   local row=takenFrame.rows[i];local line=lines[i]
+  row.takenSource=line.source;row.takenDamage=line.dmg
   row:SetValue(line.dmg/math.max(top,1));row:SetStatusBarColor(.75,.1,.1,.55)
   FieldKit_Text(row.label,TAKEN_NAMES[line.source] or line.source)
   row.value:SetText(string.format("%s  %.0f%%",ShortNumber(line.dmg),100*line.dmg/math.max(sum,1)))
   row:Show()
  end
  if n==0 then
-  local row=takenFrame.rows[1];row:SetValue(0);row.value:SetText("")
+  local row=takenFrame.rows[1];row.takenSource=nil;row:SetValue(0);row.value:SetText("")
   FieldKit_Text(row.label,known and "No damage taken yet" or "Damage data not provided")
   row:Show();n=1
  end
@@ -1687,6 +1707,10 @@ local function CreateMeterFrames()
  FieldKit.CreateMeterColumns(meterFrame)
  for i=1,table.getn(meterFrame.rows) do FieldKitPartyDetails.BindRow(meterFrame.rows[i],meterFrame,true) end
 	takenFrame = CreateBarWindow("FieldKitTakenFrame", "Damage taken", TAKEN_ROWS)
+ for _,row in ipairs(takenFrame.rows) do
+  row:SetScript("OnEnter",function() FieldKitTakenDetails.Show(this) end)
+  row:SetScript("OnLeave",function() GameTooltip:Hide() end)
+ end
 
 	takenFrame:SetPoint("TOPLEFT", meterFrame, "BOTTOMLEFT", 0, -2)
 	MakeMovable(meterFrame, -( UIParent:GetWidth() / 2 - 140 ), 60, true)
@@ -1733,7 +1757,8 @@ function UpdateLairFrame()
 		return
 	end
 	local lairs = AZS_GetLairs()
-	if ( table.getn(lairs) == 0 ) then
+	local nextBoss=DB.lairNextBoss and FieldKitNativeTools.NextBoss()
+ if ( table.getn(lairs) == 0 and not nextBoss ) then
 		lairFrame:Hide()
 		return
 	end
@@ -1806,13 +1831,63 @@ function UpdateLairFrame()
 		row:Show()
 	end
 	FieldKit_Text(lairFrame.total,held.." / "..table.getn(lairs)..FieldKit_L(" held"))
-	FitRows(lairFrame, n)
+ -- Prefer a living boss HP strip; otherwise keep the scheduled arrival countdown.
+ local live
+ if type(AZS_UNITS)=="table" and AZS_GetPhase and AZS_GetPhase() and AZS_GetPhase()~="ready" then
+  for i=1,math.min(512,table.getn(AZS_UNITS)) do
+   local e=AZS_UNITS[i];local kind=Field(e,"kind",1)
+   if kind=="final" or kind=="boss" then
+    local hp,hpm=Field(e,"hp",4),Field(e,"hpm",5)
+    if FieldKit.Number(hpm) and hpm>0 then
+     live={name=Field(e,"name",3) or "?",hp=hp or 0,hpm=hpm,enraged=Field(e,"state",6)}
+     break
+    end
+   end
+  end
+ end
+ local footer=0
+ if live then footer=40 elseif nextBoss then footer=28 end
+ lairFrame.fieldkitFooterHeight=footer
+ if lairFrame.mashCollapsed or footer==0 then
+  lairFrame.nextBoss:Hide();lairFrame.nextBossTime:Hide();lairFrame.bossBar:Hide();lairFrame.bossPct:Hide()
+ elseif live then
+  local pct=math.max(0,math.min(1,(live.hp or 0)/live.hpm))
+  local info=string.format("%d%%",math.floor(pct*100+.5))
+  if live.enraged==1 or live.enraged==true then info=FieldKit_L("ENRAGED").."  "..info end
+  -- Keep name / % / bar clear of the decorative corner chrome.
+  lairFrame.nextBoss:SetText(live.name);lairFrame.nextBoss:SetTextColor(1,.82,0)
+  lairFrame.nextBoss:SetFontObject(GameFontNormal)
+  lairFrame.nextBoss:ClearAllPoints();lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,24)
+  lairFrame.nextBoss:SetWidth(lairFrame:GetWidth()-96);lairFrame.nextBoss:Show()
+  lairFrame.nextBossTime:Hide()
+  lairFrame.bossPct:ClearAllPoints();lairFrame.bossPct:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,24)
+  lairFrame.bossPct:SetWidth(68);lairFrame.bossPct:SetText(info);lairFrame.bossPct:Show()
+  lairFrame.bossBar:ClearAllPoints();lairFrame.bossBar:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10)
+  lairFrame.bossBar:SetMinMaxValues(0,live.hpm);lairFrame.bossBar:SetValue(live.hp or 0)
+  lairFrame.bossBar:SetWidth(lairFrame:GetWidth()-24);lairFrame.bossBar:Show()
+ else
+  lairFrame.nextBoss:SetText(FieldKit_L("Next boss")..": "..nextBoss.name)
+  lairFrame.nextBoss:SetTextColor(1,.82,0);lairFrame.nextBoss:SetFontObject(GameFontNormal)
+  lairFrame.nextBoss:ClearAllPoints();lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10)
+  lairFrame.nextBoss:SetWidth(lairFrame:GetWidth()-86);lairFrame.nextBoss:Show()
+  lairFrame.nextBossTime:ClearAllPoints();lairFrame.nextBossTime:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,10)
+  lairFrame.nextBossTime:SetWidth(56);lairFrame.nextBossTime:SetText(FieldKitNative.Clock(nextBoss.left))
+  lairFrame.nextBossTime:SetTextColor(1,.9,.75);lairFrame.nextBossTime:SetFontObject(GameFontNormal)
+  lairFrame.nextBossTime:Show();lairFrame.bossBar:Hide();lairFrame.bossPct:Hide()
+ end
+ FitRows(lairFrame, n)
 	lairFrame:Show()
 end
 
 -- Allocate the ten-row lair window with separate distance/state columns.
 function CreateLairFrame()
 	lairFrame = CreateBarWindow("FieldKitLairFrame", "Lairs", LAIR_ROWS)
+ lairFrame.nextBoss=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormal");lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10);lairFrame.nextBoss:SetHeight(16);lairFrame.nextBoss:SetJustifyH("LEFT");lairFrame.nextBoss:SetTextColor(1,.82,0);lairFrame.nextBoss:Hide()
+ lairFrame.nextBossTime=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormal");lairFrame.nextBossTime:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,10);lairFrame.nextBossTime:SetWidth(56);lairFrame.nextBossTime:SetHeight(16);lairFrame.nextBossTime:SetJustifyH("RIGHT");lairFrame.nextBossTime:SetTextColor(1,.9,.75);lairFrame.nextBossTime:Hide()
+ lairFrame.bossPct=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormal");lairFrame.bossPct:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,24);lairFrame.bossPct:SetWidth(68);lairFrame.bossPct:SetHeight(16);lairFrame.bossPct:SetJustifyH("RIGHT");lairFrame.bossPct:SetTextColor(1,.9,.75);lairFrame.bossPct:Hide()
+ lairFrame.bossBar=CreateFrame("StatusBar",nil,lairFrame);lairFrame.bossBar:SetHeight(8);lairFrame.bossBar:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10)
+ lairFrame.bossBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");lairFrame.bossBar:SetStatusBarColor(.82,.13,.08);lairFrame.bossBar:SetMinMaxValues(0,1);lairFrame.bossBar:Hide()
+ local barBg=lairFrame.bossBar:CreateTexture(nil,"BACKGROUND");barBg:SetAllPoints(lairFrame.bossBar);barBg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar");barBg:SetVertexColor(.12,.08,.05)
 
 	for i = 1, LAIR_ROWS do
 		local row = lairFrame.rows[i]
@@ -2060,6 +2135,7 @@ function CreateCompactBar()
 	MainMenuBar:Hide()
 	MainMenuBar:SetScript("OnShow", function() this:Hide() end)
 	UpdateCompactXP()
+	KeepCompactBar()
 end
 
 
@@ -2080,7 +2156,9 @@ function AttachMoneyToBar(force)
 			moneyFrame:ClearAllPoints()
 			moneyFrame:SetPoint("BOTTOM", compactBar, "TOP", 0, 2)
 		end
-		if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) then moneyFrame:Hide() else moneyFrame:Show() end
+		if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase()) or FieldKit.IsChoiceScreen() then
+   moneyFrame:Hide()
+  else moneyFrame:Show() end
 	end
 end
 
@@ -2089,6 +2167,21 @@ function KeepCompactBar()
 	if ( not compactBar ) then
 		return
 	end
+ -- The old repair loop resurrected action buttons hidden by native choices.
+ -- Suppress our whole compact surface, including XP, before touching buttons.
+ -- Remember only visibility we changed, so unrelated hidden state stays hidden.
+ if FieldKit.IsChoiceScreen() then
+  if compactBar:IsShown() then
+   compactBar.fieldkitChoiceHidden=true
+   compactBar:Hide()
+  end
+  if moneyFrame then moneyFrame:Hide() end
+  return
+ end
+ if compactBar.fieldkitChoiceHidden then
+  compactBar.fieldkitChoiceHidden=nil
+  compactBar:Show()
+ end
 	AttachMoneyToBar(false)
 	if ( ( ActionButton1 and ActionButton1:GetParent() ~= compactBar )
 		or ( MainMenuMicroButton and microMenu and MainMenuMicroButton:GetParent() ~= microMenu ) ) then
@@ -2165,7 +2258,7 @@ local function ResetPositions()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
 function FieldKit_RefreshInterfaceLanguage()
- RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true);FieldKitNativeTools.Update();FieldKitScreenLayers.Update()
+ RefreshPanel();UpdateStatsFrame();UpdateGearFrame();UpdateMeterFrames(true);FieldKitNativeTools.Update();FieldKitLoadout.Update();FieldKitScreenLayers.Update()
  UpdateBossFrame();UpdateLairFrame();UpdateMoneyFrame();FieldKitRunMode.Update();FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
  FieldKitCoop.Update()
  if FieldKit_UpdateWorldPins then FieldKit_UpdateWorldPins() end
@@ -2291,6 +2384,8 @@ local function FieldKitEventLifecycle()
   FieldKitCardLayout.Initialize(MakeMovable,PlaceMovable)
   FieldKitCoop.Create(CreateBarWindow,FitRows,MakeMovable)
   FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
+  FieldKitTakenDetails.Reset();FieldKitLoadout.Update()
+  FieldKitPreview.Initialize(CreateBarWindow,CreateBossFrame,PlaceMovable)
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
@@ -2346,6 +2441,9 @@ local function FieldKitEventOther()
 	elseif ( event == "PLAYER_AURAS_CHANGED" ) then
 		UpdatePlayerBuffs()
 	elseif ( event == "CHAT_MSG_ADDON" ) then
+  -- The official AZSRUN parser runs before addon event handlers. React now,
+  -- rather than leaving an extra polling interval of compact HUD on choices.
+  if arg1=="AZSRUN" then KeepCompactBar() end
   FieldKitNative.Packet(arg1)
   FieldKitPartySync.Receive(arg1,arg2,arg3,arg4)
   FieldKitCoop.Packet(arg1)
@@ -2398,25 +2496,65 @@ local function RefreshNativeData()
 	UpdateMoneyFrame();UpdateMeterFrames();UpdateChestPins();UpdateLairFrame()
 end
 
+local plateElapsed, layoutElapsed = 0, 0
+local platesFilterOn = false
 frame:SetScript("OnUpdate", function()
 	if ( not DB ) then
 		return
 	end
-	UpdatePlates()
-	FieldKitCrits.Animate()
-	PulsePlayerBar()
-	elapsed = elapsed + ( arg1 or 0 )
-	dataClock.elapsed = dataClock.elapsed + ( arg1 or 0 )
+	local dt = arg1 or 0
+	local choosing = FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen()
+	-- Nameplate filtering is expensive in combat; skip entirely when disabled or
+	-- while the native reward/level-up overlay owns the screen. Toggle edges
+	-- always sync immediately so other UI alphas are restored without delay.
+	local wantPlates = DB.hidePlates and not choosing
+	plateElapsed = plateElapsed + dt
+	if wantPlates then
+		if (not platesFilterOn) or plateElapsed >= PLATE_INTERVAL then
+			plateElapsed = 0
+			UpdatePlates()
+		end
+		platesFilterOn = true
+	else
+		if platesFilterOn or plateElapsed >= 1 then
+			plateElapsed = 0
+			UpdatePlates()
+		end
+		platesFilterOn = false
+	end
+	if not choosing then
+		FieldKitCrits.Animate()
+		PulsePlayerBar()
+	end
+	elapsed = elapsed + dt
+	dataClock.elapsed = dataClock.elapsed + dt
+	layoutElapsed = layoutElapsed + dt
 	if ( elapsed < SCAN_INTERVAL ) then
 		return
 	end
 	elapsed = 0
 	KeepCompactBar()
-	UpdateBossFrame()
-	UpdatePlayerBuffs()
-	UpdatePlayerBar()
-	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update();FieldKitNativeTools.Update();FieldKitScreenLayers.Update() end
- FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitPartySync.Tick()
+	if not choosing then
+		UpdateBossFrame()
+		UpdatePlayerBuffs()
+		UpdatePlayerBar()
+	end
+	if dataClock.elapsed>=DATA_INTERVAL then
+		dataClock.elapsed=0
+		FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update()
+		FieldKitNativeTools.Update()
+		-- Loadout tooltip scans hitch hard; keep them off the choosing overlay path.
+		if not choosing then FieldKitLoadout.Update() end
+		FieldKitScreenLayers.Update()
+		-- Cards may show/hide after native snapshots; restack once here, not every paint.
+		layoutElapsed = 0
+		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+	elseif layoutElapsed >= LAYOUT_INTERVAL then
+		-- Safety restack when no snapshot landed (collapse/options already call Apply).
+		layoutElapsed = 0
+		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+	end
+	if not choosing then FieldKitPartySync.Tick() end
 end)
 
 SLASH_FieldKit1 = "/fieldkit"

@@ -1,6 +1,6 @@
 # Security and player-risk assessment
 
-**Assessment updated:** 2026-10-28. **Published update:** 0.2.3 (GitHub prerelease).
+**Assessment updated:** 2026-11-01. **Published update:** 0.3.2 (GitHub prerelease).
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
@@ -154,6 +154,14 @@ candidate version, client version, UI language and a minimal reproduction. Avoid
 uploading game saves or private chat. For a privacy concern, disable chat capture
 immediately and reload; no persistent chat history needs to be deleted.
 
+## 0.3.2 published loadout / Difficulty polish (2026-11-01)
+
+Adds local Spell.dbc-backed icons, Accessories/Spells UI, Difficulty-screen
+multiplier text and lair-gated guardian frames. No new native write, network
+transport, process or SavedVariables schema. Chat-copy, party-sync and CVar
+boundaries from earlier assessments remain unchanged. No independent certification
+or live transport confirmation is claimed by publication.
+
 ## 0.3.0 published native-tools addition (2026-10-31)
 
 The maintainer accepted these native tools for publication on 2026-10-31. They add
@@ -164,3 +172,38 @@ UIParent, gameplay action, level spending, new network transport or process is a
 See [scope, defaults and remaining tests](docs/NATIVE_TOOLS_0_130.md). The older
 assessment/version above remains the historical 0.2.3 record. No new live game
 result or independent certification is inferred from publication acceptance.
+
+## 0.3.1-review.1 visual preview candidate (2026-10-31)
+
+Preview.lua creates only owned sample frames. Example values remain in that
+renderer, never native tables, counters or optional peer sharing. Explicit drags
+and per-window resets can save owned HUD geometry; viewing/closing does not
+change module enable flags. No new native write, process, transport, saved chat
+or game-data access is introduced. See [PREVIEWS.md](docs/PREVIEWS.md).
+
+## 0.3.1-review.2 placement isolation
+
+At the user's request the explicit placement mode temporarily masks live FieldKit
+and other Lua UI; its button can show the other UI again. This changes transient
+alpha and available mouse state on foreign UIParent descendants, then restores the
+captured state at exit. It does not hide UIParent/WorldFrame, replace scripts or
+methods, modify other addons' preferences, or call native gameplay/HUD setters.
+This presentation scope is documented in docs/PREVIEWS.md and API_SURFACE.md.
+
+## 0.3.2-review.1 loadout and observed attacker details
+
+Loadout.lua reads bounded native tooltip/spellbook/action/inventory data, at most
+once per second. It never activates an action or copies third-party runtime tables.
+TakenDetails.lua listens only to the local creature-versus-self melee event; named
+hits require a supported exact template and fresh native classification, with
+conflicting names rejected. Its 128-source in-memory ledger is reset at run changes
+and never saved or shared. Native category totals remain separate and authoritative.
+See docs/LOADOUT_AND_TAKEN.md for limits and validation steps.
+
+## 0.3.2-review.3 correction
+
+No separate spell HUD is created. Existing equipment geometry owns the two tabs.
+Ranks use the native learned list, and labelled action-tooltip data is kept apart
+from talents or unrelated grimoire entries. Icon/name facts are generated from
+local DBC resources; no Azerloot code, catalogs or artwork are incorporated.
+Portrait lookup retains the native instance/display conflict guards.

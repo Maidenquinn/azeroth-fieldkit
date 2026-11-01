@@ -13,9 +13,9 @@ local function choose(c,value) click(c);click(c.choiceButtons[value]) end
 local savedMode=FieldKitDB.playerHealthMode
 U.Select("home");click(U.homeCards[2].open);assert(FieldKitDB.uiPage=="health")
 local health=page("health")
-choose(health.flow[2].frame.children[2],3)
+choose(health.flow[3].frame.children[2],3)
 assert(FieldKitDB.playerHealthMode==3)
-choose(health.flow[2].frame.children[2],2)
+choose(health.flow[3].frame.children[2],2)
 assert(FieldKitDB.playerHealthMode==2)
 FieldKitDB.playerHealthMode=savedMode
 

@@ -1,5 +1,117 @@
 # Changelog
 
+## 0.3.2 — 2026-11-01 (loadout, Difficulty multipliers and HUD polish; GitHub prerelease)
+
+Maintainer accepted for publication. Changes since **0.3.0**:
+
+- Integrate Accessories and Spells on one equipment card (tabs, shared size/collapse/style). Spells come only from the native learned list; bonuses/upgrades from action tooltips; icons from a local Spell.dbc index (no Azerloot copy).
+- Show compact jewelry boosts, item names as row labels, left-aligned accessory text, and tier-colored spell ranks.
+- Run mode shows Difficulty-screen multipliers (HP / damage / marks / talent loot·XP) for the live native rank; full chart on hover.
+- Guardian boss frames require a matching awake lair, so despawned/returning guardians no longer leave frames after a fresh run.
+- Lairs: next-boss countdown, clearer FR states (en attente / en combat), footer inset.
+- Partial named taken details from combat log + native categories; incomplete coverage stays labelled.
+- Compact bar / XP / money hide during native level-up and chest choices; restore FieldKit-suppressed visibility afterward.
+- Context-free placement previews with optional hide/show of other UI; install ZIP still excludes JSON/docs.
+- Idle combat-text / crit paint shortcuts; French meter icon aliases; short empty Spells label (« Aucun sort »).
+- Offline Lua 5.0.3/5.1 and packaging checks pass; no new agent in-game certification claimed.
+
+Candidate review entries below remain historical records of the path to this release.
+
+
+## 0.3.2-review.9 — 2026-11-01 (left-align accessory names)
+
+- Accessory and spell row labels are forced left-aligned; wide label boxes no longer center short slot names.
+
+## 0.3.2-review.8 — 2026-11-01 (hide despawned guardian boss frames)
+
+- Guardian boss frames now require a matching lair in `awake` state, so stale `AZS_UNITS` entries after despawn or a fresh run no longer keep Berserker/Champion frames on screen.
+
+## 0.3.2-review.7 — 2026-11-01 (Difficulty UI multipliers on run mode)
+
+- Run mode card shows the Difficulty screen multipliers (Vie / Dégâts / Marques / Butin·XP) for the live native rank, not the old qualitative 0.121 rule names.
+- Empty Spells tab uses the short label « Aucun sort » instead of the truncated « Données des sorts non… ».
+
+## 0.3.2-review.6 — 2026-11-01 (accessory boosts + meter icons + lair wording)
+
+- Restore accessory bonuses as compact lines (`+72% chance`, `-10% dmg`) instead of dropping Equip prose.
+- Add French meter icon aliases for Saccager, Rafale and Blessures profondes.
+- Lair states: asleep → en attente, awake → en combat.
+
+## 0.3.2-review.5 — 2026-11-01 (loadout / mode / lairs polish)
+
+- Accessories show compact numeric boosts only; French prose with a bare percentage no longer fills the card.
+- Equipped jewelry uses the item name as the row label (no repeated "Amulet" / slot title).
+- Spell ranks use tiered colors on the Spells tab.
+- Run mode lists the live Heroic reference impacts on the card (full detail still on hover).
+- Lairs next-boss / HP footer inset away from decorative corners.
+- Broader exact combat-log templates for named taken attribution (melee + creature spells).
+
+## 0.3.2-review.3 — 2026-10-31 (unpublished integrated loadout correction)
+
+- Remove the separate Spells window. Accessories/Spells tabs now share the existing
+  equipment card, position, sizing, collapse state, opacity and visual style.
+- Populate spells only from the native learned list; ranks no longer come from
+  unlearned or unrelated spellbook entries. Read localized run bonuses and upgrade
+  lines from action tooltips, including multiple paragraphs in one text region.
+- Associate action textures with native spell IDs using an independently generated
+  local Spell.dbc/SpellIcon.dbc base-class asset index. Reject ambiguous textures.
+  Azerloot is a behavioral reference only, with no copied code/data or dependency.
+- Request explicit .tga portrait files and normalize ASCII zone-key whitespace/case.
+  Add regression fixtures for Jeklik, Gurubashi Berserker, rejected textures and the
+  full existing portrait catalog. Keep display/identity conflict protection.
+- Extend the portrait diagnostic with the raw zone key and attempted resource.
+  In-game confirmation is still required; no all-map success is claimed.
+
+## 0.3.2-review.2 — 2026-10-31 (local compact-bar fix candidate)
+
+- Hide FieldKit's compact action bar, XP surface and docked money strip during
+  native level-up/chest choices. Stop repairing hidden native action buttons in
+  that phase; restore only visibility suppressed by FieldKit when play resumes.
+- React to native run-phase packets as well as polling. Keep intentionally
+  detached money windows and saved positions/preferences unchanged.
+- Add regression fixtures for phase transitions, money events, repeated polls,
+  hidden bars, missing phase API and absence of automatic action-slot changes.
+- Native confirmation of the reported gray rectangle is still pending.
+
+## 0.3.2-review.1 — 2026-10-31 (unpublished loadout candidate)
+
+- Add a movable, collapsible Spells card with native ranks and current green
+  tooltip bonus lines. Reuse the card styles, opacity, sizing and preview editor.
+- Add native jewelry bonus summaries to Accessories. Keep rarity/item names and
+  their native tier suffix; never infer jewelry rank from observed upgrades.
+- Show learned native icons beside spell names in local/party detail meters.
+  Unknown icons remain absent; no dependency on AZSSpellMeter is installed.
+- Add the next scheduled boss and a separate countdown column inside Lairs.
+- Add taken-category hover details for unambiguously named melee hits observed
+  during this run and classified by fresh native unit/target data. Explicitly show
+  incomplete coverage and unassigned totals; no guessed monster breakdown.
+- Validate the readers, geometry, icons, attribution guards and run resets under
+  Lua 5.0.3/5.1. Real-client visual and event coverage validation is still pending.
+
+## 0.3.1-review.2 — 2026-10-31 (unpublished UX candidate)
+
+- Isolate placement from the real FieldKit HUD. Add a Show/Hide other interface
+  elements button (hidden initially), with temporary alpha/input masking and exact
+  exit restoration. Keep UI update/event handlers and normal visibility untouched.
+- Keep audit JSON, review docs and the manifest out of the install ZIP; retain
+  the evidence in the repository and separate release attachments. Validate exact
+  ZIP membership, allowed file types and per-file sidecar hashes.
+- Add a reusable English/French example inspector for cards, boss portraits and
+  debuffs, player/target HP formats, teammate cards, revive, effects and reminders.
+- Test disabled modules without a party, boss, combat, or native API provider.
+- Reflect card style, opacity, dimensions, meter columns and HP formats live;
+  synchronize the inspector selection with Windows → Layout.
+- Place a selected window with settings hidden, or compose selected examples,
+  including disabled cards. Preserve grouped movement and the saved lock.
+- Keep sample data out of native tables, counters, party sharing and saved gameplay
+  data. Close/Escape/Done clean up examples without changing module enable flags.
+- Reset a single independent window position; grouped cards request ungrouping
+  first so unrelated windows are not reset.
+- Player/target format examples are read-only; the live player bar remains directly
+  draggable and target text remains attached to the native target frame.
+- Validate isolation, no native writes, frame reuse, EN/FR, style, geometry and
+  lifecycle under Lua 5.0.3 and 5.1. Actual visual/game validation remains pending.
+
 ## 0.3.0 — 2026-10-31 (native tools update; GitHub prerelease)
 
 Maintainer accepted for publication. Changes since 0.2.3:

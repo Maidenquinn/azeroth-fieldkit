@@ -59,25 +59,25 @@ local labels={
  ["Align left HUD cards"]="Aligner les cartes de gauche",
  ["Use one width and one movable stack for run mode, damage, damage taken and lairs. Individual positions are kept when unlinked."]="Une même largeur et une pile déplaçable pour le mode, les dégâts, les dégâts subis et les antres. Les positions individuelles sont conservées hors de la pile.",
  ["Run mode card"]="Carte du mode de jeu",
- ["Native difficulty rank with a labelled 0.121 modifier reference. Hover for full rules; unexposed live multipliers and affixes remain unknown."]="Rang fourni par le client et référence des règles 0.121. Survolez pour les détails. Les multiplicateurs et affixes non exposés restent inconnus.",
+ ["Native difficulty and zone with Difficulty-screen multipliers. Hover for the full chart."]="Difficulté native et zone, avec les multiplicateurs de l'écran Difficulté. Survolez pour le tableau complet.",
  ["Run mode"]="Mode de jeu",["Mode not provided"]="Mode non fourni",["Zone not provided"]="Zone non fournie",
  ["No difficulty data received."]="Aucune difficulté reçue du client.",
- ["Normal zone rules."]="Règles normales de la zone.",
- ["Modifier reference"]="Référence des modificateurs",
- ["+%d earlier modifiers (hover)"]="+%d règles héritées (survol)",
- ["Active affixes: not provided"]="Affixes actifs : non fournis",
- ["Shorter warnings"]="Annonces raccourcies",
- ["Boss attacks give less warning and lead your movement more as Heroic rises."]="Les attaques des boss préviennent moins tôt et anticipent davantage les déplacements quand le rang Héroïque augmente.",
- ["Elite packs"]="Meutes d'élites",["Ordinary elites arrive in pairs."]="Les élites ordinaires arrivent par paires.",
- ["Relentless"]="Implacables",["Bosses start enraged and become fiercer below 30% health."]="Les boss sont enragés dès le départ et deviennent plus féroces sous 30 % de vie.",
- ["Sentinels"]="Sentinelles",["Slain guardians strengthen the others; lairs refill sooner."]="Les gardiens tués renforcent les autres et les antres se remplissent plus tôt.",
- ["Lean purse"]="Bourse allégée",["One free reroll; caches cost a quarter more."]="Une relance gratuite ; les coffres coûtent 25 % de plus.",
- ["Horde affix"]="Affixe de horde",["A weekly horde affix applies. Its active identity is not supplied to FieldKit."]="Un affixe hebdomadaire s'applique à la horde. Son identité active n'est pas fournie à FieldKit.",
- ["Old mechanics"]="Anciennes mécaniques",["Boss towers and gazes return."]="Les tours et les regards des boss sont réactivés.",
- ["Unforgiving"]="Impitoyable",["A failed boss mechanic deals triple damage."]="Une mécanique de boss ratée inflige trois fois plus de dégâts.",
- ["Withering"]="Dépérissement",["Regeneration, healing and leech are halved; revives are slower and weaker."]="Régénération, soins et vol de vie divisés par deux ; résurrections plus lentes et plus faibles.",
- ["Council"]="Conseil",["The final boss brings an earlier boss; two weekly affixes apply."]="Le boss final vient avec un boss précédent ; deux affixes hebdomadaires s'appliquent.",
- ["Reference rules are not measured live values. Enemy HP/damage multipliers and current affix names are not supplied."]="Ces règles de référence ne sont pas des mesures en direct. Les multiplicateurs de PV/dégâts et les noms des affixes actifs ne sont pas fournis.",
+ ["Difficulty screen values"]="Valeurs de l'écran Difficulté",
+ ["Same multipliers as the Difficulty UI. Not live combat meters."]="Mêmes multiplicateurs que l'écran Difficulté. Pas des mesures de combat en direct.",
+ ["Marks x0.5"]="Marques x0.5",
+ ["The zone as-is"]="La zone telle quelle",
+ ["HP x1.79 · Damage x1.65"]="Vie x1.79 · Dégâts x1.65",
+ ["Marks x1 · Talent loot/XP x1.3"]="Marques x1 · Butin/XP talents x1.3",
+ ["Boss attacks give 15% less warning."]="Les attaques des boss préviennent 15 % moins tôt.",
+ ["Elite packs: elites arrive in pairs."]="Meutes d'élites : les élites viennent par paires.",
+ ["HP x1.97 · Damage x1.77"]="Vie x1.97 · Dégâts x1.77",
+ ["Marks x1.25 · Talent loot/XP x1.4"]="Marques x1.25 · Butin/XP talents x1.4",
+ ["HP x2.16 · Damage x1.88"]="Vie x2.16 · Dégâts x1.88",
+ ["Marks x1.5 · Talent loot/XP x1.5"]="Marques x1.5 · Butin/XP talents x1.5",
+ ["HP x2.45 · Damage x2.01"]="Vie x2.45 · Dégâts x2.01",
+ ["Marks x2 · Talent loot/XP x1.6"]="Marques x2 · Butin/XP talents x1.6",
+ ["HP x2.72 · Damage x2.16"]="Vie x2.72 · Dégâts x2.16",
+ ["Marks x2.5 · Talent loot/XP x1.7"]="Marques x2.5 · Butin/XP talents x1.7",
  ["Heroic"]="Héroïque",["Normal difficulty"]="Difficulté normale",
  ["Card style"]="Style des cartes en jeu",["Decorative"]="Travaillé",["Classic"]="Classique",
  ["Card background opacity"]="Opacité du fond des cartes en jeu",
@@ -119,7 +119,6 @@ labels["Hide native teammate frames"]="Masquer les cadres natifs des coéquipier
 labels["Advanced: hide originals only while a card has valid health. Passive cards do not provide native targeting, menus or buff interactions. Turn off to restore originals."]="Avancé : masque les originaux uniquement si les PV sont connus. Les cartes passives ne permettent ni ciblage natif, ni menus, ni interaction avec les effets. Désactivez pour rétablir les originaux."
 labels["Hide mode card without difficulty data"]="Masquer le mode si la difficulté est inconnue"
 labels["Keep the HUD clear when the client does not supply the mode. Preview arrangement still shows the card."]="Allège l’écran lorsque le client ne fournit pas le mode. La carte reste visible lors de l’organisation des aperçus."
-labels["Compact native difficulty and zone. Historical rules are available on hover, labelled with their reference version."]="Difficulté et zone natives en format compact. Les règles historiques sont accessibles au survol, avec leur version de référence."
 labels["Arrange previews"]="Organiser les aperçus"
 labels["Previews"]="Aperçus"
 labels["Arrange previews and combat areas"]="Organiser les aperçus et zones de texte"
@@ -197,5 +196,48 @@ labels["Explosive"]="Explosif"
 labels["Historical reference only. Active affixes are shown only when received; unknown formats remain raw."]="Référence historique uniquement. Les affixes ne sont affichés que s’ils sont reçus ; les formats inconnus restent bruts."
 labels["hps"]="sps"
 labels["A weekly horde affix applies. Current names are displayed only when supplied by the client."]="Un affixe hebdomadaire affecte la horde. Les noms actuels sont affichés uniquement si le client les fournit."
+labels["Preview — sample data"]="Aperçu — données fictives"
+labels["Examples only. No combat data is recorded or shared."]="Exemples uniquement. Aucune donnée de combat enregistrée ou partagée."
+labels["Test display"]="Tester l’affichage"
+labels["Compose interface"]="Composer l’interface"
+labels["Place this window"]="Placer cette fenêtre"
+labels["Include in interface composition"]="Inclure dans la composition de l’interface"
+labels["Reset this window position"]="Réinitialiser la position de cette fenêtre"
+labels["Ungroup this side to reset one window"]="Dégroupez ce côté pour réinitialiser une fenêtre"
+labels["Test without a party, boss or active module."]="Testez sans groupe, boss ni module actif."
+labels["Drag examples to place windows. Done restores live data."]="Déplacez les exemples. Terminer rétablit l’affichage réel."
+labels["Example"]="Exemple"
+labels["Player A"]="Joueur A"
+labels["Player B"]="Joueur B"
+labels["Player C"]="Joueur C"
+labels["Player D"]="Joueur D"
+labels["Periodic damage"]="Dégâts périodiques"
+labels["No categories selected"]="Aucune catégorie sélectionnée"
+labels["Move away"]="Éloignez-vous"
+labels["Totems"]="Totems"
+labels["Summons"]="Invocations"
+labels["Next boss"]="Prochain boss"
+labels["Filters"]="Filtres"
+labels["Health preview only; drag the active player bar directly"]="Aperçu des PV ; déplacez directement la barre joueur active"
+labels["Show other interface elements"]="Afficher les autres éléments de l’interface"
+labels["Hide other interface elements"]="Masquer les autres éléments de l’interface"
+labels["Spells"]="Sorts"
+labels["Rank %d"]="Rang %d"
+labels["Rank 3"]="Rang 3"
+labels["Cooldown"]="Temps de recharge"
+labels["Spell ranks and bonuses"]="Rangs et bonus des sorts"
+labels["Read current spell ranks and green bonus lines from native tooltips. No formulas or guessed jewelry ranks."]="Affiche les rangs et les bonus des infobulles natives. Aucun rang de bijou ni bonus calculé arbitrairement."
+labels["Next boss in Lairs"]="Prochain boss dans Antres"
+labels["Show the next native scheduled boss and countdown in the lair card."]="Affiche le prochain boss du calendrier natif et son compte à rebours dans Antres."
+labels["Bonus details not provided"]="Détail des bonus non fourni"
+labels["Observed attacker details"]="Détail des attaquants observés"
+labels["Partial melee log; native category totals remain authoritative."]="Journal de mêlée partiel ; les totaux natifs par catégorie font référence."
+labels["Partial named hit log; native category totals remain authoritative."]="Journal nommé partiel ; les totaux natifs par catégorie font référence."
+labels["No attributable creature hits received. The client only provided category totals."]="Aucun coup attribuable à une créature reçu. Le client ne fournit ici que les totaux par catégorie."
+labels["%d more sources"]="%d autres sources"
+labels["Not identified"]="Non identifié"
+labels["Combat log and native totals are not synchronized."]="Le journal de combat et les totaux natifs ne sont pas synchronisés."
+labels["No spells yet"]="Aucun sort"
+labels["Portrait texture rejected by client"]="Texture du portrait refusée par le client"
 for key,value in pairs(labels) do fr[key]=value end
 FieldKitLocale.en={};for en,value in pairs(fr) do FieldKitLocale.en[value]=en end

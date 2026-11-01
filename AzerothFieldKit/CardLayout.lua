@@ -31,20 +31,22 @@ end
 function C.Rows(frame,natural,count,kind,collapsed)
  local name=frame:GetName();local size=FieldKitDB.cardSizes[name]
  frame.fieldkitNaturalHeight=natural;frame.fieldkitRowCount=count;frame.fieldkitRowKind=kind
- local padding=kind=="bar" and 28 or 14
- local minimum=padding+math.max(count,1)*(kind=="gear" and 16 or 14)
+ local bar=kind=="bar" or kind=="loadout"
+ local padding=bar and 28+(frame.fieldkitFooterHeight or 0)+(frame.fieldkitHeaderHeight or 0) or 14
+ local rowMinimum=kind=="loadout" and (frame.fieldkitDenseLoadout and 16 or 32) or (kind=="gear" and 16 or 14)
+ local minimum=padding+math.max(count,1)*rowMinimum
  frame.fieldkitMinimumHeight=minimum
  local height=size and size.height and math.max(minimum,size.height) or natural
  frame.fieldkitExpandedHeight=height
  frame:SetWidth(C.Width(frame,frame:GetWidth()))
- frame:SetHeight(collapsed and (kind=="bar" and 24 or 23) or height)
+ frame:SetHeight(collapsed and (kind=="loadout" and 23 or (bar and 24 or 23)) or height)
  local step=math.min(32,(height-padding)/math.max(count,1))
- local rows=frame.rows or frame.slots or {}
+ local rows=frame.fieldkitLayoutRows or frame.rows or frame.slots or {}
  for i=1,table.getn(rows) do
   local row=rows[i]
-  if kind=="bar" then
-   row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-22-step*(i-1))
-   row:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-6,-22-step*(i-1));row:SetHeight(math.max(12,step-2))
+  if bar then
+   row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-22-(frame.fieldkitHeaderHeight or 0)-step*(i-1))
+   row:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-6,-22-(frame.fieldkitHeaderHeight or 0)-step*(i-1));row:SetHeight(math.max(12,step-2))
   elseif kind=="stats" then
    row.label:ClearAllPoints();row.label:SetPoint("TOPLEFT",frame,"TOPLEFT",9,-8-step*(i-1))
    row.value:ClearAllPoints();row.value:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-27,-8-step*(i-1))
@@ -157,7 +159,10 @@ end
 function C.Options()
  return {
   {kind="choice",label="Window to resize",values=C.labels,
-   get=function() return C.selected end,set=function(v) C.selected=v end},
+   get=function() return C.selected end,set=function(v)
+    C.selected=v
+    if FieldKitPreview.mode=="inspect" then FieldKitPreview.selected=v;FieldKitPreview.Refresh() end
+   end},
   {kind="check",label="Automatic size for this window",tip="Clear this window's custom dimensions. Height always keeps enough room for every visible row.",
    get=function() return FieldKitDB.cardSizes[C.names[C.selected]]==nil end,
    set=function(v)

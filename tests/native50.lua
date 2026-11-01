@@ -1,7 +1,7 @@
 -- Same actual Lua modules and behavioral fixtures, with no modern string API.
 dofile("tests/mock.lua")
 string.match=nil;string.gmatch=nil
-local files={"Runtime.lua","Positions.lua","Config.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","RunMode.lua","NativeData.lua","HudStack.lua","CardLayout.lua","Coop.lua","PartySync.lua","PartyDetails.lua","ScreenLayers.lua","NativeTools.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua"}
+local files={"Runtime.lua","Positions.lua","Config.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","RunMode.lua","NativeData.lua","HudStack.lua","CardLayout.lua","Coop.lua","PartySync.lua","PartyDetails.lua","ScreenLayers.lua","NativeTools.lua","SpellAssets.lua","Loadout.lua","TakenDetails.lua","Preview.lua","PreviewVisibility.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua"}
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 fire(FieldKitFrame,"VARIABLES_LOADED")
 dofile("tests/security.lua")
@@ -64,3 +64,15 @@ dofile("tests/ux_simplification.lua")
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 dofile("tests/native_tools.lua")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/previews.lua")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/loadout.lua")
+
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/portraits_native.lua")

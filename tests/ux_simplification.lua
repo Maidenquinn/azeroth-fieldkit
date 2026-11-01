@@ -44,7 +44,7 @@ for _,section in ipairs(schema) do if section.title=="Combat" then
  local first=table.remove(section.items,1);table.insert(section.items,first)
 end end
 local rebuilt=FieldKit.BuildJourneySections(schema,U.hudActions)
-assert(rebuilt[3].items[1].id=="playerBar" and rebuilt[4].items[1].id=="bossFrame")
+assert(rebuilt[3].items[1].kind=="preview" and rebuilt[3].items[2].id=="playerBar" and rebuilt[4].items[2].id=="bossFrame")
 assert(U.nativeTextOptions[1].id=="hideDamage" and U.nativeTextOptions[2].id=="showCrits")
 -- Missing mode stays hidden by default, but the user can request the unknown card.
 AZS_ZONE={};FieldKitRunMode.Update();assert(not FieldKitModeFrame:IsShown())

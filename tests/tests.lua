@@ -14,13 +14,13 @@ for i=1,table.getn(namepaths) do
  for _,target in ipairs({false,"Young Wolf","Another enemy",namepaths[i][1],false}) do
   TARGET=target or nil
   FieldKit_Portraits.Apply(FieldKitBossFrame1,AZS_UNITS[1].name,"guardian",5001)
-  assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..namepaths[i][2])
+  assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..namepaths[i][2]..".tga")
  end
 end
 AZS_UNITS[2]={name=AZS_UNITS[1].name,id=5002}
 FieldKit_Portraits.Apply(FieldKitBossFrame1,AZS_UNITS[1].name,"guardian",5001)
 FieldKit_Portraits.Apply(FieldKitBossFrame2,AZS_UNITS[1].name,"guardian",5002)
-assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\zevrim")
+assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\zevrim.tga")
 assert(FieldKitBossFrame2.portrait.texture==FieldKitBossFrame1.portrait.texture)
 assert(FieldKitBossFrame1.mashPortraitIdentity~=FieldKitBossFrame2.mashPortraitIdentity)
 AZS_UNITS[1].displayId=999
@@ -113,7 +113,7 @@ AZS_UNITS={
 for _,target in ipairs({false,"Young Wolf","Brute gordunni","Another enemy",false}) do
  TARGET=target or nil
  fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
- assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\gordunni")
+ assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\gordunni.tga")
  assert(string.find(FieldKitBossFrame1.mashPortraitReason,"instances=2",1,true))
 end
 -- Both awake guardians share the verified appearance but preserve their own instance ids/HP.
@@ -122,6 +122,24 @@ fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
 assert(FieldKitBossFrame2.portrait.texture==FieldKitBossFrame1.portrait.texture)
 assert(FieldKitBossFrame1.mashPortraitIdentity~=FieldKitBossFrame2.mashPortraitIdentity)
 assert(FieldKitBossFrame1.bar.value==11501 and FieldKitBossFrame2.bar.value==9000)
+-- Stale AZS_UNITS state=1 after despawn/new run: empty/returning lairs hide guardian frames.
+AZS_LAIRS={
+ {name="Brute gordunni",id=687865983,state="empty",left=11},
+ {name="Brute gordunni",id=0,state="empty",left=25},
+ {name="Tréant de Crochebois",id=0,state="empty",left=30},
+ {name="Protecteur Écorce-de-fer",id=0,state="empty",left=42},
+}
+fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
+assert(not FieldKitBossFrame1:IsShown() and not FieldKitBossFrame2:IsShown())
+-- Only the lair marked awake may keep a guardian frame.
+AZS_LAIRS={
+ {name="Brute gordunni",id=687865983,state="awake",left=-1},
+ {name="Brute gordunni",id=687865986,state="empty",left=25},
+}
+fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
+assert(FieldKitBossFrame1:IsShown() and FieldKitBossFrame1.bar.value==11501)
+assert(not FieldKitBossFrame2:IsShown())
+AZS_LAIRS={}
 -- Resolve every localized alias on every map, with duplicate instances and another target.
 local zones,aliases=0,0
 local entries={}
@@ -133,7 +151,7 @@ for zone,names in pairs(FieldKit_PortraitCatalog) do
   TARGET="Unrelated creature"
   FieldKit_Portraits.Apply(FieldKitBossFrame1,name,"boss",10001)
   FieldKit_Portraits.Apply(FieldKitBossFrame2,name,"boss",10002)
-  assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key)
+  assert(FieldKitBossFrame1.portrait.texture=="Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key..".tga")
   assert(FieldKitBossFrame2.portrait.texture==FieldKitBossFrame1.portrait.texture)
   assert(FieldKitBossFrame1.mashPortraitIdentity~=FieldKitBossFrame2.mashPortraitIdentity)
   TARGET=nil;FieldKit_Portraits.Apply(FieldKitBossFrame1,name,"boss",10001)
