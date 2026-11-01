@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.3.2 — 2026-11-01 (loadout, Difficulty multipliers and HUD polish; GitHub prerelease)
+
+Maintainer accepted for publication. Changes since **0.3.0**:
+
+- Integrate Accessories and Spells on one equipment card (tabs, shared size/collapse/style). Spells come only from the native learned list; bonuses/upgrades from action tooltips; icons from a local Spell.dbc index (no Azerloot copy).
+- Show compact jewelry boosts, item names as row labels, left-aligned accessory text, and tier-colored spell ranks.
+- Run mode shows Difficulty-screen multipliers (HP / damage / marks / talent loot·XP) for the live native rank; full chart on hover.
+- Guardian boss frames require a matching awake lair, so despawned/returning guardians no longer leave frames after a fresh run.
+- Lairs: next-boss countdown, clearer FR states (en attente / en combat), footer inset.
+- Partial named taken details from combat log + native categories; incomplete coverage stays labelled.
+- Compact bar / XP / money hide during native level-up and chest choices; restore FieldKit-suppressed visibility afterward.
+- Context-free placement previews with optional hide/show of other UI; install ZIP still excludes JSON/docs.
+- Idle combat-text / crit paint shortcuts; French meter icon aliases; short empty Spells label (« Aucun sort »).
+- Offline Lua 5.0.3/5.1 and packaging checks pass; no new agent in-game certification claimed.
+
+Candidate review entries below remain historical records of the path to this release.
+
+
+## 0.3.2-review.9 — 2026-11-01 (left-align accessory names)
+
+- Accessory and spell row labels are forced left-aligned; wide label boxes no longer center short slot names.
+
+## 0.3.2-review.8 — 2026-11-01 (hide despawned guardian boss frames)
+
+- Guardian boss frames now require a matching lair in `awake` state, so stale `AZS_UNITS` entries after despawn or a fresh run no longer keep Berserker/Champion frames on screen.
+
+## 0.3.2-review.7 — 2026-11-01 (Difficulty UI multipliers on run mode)
+
+- Run mode card shows the Difficulty screen multipliers (Vie / Dégâts / Marques / Butin·XP) for the live native rank, not the old qualitative 0.121 rule names.
+- Empty Spells tab uses the short label « Aucun sort » instead of the truncated « Données des sorts non… ».
+
+## 0.3.2-review.6 — 2026-11-01 (accessory boosts + meter icons + lair wording)
+
+- Restore accessory bonuses as compact lines (`+72% chance`, `-10% dmg`) instead of dropping Equip prose.
+- Add French meter icon aliases for Saccager, Rafale and Blessures profondes.
+- Lair states: asleep → en attente, awake → en combat.
+
+## 0.3.2-review.5 — 2026-11-01 (loadout / mode / lairs polish)
+
+- Accessories show compact numeric boosts only; French prose with a bare percentage no longer fills the card.
+- Equipped jewelry uses the item name as the row label (no repeated "Amulet" / slot title).
+- Spell ranks use tiered colors on the Spells tab.
+- Run mode lists the live Heroic reference impacts on the card (full detail still on hover).
+- Lairs next-boss / HP footer inset away from decorative corners.
+- Broader exact combat-log templates for named taken attribution (melee + creature spells).
+
 ## 0.3.2-review.3 — 2026-10-31 (unpublished integrated loadout correction)
 
 - Remove the separate Spells window. Accessories/Spells tabs now share the existing

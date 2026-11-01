@@ -15,6 +15,16 @@ Do not silently overwrite an already published release asset: ship this correcti
 in a new authorized release. Local installers must read dist/MANIFEST.json rather
 than expecting a manifest inside the addon folder.
 
+## Update authorized 2026-11-01 — v0.3.2
+
+The maintainer requested this loadout / Difficulty / HUD polish release. Keep the
+branch → PR → CI → main → immutable tag workflow. Build the merged commit twice and
+compare the ZIP hash, publish ZIP/manifest/checksum/validation as a GitHub
+prerelease, and verify uploaded assets before publication. Preserve older
+tags/assets. Prepare the Discord changelog for manual posting; do not claim real
+game/network testing.
+
+
 ## Update authorized 2026-10-31 — v0.3.0
 
 The maintainer requested this native-tools release. Keep the branch → PR → CI →

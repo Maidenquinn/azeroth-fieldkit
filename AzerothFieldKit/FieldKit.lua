@@ -2,7 +2,7 @@
 -- Read docs/CODE_GUIDE.md and SECURITY.md before changing native UI behavior.
 --
 -- Flow: VARIABLES_LOADED -> Config -> fixed frame pools; events refresh the
--- relevant windows; 0.05s maintains layout/debuffs, 0.2s reads run snapshots.
+-- relevant windows; buffs/debuffs 20 Hz, plates ~10 Hz, layout 0.5 s, snapshots 5 Hz.
 -- DB is the one normalized FieldKitDB table. AZS_* belongs to the game and is
 -- read-only here. UI settings and the explicit user-drag action-slot swap are
 -- the only intended native effects (enumerated in docs/API_SURFACE.md).
@@ -17,6 +17,8 @@ local PLATE_BORDER = "Interface\\Tooltips\\Nameplate-Border"
 local PLATE_SKULL = "Interface\\TargetingFrame\\UI-TargetingFrame-Skull"
 local SCAN_INTERVAL = 0.05
 local DATA_INTERVAL = 0.2 -- Official native snapshots arrive at most five times/second.
+local LAYOUT_INTERVAL = 0.5
+local PLATE_INTERVAL = 0.1
 local CAMERA_BASE = 15
 
 local DB
@@ -432,6 +434,25 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
 	f:Show()
 end
 
+-- Lair ids currently fighting. Empty/returning/asleep lairs must not keep a
+-- guardian boss frame after despawn or across a fresh run when AZS_UNITS lags.
+-- Read AZS_LAIRS directly (same source as pins) so boss refresh does not bump
+-- the documented 5 Hz GetLairs snapshot cadence.
+local function AwakeGuardianIds()
+	if type(AZS_LAIRS) ~= "table" or table.getn(AZS_LAIRS) == 0 then
+		return nil
+	end
+	local awake = {}
+	for i = 1, table.getn(AZS_LAIRS) do
+		local l = AZS_LAIRS[i]
+		local id = l and FieldKit.Number(l.id)
+		if l and l.state == "awake" and id and id > 0 then
+			awake[id] = true
+		end
+	end
+	return awake
+end
+
 -- Select live final/boss/awake-guardian entries and update the bounded frame pool.
 local function UpdateBossFrame()
 	if ( table.getn(bossFrames) == 0 ) then
@@ -441,6 +462,7 @@ local function UpdateBossFrame()
 	if ( DB.bossFrame and HasAPI() and type(AZS_UNITS) == "table" ) then
 		local phase = AZS_GetPhase()
 		if ( phase and phase ~= "ready" ) then
+			local awakeIds = AwakeGuardianIds()
 
 			for pass = 1, 2 do
 				for i = 1, math.min(512,table.getn(AZS_UNITS)) do
@@ -452,6 +474,11 @@ local function UpdateBossFrame()
 						wanted = ( kind == "final" or kind == "boss" )
 					else
 						wanted = ( kind == "guardian" and ( state == 1 or state == true ) )
+						-- Prefer the lair awake flag over a stale AZS_UNITS state=1.
+						if wanted and awakeIds then
+							local id = FieldKit.Number(Field(e, "id", 2))
+							wanted = id and awakeIds[id]
+						end
 					end
 					if ( wanted and n < BOSS_FRAMES ) then
 						n = n + 1
@@ -1282,7 +1309,7 @@ local function UpdateMoneyFrame()
 		return
 	end
 	if not DB.moneyFrame or (HasAPI() and not AZS_GetPhase())
-  or (DB.compactBar and not DB.moneyDetached and FieldKit.IsChoiceScreen()) then
+  or FieldKit.IsChoiceScreen() then
   moneyFrame:Hide();return
  end
 	local exact=HasAPI() and type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.ck,nil,0)
@@ -1453,11 +1480,13 @@ local function CreateGearFrame()
 		row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 		row.label = row:CreateFontString("FieldKitGearSlot"..i.."Label", "OVERLAY", "GameFontNormalSmall")
 		row.label:SetPoint("TOPLEFT", row, "TOPLEFT", 20, 0)
+		row.label:SetJustifyH("LEFT");row.label:SetJustifyV("TOP")
 		row.value = row:CreateFontString("FieldKitGearSlot"..i.."Value", "OVERLAY", "GameFontHighlightSmall")
 		row.value:SetPoint("TOPRIGHT", row, "TOPRIGHT", -2, 0)
 		row.value:SetPoint("TOPLEFT", row, "TOPLEFT", 80, 0)
 		row.value:SetJustifyH("RIGHT")
   row.bonus=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.bonus:SetPoint("TOPLEFT",row,"TOPLEFT",20,-16);row.bonus:SetHeight(12);row.bonus:SetTextColor(.3,1,.4)
+  row.bonus:SetJustifyH("LEFT");row.bonus:SetJustifyV("TOP");if row.bonus.SetNonSpaceWrap then row.bonus:SetNonSpaceWrap(true) end
 
 		row:SetScript("OnEnter", function()
 			if ( GetInventoryItemLink and GetInventoryItemLink("player", slotId) ) then
@@ -1526,7 +1555,14 @@ local function CreateBarWindow(name, title, rows)
 	collapse:SetFrameLevel(f:GetFrameLevel() + 10)
 	collapse:SetScript("OnClick", function()
 		local collapsed = not f.mashCollapsed
-  if f.nextBoss then if collapsed then f.nextBoss:Hide();f.nextBossTime:Hide() elseif (f.fieldkitFooterHeight or 0)>0 then f.nextBoss:Show();f.nextBossTime:Show() end end
+  if f.nextBoss then
+   if collapsed then
+    f.nextBoss:Hide();if f.nextBossTime then f.nextBossTime:Hide() end
+    if f.bossBar then f.bossBar:Hide() end;if f.bossPct then f.bossPct:Hide() end
+   elseif (f.fieldkitFooterHeight or 0)>0 then
+    -- Content refresh decides countdown versus live boss strip.
+   end
+  end
 		f.mashCollapsed = collapsed
 		DB.collapsedWindows = DB.collapsedWindows or {}
 		DB.collapsedWindows[name] = collapsed or nil
@@ -1541,6 +1577,7 @@ local function CreateBarWindow(name, title, rows)
    for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
    FieldKitCardLayout.Rows(f,f.fieldkitNaturalHeight or (28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1)),f.mashVisibleRows or 0,f.fieldkitRowKind or "bar",false)
 		end
+		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 	end)
 	f.mashCollapseButton = collapse
 	f.rows = {}
@@ -1794,10 +1831,50 @@ function UpdateLairFrame()
 		row:Show()
 	end
 	FieldKit_Text(lairFrame.total,held.." / "..table.getn(lairs)..FieldKit_L(" held"))
-	lairFrame.fieldkitFooterHeight=nextBoss and 20 or 0
- if nextBoss and not lairFrame.mashCollapsed then
-  lairFrame.nextBoss:SetText(FieldKit_L("Next boss")..": "..nextBoss.name);lairFrame.nextBoss:SetWidth(lairFrame:GetWidth()-70);lairFrame.nextBoss:Show();lairFrame.nextBossTime:SetText(FieldKitNative.Clock(nextBoss.left));lairFrame.nextBossTime:Show()
- else lairFrame.nextBoss:Hide();lairFrame.nextBossTime:Hide() end
+ -- Prefer a living boss HP strip; otherwise keep the scheduled arrival countdown.
+ local live
+ if type(AZS_UNITS)=="table" and AZS_GetPhase and AZS_GetPhase() and AZS_GetPhase()~="ready" then
+  for i=1,math.min(512,table.getn(AZS_UNITS)) do
+   local e=AZS_UNITS[i];local kind=Field(e,"kind",1)
+   if kind=="final" or kind=="boss" then
+    local hp,hpm=Field(e,"hp",4),Field(e,"hpm",5)
+    if FieldKit.Number(hpm) and hpm>0 then
+     live={name=Field(e,"name",3) or "?",hp=hp or 0,hpm=hpm,enraged=Field(e,"state",6)}
+     break
+    end
+   end
+  end
+ end
+ local footer=0
+ if live then footer=40 elseif nextBoss then footer=28 end
+ lairFrame.fieldkitFooterHeight=footer
+ if lairFrame.mashCollapsed or footer==0 then
+  lairFrame.nextBoss:Hide();lairFrame.nextBossTime:Hide();lairFrame.bossBar:Hide();lairFrame.bossPct:Hide()
+ elseif live then
+  local pct=math.max(0,math.min(1,(live.hp or 0)/live.hpm))
+  local info=string.format("%d%%",math.floor(pct*100+.5))
+  if live.enraged==1 or live.enraged==true then info=FieldKit_L("ENRAGED").."  "..info end
+  -- Keep name / % / bar clear of the decorative corner chrome.
+  lairFrame.nextBoss:SetText(live.name);lairFrame.nextBoss:SetTextColor(1,.82,0)
+  lairFrame.nextBoss:SetFontObject(GameFontNormal)
+  lairFrame.nextBoss:ClearAllPoints();lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,24)
+  lairFrame.nextBoss:SetWidth(lairFrame:GetWidth()-96);lairFrame.nextBoss:Show()
+  lairFrame.nextBossTime:Hide()
+  lairFrame.bossPct:ClearAllPoints();lairFrame.bossPct:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,24)
+  lairFrame.bossPct:SetWidth(68);lairFrame.bossPct:SetText(info);lairFrame.bossPct:Show()
+  lairFrame.bossBar:ClearAllPoints();lairFrame.bossBar:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10)
+  lairFrame.bossBar:SetMinMaxValues(0,live.hpm);lairFrame.bossBar:SetValue(live.hp or 0)
+  lairFrame.bossBar:SetWidth(lairFrame:GetWidth()-24);lairFrame.bossBar:Show()
+ else
+  lairFrame.nextBoss:SetText(FieldKit_L("Next boss")..": "..nextBoss.name)
+  lairFrame.nextBoss:SetTextColor(1,.82,0);lairFrame.nextBoss:SetFontObject(GameFontNormal)
+  lairFrame.nextBoss:ClearAllPoints();lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10)
+  lairFrame.nextBoss:SetWidth(lairFrame:GetWidth()-86);lairFrame.nextBoss:Show()
+  lairFrame.nextBossTime:ClearAllPoints();lairFrame.nextBossTime:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,10)
+  lairFrame.nextBossTime:SetWidth(56);lairFrame.nextBossTime:SetText(FieldKitNative.Clock(nextBoss.left))
+  lairFrame.nextBossTime:SetTextColor(1,.9,.75);lairFrame.nextBossTime:SetFontObject(GameFontNormal)
+  lairFrame.nextBossTime:Show();lairFrame.bossBar:Hide();lairFrame.bossPct:Hide()
+ end
  FitRows(lairFrame, n)
 	lairFrame:Show()
 end
@@ -1805,8 +1882,12 @@ end
 -- Allocate the ten-row lair window with separate distance/state columns.
 function CreateLairFrame()
 	lairFrame = CreateBarWindow("FieldKitLairFrame", "Lairs", LAIR_ROWS)
- lairFrame.nextBoss=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall");lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",8,6);lairFrame.nextBoss:SetHeight(14);lairFrame.nextBoss:Hide()
- lairFrame.nextBossTime=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall");lairFrame.nextBossTime:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-8,6);lairFrame.nextBossTime:SetWidth(50);lairFrame.nextBossTime:SetHeight(14);lairFrame.nextBossTime:SetJustifyH("RIGHT");lairFrame.nextBossTime:Hide()
+ lairFrame.nextBoss=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormal");lairFrame.nextBoss:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10);lairFrame.nextBoss:SetHeight(16);lairFrame.nextBoss:SetJustifyH("LEFT");lairFrame.nextBoss:SetTextColor(1,.82,0);lairFrame.nextBoss:Hide()
+ lairFrame.nextBossTime=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormal");lairFrame.nextBossTime:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,10);lairFrame.nextBossTime:SetWidth(56);lairFrame.nextBossTime:SetHeight(16);lairFrame.nextBossTime:SetJustifyH("RIGHT");lairFrame.nextBossTime:SetTextColor(1,.9,.75);lairFrame.nextBossTime:Hide()
+ lairFrame.bossPct=lairFrame:CreateFontString(nil,"OVERLAY","GameFontNormal");lairFrame.bossPct:SetPoint("BOTTOMRIGHT",lairFrame,"BOTTOMRIGHT",-14,24);lairFrame.bossPct:SetWidth(68);lairFrame.bossPct:SetHeight(16);lairFrame.bossPct:SetJustifyH("RIGHT");lairFrame.bossPct:SetTextColor(1,.9,.75);lairFrame.bossPct:Hide()
+ lairFrame.bossBar=CreateFrame("StatusBar",nil,lairFrame);lairFrame.bossBar:SetHeight(8);lairFrame.bossBar:SetPoint("BOTTOMLEFT",lairFrame,"BOTTOMLEFT",12,10)
+ lairFrame.bossBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");lairFrame.bossBar:SetStatusBarColor(.82,.13,.08);lairFrame.bossBar:SetMinMaxValues(0,1);lairFrame.bossBar:Hide()
+ local barBg=lairFrame.bossBar:CreateTexture(nil,"BACKGROUND");barBg:SetAllPoints(lairFrame.bossBar);barBg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar");barBg:SetVertexColor(.12,.08,.05)
 
 	for i = 1, LAIR_ROWS do
 		local row = lairFrame.rows[i]
@@ -2094,7 +2175,7 @@ function KeepCompactBar()
    compactBar.fieldkitChoiceHidden=true
    compactBar:Hide()
   end
-  if moneyFrame and not DB.moneyDetached then moneyFrame:Hide() end
+  if moneyFrame then moneyFrame:Hide() end
   return
  end
  if compactBar.fieldkitChoiceHidden then
@@ -2415,25 +2496,65 @@ local function RefreshNativeData()
 	UpdateMoneyFrame();UpdateMeterFrames();UpdateChestPins();UpdateLairFrame()
 end
 
+local plateElapsed, layoutElapsed = 0, 0
+local platesFilterOn = false
 frame:SetScript("OnUpdate", function()
 	if ( not DB ) then
 		return
 	end
-	UpdatePlates()
-	FieldKitCrits.Animate()
-	PulsePlayerBar()
-	elapsed = elapsed + ( arg1 or 0 )
-	dataClock.elapsed = dataClock.elapsed + ( arg1 or 0 )
+	local dt = arg1 or 0
+	local choosing = FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen()
+	-- Nameplate filtering is expensive in combat; skip entirely when disabled or
+	-- while the native reward/level-up overlay owns the screen. Toggle edges
+	-- always sync immediately so other UI alphas are restored without delay.
+	local wantPlates = DB.hidePlates and not choosing
+	plateElapsed = plateElapsed + dt
+	if wantPlates then
+		if (not platesFilterOn) or plateElapsed >= PLATE_INTERVAL then
+			plateElapsed = 0
+			UpdatePlates()
+		end
+		platesFilterOn = true
+	else
+		if platesFilterOn or plateElapsed >= 1 then
+			plateElapsed = 0
+			UpdatePlates()
+		end
+		platesFilterOn = false
+	end
+	if not choosing then
+		FieldKitCrits.Animate()
+		PulsePlayerBar()
+	end
+	elapsed = elapsed + dt
+	dataClock.elapsed = dataClock.elapsed + dt
+	layoutElapsed = layoutElapsed + dt
 	if ( elapsed < SCAN_INTERVAL ) then
 		return
 	end
 	elapsed = 0
 	KeepCompactBar()
-	UpdateBossFrame()
-	UpdatePlayerBuffs()
-	UpdatePlayerBar()
-	if dataClock.elapsed>=DATA_INTERVAL then dataClock.elapsed=0;FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update();FieldKitNativeTools.Update();FieldKitLoadout.Update();FieldKitScreenLayers.Update() end
- FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitPartySync.Tick()
+	if not choosing then
+		UpdateBossFrame()
+		UpdatePlayerBuffs()
+		UpdatePlayerBar()
+	end
+	if dataClock.elapsed>=DATA_INTERVAL then
+		dataClock.elapsed=0
+		FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update()
+		FieldKitNativeTools.Update()
+		-- Loadout tooltip scans hitch hard; keep them off the choosing overlay path.
+		if not choosing then FieldKitLoadout.Update() end
+		FieldKitScreenLayers.Update()
+		-- Cards may show/hide after native snapshots; restack once here, not every paint.
+		layoutElapsed = 0
+		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+	elseif layoutElapsed >= LAYOUT_INTERVAL then
+		-- Safety restack when no snapshot landed (collapse/options already call Apply).
+		layoutElapsed = 0
+		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+	end
+	if not choosing then FieldKitPartySync.Tick() end
 end)
 
 SLASH_FieldKit1 = "/fieldkit"

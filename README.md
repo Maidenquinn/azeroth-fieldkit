@@ -1,7 +1,7 @@
 # Azeroth FieldKit
 
-> **Branch candidate 0.3.2-review.3:** native loadout bonuses, spell icons and partial attacker details.
-> Not a published update. See [guide and game-test checklist](docs/LOADOUT_AND_TAKEN.md).
+> **0.3.2 update:** integrated Accessories/Spells loadout, Difficulty-screen mode
+> multipliers, guardian-frame cleanup and HUD polish. See [release notes](docs/RELEASE_0.3.2.md).
 
 > **0.3.0 native-tools update:** optional effects, revive progress, Healing/Boss
 > meters and guarded HUD tools. See [activation and limits](docs/NATIVE_TOOLS_0_130.md).
@@ -13,10 +13,10 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 
 ## Versions and downloads
 
-- **Latest package:** [0.3.0](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.0), published as a GitHub prerelease.
-- Accepted for publication by the maintainer on 2026-10-31. This update adds native
-  tools for the inspected 0.130.1 client, retaining guarded older-client fallbacks.
-  [Release notes](docs/RELEASE_0.3.0.md). New cards/warnings start disabled.
+- **Latest package:** [0.3.2](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.2), published as a GitHub prerelease.
+- Accepted for publication by the maintainer on 2026-11-01. Changes since 0.3.0:
+  loadout card, Difficulty multipliers, guardian frames and layout polish.
+  [Release notes](docs/RELEASE_0.3.2.md). Preferences and SavedVariables are kept.
 - On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
   addon. That publication permission does not independently certify this package or settle
   inherited code/assets rights. See [publication scope](docs/PUBLICATION.md),
@@ -31,7 +31,7 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
    the folder twice. Disable the legacy MASH addon to avoid duplicate behavior.
 3. Enable FieldKit in the client's addon selector and restart the game.
 
-Download `AzerothFieldKit-0.3.0.zip` from the release above; it contains the
+Download `AzerothFieldKit-0.3.2.zip` from the release above; it contains the
 current interface. No external executable or companion addon is required. FieldKit
 never imports MASHDB automatically or modifies your game saves.
 
@@ -89,9 +89,10 @@ Live co-op transport is **not confirmed**. The status reports recent received da
 not a successful send call as proof of delivery. [Protocol and limits](docs/PARTY_SYNC.md).
 
 The mode card is compact and hidden without a native difficulty rank by default.
-Its hover rules are explicitly a **0.121 reference**, not verified current mechanics
-or measured live multipliers. No active affix/marks/star data is invented. Runes on
-the ground are not tracked; lair pins are not moving guardian coordinates.
+It shows the **Difficulty-screen** HP/damage/marks/loot multipliers for the live
+rank; those are menu values, not combat meters. No active affix/marks/star data is
+invented beyond recognized received affix names. Runes on the ground are not
+tracked; lair pins are not moving guardian coordinates.
 
 ## Commands and privacy
 

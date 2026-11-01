@@ -1,7 +1,7 @@
 {
-  "version": "0.3.2-review.3",
+  "version": "0.3.2",
   "lua51": true,
-  "nativeLua50": "Native Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed",
+  "nativeLua50": null,
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -16,11 +16,11 @@
   "inGameTest": false,
   "partySyncTwoClientsSimulated": true,
   "partySyncLiveTransportConfirmed": false,
-  "approval": "development candidate; not accepted for publication",
+  "approval": "maintainer accepted for publication; not independently certified",
   "publication": {
-    "version": "0.3.2-review.3",
-    "maintainerAcceptedForPublication": false,
-    "maintainerAcceptanceDate": null,
+    "version": "0.3.2",
+    "maintainerAcceptedForPublication": true,
+    "maintainerAcceptanceDate": "2026-11-01",
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
@@ -33,7 +33,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "1fd8181dd1d6d449988ffe60ee6e178365e1e44db8a0f9161cdd15b632e384e2"
+      "sha256": "c0acc9a161cc319b8adf6e6dd6b08afccf1f0cd6ae451d2d228a01d8c5dde980"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -48,12 +48,12 @@
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "fda1b0246945329cbf04e3ebf6d2b988b92b655f3ca8ed37315a107cc5d16480"
+      "sha256": "118bf4856777f631357448c06c3bc4bf3b05f368b7aa474ce4de0e81af99f765"
     },
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "d17a2e727cf0b47c56cac8ae05e5d53b3e9446085dfd93089beee2941b875612"
+      "sha256": "a1efb9269a956e77179e5685c24bb2519721c394136f35ae460736e3a45d4f09"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -87,8 +87,8 @@
     },
     "RunMode.lua": {
       "maxUpvalues": 1,
-      "functions": 10,
-      "sha256": "bdc4982da5b94424d6dc7b6280660761c27906e1681fd37ee5512d6006bb42e4"
+      "functions": 11,
+      "sha256": "bc757119ae460f507cc5ba3b05d7893673ca8d4e1aba6a156b286c86f039f8ec"
     },
     "NativeData.lua": {
       "maxUpvalues": 2,
@@ -137,13 +137,13 @@
     },
     "Loadout.lua": {
       "maxUpvalues": 2,
-      "functions": 19,
-      "sha256": "41114c73455e2dfdb955e915b8c2957610c0c6d0ebfa23af29f026fff31331d1"
+      "functions": 25,
+      "sha256": "5904e904a5304e85c1eab65a6cdbf58f385921cc4d3880cad05888a2ff987263"
     },
     "TakenDetails.lua": {
-      "maxUpvalues": 3,
-      "functions": 8,
-      "sha256": "5b0ac8602f3a99ba812249de7543b0d530b5b65537d1fcdcafca4be2e91b8797"
+      "maxUpvalues": 4,
+      "functions": 9,
+      "sha256": "2444aa4578119eae2da08653ce627caccb7acc704ec2551dc3c8c06bcd71f563"
     },
     "Preview.lua": {
       "maxUpvalues": 3,
@@ -163,17 +163,17 @@
     "LegacyCrits.lua": {
       "maxUpvalues": 7,
       "functions": 7,
-      "sha256": "fda5238bdb3f59ef03763c58bed9ec3ada1b8d9335b14d0022b17b9aa9abdd6f"
+      "sha256": "2e33373ebde2c6a0d15e4a4f7c3566ff82e73402cd57c6c6d8f3ec8094cb2d21"
     },
     "Interface.lua": {
       "maxUpvalues": 5,
       "functions": 122,
-      "sha256": "6dcbfc3b6ad0959000f7abc0f6f406fdf91598ca3a6064e625eb113003b9d736"
+      "sha256": "e1fbdaf784622274579b0eb2cbeb682e87dcc9cc87e167c62133d8ff04fdd719"
     },
     "FieldKit.lua": {
       "maxUpvalues": 20,
-      "functions": 169,
-      "sha256": "3b481eb9cb0f0fe9f00bf69bdd7b52510f9eaf9ca7d9feaaa1b1980311a2d660"
+      "functions": 170,
+      "sha256": "d1bf6e38b8ce358a91de5139ff4915f034c1bb27fd284812b4f19a5ea292016e"
     },
     "WorldPins.lua": {
       "maxUpvalues": 9,
@@ -183,7 +183,7 @@
     "CombatText.lua": {
       "maxUpvalues": 7,
       "functions": 26,
-      "sha256": "2cd7c9d2f6fcb2b9db6afd8b2a0ae5b7e9c9ff790a20e506d8cd778860ee9c7b"
+      "sha256": "09219562fc76a484e75c604dde54de647bd7a6a67b65e6d4b8c977d8b97ba94e"
     },
     "CombatOptions.lua": {
       "maxUpvalues": 5,

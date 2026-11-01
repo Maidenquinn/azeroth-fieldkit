@@ -25,19 +25,15 @@ viewport; collapse/disable cards or use the independent layout in that case.
 
 - **Live native fields:** current rank from `AZS_ZONE.heroic` and zone name/key.
   Missing rank is displayed as unavailable; retained data outside a run is hidden.
-- **Reference:** cumulative fixed mechanic descriptions from the supplied
-  0.121.0 changelog, native client strings and difficulty screenshot. The card
-  explicitly labels the reference version, shows up to four latest mechanics,
-  and lists all cumulative mechanics in its tooltip. Tier I: warnings/packs;
-  II: relentless/sentinels; III: purse/horde affix; IV: old mechanics/unforgiving;
-  V: withering/council. This text is not a live measurement of mechanic state.
+- **Difficulty-screen chart:** fixed HP / damage / marks / talent-loot·XP
+  multipliers matching the client's Difficulty UI for Normal and Heroic I–V,
+  plus Heroic I combat notes when that rank is live. Tooltip lists the full
+  chart. These are menu values, not live combat meters.
 
-No current affix identity, enemy multiplier, reward amount or progression state
-is inferred. The current screenshot's weekly affixes are not hardcoded: they
-change, and the client API inspected has no confirmed live export for them. The
-Elwynn multipliers shown in that menu are not silently applied to other zones or
-co-op. The tooltip explicitly notes that these live values are not supplied.
-Reference rules may require maintenance after subsequent client updates.
+Guardian boss frames additionally require a matching `AZS_LAIRS` entry in
+`awake` state, so stale `AZS_UNITS` rows after despawn or a fresh run do not keep
+frames on screen. Received affix names appear only when the optional option is on
+and the packet supplies recognized literals; unknown encodings stay raw.
 
 ## Verification and limits
 

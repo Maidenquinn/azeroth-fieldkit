@@ -39,10 +39,11 @@ fire(FieldKitFrame,"CHAT_MSG_ADDON","AZSRUN")
 assert(FieldKitCompactBar:IsShown() and FieldKitMoneyFrame:IsShown(),"Compact HUD did not return after choices")
 assert(ActionButton1:IsShown(),"Normal button repair did not resume")
 
--- A deliberately detached money HUD retains its own visibility preference.
+-- Detached money must also yield to native choices; detachment stays saved.
 FieldKitDB.moneyDetached=true
 AZS_RUN.ph="choosing";update(FieldKitFrame,.3)
-assert(not FieldKitCompactBar:IsShown() and FieldKitMoneyFrame:IsShown())
+assert(not FieldKitCompactBar:IsShown() and not FieldKitMoneyFrame:IsShown())
+assert(FieldKitDB.moneyDetached==true)
 AZS_RUN.ph="playing";update(FieldKitFrame,.3)
 FieldKitDB.moneyDetached=nil
 -- Do not restore a compact bar that was already hidden before the choice.

@@ -122,6 +122,24 @@ fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
 assert(FieldKitBossFrame2.portrait.texture==FieldKitBossFrame1.portrait.texture)
 assert(FieldKitBossFrame1.mashPortraitIdentity~=FieldKitBossFrame2.mashPortraitIdentity)
 assert(FieldKitBossFrame1.bar.value==11501 and FieldKitBossFrame2.bar.value==9000)
+-- Stale AZS_UNITS state=1 after despawn/new run: empty/returning lairs hide guardian frames.
+AZS_LAIRS={
+ {name="Brute gordunni",id=687865983,state="empty",left=11},
+ {name="Brute gordunni",id=0,state="empty",left=25},
+ {name="Tréant de Crochebois",id=0,state="empty",left=30},
+ {name="Protecteur Écorce-de-fer",id=0,state="empty",left=42},
+}
+fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
+assert(not FieldKitBossFrame1:IsShown() and not FieldKitBossFrame2:IsShown())
+-- Only the lair marked awake may keep a guardian frame.
+AZS_LAIRS={
+ {name="Brute gordunni",id=687865983,state="awake",left=-1},
+ {name="Brute gordunni",id=687865986,state="empty",left=25},
+}
+fire(FieldKitFrame,"PLAYER_TARGET_CHANGED")
+assert(FieldKitBossFrame1:IsShown() and FieldKitBossFrame1.bar.value==11501)
+assert(not FieldKitBossFrame2:IsShown())
+AZS_LAIRS={}
 -- Resolve every localized alias on every map, with duplicate instances and another target.
 local zones,aliases=0,0
 local entries={}

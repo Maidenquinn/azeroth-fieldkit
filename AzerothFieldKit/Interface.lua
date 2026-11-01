@@ -30,7 +30,7 @@ function FieldKit.BuildJourneySections(sections,actions)
  end
  table.insert(interface,{kind="camera"})
  local display={
-  {kind="check",label="Run mode card",tip="Compact native difficulty and zone. Historical rules are available on hover, labelled with their reference version.",
+  {kind="check",label="Run mode card",tip="Native difficulty and zone with Difficulty-screen multipliers. Hover for the full chart.",
    get=function() return FieldKitDB.runModeCard end,set=function(v) FieldKitDB.runModeCard=v;actions.UpdateRunMode() end},
   {kind="check",label="Hide mode card without difficulty data",tip="Keep the HUD clear when the client does not supply the mode. Preview arrangement still shows the card.",
    get=function() return FieldKitDB.hideUnknownMode end,set=function(v) FieldKitDB.hideUnknownMode=v;actions.UpdateRunMode() end},

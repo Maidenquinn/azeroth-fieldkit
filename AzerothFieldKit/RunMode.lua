@@ -1,19 +1,38 @@
--- Live rank + explicitly versioned mechanic reference. No inferred affix ids,
--- enemy multipliers, rewards, star ranks or progression are presented as live data.
+-- Live native rank/zone plus the Difficulty UI multiplier chart.
+-- Chart values match the client's Difficulty screen (HP/damage/marks/loot),
+-- not live-measured combat meters.
 FieldKitRunMode={}
 local R=FieldKitRunMode
-R.reference="0.121"
-R.modifiers={
- {"Shorter warnings","Boss attacks give less warning and lead your movement more as Heroic rises."},
- {"Elite packs","Ordinary elites arrive in pairs."},
- {"Relentless","Bosses start enraged and become fiercer below 30% health."},
- {"Sentinels","Slain guardians strengthen the others; lairs refill sooner."},
- {"Lean purse","One free reroll; caches cost a quarter more."},
- {"Horde affix","A weekly horde affix applies. Current names are displayed only when supplied by the client."},
- {"Old mechanics","Boss towers and gazes return."},
- {"Unforgiving","A failed boss mechanic deals triple damage."},
- {"Withering","Regeneration, healing and leech are halved; revives are slower and weaker."},
- {"Council","The final boss brings an earlier boss; two weekly affixes apply."},
+R.reference="difficulty-ui"
+-- Exact multipliers from the Difficulty selection screen (Normal + Heroic I–V).
+R.chart={
+ [0]={
+  lines={"Marks x0.5"},
+  notes={"The zone as-is"},
+ },
+ [1]={
+  lines={"HP x1.79 · Damage x1.65","Marks x1 · Talent loot/XP x1.3"},
+  notes={
+   "Boss attacks give 15% less warning.",
+   "Elite packs: elites arrive in pairs.",
+  },
+ },
+ [2]={
+  lines={"HP x1.97 · Damage x1.77","Marks x1.25 · Talent loot/XP x1.4"},
+  notes={},
+ },
+ [3]={
+  lines={"HP x2.16 · Damage x1.88","Marks x1.5 · Talent loot/XP x1.5"},
+  notes={},
+ },
+ [4]={
+  lines={"HP x2.45 · Damage x2.01","Marks x2 · Talent loot/XP x1.6"},
+  notes={},
+ },
+ [5]={
+  lines={"HP x2.72 · Damage x2.16","Marks x2.5 · Talent loot/XP x1.7"},
+  notes={},
+ },
 }
 
 -- Accept only explicit names from the packet. Numeric/unknown encodings remain
@@ -37,20 +56,44 @@ function R.Affixes()
  return FieldKit_L("Active affixes")..": "..table.concat(result,", "),true
 end
 
+function R.ChartLines(level)
+ local entry=R.chart[level]
+ if not entry then return {} end
+ local out={}
+ for _,line in ipairs(entry.lines or {}) do table.insert(out,FieldKit_L(line)) end
+ -- Live run: show combat notes for the current rank (Heroic I has the pair/warn rules).
+ for _,note in ipairs(entry.notes or {}) do table.insert(out,FieldKit_L(note)) end
+ return out
+end
+
 function R.Tooltip(owner)
  GameTooltip:SetOwner(owner,"ANCHOR_RIGHT")
  GameTooltip:SetText(FieldKit.GetHeroicLabel() or FieldKit_L("Mode not provided"),1,.85,.55)
  local level=FieldKit.GetHeroicLevel()
- if level==0 then GameTooltip:AddLine(FieldKit_L("Normal zone rules."),.9,.9,.85,true)
- elseif level then
-  GameTooltip:AddLine(FieldKit_L("Modifier reference").." · "..R.reference,.65,.7,.7,true)
-  for i=1,level*2 do
-   GameTooltip:AddLine(FieldKit_L(R.modifiers[i][1])..": "..FieldKit_L(R.modifiers[i][2]),.9,.9,.85,true)
+ if level==nil then
+  GameTooltip:AddLine(FieldKit_L("No difficulty data received."),.9,.9,.85,true)
+ else
+  GameTooltip:AddLine(FieldKit_L("Difficulty screen values"),.65,.7,.7,true)
+  local titles={
+   [0]=FieldKit_L("Normal difficulty"),
+   [1]=FieldKit_L("Heroic").." I",
+   [2]=FieldKit_L("Heroic").." II",
+   [3]=FieldKit_L("Heroic").." III",
+   [4]=FieldKit_L("Heroic").." IV",
+   [5]=FieldKit_L("Heroic").." V",
+  }
+  for rank=0,5 do
+   local entry=R.chart[rank]
+   GameTooltip:AddLine(titles[rank],1,.85,.55)
+   for _,line in ipairs(entry.lines or {}) do GameTooltip:AddLine(FieldKit_L(line),.9,.9,.85,true) end
+   if rank==level then
+    for _,note in ipairs(entry.notes or {}) do GameTooltip:AddLine(FieldKit_L(note),.85,.9,.7,true) end
+   end
   end
  end
  local affixes=R.Affixes()
  if affixes then GameTooltip:AddLine(affixes,.9,.85,.5,true) end
- GameTooltip:AddLine(FieldKit_L("Historical reference only. Active affixes are shown only when received; unknown formats remain raw."),.8,.7,.45,true)
+ GameTooltip:AddLine(FieldKit_L("Same multipliers as the Difficulty UI. Not live combat meters."),.8,.7,.45,true)
  GameTooltip:Show()
 end
 
@@ -73,8 +116,6 @@ function R.Reflow(width)
  for i=1,table.getn(R.frame.rows) do R.frame.rows[i].label:SetWidth(width-24) end
 end
 
--- Up to four mechanic names remain visible; the complete cumulative reference
--- is available on hover. Unknown mode means no guessed Normal/Heroic modifiers.
 function R.Update()
  local f=R.frame;if not f then return end
  local active=type(AZS_GetPhase)=="function" and AZS_GetPhase()
@@ -82,14 +123,16 @@ function R.Update()
  local level=FieldKit.GetHeroicLevel()
  FieldKit_Text(f.total,FieldKit.GetHeroicLabel() or (active and "Mode not provided" or "Preview"))
  local zone=type(AZS_ZONE)=="table" and (AZS_ZONE.zname or AZS_ZONE.zone)
- -- Keep only current native context on the HUD. Historical mechanic reference
- -- remains in the tooltip and never masquerades as current measured modifiers.
  if level==nil and FieldKitDB.hideUnknownMode and not FieldKit.layoutEditing then f:Hide();return end
  local lines={zone or FieldKit_L("Zone not provided")}
- if level==nil then table.insert(lines,FieldKit_L("No difficulty data received.")) end
+ if level==nil then table.insert(lines,FieldKit_L("No difficulty data received."))
+ else
+  for _,line in ipairs(R.ChartLines(level)) do table.insert(lines,line) end
+ end
  local affixes=R.Affixes();if affixes then table.insert(lines,affixes) end
- for i=1,table.getn(lines) do
+ local shown=math.min(table.getn(lines),table.getn(f.rows))
+ for i=1,shown do
   local row=f.rows[i];row:SetValue(0);row.value:Hide();row.label:SetText(lines[i]);row:Show()
  end
- R.Reflow(f:GetWidth());R.fitRows(f,table.getn(lines));f:Show()
+ R.Reflow(f:GetWidth());R.fitRows(f,shown);f:Show()
 end

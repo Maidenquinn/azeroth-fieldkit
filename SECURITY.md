@@ -1,6 +1,6 @@
 # Security and player-risk assessment
 
-**Assessment updated:** 2026-10-28. **Published update:** 0.2.3 (GitHub prerelease).
+**Assessment updated:** 2026-11-01. **Published update:** 0.3.2 (GitHub prerelease).
 This is a maintainer's source review and automated verification, not an
 independent security certification, a guarantee of no bugs or game approval.
 
@@ -153,6 +153,14 @@ non-sensitive reproductions. Include
 candidate version, client version, UI language and a minimal reproduction. Avoid
 uploading game saves or private chat. For a privacy concern, disable chat capture
 immediately and reload; no persistent chat history needs to be deleted.
+
+## 0.3.2 published loadout / Difficulty polish (2026-11-01)
+
+Adds local Spell.dbc-backed icons, Accessories/Spells UI, Difficulty-screen
+multiplier text and lair-gated guardian frames. No new native write, network
+transport, process or SavedVariables schema. Chat-copy, party-sync and CVar
+boundaries from earlier assessments remain unchanged. No independent certification
+or live transport confirmation is claimed by publication.
 
 ## 0.3.0 published native-tools addition (2026-10-31)
 

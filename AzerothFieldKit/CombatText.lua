@@ -297,14 +297,20 @@ f:SetScript("OnUpdate",function()
  if not C.Ensure() then return end
  local now=GetTime();elapsed=elapsed+(arg1 or 0)
  if elapsed>=.05 then
-  elapsed=0;Healing()
-  if not FieldKitDB.combatText then pending={}
-  else
+  elapsed=0
+  -- Healing baseline must keep ticking even with no floating text on screen.
+  if FieldKitDB.combatText then Healing() else pending={} end
+  local queued=false;for _ in pairs(pending) do queued=true;break end
+  if FieldKitDB.combatText and queued then
    local due={};for key,v in pairs(pending) do if now-v.start>=C.Number("combatTextWindow",25,5,75)/100 then table.insert(due,key) end end
    table.sort(due,function(a,b) if pending[a].start==pending[b].start then return a<b end;return pending[a].start<pending[b].start end)
    for i=1,table.getn(due) do Emit(pending[due[i]]);pending[due[i]]=nil end
   end
  end
+ -- Idle fast path: no live floating text means nothing to age, sort or lay out.
+ local live=false
+ for i=1,10 do if slots[i] and slots[i].active then live=true;break end end
+ if not live then return end
  local lifetime=C.Number("combatTextDuration",18,6,50)/10;local visible={}
  for i=1,10 do
   local s=slots[i]

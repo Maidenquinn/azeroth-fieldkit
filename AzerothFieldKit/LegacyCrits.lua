@@ -12,7 +12,7 @@ local critPending         -- agrupado: { best, count, since } do intervalo atual
 
 -- Allocate the amount/count fontstrings for one reusable line.
 local function CreateCritLine(i)
-	local line = {}
+	local line = { visible = true } -- new FontStrings are shown; first Animate hides them once
 	line.value = critHolder:CreateFontString("FieldKitCrit"..i, "OVERLAY", "GameFontNormalLarge")
 	line.value:SetTextColor(1.0, 0.85, 0.1)
 	line.count = critHolder:CreateFontString("FieldKitCrit"..i.."Count", "OVERLAY", "GameFontHighlightSmall")
@@ -72,7 +72,8 @@ function FieldKitCrits.Animate()
 	if not FieldKitDB.showCrits then
 		critPending = nil
 		for i=1,table.getn(critLines) do
-			critLines[i].born=nil;critLines[i].value:Hide();critLines[i].count:Hide()
+			local line=critLines[i];line.born=nil
+			if line.visible then line.visible=nil;line.value:Hide();line.count:Hide() end
 		end
 		return
 	end
@@ -81,13 +82,24 @@ function FieldKitCrits.Animate()
 		AddCritLine(critPending.best, critPending.count)
 		critPending = nil
 	end
+	-- Idle: no pending group and no living lines → nothing to reposition.
+	local busy=critPending~=nil
+	if not busy then
+		for i=1,table.getn(critLines) do if critLines[i].born then busy=true;break end end
+	end
+	if not busy then return end
 	for i = 1, table.getn(critLines) do
 		local line = critLines[i]
 		local age = line.born and ( now - line.born ) / CRIT_LIFE or 1
 		if ( age >= 1 ) then
-			line.value:Hide()
-			line.count:Hide()
+			-- Hide once; expired lines are not touched again on every painted frame.
+			if line.visible then
+				line.visible=nil
+				line.value:Hide()
+				line.count:Hide()
+			end
 		else
+			line.visible=true
 			line.value:ClearAllPoints()
 			line.value:SetPoint("BOTTOM", critHolder, "BOTTOM", 0, CRIT_GAP * ( i - 1 ))
 			line.value:SetAlpha(age < 0.7 and 1 or ( 1 - age ) / 0.3)
