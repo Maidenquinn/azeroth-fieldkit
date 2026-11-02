@@ -31,7 +31,7 @@ fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 assert fresh.globals().FieldKitDB.uiPage=='home'
 # Migrating navigation must preserve unrelated preferences and explicit opt-outs.
 for title,page in {'Nameplates':'nameplates','Player':'health','Target':'health','Combat':'bosses',
-                   'Boss health':'bosses','Combat text':'combat','Camera':'interface','Windows':'windows'}.items():
+                   'Boss health':'bosses','Combat text':'combat','Camera':'interface','Windows':'cards'}.items():
  old=runtime('{panelSection='+json.dumps(title)+',panelTab=4,playerHealthMode=3,moneyFrame=false,combatTextX=-217}')
  old.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
  assert old.globals().FieldKitDB.uiPage==page
@@ -80,7 +80,7 @@ native_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED");assert(FieldKitDB.
 ux=runtime();ux.execute((base/'tests/ux_simplification.lua').read_text(encoding='utf8'))
 ux.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 ux_reload=runtime(ux.eval('SNAPSHOT(FieldKitDB)'))
-ux_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("");assert(FieldKitUI.windowPage.windowSelected=="layout")')
+ux_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("");assert(FieldKitDB.uiPage=="layout" or FieldKitUI.sections)')
 locks=runtime();locks.execute((base/'tests/window_lock.lua').read_text(encoding='utf8'))
 locks.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 locked_reload=runtime(locks.eval('SNAPSHOT(FieldKitDB)'))

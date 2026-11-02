@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.4 — 2026-11-02 (chronicle HUD, meter suite, settings split; GitHub prerelease)
+
+Maintainer accepted for publication. Changes since **0.3.2**:
+
+- Tabbed combat meter (damage / healing / boss / taken / party / kills) with Reset, sort, hide, heal perspective, party drill, pet/DoT ledger hits and Max Hit–style tips; merge same ability across ranks.
+- Boss schedule timeline (Chronicle rail, next-boss countdown) and redesigned boss frames (portraits, name/HP above, tags under, no overflow).
+- Settings: replace mega Windows page with HUD cards / Combat meter / Layout & arrange / Look / Co-op.
+- Effects drag no longer sticks during timer refresh; choice screens still yield HUD; native Show Target Damage exposed in Combat text.
+- Offline Lua 5.0.3/5.1 and packaging checks pass; no new agent in-game certification claimed.
+
+## 0.3.3-review.1 — 2026-11-01 (Show target damage toggle in Combat text)
+
+- Expose the native Options → Combat → Show Target Damage (`CombatDamage`) switch on Combat text → General, with the same wording as the game, so FieldKit-only text is one uncheck away.
+
 ## 0.3.2 — 2026-11-01 (loadout, Difficulty multipliers and HUD polish; GitHub prerelease)
 
 Maintainer accepted for publication. Changes since **0.3.0**:

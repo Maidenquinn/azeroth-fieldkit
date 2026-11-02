@@ -44,7 +44,7 @@ assert(relative(FieldKitTakenFrame)==UIParent,"Taken reattached to damage")
 assert(offset(FieldKitTakenFrame)==77)
 assert(offset(FieldKitGearFrame)==-25)
 assert(offset(FieldKitStatsFrame)==-30)
-click(U.sizes);assert(not FieldKit.layoutEditing and FieldKitDB.uiPage=="windows")
+click(U.sizes);assert(not FieldKit.layoutEditing and FieldKitDB.uiPage=="layout")
 
 -- Each card keeps its own width and height through unchanged native stamps.
 local selector,width,height=control("Window to resize"),control("Window width"),control("Window height")

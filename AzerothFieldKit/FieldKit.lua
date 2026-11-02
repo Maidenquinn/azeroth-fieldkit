@@ -164,6 +164,13 @@ end
 
 
 -- Attach drag handlers and persist positions in FieldKitDB.pos; no native save edits.
+local function FinishMoving(frame)
+	if not frame or not frame.azsMoving then return end
+	frame.azsMoving = nil
+	frame:StopMovingOrSizing()
+	if FieldKitPositions.Save(frame,frame.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(frame) end
+end
+
 local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 	handle = handle or frame
 	if ( not frame.azsDefault ) then
@@ -183,14 +190,9 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 		frame.azsMoving = true
 		frame:StartMoving()
 	end)
-	handle:SetScript("OnDragStop", function()
-		if ( not frame.azsMoving ) then
-			return
-		end
-		frame.azsMoving = nil
-		frame:StopMovingOrSizing()
-  if FieldKitPositions.Save(frame,frame.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(frame) end
-	end)
+	-- OnDragStop alone can be swallowed after a live resize (Effects timers); MouseUp is the release fallback.
+	handle:SetScript("OnDragStop", function() FinishMoving(frame) end)
+	handle:SetScript("OnMouseUp", function() FinishMoving(frame) end)
 	handle.azsFreeDrag = freeDrag
  handle:EnableMouse(not handle.fieldkitMouseProxy and (not DB.windowsLocked or freeDrag) and 1 or nil)
 	table.insert(movables, handle)
@@ -202,14 +204,7 @@ local function SetMovablesUnlocked(unlocked)
   -- A lock issued while a button is held must finish the native drag too.
   for i=1,table.getn(movableFrames) do
    local f=movableFrames[i]
-   if f.azsMoving then
-    local stop=f:GetScript("OnDragStop");local previous=this;this=f
-    if stop then stop() else
-     f:StopMovingOrSizing();f.azsMoving=nil
-     if FieldKitPositions.Save(f,f.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(f) end
-    end
-    this=previous
-   end
+   if f.azsMoving then FinishMoving(f) end
   end
  end
 	for i = 1, table.getn(movables) do
@@ -219,98 +214,128 @@ end
 
 
 local BOSS_FRAMES = 4
-local BOSS_DEBUFFS = 6
-local DEBUFF_SIZE = 18
-local BOSS_STACK = 106
+local BOSS_DEBUFFS = 8
+local DEBUFF_SIZE = 16
+local BOSS_STACK = 104
+local BOSS_W = 420
+local BOSS_BAR_H = 18
+local BOSS_PORT = 44
+local BOSS_HP_W = 118
 local bossFrames = {}
 
-
--- Copy geometry and textures from a stock target-frame region, with a fallback layout.
-local function MirrorTarget(owner, region, sourceName, fallbackPoint, fallbackX, fallbackY, fallbackW, fallbackH)
-	local source = getglobal(sourceName)
-	local point, relPoint, x, y = fallbackPoint, fallbackPoint, fallbackX, fallbackY
-	local w, h = fallbackW, fallbackH
-	if ( source ) then
-		local p, rel, rp, sx, sy = source:GetPoint(1)
-		if ( p and ( rel == TargetFrame or rel == TargetFrameTextureFrame ) ) then
-			point, relPoint, x, y = p, rp or p, sx, sy
-		end
-		if ( source:GetWidth() and source:GetWidth() > 0 ) then
-			w, h = source:GetWidth(), source:GetHeight()
-		end
-	end
-	region:SetWidth(w)
-	region:SetHeight(h)
-	region:SetPoint(point, owner, relPoint, x, y)
-end
-
--- Build one of four display frames. The portrait module supplies an independent texture.
+-- CreedUI hierarchy + FieldKit Chronicle chrome; all text kept inside the plate.
 local function CreateBossFrame(i,preview)
 	local prefix=preview and "FieldKitPreviewBoss" or "FieldKitBossFrame"..i
 	local f = CreateFrame("Frame", prefix, UIParent)
-	f:SetWidth(232)
-	f:SetHeight(100)
-	f:SetFrameStrata("LOW")
+	f:SetWidth(BOSS_W)
+	f:SetHeight(96)
+	f:SetFrameStrata("MEDIUM")
+	if FieldKitTheme and FieldKitTheme.Surface then FieldKitTheme.Surface(f,"window",true) end
 
-	f.portrait = f:CreateTexture(prefix.."Portrait", "BACKGROUND")
-	MirrorTarget(f, f.portrait, "TargetPortrait", "TOPRIGHT", -42, -12, 64, 64)
+	local portBack=f:CreateTexture(nil,"BACKGROUND")
+	portBack:SetTexture(FieldKitTheme.bronze[1],FieldKitTheme.bronze[2],FieldKitTheme.bronze[3])
+	portBack:SetWidth(BOSS_PORT);portBack:SetHeight(BOSS_PORT)
+	portBack:SetPoint("LEFT",f,"LEFT",14,4)
+	f.portrait = f:CreateTexture(prefix.."Portrait", "ARTWORK")
+	f.portrait:SetWidth(BOSS_PORT-4);f.portrait:SetHeight(BOSS_PORT-4)
+	f.portrait:SetPoint("CENTER",portBack,"CENTER",0,0)
+	f.portrait:SetTexCoord(0.08,0.92,0.08,0.92)
+	f.portBack=portBack
 
-	local nameBg = f:CreateTexture(prefix.."NameBackground", "BACKGROUND")
-	nameBg:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
-	nameBg:SetVertexColor(1.0, 0.0, 0.0)
-	MirrorTarget(f, nameBg, "TargetFrameNameBackground", "TOPRIGHT", -88, -22, 119, 19)
+	local jewel=f:CreateTexture(nil,"ARTWORK")
+	jewel:SetTexture(FieldKitTheme.media.."ChronicleSeal.tga")
+	jewel:SetWidth(20);jewel:SetHeight(20)
+	jewel:SetPoint("LEFT",portBack,"RIGHT",5,0)
+	jewel:SetVertexColor(1,.82,.48)
+	f.jewel=jewel
+	local jewelGem=f:CreateTexture(nil,"OVERLAY")
+	jewelGem:SetTexture(FieldKitTheme.media.."ChronicleGlyph08.tga")
+	jewelGem:SetWidth(9);jewelGem:SetHeight(9)
+	jewelGem:SetPoint("CENTER",jewel,"CENTER",0,0)
+	jewelGem:SetVertexColor(1,.55,.35)
+	f.jewelGem=jewelGem
 
-	f.bar = CreateFrame("StatusBar", prefix.."HealthBar", f)
-	MirrorTarget(f, f.bar, "TargetFrameHealthBar", "TOPRIGHT", -106, -41, 119, 12)
+	local barLeft=14+BOSS_PORT+5+20+7
+	local chrome=CreateFrame("Frame",nil,f)
+	chrome:SetHeight(BOSS_BAR_H+6)
+	chrome:SetPoint("TOPLEFT",f,"TOPLEFT",barLeft,-34)
+	chrome:SetPoint("TOPRIGHT",f,"TOPRIGHT",-16,-34)
+	local chromeBg=chrome:CreateTexture(nil,"BACKGROUND")
+	chromeBg:SetAllPoints(chrome);chromeBg:SetTexture("Interface\\Buttons\\WHITE8X8")
+	chromeBg:SetVertexColor(.02,.02,.025,.98)
+	local chromeEdgeT=chrome:CreateTexture(nil,"BORDER")
+	chromeEdgeT:SetTexture(FieldKitTheme.gold[1],FieldKitTheme.gold[2],FieldKitTheme.gold[3])
+	chromeEdgeT:SetPoint("TOPLEFT",chrome,"TOPLEFT",0,0);chromeEdgeT:SetPoint("TOPRIGHT",chrome,"TOPRIGHT",0,0);chromeEdgeT:SetHeight(2);chromeEdgeT:SetAlpha(.85)
+	local chromeEdgeB=chrome:CreateTexture(nil,"BORDER")
+	chromeEdgeB:SetTexture(FieldKitTheme.bronze[1],FieldKitTheme.bronze[2],FieldKitTheme.bronze[3])
+	chromeEdgeB:SetPoint("BOTTOMLEFT",chrome,"BOTTOMLEFT",0,0);chromeEdgeB:SetPoint("BOTTOMRIGHT",chrome,"BOTTOMRIGHT",0,0);chromeEdgeB:SetHeight(2);chromeEdgeB:SetAlpha(.9)
+	local chromeEdgeL=chrome:CreateTexture(nil,"BORDER")
+	chromeEdgeL:SetTexture(FieldKitTheme.gold[1],FieldKitTheme.gold[2],FieldKitTheme.gold[3])
+	chromeEdgeL:SetPoint("TOPLEFT",chrome,"TOPLEFT",0,0);chromeEdgeL:SetPoint("BOTTOMLEFT",chrome,"BOTTOMLEFT",0,0);chromeEdgeL:SetWidth(2);chromeEdgeL:SetAlpha(.75)
+	local chromeEdgeR=chrome:CreateTexture(nil,"BORDER")
+	chromeEdgeR:SetTexture(FieldKitTheme.bronze[1],FieldKitTheme.bronze[2],FieldKitTheme.bronze[3])
+	chromeEdgeR:SetPoint("TOPRIGHT",chrome,"TOPRIGHT",0,0);chromeEdgeR:SetPoint("BOTTOMRIGHT",chrome,"BOTTOMRIGHT",0,0);chromeEdgeR:SetWidth(2);chromeEdgeR:SetAlpha(.75)
+	f.chrome=chrome
+
+	f.bar = CreateFrame("StatusBar", prefix.."HealthBar", chrome)
+	f.bar:SetPoint("TOPLEFT",chrome,"TOPLEFT",3,-3)
+	f.bar:SetPoint("BOTTOMRIGHT",chrome,"BOTTOMRIGHT",-3,3)
 	f.bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-	f.bar:SetStatusBarColor(0.0, 1.0, 0.0)
+	f.bar:SetStatusBarColor(.82,.16,.1)
+	local trough=f.bar:CreateTexture(nil,"BACKGROUND")
+	trough:SetAllPoints(f.bar);trough:SetTexture("Interface\\Buttons\\WHITE8X8")
+	trough:SetVertexColor(.05,.03,.03,.95)
+	local grain=f.bar:CreateTexture(nil,"OVERLAY")
+	grain:SetAllPoints(f.bar);grain:SetTexture(FieldKitTheme.media.."ChronicleGrain.tga");grain:SetAlpha(.42)
+	local sheen=f.bar:CreateTexture(nil,"OVERLAY")
+	sheen:SetTexture("Interface\\Buttons\\WHITE8X8");sheen:SetVertexColor(1,.78,.62,.28)
+	sheen:SetPoint("TOPLEFT",f.bar,"TOPLEFT",0,0);sheen:SetPoint("TOPRIGHT",f.bar,"TOPRIGHT",0,0);sheen:SetHeight(math.floor(BOSS_BAR_H/3))
+	local sheenLow=f.bar:CreateTexture(nil,"OVERLAY")
+	sheenLow:SetTexture("Interface\\Buttons\\WHITE8X8");sheenLow:SetVertexColor(0,0,0,.25)
+	sheenLow:SetPoint("BOTTOMLEFT",f.bar,"BOTTOMLEFT",0,0);sheenLow:SetPoint("BOTTOMRIGHT",f.bar,"BOTTOMRIGHT",0,0);sheenLow:SetHeight(3)
 
 	local border = CreateFrame("Frame", prefix.."TextureFrame", f)
 	border:SetAllPoints(f)
-	border:SetFrameLevel(f.bar:GetFrameLevel() + 2)
-	local tex = border:CreateTexture(prefix.."Texture", "BORDER")
-	tex:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-Elite")
-	tex:SetTexCoord(0.09375, 1.0, 0.0, 0.78125)
-	tex:SetWidth(232)
-	tex:SetHeight(100)
-	tex:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
+	border:SetFrameLevel(f.bar:GetFrameLevel() + 3)
+
+	-- Fixed HP width so name never pushes numbers out of the plate.
+	f.hp = border:CreateFontString(prefix.."HealthText", "OVERLAY", "GameFontHighlightSmall")
+	f.hp:SetPoint("BOTTOMRIGHT",chrome,"TOPRIGHT",0,3)
+	f.hp:SetWidth(BOSS_HP_W);f.hp:SetHeight(14);f.hp:SetJustifyH("RIGHT")
+	if FieldKitTheme and FieldKitTheme.Font then FieldKitTheme.Font(f.hp,11,FieldKitTheme.text) end
+
+	f.name = border:CreateFontString(prefix.."Name", "OVERLAY", "GameFontNormal")
+	f.name:SetPoint("BOTTOMLEFT",chrome,"TOPLEFT",2,3)
+	f.name:SetPoint("RIGHT",f.hp,"LEFT",-8,0)
+	f.name:SetJustifyH("LEFT");f.name:SetHeight(14)
+	if f.name.SetNonSpaceWrap then f.name:SetNonSpaceWrap(false) end
+	if FieldKitTheme and FieldKitTheme.Font then FieldKitTheme.Font(f.name,12,FieldKitTheme.gold,true) end
+
+	f.tag = border:CreateFontString(prefix.."Tag", "OVERLAY", "GameFontNormalSmall")
+	f.tag:SetPoint("TOPLEFT",chrome,"BOTTOMLEFT",2,-2)
+	f.tag:SetWidth(90);f.tag:SetJustifyH("LEFT")
+	if FieldKitTheme and FieldKitTheme.Font then FieldKitTheme.Font(f.tag,10,FieldKitTheme.gold) end
 
 	f.level = border:CreateFontString(prefix.."Level", "OVERLAY", "GameFontNormalSmall")
+	f.level:SetPoint("BOTTOMRIGHT",portBack,"BOTTOMRIGHT",1,-1)
 	f.skull = border:CreateTexture(prefix.."Skull", "OVERLAY")
-	f.skull:SetTexture(PLATE_SKULL)
-	MirrorTarget(f, f.skull, "TargetHighLevelTexture", "CENTER", 63, -16, 16, 16)
-	if ( TargetLevelText ) then
-		local p, rel, rp, x, y = TargetLevelText:GetPoint(1)
-		if ( p and ( rel == TargetFrame or rel == TargetFrameTextureFrame ) ) then
-			f.skull:ClearAllPoints()
-			f.skull:SetPoint(p, f, rp, x, y)
-		end
-	end
-	f.level:SetPoint("CENTER", f.skull, "CENTER", 0, 0)
-
-	f.name = border:CreateFontString(prefix.."Name", "OVERLAY", "GameFontNormalSmall")
-	MirrorTarget(f, f.name, "TargetName", "CENTER", -50, 19, 100, 10)
-	f.hp = border:CreateFontString(prefix.."HealthText", "OVERLAY", "GameFontHighlightSmall")
-	f.hp:SetPoint("CENTER", f.bar, "CENTER", 0, 0)
-	f.tag = border:CreateFontString(prefix.."Tag", "OVERLAY", "GameFontNormalSmall")
-	f.tag:SetPoint("TOP", f.bar, "BOTTOM", 0, -2)
-
+	f.skull:SetTexture(PLATE_SKULL);f.skull:SetWidth(14);f.skull:SetHeight(14)
+	f.skull:SetPoint("BOTTOMRIGHT",portBack,"BOTTOMRIGHT",2,-2);f.skull:Hide()
 
 	f.debuffs = {}
 	for d = 1, BOSS_DEBUFFS do
 		local icon = border:CreateTexture(prefix.."Debuff"..d, "OVERLAY")
-		icon:SetWidth(DEBUFF_SIZE)
-		icon:SetHeight(DEBUFF_SIZE)
+		icon:SetWidth(DEBUFF_SIZE);icon:SetHeight(DEBUFF_SIZE)
 		icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-		icon:SetPoint("TOPLEFT", f.bar, "BOTTOMLEFT", ( d - 1 ) * ( DEBUFF_SIZE + 1 ), -15)
+		icon:SetPoint("TOPLEFT", chrome, "BOTTOMLEFT", 96 + ( d - 1 ) * ( DEBUFF_SIZE + 3 ), -2)
 		icon:Hide()
 		icon.count = border:CreateFontString(prefix.."Debuff"..d.."Count", "OVERLAY", "NumberFontNormalSmall")
 		icon.count:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 1, -1)
 		icon.count:Hide()
-
+		-- Timer overlays sit on the icon so they stay inside the plate.
 		icon.time = border:CreateFontString(prefix.."Debuff"..d.."Time", "OVERLAY", "GameFontHighlightSmall")
-		icon.time:SetFont(MENU_FONT, 10, "OUTLINE")
-		icon.time:SetPoint("TOP", icon, "BOTTOM", 0, -1)
+		icon.time:SetFont(MENU_FONT, 9, "OUTLINE")
+		icon.time:SetPoint("CENTER", icon, "CENTER", 0, 0)
 		icon.time:Hide()
 		f.debuffs[d] = icon
 	end
@@ -318,11 +343,10 @@ local function CreateBossFrame(i,preview)
 	if preview then
   -- Isolated demonstration: no movable registration, native unit or HUD action.
  elseif ( i == 1 ) then
-
 		local handle = CreateFrame("Frame", "FieldKitBossFrame1Handle", f)
 		handle:SetAllPoints(f)
 		handle:SetFrameLevel(border:GetFrameLevel() + 5)
-		MakeMovable(f, 0, 150, true, handle)
+		MakeMovable(f, 0, 120, true, handle)
 	else
 		f:SetPoint("TOP", bossFrames[i - 1], "TOP", 0, -BOSS_STACK)
 	end
@@ -359,13 +383,21 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
 	f.bar:SetValue(hp or 0)
 	FieldKit_Text(f.hp,FieldKit_FormatHealth(hp, hpm, DB.bossHealthMode))
 	if ( kind == "guardian" ) then
+		f.bar:SetStatusBarColor(.62,.08,.12)
 		FieldKit_Text(f.tag,"|cffffd100"..FieldKit_L("Guardian").."|r")
+		if f.jewel then f.jewel:SetVertexColor(1,.82,.45) end
 	elseif ( state == 1 or state == true ) then
+		f.bar:SetStatusBarColor(.98,.28,.06)
 		FieldKit_Text(f.tag,"|cffff2020"..FieldKit_L("ENRAGED").."|r")
+		if f.jewel then f.jewel:SetVertexColor(1,.45,.2) end
 	elseif ( kind == "final" ) then
+		f.bar:SetStatusBarColor(.85,.22,.08)
 		FieldKit_Text(f.tag,"|cffff8000"..FieldKit_L("Final boss").."|r")
+		if f.jewel then f.jewel:SetVertexColor(1,.7,.3) end
 	else
+		f.bar:SetStatusBarColor(.82,.16,.1)
 		FieldKit_Text(f.tag,"")
+		if f.jewel then f.jewel:SetVertexColor(1,.82,.48) end
 	end
 
 	if ( UnitExists("target") and UnitName("target") == name ) then
@@ -497,6 +529,7 @@ local function UpdateBossFrame()
 	for i = n + 1, BOSS_FRAMES do
 		bossFrames[i]:Hide()
 	end
+	if FieldKitBossTimeline and FieldKitBossTimeline.Update then FieldKitBossTimeline.Update() end
 end
 
 
@@ -1598,7 +1631,8 @@ local function CreateBarWindow(name, title, rows)
 		row:EnableMouse(1)
 		row:RegisterForDrag("LeftButton")
 		row:SetScript("OnDragStart", function() f:GetScript("OnDragStart")() end)
-		row:SetScript("OnDragStop", function() f:GetScript("OnDragStop")() end)
+		row:SetScript("OnDragStop", function() FinishMoving(f) end)
+		row:SetScript("OnMouseUp", function() FinishMoving(f) end)
 		row:Hide()
 		f.rows[i] = row
 	end
@@ -1717,14 +1751,22 @@ local function CreateMeterFrames()
  MakeMovable(takenFrame,-(UIParent:GetWidth()/2-140),-60,true)
 	meterFrame:Hide()
 	takenFrame:Hide()
+ if FieldKitMeterSuite and FieldKitMeterSuite.HookMeter then FieldKitMeterSuite.HookMeter(meterFrame) end
 end
 
 -- Refresh both optional meter displays, supporting an explicit forced refresh.
 local function UpdateMeterFrames(force)
-	UpdateMeterFrame(force)
-	UpdateTakenFrame(force)
-
- FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+ local d=DB or FieldKitDB
+ if FieldKitMeterSuite and FieldKitMeterSuite.Update and d and d.meterTabs~=false then
+  FieldKitMeterSuite.Update(force)
+  local view=d.meterViewKey or "damage"
+  local onTaken=(view=="taken") or d.meterDetach_taken
+  if d.takenFrame and (not onTaken or d.meterKeepTakenFrame) then UpdateTakenFrame(force) end
+ else
+  UpdateMeterFrame(force)
+  UpdateTakenFrame(force)
+  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+ end
 end
 
 local UpdateChestPins, UpdateLairFrame, CreateLairFrame
@@ -2373,6 +2415,7 @@ local function FieldKitEventLifecycle()
 		CreatePlayerBar()
 		CreatePlayerBuffs()
 		CreateBossFrames()
+  if FieldKitBossTimeline and FieldKitBossTimeline.Update then FieldKitBossTimeline.Update() end
 		CreateStatsFrame()
 		CreateMoneyFrame()
 		CreateGearFrame()
@@ -2504,6 +2547,16 @@ frame:SetScript("OnUpdate", function()
 	end
 	local dt = arg1 or 0
 	local choosing = FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen()
+	-- Yield every FieldKit HUD while native level-up/jewelry cards own the screen.
+	-- Re-apply while choosing so a late Show() cannot paint over the cards.
+	if FieldKitScreenLayers and FieldKitScreenLayers.ApplyChoice then
+		local edge=choosing~=frame.fieldkitChoicePhase
+		frame.fieldkitChoicePhase=choosing
+		if choosing or edge then
+			FieldKitScreenLayers.ApplyChoice()
+			if edge and FieldKitBossTimeline and FieldKitBossTimeline.Update then FieldKitBossTimeline.Update() end
+		end
+	end
 	-- Nameplate filtering is expensive in combat; skip entirely when disabled or
 	-- while the native reward/level-up overlay owns the screen. Toggle edges
 	-- always sync immediately so other UI alphas are restored without delay.
@@ -2548,11 +2601,11 @@ frame:SetScript("OnUpdate", function()
 		FieldKitScreenLayers.Update()
 		-- Cards may show/hide after native snapshots; restack once here, not every paint.
 		layoutElapsed = 0
-		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight() end
 	elseif layoutElapsed >= LAYOUT_INTERVAL then
 		-- Safety restack when no snapshot landed (collapse/options already call Apply).
 		layoutElapsed = 0
-		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight() end
 	end
 	if not choosing then FieldKitPartySync.Tick() end
 end)

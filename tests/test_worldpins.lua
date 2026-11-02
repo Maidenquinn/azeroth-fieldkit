@@ -27,5 +27,16 @@ GetMinimapShape=nil
 Minimap:Hide();FieldKit_UpdateWorldPins();assert(not FieldKitChestPin1:IsShown());Minimap:Show()
 AZS_RUN.ph=nil;FieldKit_UpdateWorldPins();assert(not FieldKitChestPin1:IsShown())
 AZS_RUN.ph="playing"
+-- Prefer AZS_GetPlayerPosition when present; ignore foreign spaceId entries.
+local liveX,liveY=130,220
+function AZS_GetPlayerPosition()
+ return {apiVersion=1,mapId=1,spaceId="m1:runA",sampleId="s1",x=liveX,y=liveY,z=0,facing=0,runId="runA"},nil
+end
+AZS_CHESTS={{x=140,y=210,spaceId="m1:runA"},{x=999,y=999,spaceId="m2:other"}}
+FieldKitDB.chestPins=true;FieldKitDB.guardianPins=false
+FieldKit_UpdateWorldPins()
+assert(FieldKitChestPin1:IsShown())
+assert(not FieldKitChestPin2:IsShown(),"foreign spaceId chests stay hidden")
+AZS_GetPlayerPosition=nil
 -- Persist disabled preference.
 FieldKitDB.guardianPins=false

@@ -1,25 +1,24 @@
--- Real constructors/callbacks: subpage routing, visibility-only preset Undo,
+-- Real constructors/callbacks: thin HUD pages, visibility-only preset Undo,
 -- native interactions, pinned identity and honest transport state.
-FieldKitDB={cardStyle=2,cardOpacity=37,windowsLocked=true,partyCards=false}
+FieldKitDB={cardStyle=2,cardOpacity=37,windowsLocked=true,partyCards=false,uiPage="windows",windowPage="coop"}
 fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("");update(FieldKitFrame,.3)
 local U=FieldKitUI
-local page=U.windowPage
-assert(page and table.getn(page.windowTabs)==4 and page.windowSelected=="display")
-local objectsBefore=table.getn(objects)
+assert(table.getn(U.sections)==13,"split HUD sections")
+assert(FieldKitDB.uiPage=="coop","legacy windows+coop subtab migrates")
 local writes=0
 local oldCvar,oldHud=SetCVar,AZS_SetHudShown
 SetCVar=function() writes=writes+1 end;AZS_SetHudShown=function() writes=writes+1 end
-for _,tab in ipairs(page.windowTabs) do
- click(tab.button)
- assert(page.windowSelected==tab.id and FieldKitDB.windowPage==tab.id)
- for _,flow in ipairs(page.flow) do assert(flow.frame:IsShown()==(flow.windowTab==tab.id)) end
- assert(page.contentHeight==tab.height)
-end
-assert(writes==0 and table.getn(objects)==objectsBefore)
-U.Select("health");U.Select("windows");assert(page.windowSelected=="coop")
+local ids={}
+for i=1,table.getn(U.sections) do ids[U.sections[i].id]=true end
+for _,id in ipairs({"cards","meter","layout","look","coop"}) do assert(ids[id],id) end
+assert(not ids.windows,"mega Windows page removed")
+U.Select("cards");U.Select("meter");U.Select("layout");U.Select("look");U.Select("coop")
+assert(FieldKitDB.uiPage=="coop" and writes==0)
 local sw,sh=UIParent.width,UIParent.height;UIParent.width=800;UIParent.height=600
-U.Reflow();click(page.windowTabs[2].button)
-assert(page.contentHeight>page.scroll:GetHeight())
+U.Reflow();U.Select("layout")
+local layoutPage
+for i=1,table.getn(U.pages) do if U.pages[i].section.id=="layout" then layoutPage=U.pages[i] end end
+assert(layoutPage and layoutPage.contentHeight>layoutPage.scroll:GetHeight())
 UIParent.width=sw;UIParent.height=sh;U.Reflow()
 -- A visibility preset is explicit and reversible, including prior opt-outs.
 local before={}
@@ -51,7 +50,7 @@ AZS_ZONE={};FieldKitRunMode.Update();assert(not FieldKitModeFrame:IsShown())
 FieldKitDB.hideUnknownMode=false;FieldKitRunMode.Update();assert(FieldKitModeFrame:IsShown())
 FieldKitDB.hideUnknownMode=true
 -- Every newly visible label has a French equivalent.
-for _,key in ipairs({"Display","Layout","Appearance","Co-op / test","Previews","Pin","Unpin","Use essential HUD","Sharing disabled","Hide native teammate frames"}) do
+for _,key in ipairs({"HUD cards","Combat meter","Layout & arrange","Look","Co-op / test","Previews","Pin","Unpin","Use essential HUD","Sharing disabled","Hide native teammate frames","Which HUD cards to show"}) do
  assert(FieldKitLocale.fr[key] and FieldKitLocale.fr[key]~=key,key)
 end
 -- A pinned player remains selected when rows reorder or the mouse leaves.

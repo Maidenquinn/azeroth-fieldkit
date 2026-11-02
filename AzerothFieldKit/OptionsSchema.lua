@@ -52,16 +52,17 @@ local SECTIONS = {
 			{
 				kind = "check",
 				id = "hideDamage",
-				label = "Hide damage numbers",
-				tip = "Hides the damage numbers that pop over monsters (yours and your pet's).",
-				get = function() return FieldKitDB.hideDamage end,
-				set = function(v) FieldKitDB.hideDamage = v; actions.ApplyDamageNumbers() end,
+				-- Same CVar as Options → Combat → Show Target Damage (CombatDamage).
+				label = "Show target damage (game)",
+				tip = "Same as Options → Combat → Show Target Damage. Uncheck to keep only FieldKit combat text.",
+				get = function() return FieldKitDB.hideDamage ~= true end,
+				set = function(v) FieldKitDB.hideDamage = not v; actions.ApplyDamageNumbers() end,
 			},
 			{
 				kind = "check",
 				id = "showCrits",
 				label = "Show my crits above the hero",
-				tip = "Your critical hits pop up above your character. Pair it with Hide damage numbers to see only crits.",
+				tip = "Your critical hits pop up above your character. Uncheck Show target damage (game) to avoid duplicates.",
 				get = function() return FieldKitDB.showCrits end,
 				set = function(v) FieldKitDB.showCrits = v end,
 			},

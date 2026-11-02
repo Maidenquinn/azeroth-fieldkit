@@ -1,6 +1,6 @@
 -- End-to-end UI intent tests. These run against the actual addon constructors.
 local U=FieldKitUI
-assert(U and table.getn(U.sections)==9)
+assert(U and table.getn(U.sections)==13)
 local function page(id)
  for i=1,table.getn(U.pages) do if U.pages[i].section.id==id then return U.pages[i] end end
  error(id)
@@ -37,10 +37,10 @@ local total=table.getn(objects);local sw,sh=UIParent.width,UIParent.height
 UIParent.width=800;UIParent.height=600
 for i=1,12 do U.Reflow() end
 assert(U.frame:GetWidth()==776 and U.frame:GetHeight()==576)
-assert(page("windows").contentHeight>page("windows").scroll:GetHeight())
-local viewport=page("windows").scroll
+assert(page("meter").contentHeight>page("meter").scroll:GetHeight())
+local viewport=page("meter").scroll
 this=viewport;arg1=-100;viewport.scripts.OnMouseWheel()
-assert(viewport:GetVerticalScroll()==page("windows"):GetHeight()-viewport:GetHeight())
+assert(viewport:GetVerticalScroll()==page("meter"):GetHeight()-viewport:GetHeight())
 arg1=100;viewport.scripts.OnMouseWheel();assert(viewport:GetVerticalScroll()==0)
 assert(table.getn(objects)==total,"Resize must reuse all widgets")
 assert(writes==0,"Read-only UI paths wrote native state")

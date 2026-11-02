@@ -1,10 +1,11 @@
 -- Exercise live language changes through the real Interface buttons.
 assert(FieldKitDB.language=="en")
-assert(table.getn(FieldKitPanel.tabs)==9)
+assert(table.getn(FieldKitPanel.tabs)==13)
 assert(FieldKitPanel.tabs[2].fieldkitLabel.text=="Combat text")
 assert(FieldKitPanel.tabs[4].fieldkitLabel.text=="Bosses")
+assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="HUD cards")
 for i=1,table.getn(FieldKitPanel.tabs) do assert(FieldKitPanel.tabs[i].fieldkitLabel.text~="Text layout") end
-local interface=FieldKitPanel.tabs[9].page
+local interface=FieldKitPanel.tabs[13].page
 local en,fr=FieldKitUI.languageRow.en,FieldKitUI.languageRow.fr
 for i=1,table.getn(interface.children) do
  local b=interface.children[i]
@@ -28,7 +29,8 @@ end
 for n=1,3 do
  click(fr)
  assert(FieldKitDB.language=="fr" and FieldKitPanel.tabs[2].fieldkitLabel.text=="Texte de combat")
- assert(FieldKitPanel.tabs[8].fieldkitLabel.text=="Barres ennemies")
+ assert(FieldKitPanel.tabs[12].fieldkitLabel.text=="Barres ennemies")
+ assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="Cartes du HUD")
  assert(FieldKitPanelReset.text=="Positions par défaut")
  assert(FieldKit_L("Show only elites and bosses")=="Afficher uniquement les élites et les boss")
  assert(FieldKit_L("Dégâts infligés")=="Dégâts infligés")

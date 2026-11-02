@@ -16,7 +16,7 @@ function T.Create(create,fit,move)
   row.icon=row:CreateTexture(nil,"ARTWORK");row.icon:SetWidth(14);row.icon:SetHeight(14)
   row.icon:SetPoint("LEFT",row,"LEFT",0,0)
   row:SetScript("OnEnter",function()
-   if not this.nativeDetail then return end
+   if not this.nativeDetail or (T.frames[1] and T.frames[1].azsMoving) then return end
    GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(this.nativeDetail,1,.85,.55)
    GameTooltip:AddLine(FieldKit_L("Native remaining time; grouped durations show the soonest expiration."),.8,.8,.8,true);GameTooltip:Show()
   end)
@@ -41,7 +41,9 @@ function T.ShowRows(frame,rows,total)
  if table.getn(rows)==0 and not FieldKit.layoutEditing then frame:Hide();return end
  if table.getn(rows)==0 then rows={{label=FieldKit_L("Preview"),value="?"}} end
  FieldKit_Text(frame.total,total or "")
- frame:SetWidth(FieldKitCardLayout.Width(frame,300))
+ -- Never resize while the player is dragging: FitRows during StartMoving drops OnDragStop on 1.12.
+ local moving=frame.azsMoving and true or false
+ if not moving then frame:SetWidth(FieldKitCardLayout.Width(frame,300)) end
  local count=math.min(table.getn(rows),table.getn(frame.rows))
  for i=1,count do
   local row,entry=frame.rows[i],rows[i]
@@ -56,7 +58,8 @@ function T.ShowRows(frame,rows,total)
   end
   row:Show()
  end
- T.fit(frame,count);frame:Show()
+ if not moving then T.fit(frame,count) end
+ frame:Show()
 end
 function T.Effects()
  local frame=T.frames[1];if not FieldKitDB.effectsFrame then frame:Hide();return end
@@ -162,7 +165,11 @@ function T.Push(text,key)
 end
 function T.Banner(banner)
  if not FieldKitDB or not FieldKitDB.nativeWarnings or not N.Active() or type(banner)~="table" or type(banner.text)~="string" then return end
- local allowed=(banner.boss==true and FieldKitDB.bossBannerWarnings) or (banner.kind=="mechanic" and FieldKitDB.mechanicWarnings)
+ local kind=banner.kind
+ local party=kind=="downed" or kind=="frienddown" or kind=="revived"
+ local allowed=(banner.boss==true and FieldKitDB.bossBannerWarnings)
+  or (kind=="mechanic" and FieldKitDB.mechanicWarnings)
+  or (party and FieldKitDB.partyBannerWarnings~=false)
  if allowed then T.Push(banner.text,"banner:"..tostring(banner.id)) end
 end
 function T.Subscription()

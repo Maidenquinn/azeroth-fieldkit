@@ -17,7 +17,9 @@ C.defaults={combatText=false,combatTextGroup=true,combatTextHealing=true,combatT
  combatTextFontSize=16,combatTextCritSize=20,combatTextFont=1,combatTextCritFont=0,combatTextOutline=2,combatTextOpacity=100,
  combatTextMax=5,combatTextSpacing=27,combatTextDuration=18,combatTextWindow=25,combatTextMin=0,combatTextHealMin=5,
  combatTextX=180,combatTextY=-45,combatTextIncomingX=-180,combatTextIncomingY=-45,combatTextSplit=true,
- combatTextNames=true,combatTextCounts=true,combatTextDirection=1,combatTextIgnore=""}
+ combatTextNames=true,combatTextCounts=true,combatTextDirection=1,combatTextIgnore="",
+ -- AS 0.138+: pin numbers to the hit spot via AZS_GetCombatTextEvents / Project / Register.
+ combatTextWorld=false}
 -- Read and clamp one numeric combat option, tolerating invalid saved values.
 function C.Number(key,default,min,max)
  local n=FieldKitDB and tonumber(FieldKitDB[key]) or default
@@ -112,14 +114,17 @@ local function Emit(v)
  serial=serial+1;slot.serial=serial;slot.active=true;slot.start=GetTime();slot.y=0;slot.value=v
 end
 -- Merge same-skill/category events in a short window; cap pending groups at 64.
-local function Queue(label,amount,kind,incoming,filterName,generated)
- local v={label=label,amount=amount,kind=kind,incoming=incoming,filterName=filterName,generated=generated,count=1,start=GetTime()}
+-- Optional `anchor` (AS 0.138+) keeps the number over the hit / death spot.
+local function Queue(label,amount,kind,incoming,filterName,generated,anchor)
+ local v={label=label,amount=amount,kind=kind,incoming=incoming,filterName=filterName,generated=generated,count=1,start=GetTime(),anchor=anchor}
  if not Allowed(v) then return end
  if amount then
   if amount<=0 then return end
   local threshold=kind=="heal" and C.Number("combatTextHealMin",5,0,1000000) or C.Number("combatTextMin",0,0,1000000)
   if amount<threshold then return end
  end
+ -- World-anchored hits never merge: each float stays above its own target.
+ if anchor and FieldKitDB.combatTextWorld then Emit(v);return end
  local key=kind..":"..tostring(incoming)..":"..label;local old=pending[key]
  if old then
   if FieldKitDB.combatTextGroup and v.start-old.start<C.Number("combatTextWindow",25,5,75)/100 then
@@ -134,6 +139,167 @@ local function Queue(label,amount,kind,incoming,filterName,generated)
 end
 -- Parse a finite comma-formatted combat amount as data.
 local function Amount(n) return n and FieldKit.Number((string.gsub(n,",",""))) end
+-- AS 0.138 world-anchored combat text (opt-in): official Addon API "version 1".
+-- Outgoing hits only; incoming damage and healing stay on chat / AZS_HEALING.
+local worldCursor,worldHandler,worldCaps=nil,false,nil
+local function WorldReady()
+ if not FieldKitDB or not FieldKitDB.combatText or not FieldKitDB.combatTextWorld then return false end
+ if type(AZS_GetCombatTextEvents)~="function" or type(AZS_ProjectCombatTextAnchors)~="function" then return false end
+ if type(AZS_GetCombatTextCapabilities)=="function" then
+  if worldCaps==nil then
+   local ok,caps=pcall(AZS_GetCombatTextCapabilities)
+   worldCaps=ok and type(caps)=="table" and caps or false
+  end
+  if worldCaps==false then return false end
+ end
+ return true
+end
+local function PlaceWorld(fs,x,y,rise)
+ if type(x)~="number" or type(y)~="number" then return false end
+ local parent=WorldFrame or UIParent
+ fs:ClearAllPoints()
+ fs:SetPoint("CENTER",parent,"BOTTOMLEFT",x,y+(rise or 0))
+ return true
+end
+local function StyleSlot(s,v,size,now,lifetime)
+ local critical=v.kind=="crit" or v.kind=="incomingCrit"
+ local e=C.Event(v.kind)
+ local override=tonumber(e.size)
+ if override and override>=10 and override<=40 then size=override end
+ local font=C.Number("combatTextFont",1,1,4)
+ if critical and C.Number("combatTextCritFont",0,0,4)>0 then font=C.Number("combatTextCritFont",0,0,4) end
+ local path=C.fonts[math.floor(font)][2];local outlines={"","OUTLINE","THICKOUTLINE"};local outline=outlines[math.floor(C.Number("combatTextOutline",2,1,3))]
+ local style=path..size..outline
+ if s.style~=style then
+  local ok,result=pcall(s.fs.SetFont,s.fs,path,size,outline)
+  if not ok or result==false then s.fs:SetFont(C.fonts[1][2],size,"OUTLINE") end
+  s.fs:SetHeight(size+8);s.style=style
+ end
+ local text=v.label
+ if v.previewKind then text=FieldKit_L("[Preview]").." "..FieldKit_L(C.byKind[v.previewKind][4] or C.byKind[v.previewKind][2]) end
+ if v.generated then text=FieldKit_L(text) end
+ if v.kind=="heal" then
+  local _,_,name=string.find(v.label,"^Heal: (.*)$")
+  if name then text=FieldKit_L("Heal: ")..name end
+ end
+ if C.byKind[v.kind] and C.byKind[v.kind][4] and not v.preview then
+  local outcome=C.byKind[v.kind][4]
+  local at=string.len(v.label)-string.len(outcome)+1
+  if at>0 and string.sub(v.label,at)==outcome then text=string.sub(v.label,1,at-1)..FieldKit_L(outcome)..string.sub(v.label,at+string.len(outcome)) end
+ end
+ if v.amount then
+  if not FieldKitDB.combatTextNames and not v.preview then text="" end
+  text=text..(text~="" and " " or "")..string.format("%d",v.amount)
+ end
+ if FieldKitDB.combatTextCounts and v.count>1 then text=text.." x"..v.count end
+ if s.text~=text then s.fs:SetText(text);s.text=text end
+ local r,g,b=C.Color(v.kind)
+ if s.r~=r or s.g~=g or s.b~=b then s.fs:SetTextColor(r,g,b);s.r=r;s.g=g;s.b=b end
+ local age=now-s.start
+ s.fs:SetAlpha(C.Number("combatTextOpacity",100,10,100)/100*math.min(1,math.max(0,(lifetime-age)/(lifetime/3))))
+ return size
+end
+local function IngestWorldEvent(e)
+ if type(e)~="table" then return end
+ local presented=tonumber(e.presentedAt)
+ if presented and GetTime()-presented>3 then return end
+ local anchor=e.anchorStatus=="ready" and e.anchorId or nil
+ if type(anchor)~="string" or anchor=="" then anchor=nil end
+ if e.kind=="miss" then
+  local result=type(e.result)=="table" and e.result or nil
+  local key=result and result.key
+  if type(key)~="string" or not C.byKind[key] then key="miss" end
+  local spell=type(e.abilityName)=="string" and e.abilityName~="" and e.abilityName or nil
+  local text=result and type(result.text)=="string" and result.text~="" and result.text or (C.byKind[key] and C.byKind[key][4]) or key
+  if spell then text=spell..": "..text end
+  text="> "..text
+  Queue(text,nil,key,false,spell,false,anchor)
+  return
+ end
+ if e.kind~="damage" then return end
+ local amount=tonumber(e.amount);if not amount or amount<=0 then return end
+ local spell=type(e.abilityName)=="string" and e.abilityName~="" and e.abilityName or "Hit"
+ local crit=e.critical and true or false
+ local kind=e.periodic and "outPeriodic" or (crit and "crit" or "out")
+ Queue(spell,amount,kind,false,spell,false,anchor)
+end
+local function PollWorldCombat()
+ if not WorldReady() then return false end
+ local ok,batch,err=pcall(AZS_GetCombatTextEvents,worldCursor)
+ if not ok then return false end
+ if not batch and type(err)=="table" and err.code=="STREAM_CHANGED" then
+  worldCursor=nil;C.Clear()
+  ok,batch=pcall(AZS_GetCombatTextEvents,nil)
+  if not ok or not batch then return false end
+ end
+ if type(batch)~="table" then return false end
+ worldCursor=batch.cursor
+ local events=batch.events
+ if type(events)=="table" then
+  for i=1,math.min(256,table.getn(events)) do IngestWorldEvent(events[i]) end
+ end
+ if batch.hasMore then
+  local guard=0
+  while batch.hasMore and guard<4 do
+   guard=guard+1
+   ok,batch=pcall(AZS_GetCombatTextEvents,worldCursor)
+   if not ok or type(batch)~="table" then break end
+   worldCursor=batch.cursor
+   events=batch.events
+   if type(events)=="table" then
+    for i=1,math.min(256,table.getn(events)) do IngestWorldEvent(events[i]) end
+   end
+  end
+ end
+ return true
+end
+local function ProjectWorldSlots()
+ if not WorldReady() or type(AZS_ProjectCombatTextAnchors)~="function" then return end
+ local now=GetTime();local lifetime=C.Number("combatTextDuration",18,6,50)/10
+ local ids,map={},{}
+ for i=1,10 do
+  local s=slots[i]
+  if s and s.active and s.value and type(s.value.anchor)=="string" then
+   table.insert(ids,s.value.anchor);map[table.getn(ids)]=s
+  end
+ end
+ if table.getn(ids)==0 then return end
+ local ok,projection=pcall(AZS_ProjectCombatTextAnchors,ids,"follow")
+ if not ok or type(projection)~="table" or type(projection.entries)~="table" then return end
+ for i=1,math.min(table.getn(ids),table.getn(projection.entries)) do
+  local point,s=projection.entries[i],map[i]
+  if s and s.active and s.value then
+   local size=C.Number(s.value.kind=="crit" and "combatTextCritSize" or "combatTextFontSize",s.value.kind=="crit" and 20 or 16,10,40)
+   if type(point)=="table" and point.state=="onScreen" and type(point.x)=="number" and type(point.y)=="number" then
+    local yards=tonumber(point.cameraDistance)
+    if yards and yards>0 then size=math.max(10,math.min(40,math.floor(size*(28/math.max(yards,6))+.5))) end
+    StyleSlot(s,s.value,size,now,lifetime)
+    local rise=(now-s.start)*18
+    PlaceWorld(s.fs,point.x,point.y,rise)
+    s.fs:Show()
+   else
+    s.fs:Hide()
+   end
+  end
+ end
+end
+local function EnsureWorldHandler()
+ if worldHandler or type(AZS_RegisterCombatTextFrameHandler)~="function" then return end
+ local ok=pcall(AZS_RegisterCombatTextFrameHandler,function()
+  if not WorldReady() then return end
+  PollWorldCombat()
+  -- Flush grouped pending immediately for anchored hits (already Emit'd) and layout.
+  local now=GetTime();local lifetime=C.Number("combatTextDuration",18,6,50)/10
+  for i=1,10 do
+   local s=slots[i]
+   if s and s.active then
+    if now-s.start>=lifetime or (not s.value.preview and not Allowed(s.value)) then s.active=false;s.fs:Hide() end
+   end
+  end
+  ProjectWorldSlots()
+ end)
+ worldHandler=ok and true or false
+end
 local avoidance={
  {"dodge",{" was dodged"," is dodged","^you dodge ","%. .- dodges%.?$","%. you dodge%.?$"}},
  {"parry",{" was parried"," is parried","^you parry ","%. .- parries%.?$","%. you parry%.?$"}},
@@ -152,11 +318,14 @@ local function Outcome(msg)
  end
 end
 -- Parse bounded legacy combat text; unrecognized messages do not generate invented events.
+-- World API covers outgoing damage/misses only: skip those chat lines when live, keep
+-- incoming damage, incoming avoidance, and let Healing() own heal floats.
 local function Capture(msg,ev)
  if type(msg)~="string" or string.len(msg)>4096 then return end
  if not C.Ensure() or not FieldKitDB.combatText or type(msg)~="string" then return end
+ local native=WorldReady()
  local _,_,amount,label=string.find(msg,"^.- suffers ([%d,]+) .- damage from your (.-)%.")
- if amount then Queue(label,Amount(amount),"outPeriodic",false);return end
+ if amount then if not native then Queue(label,Amount(amount),"outPeriodic",false) end;return end
  local _,_,taken=string.find(msg,"^You suffer ([%d,]+) .- damage from ")
  if taken then
   local _,_,spell=string.find(msg," from .-'s (.-)%.")
@@ -179,7 +348,10 @@ local function Capture(msg,ev)
    if string.find(msg,"^You hit ") then skill="Hit"
    elseif string.find(msg,"^You crit ") or string.find(msg,"^You critically hit ") then skill="Crit" end
   end
-  if skill then Queue(skill,Amount(a),kind,incoming,nil,generated);return end
+  if skill then
+   if native and not incoming then return end
+   Queue(skill,Amount(a),kind,incoming,nil,generated);return
+  end
  end
  -- Full avoidance only. Partial blocked/resisted amounts are already in the damage hit.
  local kind=not a and Outcome(msg)
@@ -190,6 +362,7 @@ local function Capture(msg,ev)
   if not skill then _,_,skill=string.find(msg,"^Your (.-) is ") end
   if not skill then _,_,skill=string.find(msg,"^Your (.-) misses ") end
   if not skill then _,_,skill=string.find(msg,"^Your (.-) missed ") end
+  if native and not incoming then return end
   local text=C.byKind[kind][4]
   if skill then text=skill..": "..text end
   if incoming then text="< "..text else text="> "..text end
@@ -230,6 +403,10 @@ end
 -- Clear pending groups and hide the fixed slot pool.
 function C.Clear()
  pending={};for i=1,10 do slots[i].active=false;slots[i].fs:Hide() end
+end
+-- Reset the world combat-text cursor after a stream change or explicit clear-all.
+function C.ResetWorldCursor()
+ worldCursor=nil
 end
 -- Change filters/grouping/limits while preserving user fonts, colors and positions.
 function C.Preset(name)
@@ -298,8 +475,13 @@ f:SetScript("OnUpdate",function()
  local now=GetTime();elapsed=elapsed+(arg1 or 0)
  if elapsed>=.05 then
   elapsed=0
-  -- Healing baseline must keep ticking even with no floating text on screen.
-  if FieldKitDB.combatText then Healing() else pending={} end
+  if FieldKitDB.combatText then
+   if FieldKitDB.combatTextWorld then
+    EnsureWorldHandler()
+    if not worldHandler then PollWorldCombat() end
+   end
+   Healing()
+  else pending={} end
   local queued=false;for _ in pairs(pending) do queued=true;break end
   if FieldKitDB.combatText and queued then
    local due={};for key,v in pairs(pending) do if now-v.start>=C.Number("combatTextWindow",25,5,75)/100 then table.insert(due,key) end end
@@ -307,7 +489,6 @@ f:SetScript("OnUpdate",function()
    for i=1,table.getn(due) do Emit(pending[due[i]]);pending[due[i]]=nil end
   end
  end
- -- Idle fast path: no live floating text means nothing to age, sort or lay out.
  local live=false
  for i=1,10 do if slots[i] and slots[i].active then live=true;break end end
  if not live then return end
@@ -322,49 +503,24 @@ f:SetScript("OnUpdate",function()
  table.sort(visible,function(a,b) return a.serial>b.serial end)
  local previous={out=-1000,incoming=-1000};local previousSize={out=0,incoming=0}
  for i=1,table.getn(visible) do
-  local s=visible[i];local v=s.value;local e=C.Event(v.kind)
-  local critical=v.kind=="crit" or v.kind=="incomingCrit"
-  local size=critical and C.Number("combatTextCritSize",20,10,40) or C.Number("combatTextFontSize",16,10,32)
-  local override=tonumber(e.size)
-  if override and override>=10 and override<=40 then size=override end
-  local area=v.incoming and FieldKitDB.combatTextSplit and "incoming" or "out"
-  local spacing=math.max(C.Number("combatTextSpacing",27,18,60),(size+previousSize[area])/2+6)
-  local age=now-s.start;s.y=math.max(age*18,previous[area]+spacing);previous[area]=s.y;previousSize[area]=size
-  local font=C.Number("combatTextFont",1,1,4)
-  if critical and C.Number("combatTextCritFont",0,0,4)>0 then font=C.Number("combatTextCritFont",0,0,4) end
-  local path=C.fonts[math.floor(font)][2];local outlines={"","OUTLINE","THICKOUTLINE"};local outline=outlines[math.floor(C.Number("combatTextOutline",2,1,3))]
-  local style=path..size..outline
-  if s.style~=style then
-   local ok,result=pcall(s.fs.SetFont,s.fs,path,size,outline)
-   if not ok or result==false then s.fs:SetFont(C.fonts[1][2],size,"OUTLINE") end
-   s.fs:SetHeight(size+8);s.style=style
+  local s=visible[i];local v=s.value
+  if type(v.anchor)=="string" and FieldKitDB.combatTextWorld and worldHandler then
+   local size=C.Number(v.kind=="crit" and "combatTextCritSize" or "combatTextFontSize",v.kind=="crit" and 20 or 16,10,40)
+   StyleSlot(s,v,size,now,lifetime)
+  else
+   local critical=v.kind=="crit" or v.kind=="incomingCrit"
+   local size=critical and C.Number("combatTextCritSize",20,10,40) or C.Number("combatTextFontSize",16,10,32)
+   local area=v.incoming and FieldKitDB.combatTextSplit and "incoming" or "out"
+   local spacing=math.max(C.Number("combatTextSpacing",27,18,60),(size+previousSize[area])/2+6)
+   s.y=math.max((now-s.start)*18,previous[area]+spacing);previous[area]=s.y;previousSize[area]=size
+   StyleSlot(s,v,size,now,lifetime)
+   local prefix=area=="incoming" and "combatTextIncoming" or "combatText"
+   local sign=FieldKitDB.combatTextDirection==2 and -1 or 1
+   s.fs:ClearAllPoints();s.fs:SetPoint("CENTER",UIParent,"CENTER",C.Number(prefix.."X",area=="incoming" and -180 or 180,-2000,2000),C.Number(prefix.."Y",-45,-2000,2000)+sign*s.y)
+   s.fs:Show()
   end
-  local text=v.label
-  if v.previewKind then text=FieldKit_L("[Preview]").." "..FieldKit_L(C.byKind[v.previewKind][4] or C.byKind[v.previewKind][2]) end
-  if v.generated then text=FieldKit_L(text) end
-  if v.kind=="heal" then
-   local _,_,name=string.find(v.label,"^Heal: (.*)$")
-   if name then text=FieldKit_L("Heal: ")..name end
-  end
-  if C.byKind[v.kind][4] and not v.preview then
-   -- Keep raw skill names and translate only the outcome word.
-   local outcome=C.byKind[v.kind][4]
-   local at=string.len(v.label)-string.len(outcome)+1
-   if at>0 and string.sub(v.label,at)==outcome then text=string.sub(v.label,1,at-1)..FieldKit_L(outcome)..string.sub(v.label,at+string.len(outcome)) end
-  end
-  if v.amount then
-   if not FieldKitDB.combatTextNames and not v.preview then text="" end
-   text=text..(text~="" and " " or "")..string.format("%d",v.amount)
-  end
-  if FieldKitDB.combatTextCounts and v.count>1 then text=text.." x"..v.count end
-  if s.text~=text then s.fs:SetText(text);s.text=text end
-  local r,g,b=C.Color(v.kind)
-  if s.r~=r or s.g~=g or s.b~=b then s.fs:SetTextColor(r,g,b);s.r=r;s.g=g;s.b=b end
-  local prefix=area=="incoming" and "combatTextIncoming" or "combatText"
-  local sign=FieldKitDB.combatTextDirection==2 and -1 or 1
-  s.fs:ClearAllPoints();s.fs:SetPoint("CENTER",UIParent,"CENTER",C.Number(prefix.."X",area=="incoming" and -180 or 180,-2000,2000),C.Number(prefix.."Y",-45,-2000,2000)+sign*s.y)
-  s.fs:SetAlpha(C.Number("combatTextOpacity",100,10,100)/100*math.min(1,math.max(0,(lifetime-age)/(lifetime/3))));s.fs:Show()
  end
+ if FieldKitDB.combatTextWorld and not worldHandler then ProjectWorldSlots() end
 end)
 SLASH_FieldKitCOMBAT1="/fieldkitcombat"
 SlashCmdList["FieldKitCOMBAT"]=function() if SlashCmdList.FieldKit then SlashCmdList.FieldKit("combat") end end

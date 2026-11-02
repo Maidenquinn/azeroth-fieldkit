@@ -4,7 +4,8 @@ FieldKitNative={generation={},barriers={},serial=0}
 local N=FieldKitNative
 local reads={["AZS_GetPhase"]=true,["AZS_GetRunTime"]=true,["AZS_GetTotems"]=true,["AZS_GetSummonGroups"]=true,
  ["AZS_GetTimers"]=true,["AZS_GetRevive"]=true,["AZS_GetUpcomingBosses"]=true,["AZS_GetStoredLevels"]=true,
- ["AZS_GetFlaggedLair"]=true,["AZS_GetMeter"]=true,["AZS_GetHealing"]=true,["AZS_GetBossMeter"]=true}
+ ["AZS_GetFlaggedLair"]=true,["AZS_GetMeter"]=true,["AZS_GetHealing"]=true,["AZS_GetBossMeter"]=true,
+ ["AZS_GetLocalTime"]=true,["AZS_GetCombatTextEvents"]=true}
 local sources={AZSSPELLS="AZS_SPELLS",AZSTOTEMS="AZS_TOTEMS",AZSPETS="AZS_PETS",AZSTIMERS="AZS_TIMERS",AZSREVIVE="AZS_REVIVE"}
 function N.Read(name)
  if not reads[name] then return nil end
@@ -67,9 +68,23 @@ FieldKitMeters={}
 local M=FieldKitMeters
 M.getters={"AZS_GetMeter","AZS_GetHealing","AZS_GetBossMeter"}
 M.labels={"Damage","Healing","Boss damage"}
-function M.Mode() return math.floor(FieldKit.Number(FieldKitDB and FieldKitDB.meterView,1,1,3)) end
+function M.Mode()
+ if FieldKitDB and type(FieldKitDB.meterViewKey)=="string" and FieldKitMeterLedger then
+  local views=FieldKitMeterLedger.views
+  for i=1,math.min(3,table.getn(views)) do if views[i]==FieldKitDB.meterViewKey then return i end end
+ end
+ return math.floor(FieldKit.Number(FieldKitDB and FieldKitDB.meterView,1,1,3))
+end
 function M.Read(mode)
  mode=mode or M.Mode()
+ if FieldKitMeterLedger and FieldKitMeterLedger.Read then
+  local key=(FieldKitMeterLedger.views and FieldKitMeterLedger.views[mode]) or "damage"
+  if FieldKitDB and type(FieldKitDB.meterViewKey)=="string" then key=FieldKitDB.meterViewKey end
+  if key=="damage" or key=="healing" or key=="boss" then
+   local lines,total,rate,known,truncated=FieldKitMeterLedger.Read(key)
+   return lines,total,rate,known,truncated
+  end
+ end
  local lines,total,rate=N.Read(M.getters[mode] or M.getters[1])
  if type(lines)~="table" then return {},nil,nil,false,false end
  local out={}

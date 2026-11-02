@@ -34,10 +34,20 @@ fire(FieldKitFrame,"PLAYER_MONEY")
 assert(not FieldKitCompactBar:IsShown() and not FieldKitMoneyFrame:IsShown(),"Polling/money event undid choice suppression")
 assert(not ActionButton1:IsShown(),"Repair loop resurrected a hidden choice button")
 assert(FieldKitDB.compactBar and FieldKitDB.pos.FieldKitCompactBar==anchor,"Choice changed saved layout/preferences")
+-- Regular HUD cards yield (alpha) so native level-up cards stay unobstructed.
+FieldKitDB.meterFrame=true;FieldKitMeterFrame:Show();FieldKitMeterFrame:SetAlpha(1)
+update(FieldKitFrame,.05)
+assert(FieldKitMeterFrame:GetAlpha()==0,"Meter stayed painted over choice cards")
+if FieldKitBossTimelineFrame then
+ assert(not FieldKitBossTimelineFrame:IsShown() or FieldKitBossTimelineFrame:GetAlpha()==0,"Timeline over choice cards")
+end
 AZS_RUN.ph="playing"
 fire(FieldKitFrame,"CHAT_MSG_ADDON","AZSRUN")
+update(FieldKitFrame,.05)
+assert(FieldKitMeterFrame:GetAlpha()==1,"Meter alpha not restored after choices")
 assert(FieldKitCompactBar:IsShown() and FieldKitMoneyFrame:IsShown(),"Compact HUD did not return after choices")
 assert(ActionButton1:IsShown(),"Normal button repair did not resume")
+FieldKitDB.meterFrame=false;FieldKitMeterFrame:Hide()
 
 -- Detached money must also yield to native choices; detachment stays saved.
 FieldKitDB.moneyDetached=true

@@ -19,9 +19,10 @@ assert(D.frame:IsShown() and D.member=="Maiden" and D.data.own)
 assert(table.getn(D.data.rows)==23 and D.data.damage==123456 and D.data.dps==321)
 assert(D.summary:GetText()=="Damage: 123456   DPS: 321")
 assert(D.frame.rows[1].label:GetText()=="Actual spell 1")
-assert(D.frame.rows[1].meterColumns[1]:GetText()=="2390")
-assert(D.frame.rows[1].meterColumns[2]:GetText()=="239 dps")
-assert(D.frame.rows[1].label:GetWidth()+3<=D.frame.rows[1]:GetWidth()-131-92)
+-- Own breakdown uses Max Hit columns (Total / Crit / Burst / Avg / Hits / Crit%).
+assert(D.frame.rows[1].hitColumns[1]:GetText()=="2.4k")
+assert(D.hitCaptions[1]:IsShown() and not D.captions[1]:IsShown())
+assert(D.frame:GetWidth()>=640,"Own Max Hit breakdown needs a wide card")
 assert(D.frame.fieldkitSkin.base:GetAlpha()==0,"Hover ignored the selected HUD background opacity")
 FieldKitDB.cardStyle=2;FieldKitDB.cardOpacity=37;FieldKitTheme.Refresh()
 assert(FieldKitTheme.Style(D.frame)==2 and D.frame.fieldkitSkin.base:GetAlpha()==.37)
@@ -38,7 +39,16 @@ click(D.previous);assert(D.offset==3)
 -- Crossing onto the card keeps it open so wheel/buttons can be used.
 leave(own);enter(D.frame);NOW=NOW+1;this=D.frame;arg1=.3;D.frame:GetScript("OnUpdate")()
 assert(D.frame:IsShown())
-leave(D.frame);NOW=NOW+.3;this=D.frame;D.frame:GetScript("OnUpdate")()
+-- Hovering a child row must not despawn the card (frame OnLeave → row OnEnter).
+leave(D.frame);enter(D.frame.rows[1]);NOW=NOW+1;this=D.frame;D.frame:GetScript("OnUpdate")()
+assert(D.frame:IsShown() and D.overPopup,"row hover keeps detail open")
+-- Column header sort (Total / name). Spell hitbox must stay left of Total.
+assert(D.spell:GetWidth()+10<=(D.header:GetWidth()-(294+72)),"spell must not cover Total")
+D.sortKey="dmg";D.sortAsc=false
+click(D.hitCaptions[1]);assert(D.sortKey=="dmg" and D.sortAsc==true,"toggle sort asc")
+click(D.spell);assert(D.sortKey=="name" and D.sortAsc==false)
+click(D.spell);assert(D.sortAsc==true and D.frame.rows[1].label:GetText()=="Actual spell 1","sort by name asc")
+leave(D.frame.rows[1]);leave(D.frame);NOW=NOW+.3;this=D.frame;D.frame:GetScript("OnUpdate")()
 assert(not D.frame:IsShown() and D.data==nil)
 
 -- A peer gets only their real top spell/rate. No self spells or inferred damage.
