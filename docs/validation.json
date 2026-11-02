@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2",
+  "version": "0.3.4",
   "lua51": true,
   "nativeLua50": null,
   "persistence": true,
@@ -18,9 +18,9 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "maintainer accepted for publication; not independently certified",
   "publication": {
-    "version": "0.3.2",
+    "version": "0.3.4",
     "maintainerAcceptedForPublication": true,
-    "maintainerAcceptanceDate": "2026-11-01",
+    "maintainerAcceptanceDate": "2026-11-02",
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
@@ -33,7 +33,7 @@
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "c0acc9a161cc319b8adf6e6dd6b08afccf1f0cd6ae451d2d228a01d8c5dde980"
+      "sha256": "bec450250412aa771af3f0e607266422a1396bab9e9828dc5cf6d3d864871440"
     },
     "Positions.lua": {
       "maxUpvalues": 2,
@@ -43,17 +43,17 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "a9b0361dd56fafedddb3a569e4018d7dc00939edd879a9efdec90ca96f748c69"
+      "sha256": "6222ff1f08db3df1ee352b529b9ee34c280c9df601c589fcbdf4858d7dd29fc9"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "118bf4856777f631357448c06c3bc4bf3b05f368b7aa474ce4de0e81af99f765"
+      "sha256": "19dedfcba8d68ccc7b4b5a181fe7b336ebdff69822e61b9662b81372fdd49b21"
     },
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "a1efb9269a956e77179e5685c24bb2519721c394136f35ae460736e3a45d4f09"
+      "sha256": "ea71496f7295408fa1e4a320e78b27f6975d49737b183cbc870c0ba1c3d20f93"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -77,8 +77,8 @@
     },
     "Settings.lua": {
       "maxUpvalues": 2,
-      "functions": 11,
-      "sha256": "f64655fd0a70b759b3c929b74e05da8370a3f799c595a417029f3c417899f2d9"
+      "functions": 15,
+      "sha256": "d7e2677b210414484ad387a9ad59d3a18c9626d51da227980e53c14dc47d5dde"
     },
     "GameCompatibility.lua": {
       "maxUpvalues": 1,
@@ -93,7 +93,22 @@
     "NativeData.lua": {
       "maxUpvalues": 2,
       "functions": 13,
-      "sha256": "534a35380cada170d3f6f8a63b4c6533571dc08ab46e7e3feb041824d4b2731f"
+      "sha256": "ecff13f09a0ff414854ee8fb89321c74e5d530069e0c0d90de29474a94f63261"
+    },
+    "MeterLedger.lua": {
+      "maxUpvalues": 11,
+      "functions": 50,
+      "sha256": "81ec90beb59b31d2f66c21b8ef5059721f871faa7c582eda77a9a576b2e7c81b"
+    },
+    "MeterSuite.lua": {
+      "maxUpvalues": 6,
+      "functions": 39,
+      "sha256": "4c3b8457bcf984db948aae61c3f92cc297da6a64a95fc02207a1c05383122a84"
+    },
+    "BossTimeline.lua": {
+      "maxUpvalues": 26,
+      "functions": 17,
+      "sha256": "6daecd0e389e40fbd9e6cd2d93d1b022808dca57802b28ed0f870dab24bf98a3"
     },
     "HudStack.lua": {
       "maxUpvalues": 2,
@@ -116,19 +131,19 @@
       "sha256": "c05b7ffaf4a274e1c287f9e8a71d5c867fe9195929c919553e003d97138f5aee"
     },
     "PartyDetails.lua": {
-      "maxUpvalues": 2,
-      "functions": 24,
-      "sha256": "1963d4904516609fa70049f3f16b7f0600852bb55546b2fec488b5dd20377325"
+      "maxUpvalues": 11,
+      "functions": 39,
+      "sha256": "db02505f8857532f18126b92054741239be703e3261a62c8de28a80607028509"
     },
     "ScreenLayers.lua": {
-      "maxUpvalues": 1,
-      "functions": 2,
-      "sha256": "fa41024b7e27d166757536028246524fc2f10865deafbe4b529ec817c4805668"
+      "maxUpvalues": 3,
+      "functions": 7,
+      "sha256": "c66920fe0dd2f94d5ec13942eec677d92ad5ed84fb269f2a45a61ddd720cafa3"
     },
     "NativeTools.lua": {
       "maxUpvalues": 3,
       "functions": 18,
-      "sha256": "6bf5db540bfcc3c2220c9e761838e49a16f6a1674d174fecd608714d4cd9a38e"
+      "sha256": "8d051e1a3d866c8729c547930680741d08baa710a2d7ebe8c1adff4319330e3a"
     },
     "SpellAssets.lua": {
       "maxUpvalues": 0,
@@ -138,7 +153,7 @@
     "Loadout.lua": {
       "maxUpvalues": 2,
       "functions": 25,
-      "sha256": "5904e904a5304e85c1eab65a6cdbf58f385921cc4d3880cad05888a2ff987263"
+      "sha256": "265193b7708087cc6b4a273ec0156ab9b293b00976df7c7637009437028510d3"
     },
     "TakenDetails.lua": {
       "maxUpvalues": 4,
@@ -158,7 +173,7 @@
     "OptionsSchema.lua": {
       "maxUpvalues": 1,
       "functions": 49,
-      "sha256": "c45eb20dc456b383a86cfa0404a8ea58bdaf43c4587a8359f4329ab83d4e2f7a"
+      "sha256": "ceba3afc76e83968143a5305c4641ad451290cfc212a4e86b24a0295c7494202"
     },
     "LegacyCrits.lua": {
       "maxUpvalues": 7,
@@ -167,28 +182,28 @@
     },
     "Interface.lua": {
       "maxUpvalues": 5,
-      "functions": 122,
-      "sha256": "e1fbdaf784622274579b0eb2cbeb682e87dcc9cc87e167c62133d8ff04fdd719"
+      "functions": 142,
+      "sha256": "f63f2cd319b926f24baa784530f970ee104b685566501b5d131aa4c516aef6d3"
     },
     "FieldKit.lua": {
       "maxUpvalues": 20,
-      "functions": 170,
-      "sha256": "d1bf6e38b8ce358a91de5139ff4915f034c1bb27fd284812b4f19a5ea292016e"
+      "functions": 172,
+      "sha256": "463f11dbb17cb1bb95ce4d6cd0b252b0081bf1db2348e231987c457ec9b5eb1c"
     },
     "WorldPins.lua": {
-      "maxUpvalues": 9,
-      "functions": 10,
-      "sha256": "86cd900d9fcd3582e185ee61720e074f4ae72f12b62f9c7c9bd6aa89e39fb666"
+      "maxUpvalues": 11,
+      "functions": 12,
+      "sha256": "278214f1b8f9f0a61145455f0f257d3e830afdc7f1527859c42e87097c3aeb86"
     },
     "CombatText.lua": {
-      "maxUpvalues": 7,
-      "functions": 26,
-      "sha256": "09219562fc76a484e75c604dde54de647bd7a6a67b65e6d4b8c977d8b97ba94e"
+      "maxUpvalues": 12,
+      "functions": 35,
+      "sha256": "5be9d63b56de4b3a922602f71698e066d75af82f1ec5c8c31c2d4df34ab4e2f9"
     },
     "CombatOptions.lua": {
       "maxUpvalues": 5,
       "functions": 75,
-      "sha256": "1bafcccaac54981ccd9d592679aa2537dd1b68414ad2b982bf0460b3783ee402"
+      "sha256": "5451ddb18283847c5c6c9e2b9ab9a1df55852d7e93c1ede951b3742ebe0be88b"
     },
     "CopyLog.lua": {
       "maxUpvalues": 4,

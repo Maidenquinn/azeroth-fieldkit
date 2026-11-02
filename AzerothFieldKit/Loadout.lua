@@ -137,8 +137,25 @@ function L.EnsureAssetIcons()
   flurry="Interface\\Icons\\Ability_GhoulFrenzy",
   blessuresprofondes="Interface\\Icons\\Ability_BackStab",
   deepwounds="Interface\\Icons\\Ability_BackStab",
+  -- French meter labels ↔ English combat-log / Spell.dbc icons (join hits & kills).
+  execution="Interface\\Icons\\INV_Sword_48",
+  ["exécution"]="Interface\\Icons\\INV_Sword_48",
+  tourbillon="Interface\\Icons\\Ability_Whirlwind",
+  whirlwind="Interface\\Icons\\Ability_Whirlwind",
+  enchainement="Interface\\Icons\\Ability_Warrior_Cleave",
+  ["enchaînement"]="Interface\\Icons\\Ability_Warrior_Cleave",
+  cleave="Interface\\Icons\\Ability_Warrior_Cleave",
+  sanguinaire="Interface\\Icons\\Spell_Nature_BloodLust",
+  bloodthirst="Interface\\Icons\\Spell_Nature_BloodLust",
+  heurtbouclier="Interface\\Icons\\INV_Shield_05",
+  shieldslam="Interface\\Icons\\INV_Shield_05",
+  coupdetonnerre="Interface\\Icons\\Spell_Nature_ThunderClap",
+  thunderclap="Interface\\Icons\\Spell_Nature_ThunderClap",
+  mele="Interface\\Icons\\INV_Sword_04",
+  ["mêlée"]="Interface\\Icons\\INV_Sword_04",
+  melee="Interface\\Icons\\INV_Sword_04",
  }
- for key,icon in pairs(alias) do L.assetIcons[key]=icon end
+ for key,icon in pairs(alias) do L.assetIcons[L.Key(key)]=icon end
 end
 function L.Icon(name)
  if name=="Melee" or name=="Mêlée" then return "Interface\\Icons\\INV_Sword_04" end

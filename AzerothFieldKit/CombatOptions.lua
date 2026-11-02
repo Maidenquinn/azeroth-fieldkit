@@ -91,16 +91,22 @@ function FieldKit_CreateCombatOptions(parent)
  local p=ui.pages[1]
  Flag(p,"Activer le texte de combat FieldKit",0,"combatText")
  Flag(p,"Regrouper les frappes d'une compétence",-29,"combatTextGroup","Les critiques et les dégâts normaux restent séparés.")
- Number(p,"Messages simultanés (toutes zones)",-69,"combatTextMax",1,10)
- Number(p,"Durée d'affichage",-122,"combatTextDuration",6,50,function(v) return string.format("%.1f s",v/10) end)
- Number(p,"Fenêtre de regroupement",-175,"combatTextWindow",5,75,function(v) return string.format("%.2f s",v/100) end)
- Text(p,"Quick presets change filters, merging and message limits. Fonts, colors and positions are kept.",0,-233)
- Button(p,"Équilibré",0,-272,width/3-4,function() C.Preset("balanced");ui.Refresh() end)
- Button(p,"Discret",width/3,-272,width/3-4,function() C.Preset("quiet");ui.Refresh() end)
- Button(p,"Tout",2*width/3,-272,width/3-4,function() C.Preset("all");ui.Refresh() end)
- Button(p,"Aperçu (exemples fictifs)",0,-313,width,function() C.Preview() end)
- Button(p,"Utiliser seulement ce texte",0,-347,width,function() if FieldKit_UseCombatTextOnly then FieldKit_UseCombatTextOnly();ui.Refresh() end end)
- Text(p,"Enables FieldKit text and hides game damage numbers and the old critical display. Restore them in Game text. Preview uses marked sample data. Healing uses native totals.",0,-387)
+ Flag(p,"Ancrer au monde (AS 0.138+)",-58,"combatTextWorld","Les nombres restent sur le point d'impact / de mort via AZS_GetCombatTextEvents. Sans l'API, le mode chat classique reste actif.")
+ Number(p,"Messages simultanés (toutes zones)",-98,"combatTextMax",1,10)
+ Number(p,"Durée d'affichage",-151,"combatTextDuration",6,50,function(v) return string.format("%.1f s",v/10) end)
+ Number(p,"Fenêtre de regroupement",-204,"combatTextWindow",5,75,function(v) return string.format("%.2f s",v/100) end)
+ Text(p,"Quick presets change filters, merging and message limits. Fonts, colors and positions are kept.",0,-255)
+ Button(p,"Équilibré",0,-290,width/3-4,function() C.Preset("balanced");ui.Refresh() end)
+ Button(p,"Discret",width/3,-290,width/3-4,function() C.Preset("quiet");ui.Refresh() end)
+ Button(p,"Tout",2*width/3,-290,width/3-4,function() C.Preset("all");ui.Refresh() end)
+ Button(p,"Aperçu (exemples fictifs)",0,-328,width,function() C.Preview() end)
+ -- Same CombatDamage switch as Options → Combat → Show Target Damage.
+ do
+  local item=FieldKitUI.nativeTextOptions and FieldKitUI.nativeTextOptions[1]
+  if item then Check(p,item.label,-362,item.get,item.set,item.tip) end
+ end
+ Button(p,"Utiliser seulement ce texte",0,-396,width,function() if FieldKit_UseCombatTextOnly then FieldKit_UseCombatTextOnly();ui.Refresh() end end)
+ Text(p,"Use only this combat text turns FieldKit on and unchecks Show target damage (game). World anchor needs AS 0.138+.",0,-430)
  p=ui.pages[2]
  Choice(p,"Catégorie à personnaliser",0,(function() local t={};for i=1,table.getn(C.defs) do table.insert(t,C.defs[i][2]) end;return t end)(),
   function() for i=1,table.getn(C.defs) do if C.defs[i][1]==ui.eventKind then return i end end;return 1 end,

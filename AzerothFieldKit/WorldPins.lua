@@ -68,42 +68,66 @@ local function Clock(sec)
  sec=math.ceil(sec)
  return math.floor(sec/60)..":"..string.format("%02d",math.mod(sec,60))
 end
+-- Prefer the per-frame client pose (AS 0.132+); fall back to AZS_RUN.px/py.
+local function HeroPose()
+ if type(AZS_GetPlayerPosition)=="function" then
+  local ok,pos=pcall(AZS_GetPlayerPosition)
+  if ok and type(pos)=="table" then
+   local x,y=FieldKit.Number(pos.x),FieldKit.Number(pos.y)
+   if x and y then return x,y,pos.spaceId end
+  end
+ end
+ if type(AZS_RUN)=="table" then
+  return FieldKit.Number(AZS_RUN.px),FieldKit.Number(AZS_RUN.py),nil
+ end
+end
+-- Same coordinate space only: skip stale chests/lairs from another map/run.
+local function SameSpace(entry,spaceId)
+ if type(spaceId)~="string" or spaceId=="" then return true end
+ if type(entry)~="table" or entry.spaceId==nil then return true end
+ return entry.spaceId==spaceId
+end
 -- Refresh at most 128 chest and 128 guardian-lair pins; both options are independent.
 function FieldKit_UpdateWorldPins()
  Hide(chests);Hide(guardians)
  if not FieldKitDB or not Minimap or not Minimap:IsShown() or type(AZS_GetPhase)~="function" or not AZS_GetPhase() or type(AZS_RUN)~="table" then return end
- local px,py=FieldKit.Number(AZS_RUN.px),FieldKit.Number(AZS_RUN.py)
+ local px,py,spaceId=HeroPose()
  if not px or not py or Rotating() then return end
  local span=yards[Minimap:GetZoom() or 0]
  if not span then return end
  local scale,square=Minimap:GetWidth()/span,Square()
  if FieldKitDB.chestPins and type(AZS_CHESTS)=="table" then
   for i=1,math.min(128,table.getn(AZS_CHESTS)) do
-   local p=chests[i] or NewPin(chests,i,"Chest")
-   p.title=FieldKit_L("Battleground Cache");p.detail=nil
-   Place(p,AZS_CHESTS[i],px,py,scale,square)
+   local entry=AZS_CHESTS[i]
+   if SameSpace(entry,spaceId) then
+    local p=chests[i] or NewPin(chests,i,"Chest")
+    p.title=FieldKit_L("Battleground Cache");p.detail=nil
+    Place(p,entry,px,py,scale,square)
+   end
   end
  end
  if FieldKitDB.guardianPins==nil then FieldKitDB.guardianPins=false end
  if FieldKitDB.guardianPins and type(AZS_LAIRS)=="table" then
   for i=1,math.min(128,table.getn(AZS_LAIRS)) do
    local l=AZS_LAIRS[i]
-   local up=l.state=="asleep" or l.state=="awake"
-   local left=tonumber(l.left) or -1
-   if up or left>=0 then
-    local p=guardians[i] or NewPin(guardians,i,"Guardian")
-    p.title=l.name or FieldKit_L("Guardian")
-    if up then
-     p.icon:Show();p.timer:Hide()
-     if l.state=="awake" then p.icon:SetVertexColor(1,.25,.25) else p.icon:SetVertexColor(1,1,1) end
-     p.detail=l.state=="awake" and FieldKit_L("Lair: guardian fighting (not its moving position)") or FieldKit_L("Lair: guardian asleep")
-    else
-     -- AZSLAIRS supplies the countdown once/second when changing. Do not subtract
-     -- wall-clock time: the official run clock stops while choosing or paused.
-     p.icon:Hide();FieldKit_Text(p.timer,left>0 and Clock(left) or "?");p.timer:SetTextColor(1,.6,.15);p.timer:Show()
-     p.detail=left>0 and (FieldKit_L("Lair empty; return in ")..Clock(left)) or FieldKit_L("Awaiting native return confirmation")
+   if SameSpace(l,spaceId) then
+    local up=l.state=="asleep" or l.state=="awake"
+    local left=tonumber(l.left) or -1
+    if up or left>=0 then
+     local p=guardians[i] or NewPin(guardians,i,"Guardian")
+     p.title=l.name or FieldKit_L("Guardian")
+     if up then
+      p.icon:Show();p.timer:Hide()
+      if l.state=="awake" then p.icon:SetVertexColor(1,.25,.25) else p.icon:SetVertexColor(1,1,1) end
+      p.detail=l.state=="awake" and FieldKit_L("Lair: guardian fighting (not its moving position)") or FieldKit_L("Lair: guardian asleep")
+     else
+      -- AZSLAIRS supplies the countdown once/second when changing. Do not subtract
+      -- wall-clock time: the official run clock stops while choosing or paused.
+      p.icon:Hide();FieldKit_Text(p.timer,left>0 and Clock(left) or "?");p.timer:SetTextColor(1,.6,.15);p.timer:Show()
+      p.detail=left>0 and (FieldKit_L("Lair empty; return in ")..Clock(left)) or FieldKit_L("Awaiting native return confirmation")
+     end
+     Place(p,l,px,py,scale,square)
     end
-    Place(p,l,px,py,scale,square)
    end
   end
  end

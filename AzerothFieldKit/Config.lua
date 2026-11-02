@@ -1,9 +1,12 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
 local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,reviveFrame=false,
- nextBossCard=false,nextBossAlert=false,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,
+ nextBossCard=false,nextBossAlert=false,bossTimeline=false,bossTimelineWidth=560,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,partyBannerWarnings=true,
  highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
+ meterTabs=true,meterSpellTips=true,meterKeepTakenFrame=false,meterViewKey="damage",
+ meterSortKey="dmg",meterSortAsc=false,meterHealDone=false,meterPartyOwner=nil,
+
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
  lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false}
@@ -23,14 +26,20 @@ function FieldKit.InitializeSettings(defaultStats)
  d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
  d.meterView=math.floor(FieldKit.Number(d.meterView,1,1,3))
  d.bossWarningLead=math.floor(FieldKit.Number(d.bossWarningLead,10,3,30))
+ d.bossTimeline=d.bossTimeline==true
+ d.bossTimelineWidth=math.floor(FieldKit.Number(d.bossTimelineWidth,560,360,780))
  if type(d.onTopWindows)~="table" then d.onTopWindows={} end
  for name,value in pairs(d.onTopWindows) do
   if (not FieldKitCardLayout.ValidName(name) and name~="FieldKitPartyDetailsFrame") or value~=true then d.onTopWindows[name]=nil end
  end
  d.meterValues=math.floor(FieldKit.Number(d.meterValues,3,1,3))
- for _,key in ipairs({"known","pos","collapsedWindows","frameAnchors"}) do
+ for _,key in ipairs({"known","pos","collapsedWindows","frameAnchors","meterHiddenRows"}) do
   if type(d[key])~="table" then d[key]={} end
  end
+ if type(d.meterSortKey)~="string" then d.meterSortKey="dmg" end
+ if d.meterSortAsc~=true then d.meterSortAsc=false end
+ if d.meterHealDone~=true then d.meterHealDone=false end
+ if type(d.meterPartyOwner)~="string" then d.meterPartyOwner=nil end
  if type(d.cardSizes)~="table" then d.cardSizes={} end
  for name,size in pairs(d.cardSizes) do
   if not FieldKitCardLayout.ValidName(name) or type(size)~="table" then d.cardSizes[name]=nil
@@ -59,14 +68,20 @@ function FieldKit.InitializeSettings(defaultStats)
  d.lowHealthPct=FieldKit.Number(d.lowHealthPct,30,10,70)
  -- Stable journey ids survive page reordering without resetting user choices.
  if d.uiSchema~=2 then
+  local keep=d.uiPage
   local previous={"nameplates","health","bosses","health","alerts","windows","map","interface","interface","combat","bosses"}
   local titles={Nameplates="nameplates",Target="health",Combat="bosses",Player="health",Warnings="alerts",Windows="windows",Map="map",Interface="interface",Camera="interface",["Combat text"]="combat",["Boss health"]="bosses"}
-  d.uiPage=titles[d.panelSection] or previous[tonumber(d.panelTab)] or "home";d.uiSchema=2
+  d.uiPage=titles[d.panelSection] or previous[tonumber(d.panelTab)] or keep or "home";d.uiSchema=2
  end
- local valid={home=true,combat=true,health=true,bosses=true,alerts=true,windows=true,map=true,nameplates=true,interface=true}
+ -- Promote legacy mega-Windows page (+ its subtabs) to thin HUD sections.
+ if d.uiPage=="windows" then
+  local map={display="cards",layout="layout",appearance="look",coop="coop",meter="meter",cards="cards"}
+  d.uiPage=map[d.windowPage] or "cards"
+ elseif d.uiPage=="appearance" then d.uiPage="look"
+ elseif d.uiPage=="display" then d.uiPage="cards" end
+ local valid={home=true,combat=true,health=true,bosses=true,alerts=true,cards=true,meter=true,layout=true,look=true,coop=true,map=true,nameplates=true,interface=true}
  if not valid[d.uiPage] then d.uiPage="home" end
- if d.windowPage~="layout" and d.windowPage~="appearance" and d.windowPage~="coop" then d.windowPage="display" end
- d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,9))
+ d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,16))
  d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)
  d.playerBarY=FieldKit.Number(d.playerBarY,-70,-10000,10000)
  if type(d.lastStats)=="table" then

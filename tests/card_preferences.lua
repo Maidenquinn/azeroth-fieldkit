@@ -28,14 +28,15 @@ local center=FieldKitDB.pos.FieldKitMeterFrame[1]
 local stackLeft=FieldKitDB.pos.FieldKitLeftStack[1]
 choose(display,2)
 assert(columns[1]:IsShown() and columns[2]:IsShown() and not columns[3]:IsShown())
-assert(FieldKitMeterFrame:GetWidth()==320)
+-- Tabs + kill column reserve a 340 floor even on the mid values mode.
+assert(FieldKitMeterFrame:GetWidth()==340)
 if FieldKitDB.linkLeftCards then
  assert(FieldKitDB.pos.FieldKitLeftStack[1]==stackLeft,"Mode switch moved the stack anchor")
  assert(FieldKitDB.pos.FieldKitMeterFrame[1]==center,"Linked layout overwrote individual coordinates")
-else assert(FieldKitDB.pos.FieldKitMeterFrame[1]-320/2==center-360/2,"Mode switch moved the saved left edge") end
+else assert(FieldKitDB.pos.FieldKitMeterFrame[1]-340/2==center-360/2,"Mode switch moved the saved left edge") end
 choose(display,1)
 assert(not columns[1]:IsShown() and columns[2]:IsShown() and columns[3]:IsShown())
-assert(FieldKitMeterFrame:GetWidth()==220)
+assert(FieldKitMeterFrame:GetWidth()==340)
 assert(FieldKit_FormatMeterValues({dps=10},3)=="? | 10 dps | ?","Never infer damage from DPS")
 assert(FieldKit_FormatMeterValues({dmg=0,dps=0,share=0},3)=="0 | 0 dps | 0%")
 assert(lines[1].dmg==1234567 and lines[1].dps==8656)

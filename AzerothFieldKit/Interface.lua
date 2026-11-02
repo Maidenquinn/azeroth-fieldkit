@@ -29,7 +29,8 @@ function FieldKit.BuildJourneySections(sections,actions)
   end
  end
  table.insert(interface,{kind="camera"})
- local display={
+ local cards={
+  {kind="note",label="Which HUD cards to show",tip="Turn modules on or off here. Positions and sizes are under Layout & arrange."},
   {kind="check",label="Run mode card",tip="Native difficulty and zone with Difficulty-screen multipliers. Hover for the full chart.",
    get=function() return FieldKitDB.runModeCard end,set=function(v) FieldKitDB.runModeCard=v;actions.UpdateRunMode() end},
   {kind="check",label="Hide mode card without difficulty data",tip="Keep the HUD clear when the client does not supply the mode. Preview arrangement still shows the card.",
@@ -37,14 +38,13 @@ function FieldKit.BuildJourneySections(sections,actions)
   options.statsFrame,
   {kind="check",label="Gold and chest price",tip="Show the separate gold and next-chest strip. Hiding it restores the native tally if FieldKit replaced it.",
    get=function() return FieldKitDB.moneyFrame end,set=function(v) FieldKitDB.moneyFrame=v;actions.SyncHudTally();actions.UpdateMoneyFrame() end},
-  options.replaceTally,options.meterFrame,
-  {kind="choice",label="Local meter view",values={"Damage","Healing","Boss damage"},
-   get=function() return FieldKitMeters.Mode() end,set=function(v) FieldKitDB.meterView=v;FieldKitPartyDetails.Close();actions.UpdateMeterFrames(true) end},
-  options.takenFrame,options.gearFrame,
+  options.replaceTally,options.takenFrame,options.gearFrame,
   {kind="check",label="Effects tracker",tip="Contextual totems, summons and native talent timers. Hidden without relevant data; filters are in Health & buffs.",
    get=function() return FieldKitDB.effectsFrame end,set=function(v) FieldKitDB.effectsFrame=v;FieldKitNativeTools.Update() end},
   {kind="check",label="Next boss reminder",tip="Compact native arrival countdown, not a prediction of boss attacks. Hidden when no schedule is available.",
    get=function() return FieldKitDB.nextBossCard end,set=function(v) FieldKitDB.nextBossCard=v;FieldKitNativeTools.Update() end},
+  {kind="check",label="Next boss in Lairs",tip="Show the next native scheduled boss and countdown in the lair card.",
+   get=function() return FieldKitDB.lairNextBoss end,set=function(v) FieldKitDB.lairNextBoss=v;actions.UpdateLairFrame() end},
   {kind="check",label="Stored level-up reminder",tip="Show a count only while native stored level-ups are waiting. Does not open, spend or choose them.",
    get=function() return FieldKitDB.storedLevelsBadge end,set=function(v) FieldKitDB.storedLevelsBadge=v;FieldKitNativeTools.Update() end},
   {kind="check",label="Show received active affixes",tip="Display recognized names only when supplied by the client. Unknown formats stay labelled as raw data; no calendar guessing.",
@@ -52,9 +52,50 @@ function FieldKit.BuildJourneySections(sections,actions)
   {kind="check",label="Group damage meter",tip="Native damage, DPS and contribution per player. Separate from your own spell breakdown. Missing group data is shown explicitly.",
    get=function() return FieldKitDB.partyMeter end,set=function(v) FieldKitDB.partyMeter=v;FieldKitCoop.Update() end},
  }
- table.insert(display,{kind="check",label="Next boss in Lairs",tip="Show the next native scheduled boss and countdown in the lair card.",get=function() return FieldKitDB.lairNextBoss end,set=function(v) FieldKitDB.lairNextBoss=v;actions.UpdateLairFrame() end})
+ local meter={
+  {kind="note",label="Your combat meter",tip="Main meter, tabs, tooltips and optional detached windows. Which other HUD cards appear is under HUD cards."},
+  options.meterFrame,
+  {kind="choice",label="Local meter view",values={"Damage","Healing","Boss damage","Damage taken","Party DPS","Kills"},
+   get=function()
+    if FieldKitMeterSuite and FieldKitMeterSuite.View then local _,i=FieldKitMeterSuite.View();return i or 1 end
+    return FieldKitMeters.Mode()
+   end,
+   set=function(v)
+    local keys={"damage","healing","boss","taken","party","kills"}
+    FieldKitDB.meterViewKey=keys[v] or "damage";FieldKitDB.meterView=math.min(v,3)
+    if FieldKitPartyDetails then FieldKitPartyDetails.Close() end
+    actions.UpdateMeterFrames(true)
+   end},
+  {kind="check",label="Meter tabs + reset",tip="Tabs for damage, healing, boss, taken, party and kills, with a mid-run Reset (native checkpoint when available).",
+   get=function() return FieldKitDB.meterTabs~=false end,set=function(v) FieldKitDB.meterTabs=v and true or false;actions.UpdateMeterFrames(true) end},
+  {kind="check",label="Spell hit tips on hover",tip="Show max hit/crit, hits, crit% and burst when hovering a meter row or an action-bar spell (Max Hit style).",
+   get=function() return FieldKitDB.meterSpellTips~=false end,set=function(v) FieldKitDB.meterSpellTips=v and true or false end},
+  {kind="choice",label="Damage meter values",values={"DPS + share","Damage + DPS","Damage + DPS + share"},
+   get=function() return FieldKitDB.meterValues end,set=function(v) FieldKitDB.meterValues=v;actions.UpdateMeterFrames(true) end},
+  {kind="check",label="Keep separate taken window",tip="Keep the classic Damage taken card visible even while the Taken tab or a detached Taken window is open.",
+   get=function() return FieldKitDB.meterKeepTakenFrame and true or false end,set=function(v) FieldKitDB.meterKeepTakenFrame=v and true or false;actions.UpdateMeterFrames(true) end},
+  {kind="check",label="Detach Damage window",tip="Open Damage in its own movable window. Right-click the Dmg tab does the same.",
+   get=function() return FieldKitDB.meterDetach_damage and true or false end,
+   set=function(v) if FieldKitMeterSuite then FieldKitMeterSuite.SetDetached("damage",v) else FieldKitDB.meterDetach_damage=v and true or nil;actions.UpdateMeterFrames(true) end end},
+  {kind="check",label="Detach Healing window",tip="Open Healing in its own movable window.",
+   get=function() return FieldKitDB.meterDetach_healing and true or false end,
+   set=function(v) if FieldKitMeterSuite then FieldKitMeterSuite.SetDetached("healing",v) else FieldKitDB.meterDetach_healing=v and true or nil;actions.UpdateMeterFrames(true) end end},
+  {kind="check",label="Detach Boss damage window",tip="Open Boss damage in its own movable window.",
+   get=function() return FieldKitDB.meterDetach_boss and true or false end,
+   set=function(v) if FieldKitMeterSuite then FieldKitMeterSuite.SetDetached("boss",v) else FieldKitDB.meterDetach_boss=v and true or nil;actions.UpdateMeterFrames(true) end end},
+  {kind="check",label="Detach Damage taken window",tip="Open Damage taken in its own movable window.",
+   get=function() return FieldKitDB.meterDetach_taken and true or false end,
+   set=function(v) if FieldKitMeterSuite then FieldKitMeterSuite.SetDetached("taken",v) else FieldKitDB.meterDetach_taken=v and true or nil;actions.UpdateMeterFrames(true) end end},
+  {kind="check",label="Detach Party DPS window",tip="Open Party DPS ranking in its own movable window.",
+   get=function() return FieldKitDB.meterDetach_party and true or false end,
+   set=function(v) if FieldKitMeterSuite then FieldKitMeterSuite.SetDetached("party",v) else FieldKitDB.meterDetach_party=v and true or nil;actions.UpdateMeterFrames(true) end end},
+  {kind="check",label="Detach Kills window",tip="Open kills-per-spell in its own movable window.",
+   get=function() return FieldKitDB.meterDetach_kills and true or false end,
+   set=function(v) if FieldKitMeterSuite then FieldKitMeterSuite.SetDetached("kills",v) else FieldKitDB.meterDetach_kills=v and true or nil;actions.UpdateMeterFrames(true) end end},
+ }
  local layout={
   {kind="preview",preview=0},
+  {kind="note",label="Move and size your windows",tip="Drag windows in play by default. Use Arrange previews for hidden modules. Lock when the layout feels right."},
   {kind="check",label="Lock window positions",tip="Drag active windows during play by default. Locking keeps their current positions; grouping and dimensions stay unchanged.",
    get=function() return FieldKitDB.windowsLocked end,set=function(v) FieldKit.SetWindowsLocked(v) end},
   {kind="check",label="Align left HUD cards",tip="Move the left cards together. Turn off to move every card independently. Custom sizes are kept in both modes.",
@@ -63,18 +104,17 @@ function FieldKit.BuildJourneySections(sections,actions)
    get=function() return FieldKitDB.linkRightCards end,set=function(v) FieldKitDB.linkRightCards=v;FieldKitCardLayout.ApplyRight() end},
  }
  for _,item in ipairs(FieldKitCardLayout.Options()) do table.insert(layout,item) end
- local appearance={
+ local look={
+  {kind="note",label="Visual style",tip="Chronicle look for FieldKit cards only. Does not change other addons."},
   {kind="choice",label="Card style",values={"Decorative","Classic"},get=function() return FieldKitDB.cardStyle end,
    set=function(v) FieldKitDB.cardStyle=v;T.Refresh() end},
   {kind="slider",label="Card background opacity",min=0,max=100,step=1,
    format=function(v) return FieldKit_L("Card background opacity")..": "..v.."%" end,
    get=function() return FieldKitDB.cardOpacity end,set=function(v) FieldKitDB.cardOpacity=v;T.Refresh() end},
-  {kind="choice",label="Damage meter values",values={"DPS + share","Damage + DPS","Damage + DPS + share"},
-   get=function() return FieldKitDB.meterValues end,set=function(v) FieldKitDB.meterValues=v;actions.UpdateMeterFrames(true) end},
+  {kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
+   get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
+   set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end},
  }
- table.insert(appearance,{kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
-  get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
-  set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end})
  local health={{kind="preview",preview=18},options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
  for _,def in ipairs({{"effectTotems","Track totems"},{"effectSummons","Track summons"},{"effectTimers","Track native effect timers"}}) do
   local key,label=def[1],def[2]
@@ -86,6 +126,7 @@ function FieldKit.BuildJourneySections(sections,actions)
  for _,def in ipairs({{"nativeWarnings","Native mechanic warnings","Show filtered received boss/mechanic messages, with duplicates suppressed. The native banner display is unchanged."},
   {"bossBannerWarnings","Boss banner messages","Include received banners explicitly flagged as boss messages."},
   {"mechanicWarnings","Mechanic banner messages","Include received banners whose kind is mechanic."},
+  {"partyBannerWarnings","Party revive banners","Include co-op downed / friend-down / revived banners."},
   {"nextBossAlert","Warn before the next boss","One warning before each observed arrival. Based on native scheduling; no attack prediction."}}) do
   local key,label,tip=def[1],def[2],def[3]
   table.insert(alerts,{kind="check",label=label,tip=tip,get=function() return FieldKitDB[key] end,
@@ -104,25 +145,32 @@ function FieldKit.BuildJourneySections(sections,actions)
   HealthChoice("partyHealthMode","Teammate health format",FieldKitCoop.Update),
   {kind="check",label="Co-op revive progress",tip="Show native local revive progress and the ally involved. Original revive HUD stays available; no automatic actions.",
    get=function() return FieldKitDB.reviveFrame end,set=function(v) FieldKitDB.reviveFrame=v;FieldKitNativeTools.Update() end},
-  {kind="check",label="Hide native teammate frames",tip="Advanced: hide originals only while a card has valid health. Passive cards do not provide native targeting, menus or buff interactions. Turn off to restore originals.",
+  {kind="check",label="Hide native teammate frames",tip="Advanced: hide originals only while a card has valid health. Field cards do not provide native targeting, menus or buff interactions. Turn off to restore originals.",
    get=function() return FieldKitDB.replacePartyFrames end,set=function(v) FieldKitDB.replacePartyFrames=v;FieldKitCoop.Update() end},
   {kind="check",label="Share spell breakdowns with group",tip="Optional in-game PARTY addon messages. Both players need FieldKit and this option. Shares only your own spell damage/DPS on request. Client transport is not confirmed; use /fieldkit sync to check received snapshots.",
    get=function() return FieldKitDB.partyDetailSync end,set=function(v) FieldKitDB.partyDetailSync=v;FieldKitPartySync.Watch();FieldKitCoop.Update() end},
   {kind="syncStatus"},
  }
- local windows={{id="display",title="Display",items=display},{id="layout",title="Layout",items=layout},
-  {id="appearance",title="Appearance",items=appearance},{id="coop",title="Co-op / test",items=coop}}
  return {
   {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
   {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
   {id="health",title="Health & buffs",glyph=16,items=health},
-  {id="bosses",title="Bosses",glyph=5,items={{kind="preview",preview=17},options.bossFrame,HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
+  {id="bosses",title="Bosses",glyph=5,items={{kind="preview",preview=17},options.bossFrame,
+   {kind="check",label="Boss schedule timeline",tip="Chronicle bar under the top of the screen with upcoming boss markers. Hides the native run clock while shown. Off by default.",
+    get=function() return FieldKitDB.bossTimeline==true end,
+    set=function(v) FieldKitDB.bossTimeline=v and true or false;if FieldKitBossTimeline then FieldKitBossTimeline.Update() end;if not v and FieldKitBossTimeline then FieldKitBossTimeline.RestoreHud() end end},
+   HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
   {id="alerts",title="Alerts",glyph=12,items=alerts},
-  {id="windows",title="Windows",glyph=9,group="Your interface",items={},windowTabs=windows},
-  {id="map",title="Minimap",glyph=1,items=old.Map.items},
+  {id="cards",title="HUD cards",glyph=9,group="Your HUD",items=cards},
+  {id="meter",title="Combat meter",glyph=8,items=meter},
+  {id="layout",title="Layout & arrange",glyph=14,items=layout},
+  {id="look",title="Look",glyph=4,items=look},
+  {id="coop",title="Co-op / test",glyph=15,items=coop},
+  {id="map",title="Minimap",glyph=1,group="World & client",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,items=old.Nameplates.items},
   {id="interface",title="Interface",glyph=11,items=interface},
  }
+
 end
 
 -- One owned tooltip; no chat/network output for normal configuration changes.
@@ -529,7 +577,7 @@ function U.Build(sections,context)
   FieldKitDB.linkRightCards=not FieldKitDB.linkRightCards;FieldKitCardLayout.ApplyRight();FieldKitCardLayout.UpdateDock()
  end)
  U.sizes=T.Button(dock,nil,"Adjust sizes",366,88,172,28,function()
-  U.SetLayoutEditing(false,true);U.Select("windows");U.SelectWindowTab(U.windowPage,"layout")
+  U.SetLayoutEditing(false,true);U.Select("layout")
  end)
  U.otherUI=T.Button(dock,"FieldKitPreviewOtherUI","Show other interface elements",18,126,520,28,FieldKitPreviewVisibility.Toggle)
  local previewElapsed=0

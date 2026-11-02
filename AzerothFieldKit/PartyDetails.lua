@@ -1,9 +1,109 @@
 -- One reusable HUD-themed hover card. AZSPARTY exposes only top/topdps for peers;
 -- the full spell table belongs to the local player. Never substitute our spells
 -- for an ally's or convert top DPS into an invented damage amount.
-FieldKitPartyDetails={offset=0,pool=10}
+-- Own-player pin view adds Max Hit columns (crit/burst/avg/hits/crit%).
+FieldKitPartyDetails={offset=0,pool=10,sortKey="dmg",sortAsc=false}
 local D=FieldKitPartyDetails
 local T=FieldKitTheme
+local HIT_COLS=6
+local HIT_LABELS={"Total","Crit","Burst","Avg","Hits","Crit%"}
+local HIT_KEYS={"dmg","maxCrit","burst","avg","hits","critPct"}
+local HIT_WIDTHS={72,58,58,52,44,48}
+-- Distance from row right edge to each column's right edge (Total … Crit%).
+local HIT_RIGHT={294,230,166,108,58,4}
+local CAP_KEYS={"dmg","dps","share"}
+
+local function Short(n)
+ if not n or n<=0 then return "-" end
+ n=math.floor(n+.5)
+ if n>=1000000 then return string.format("%.1fM",n/1000000) end
+ if n>=10000 then return string.format("%.1fk",n/1000) end
+ if n>=1000 then return string.format("%.1fk",n/1000) end
+ return tostring(n)
+end
+
+local function CritPct(line)
+ local hits=line.hits or 0
+ if line.critPct then return line.critPct end
+ if hits>0 and line.crits then return 100*line.crits/hits end
+ return 0
+end
+
+local function HitCells(line)
+ local hits=line.hits or 0
+ local critPct=CritPct(line)
+ return {
+  Short(line.dmg),
+  Short(line.maxCrit),
+  Short(line.burst),
+  line.avg and line.avg>0 and string.format("%.0f",line.avg) or "-",
+  hits>0 and tostring(hits) or "-",
+  hits>0 and critPct>0 and string.format("%.0f%%",critPct) or (hits>0 and "0%" or "-"),
+ }
+end
+
+local function SortMark(key)
+ if D.sortKey~=key then return "" end
+ return D.sortAsc and " ^" or " v"
+end
+
+local function SortValue(line,key)
+ if key=="name" then return line.name or "" end
+ if key=="critPct" then return CritPct(line) end
+ local v=line[key]
+ if type(v)=="string" then return v end
+ return tonumber(v) or 0
+end
+
+function D.SetSort(key)
+ if type(key)~="string" then return end
+ if D.sortKey==key then D.sortAsc=not D.sortAsc else D.sortKey=key;D.sortAsc=false end
+ D.offset=0
+ if D.data then D.Render() end
+end
+
+local function ApplySort(rows)
+ if type(rows)~="table" then return end
+ local key=D.sortKey or "dmg"
+ local asc=D.sortAsc and true or false
+ table.sort(rows,function(a,b)
+  local av,bv=SortValue(a,key),SortValue(b,key)
+  if type(av)=="string" then
+   if av==bv then return false end
+   if asc then return av<bv end
+   return av>bv
+  end
+  if av==bv then return (a.name or "")<(b.name or "") end
+  if asc then return av<bv end
+  return av>bv
+ end)
+end
+
+local function MakeSortCap(parent,key,justify)
+ local b=CreateFrame("Button",nil,parent)
+ b:SetHeight(18);b.sortKey=key
+ -- Above the Spell header so numeric columns stay clickable (Spell used to cover them).
+ if parent.GetFrameLevel then b:SetFrameLevel(parent:GetFrameLevel()+4) end
+ local t=b:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ t:SetAllPoints(b);t:SetJustifyH(justify or "RIGHT");T.Font(t,11,T.muted);b.cap=t
+ b:SetScript("OnClick",function() D.SetSort(this.sortKey) end)
+ b:SetScript("OnEnter",function()
+  D.overPopup=true;D.deadline=nil
+  GameTooltip:SetOwner(this,"ANCHOR_TOP")
+  GameTooltip:SetText(FieldKit_L("Click to sort by this column."),1,1,1)
+  GameTooltip:Show()
+ end)
+ b:SetScript("OnLeave",function()
+  GameTooltip:Hide();D.overPopup=false;D.DelayClose()
+ end)
+ return b
+end
+
+local function CapText(btn,key)
+ local shown=FieldKit_L(btn.fieldkitCaption or "")..SortMark(key)
+ if btn.cap then btn.cap:SetText(shown) end
+ if btn.SetText then btn:SetText(shown) end
+end
 
 function D.Data(name,mode)
  local peer=FieldKitCoop.MemberDamage(name)
@@ -26,7 +126,6 @@ function D.Data(name,mode)
  result.mode=mode or 1
  if not known then result.unavailable=true;return result end
  result.rows=lines;result.damage=total;result.dps=rate;result.truncated=truncated
-
  return result
 end
 
@@ -61,29 +160,47 @@ end
 function D.Build()
  if D.frame then return end
  local frame=CreateFrame("Frame","FieldKitPartyDetailsFrame",UIParent);D.frame=frame
- frame:SetWidth(560);frame:SetHeight(400);frame:SetFrameStrata("TOOLTIP");frame:SetFrameLevel(220)
+ frame:SetWidth(720);frame:SetHeight(400);frame:SetFrameStrata("TOOLTIP");frame:SetFrameLevel(220)
  frame:SetClampedToScreen(true);frame:EnableMouse(true);T.Surface(frame,"card",true)
- D.title=T.Label(frame,nil,16,10,480,26,18,T.gold,true)
- D.summary=T.Label(frame,nil,16,40,520,22,12,T.text)
- D.hint=T.Label(frame,nil,16,64,520,36,11,T.muted)
+ D.title=T.Label(frame,nil,16,10,560,26,18,T.gold,true)
+ D.summary=T.Label(frame,nil,16,40,680,22,12,T.text)
+ D.hint=T.Label(frame,nil,16,64,680,36,11,T.muted)
  D.header=CreateFrame("Frame",nil,frame);D.header:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-106);D.header:SetHeight(18)
- D.spell=T.Label(D.header,"Spell",3,0,260,18,11,T.muted)
+ D.header:EnableMouse(true);D.BindHover(D.header)
+ D.spell=MakeSortCap(D.header,"name","LEFT")
+ if D.header.GetFrameLevel then D.spell:SetFrameLevel(D.header:GetFrameLevel()+2) end
+ D.spell:SetPoint("TOPLEFT",D.header,"TOPLEFT",3,0);D.spell:SetWidth(200)
+ -- Classic 3-column meter captions (allies / shared).
  local captions={"Damage","DPS","%"};local offsets={131,45,3};local widths={92,78,34}
  D.captions={}
  for i=1,3 do
-  local label=D.header:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
-  label:SetPoint("RIGHT",D.header,"RIGHT",-offsets[i],0);label:SetWidth(widths[i]);label:SetHeight(18)
-  label:SetJustifyH("RIGHT");T.Font(label,11,T.muted);FieldKit_Text(label,captions[i])
+  local label=MakeSortCap(D.header,CAP_KEYS[i],"RIGHT")
+  label:SetPoint("RIGHT",D.header,"RIGHT",-offsets[i],0);label:SetWidth(widths[i])
+  label.fieldkitCaption=captions[i];CapText(label,CAP_KEYS[i])
   D.captions[i]=label
+ end
+ -- Max Hit captions for own pinned breakdown.
+ D.hitCaptions={}
+ for i=1,HIT_COLS do
+  local label=MakeSortCap(D.header,HIT_KEYS[i],"RIGHT")
+  label:SetWidth(HIT_WIDTHS[i])
+  label.fieldkitCaption=HIT_LABELS[i];CapText(label,HIT_KEYS[i])
+  D.hitCaptions[i]=label;label:Hide()
  end
  frame.rows={}
  for i=1,D.pool do
   local row=CreateFrame("StatusBar",nil,frame);frame.rows[i]=row
   row:SetMinMaxValues(0,1);row:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-  row:SetHeight(20);row:EnableMouse(false)
+  row:SetHeight(20);row:EnableMouse(true);D.BindHover(row)
   row.label=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
   row.label:SetJustifyH("LEFT");T.Font(row.label,12,T.text)
   row.value=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.value:Hide()
+  row.hitColumns={}
+  for j=1,HIT_COLS do
+   local text=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
+   text:SetJustifyH("RIGHT");text:SetHeight(14);T.Font(text,11,T.text)
+   row.hitColumns[j]=text;text:Hide()
+  end
  end
  FieldKit.CreateMeterColumns(frame)
  for i=1,D.pool do for j=1,3 do T.Font(frame.rows[i].meterColumns[j],12,T.text) end end
@@ -91,7 +208,20 @@ function D.Build()
   D.pinned=not D.pinned;D.deadline=nil;D.Render()
  end)
  D.pin:ClearAllPoints();D.pin:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-40,-8);D.BindHover(D.pin)
- D.footer=T.Label(frame,nil,16,0,390,24,11,T.muted)
+ D.pin:SetScript("OnEnter",function()
+  D.overPopup=true;D.deadline=nil
+  if T.State then T.State(this,true) end
+  GameTooltip:SetOwner(this,"ANCHOR_LEFT")
+  GameTooltip:SetText(FieldKit_L("Pin"),1,.85,.55)
+  GameTooltip:AddLine(FieldKit_L("Keep this spell breakdown open. Unpin or close to hide it again."),.8,.8,.8,true)
+  GameTooltip:Show()
+ end)
+ D.pin:SetScript("OnLeave",function()
+  GameTooltip:Hide()
+  if T.State then T.State(this,this.fieldkitSelected) end
+  D.overPopup=false;D.DelayClose()
+ end)
+ D.footer=T.Label(frame,nil,16,0,520,24,11,T.muted)
  D.previous=T.Button(frame,nil,"<",0,0,30,24,function() D.Page(-D.visible) end)
  D.next=T.Button(frame,nil,">",0,0,30,24,function() D.Page(D.visible) end)
  D.BindHover(D.previous);D.BindHover(D.next)
@@ -103,7 +233,12 @@ function D.Build()
   frame:EnableMouseWheel(true);frame:SetScript("OnMouseWheel",function() D.Page(-(arg1 or 0)*3) end)
  end
  frame:SetScript("OnUpdate",function()
-  if not D.pinned and D.deadline and GetTime()>=D.deadline and not D.overOwner and not D.overPopup then D.Close() end
+  if D.pinned then return end
+  -- Children (rows/headers) steal mouse focus; treat any hover on the card as alive.
+  if type(MouseIsOver)=="function" and MouseIsOver(this) then
+   D.overPopup=true;D.deadline=nil;return
+  end
+  if D.deadline and GetTime()>=D.deadline and not D.overOwner and not D.overPopup then D.Close() end
  end)
  frame:SetScript("OnHide",function() D.pinned=false;D.member=nil;D.data=nil;D.owner=nil;D.source=nil;D.deadline=nil end)
  if type(UISpecialFrames)=="table" then table.insert(UISpecialFrames,"FieldKitPartyDetailsFrame") end
@@ -122,25 +257,48 @@ end
 
 function D.Render()
  local data=D.data;if not data then return end
- local frame=D.frame;local width=math.max(360,math.min(560,UIParent:GetWidth()-24))
+ local frame=D.frame
+ -- Max Hit columns for own damage/boss breakdown; healing keeps HPS columns.
+ local hitMode=data.own and data.mode~=2
+ local width=hitMode and math.max(640,math.min(760,UIParent:GetWidth()-24)) or math.max(360,math.min(560,UIParent:GetWidth()-24))
  D.visible=math.max(1,math.min(D.pool,math.floor((UIParent:GetHeight()-200)/22)))
+ ApplySort(data.rows)
  local count=table.getn(data.rows)
  D.offset=math.max(0,math.min(D.offset,math.max(0,count-D.visible)))
  local shown=math.min(D.visible,count);local height=174+22*math.max(shown,1)
  frame:SetWidth(width);frame:SetHeight(height);D.title:SetWidth(width-142)
  D.summary:SetWidth(width-32);D.hint:SetWidth(width-32);D.header:SetWidth(width-24)
- D.spell:SetWidth(width-270);D.title:SetText(data.name)
+ D.title:SetText(data.name)
  local limited=not data.own and not data.shared
+ -- Caption layout: Max Hit columns for own, classic meter for allies.
  for i=1,3 do
-  local caption=D.captions[i];caption:ClearAllPoints()
-  caption:SetPoint("RIGHT",D.header,"RIGHT",limited and -3 or -({131,45,3})[i],0)
-  caption:SetWidth(limited and 110 or ({92,78,34})[i])
-  if limited and i~=2 then caption:Hide() else caption:Show() end
+  if hitMode then D.captions[i]:Hide()
+  else
+   local caption=D.captions[i];caption:ClearAllPoints()
+   caption:SetPoint("RIGHT",D.header,"RIGHT",limited and -3 or -({131,45,3})[i],0)
+   caption:SetWidth(limited and 110 or ({92,78,34})[i])
+   if limited and i~=2 then caption:Hide()
+   else
+    caption.fieldkitCaption=(i==1 and (data.mode==2 and "Healing" or "Damage")) or (i==2 and (data.mode==2 and "HPS" or "DPS")) or "%"
+    CapText(caption,CAP_KEYS[i]);caption:Show()
+   end
+  end
  end
- if limited then D.spell:SetWidth(width-164) end
- FieldKit_Text(D.captions[1],data.mode==2 and "Healing" or "Damage");FieldKit_Text(D.captions[2],data.mode==2 and "HPS" or "DPS")
+ for i=1,HIT_COLS do
+  local cap=D.hitCaptions[i]
+  if hitMode then
+   cap:ClearAllPoints();cap:SetPoint("RIGHT",D.header,"RIGHT",-HIT_RIGHT[i],0)
+   cap:SetWidth(HIT_WIDTHS[i]);cap.fieldkitCaption=HIT_LABELS[i];CapText(cap,HIT_KEYS[i]);cap:Show()
+  else cap:Hide() end
+ end
+ D.spell.fieldkitCaption="Spell";CapText(D.spell,"name")
+ -- Keep Spell's hitbox left of the first value column (never cover Total/Damage).
+ local headerW=width-24
+ if hitMode then D.spell:SetWidth(math.max(80,headerW-(HIT_RIGHT[1]+HIT_WIDTHS[1])-10))
+ elseif limited then D.spell:SetWidth(math.max(80,headerW-120))
+ else D.spell:SetWidth(math.max(80,headerW-270)) end
  D.summary:SetText(string.format(FieldKit_L(data.mode==2 and "Healing: %s   HPS: %s" or "Damage: %s   DPS: %s"),data.damage and string.format("%.0f",data.damage) or "?",data.dps and string.format("%.0f",data.dps) or "?"))
- local hint=data.own and "Your native spell breakdown. Scroll for more spells." or "Allies: only their top spell is exposed. Full breakdown unavailable."
+ local hint=data.own and (hitMode and "Max Hit style: total, max crit, burst, average, hits and crit%. Click headers to sort." or "Your native spell breakdown. Scroll for more spells.") or "Allies: only their top spell is exposed. Full breakdown unavailable."
  if data.waiting then hint="Waiting for shared spells. The ally must enable sharing in FieldKit too." end
  if data.noTransport then hint="This client does not expose an addon-message transport." end
  if data.shared then hint=string.format(FieldKit_L("Shared spell snapshot · received %.0fs ago"),data.age) end
@@ -152,16 +310,37 @@ function D.Render()
   local row=frame.rows[i];local line=i<=shown and data.rows[D.offset+i]
   if line then
    row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-128-(i-1)*22);row:SetWidth(width-24)
-   row.label:SetText(line.name);FieldKit.UpdateMeterColumns(row,line,3,width-12,data.mode==2 and "hps" or "dps")
-   if limited then
-    row.meterColumns[1]:Hide();row.meterColumns[3]:Hide()
-    row.meterColumns[2]:ClearAllPoints();row.meterColumns[2]:SetPoint("RIGHT",row,"RIGHT",-3,0);row.meterColumns[2]:SetWidth(110)
-    row.label:SetWidth(width-164-(row.fieldkitIconInset or 0));row.meterMode=nil
+   row.label:SetText(line.name);row.fieldkitSpell=line.name;row.fieldkitLine=line
+   if hitMode then
+    if row.meterColumns then for j=1,3 do row.meterColumns[j]:Hide() end end
+    local cells=HitCells(line)
+    for j=1,HIT_COLS do
+     local text=row.hitColumns[j]
+     text:ClearAllPoints();text:SetPoint("RIGHT",row,"RIGHT",-HIT_RIGHT[j],0)
+     text:SetWidth(HIT_WIDTHS[j]);text:SetText(cells[j]);text:Show()
+     if j==2 and line.maxCrit and line.maxCrit>0 then text:SetTextColor(1,.55,.2) else text:SetTextColor(1,1,1) end
+    end
+    row.label:ClearAllPoints();row.label:SetPoint("LEFT",row,"LEFT",3+(row.fieldkitIconInset or 0),0)
+    row.label:SetWidth(math.max(80,width-HIT_RIGHT[1]-16-(row.fieldkitIconInset or 0)))
+    if FieldKitLoadout and FieldKitLoadout.Decorate then FieldKitLoadout.Decorate(row,line.name) end
+   else
+    for j=1,HIT_COLS do row.hitColumns[j]:Hide() end
+    FieldKit.UpdateMeterColumns(row,line,3,width-12,data.mode==2 and "hps" or "dps")
+    if limited then
+     row.meterColumns[1]:Hide();row.meterColumns[3]:Hide()
+     row.meterColumns[2]:ClearAllPoints();row.meterColumns[2]:SetPoint("RIGHT",row,"RIGHT",-3,0);row.meterColumns[2]:SetWidth(110)
+     row.label:SetWidth(width-164-(row.fieldkitIconInset or 0));row.meterMode=nil
+    end
    end
    row:SetValue(line.dmg and line.dmg/math.max(top or 0,1) or 0)
    if line.proc==1 then row:SetStatusBarColor(.25,.45,.9,.55) else row:SetStatusBarColor(.8,.55,.1,.55) end
+   row:EnableMouse(true)
+   if data.own and FieldKitMeterSuite and FieldKitMeterSuite.BindSpellTip then FieldKitMeterSuite.BindSpellTip(row) end
    row:Show()
-  else row:Hide() end
+  else
+   row:Hide();row.fieldkitSpell=nil;row.fieldkitLine=nil
+   for j=1,HIT_COLS do row.hitColumns[j]:Hide() end
+  end
  end
  D.footer:ClearAllPoints();D.footer:SetPoint("BOTTOMLEFT",frame,"BOTTOMLEFT",16,10);D.footer:SetWidth(width-112)
  if count==0 then FieldKit_Text(D.footer,"No spell detail provided")

@@ -114,6 +114,8 @@ AZS_LAIRS={};AZS_HEALING={};AZS_STATS={};AZS_BUFFS={};AZS_SPELLS={};AZS_TAKEN={}
 function fire(f,ev,a) event=ev;arg1=a;this=f;f.scripts.OnEvent() end
 function update(f,dt) NOW=NOW+dt;arg1=dt;this=f;f.scripts.OnUpdate() end
 function click(f) this=f;f.scripts.OnClick() end
+-- WoW 1.12 mouse-over helper; tests drive BindHover flags instead of geometry.
+function MouseIsOver(frame) return frame and frame._mouseIsOver and true or false end
 function UnitIsDeadOrGhost() return false end
 function GetPlayerBuff() return -1 end
 function UIParent:GetBackdrop() return {} end

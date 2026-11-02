@@ -1,10 +1,10 @@
 # Azeroth FieldKit
 
+> **0.3.4 update:** chronicle boss timeline/frames, tabbed meter suite and split
+> settings journey. See [release notes](docs/RELEASE_0.3.4.md).
+
 > **0.3.2 update:** integrated Accessories/Spells loadout, Difficulty-screen mode
 > multipliers, guardian-frame cleanup and HUD polish. See [release notes](docs/RELEASE_0.3.2.md).
-
-> **0.3.0 native-tools update:** optional effects, revive progress, Healing/Boss
-> meters and guarded HUD tools. See [activation and limits](docs/NATIVE_TOOLS_0_130.md).
 
 An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 **Kevin Radlowski / Maidenhead**, derived from **MASH by Malk**.
@@ -13,10 +13,10 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
 
 ## Versions and downloads
 
-- **Latest package:** [0.3.2](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.2), published as a GitHub prerelease.
-- Accepted for publication by the maintainer on 2026-11-01. Changes since 0.3.0:
-  loadout card, Difficulty multipliers, guardian frames and layout polish.
-  [Release notes](docs/RELEASE_0.3.2.md). Preferences and SavedVariables are kept.
+- **Latest package:** [0.3.4](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.4), published as a GitHub prerelease.
+- Accepted for publication by the maintainer on 2026-11-02. Changes since 0.3.2:
+  meter suite, boss timeline/frames and clearer settings. [Release notes](docs/RELEASE_0.3.4.md).
+  Preferences and SavedVariables are kept.
 - On 2026-10-28 the maintainer reported permission to post FieldKit as a verified
   addon. That publication permission does not independently certify this package or settle
   inherited code/assets rights. See [publication scope](docs/PUBLICATION.md),
@@ -31,7 +31,7 @@ An entirely in-game combat and HUD toolkit for Azeroth Survivors. Maintained by
    the folder twice. Disable the legacy MASH addon to avoid duplicate behavior.
 3. Enable FieldKit in the client's addon selector and restart the game.
 
-Download `AzerothFieldKit-0.3.2.zip` from the release above; it contains the
+Download `AzerothFieldKit-0.3.4.zip` from the release above; it contains the
 current interface. No external executable or companion addon is required. FieldKit
 never imports MASHDB automatically or modifies your game saves.
 

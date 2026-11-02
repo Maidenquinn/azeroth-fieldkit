@@ -89,8 +89,12 @@ this=FieldKitPanel;FieldKitPanel.scripts.OnHide();assert(not FieldKitCombatAncho
 FieldKitDB.combatTextX=savedX;FieldKitDB.uiPage="health";FieldKitDB.panelTab=3;FieldKitDB.panelSection="Health & buffs";FieldKitDB.combatText=true
 assert(FieldKitDB.moneyDockRepair==1 and FieldKitDB.guardianPins==false)
 
+click(button(editor,"Général"));FieldKitDB.hideDamage=false;editor.Refresh()
+local targetDamage=widget("Show target damage (game)")
+assert(targetDamage:GetChecked())
 click(button(editor.pages[1],"Utiliser seulement ce texte"))
 assert(FieldKitDB.combatText and FieldKitDB.hideDamage and FieldKitDB.showCrits==false)
+assert(not targetDamage:GetChecked())
 
 FieldKitDB.showCrits=true;FieldKitDB.groupCrits=false
 fire(FieldKitFrame,"CHAT_MSG_SPELL_SELF_DAMAGE","Your Backstab crits Wolf for 100.")

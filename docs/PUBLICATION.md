@@ -1,6 +1,24 @@
 # Verified-addon publication record
 
-## Latest public update — 0.3.2
+## Latest public update — 0.3.4
+
+The maintainer authorized publication on 2026-11-02 after the chronicle boss HUD,
+meter suite and settings navigation split. This is maintainer acceptance, not a
+newly supplied package-specific team approval or independent certification. Real
+peer-message forwarding and the actual affix encoding remain unconfirmed.
+
+- Release: https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.4
+- Asset: `AzerothFieldKit-0.3.4.zip`.
+- Maturity: GitHub prerelease, retaining the existing publication workflow.
+- Source/per-file identity: release `MANIFEST.json`; ZIP checksum: `SHA256SUMS.txt`.
+- Evidence: release `validation.json`; no new agent-performed game test claimed.
+- Notes: [RELEASE_0.3.4.md](RELEASE_0.3.4.md). Discord text:
+  [DISCORD_ANNOUNCEMENT.md](DISCORD_ANNOUNCEMENT.md).
+
+Older releases below remain immutable historical records.
+
+
+## Historical update — 0.3.2
 
 The maintainer authorized publication on 2026-11-01 after loadout / Difficulty /
 guardian-frame polish. This is maintainer acceptance, not a newly supplied
@@ -12,8 +30,7 @@ forwarding and the actual affix encoding remain unconfirmed.
 - Maturity: GitHub prerelease, retaining the existing publication workflow.
 - Source/per-file identity: release `MANIFEST.json`; ZIP checksum: `SHA256SUMS.txt`.
 - Evidence: release `validation.json`; no new agent-performed game test claimed.
-- Notes: [RELEASE_0.3.2.md](RELEASE_0.3.2.md). Discord text:
-  [DISCORD_ANNOUNCEMENT.md](DISCORD_ANNOUNCEMENT.md).
+- Notes: [RELEASE_0.3.2.md](RELEASE_0.3.2.md).
 
 Older releases below remain immutable historical records.
 

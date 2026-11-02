@@ -27,7 +27,12 @@ function FieldKit_FormatMeterValues(line,mode)
  return amount.." | "..dps.." | "..percent
 end
 
-function FieldKit.MeterWidth(mode) return mode==1 and 220 or (mode==2 and 320 or 360) end
+function FieldKit.MeterWidth(mode)
+ local w=mode==1 and 220 or (mode==2 and 320 or 360)
+ -- Tabs + optional kill counts need a wider card than the classic 220 strip.
+ if FieldKitDB and FieldKitDB.meterTabs~=false then w=math.max(w,340) end
+ return w
+end
 
 -- One bounded set of right-aligned numeric columns per spell row. Text length
 -- never moves a neighbouring column or changes the available name rectangle.
@@ -42,26 +47,91 @@ function FieldKit.CreateMeterColumns(frame)
  end
 end
 
+-- Shared column geometry for meter rows and the header strip.
+function FieldKit.MeterColumnLayout(mode,showKills)
+ local killW=showKills and 40 or 0
+ local offsets=mode==2 and {89,3,0} or {131,45,3}
+ local sizes={92,78,34}
+ local valueLeft=mode==1 and 123 or (mode==2 and 89 or 223)
+ local reserved=(mode==1 and 123 or (mode==2 and 181 or 223))+killW
+ return offsets,sizes,killW,valueLeft,reserved
+end
+
+local function SortMark(key)
+ local db=FieldKitDB
+ if not db or db.meterSortKey~=key then return "" end
+ return db.meterSortAsc and " ^" or " v"
+end
+
+local function HeaderLabel(btn,text)
+ if btn.text then FieldKit_Text(btn.text,text) else FieldKit_Text(btn,text) end
+end
+
+function FieldKit.UpdateMeterHeaders(header,mode,width,showKills,rateLabel)
+ if not header then return end
+ local offsets,sizes,killW,valueLeft=FieldKit.MeterColumnLayout(mode,showKills)
+ header:SetWidth(width-12)
+ local spellW=math.max(40,width-12-((mode==1 and 123 or (mode==2 and 181 or 223))+killW)-11)
+ header.spell:ClearAllPoints();header.spell:SetPoint("LEFT",header,"LEFT",3,0)
+ header.spell:SetWidth(spellW);header.spell:SetHeight(12)
+ HeaderLabel(header.spell,FieldKit_L("Spell")..SortMark("name"))
+ local labels={
+  (mode==2 and FieldKit_L("Healing") or FieldKit_L("Damage"))..SortMark("dmg"),
+  FieldKit_L(rateLabel or (mode==2 and "hps" or "dps"))..SortMark("dps"),
+  "%"..SortMark("share"),
+ }
+ for i=1,3 do
+  local text=header.cols[i]
+  text:ClearAllPoints();text:SetPoint("RIGHT",header,"RIGHT",-offsets[i],0);text:SetWidth(sizes[i]);text:SetHeight(12)
+  HeaderLabel(text,labels[i])
+  if (i==1 and mode==1) or (i==3 and mode==2) then text:Hide() else text:Show() end
+ end
+ if showKills then
+  header.kills:ClearAllPoints();header.kills:SetPoint("RIGHT",header,"RIGHT",-(valueLeft+4),0)
+  header.kills:SetWidth(36);header.kills:SetHeight(12)
+  HeaderLabel(header.kills,FieldKit_L("Kills")..SortMark("kills"));header.kills:Show()
+ else header.kills:Hide() end
+ header:Show()
+end
+
 function FieldKit.UpdateMeterColumns(row,line,mode,width,rateLabel)
  FieldKitLoadout.Decorate(row,line.name)
  local columns=row.meterColumns
  local damage,rate,share=MeterParts(line,rateLabel)
  columns[1]:SetText(damage);columns[2]:SetText(rate);columns[3]:SetText(share)
- if row.meterMode~=mode or row.meterWidth~=width or row.meterInset~=row.fieldkitIconInset then
-  row.meterMode=mode;row.meterWidth=width;row.meterInset=row.fieldkitIconInset
-  local offsets=mode==2 and {89,3,0} or {131,45,3}
-  local sizes={92,78,34}
+ -- Kills sit in their own slot left of the value columns — never on top of damage.
+ local kills=FieldKit.Number(line and line.kills,nil,0)
+ local showKills=kills and kills>0 and mode~=2
+ local offsets,sizes,killW,valueLeft,reserved=FieldKit.MeterColumnLayout(mode,showKills)
+ local killKey=showKills and kills or 0
+ if row.meterMode~=mode or row.meterWidth~=width or row.meterInset~=row.fieldkitIconInset or row.meterKills~=killKey then
+  row.meterMode=mode;row.meterWidth=width;row.meterInset=row.fieldkitIconInset;row.meterKills=killKey
   for i=1,3 do
    local text=columns[i];text:ClearAllPoints()
    text:SetPoint("RIGHT",row,"RIGHT",-offsets[i],0);text:SetWidth(sizes[i])
    if (i==1 and mode==1) or (i==3 and mode==2) then text:Hide() else text:Show() end
   end
-  local reserved=mode==1 and 123 or (mode==2 and 181 or 223)
+  if not row.killColumn then
+   row.killColumn=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
+   row.killColumn:SetJustifyH("RIGHT");row.killColumn:SetHeight(14)
+  end
+  if showKills then
+   row.killColumn:ClearAllPoints()
+   row.killColumn:SetPoint("RIGHT",row,"RIGHT",-(valueLeft+4),0)
+   row.killColumn:SetWidth(36)
+   row.killColumn:SetText(tostring(kills))
+   row.killColumn:SetTextColor(1,.82,.45)
+   row.killColumn:Show()
+  else
+   row.killColumn:Hide();row.killColumn:SetText("")
+  end
   row.label:ClearAllPoints();row.label:SetPoint("LEFT",row,"LEFT",3+(row.fieldkitIconInset or 0),0)
-  row.label:SetWidth(width-12-reserved-11-(row.fieldkitIconInset or 0));row.label:SetHeight(14)
+  row.label:SetWidth(math.max(40,width-12-reserved-11-(row.fieldkitIconInset or 0)));row.label:SetHeight(14)
  end
- -- Other bar windows still use the generic value region; this meter hides it.
- row.value:Hide()
+ if showKills and row.killColumn then
+  row.killColumn:SetText(tostring(kills));row.killColumn:Show()
+ elseif row.killColumn then row.killColumn:Hide() end
+ row.value:Hide();row.value:SetText("")
 end
 -- Factory keeps checkbox closures small enough for Lua 5.0.
 local function Check(key,label,tip,default)

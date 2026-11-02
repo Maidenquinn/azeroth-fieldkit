@@ -1,26 +1,31 @@
-# Discord announcement — 0.3.2
+# Discord announcement — 0.3.4
 
 English message for manual posting; no message has been sent by tools.
 Copy the block contents, not the fences. Under 2,000 characters.
 
 ```md
-# Azeroth FieldKit 0.3.2 is out!
-**Loadout card, Difficulty multipliers and HUD polish · EN / FR**
+# Azeroth FieldKit 0.3.4 is out!
+**Chronicle boss HUD, meter suite & clearer settings · EN / FR**
 
-**New since 0.3.0**
-• **Accessories / Spells:** one equipment card with tabs — native learned spells, tooltip bonuses, jewelry boosts and left-aligned item names.
-• **Run mode:** shows the real Difficulty-screen multipliers (HP / damage / marks / talent loot·XP) for your current rank; full chart on hover.
-• **Guardian frames:** hide when the lair is no longer awake (despawn / fresh run).
-• **Lairs:** next-boss countdown, clearer FR wording, cleaner footer.
-• **Taken details:** partial named attackers when the combat log can identify them.
-• Compact bar / gold hide cleanly during level-up and chest choices.
-• Placement previews can temporarily hide the rest of the UI.
+**New since 0.3.2**
+• **Meter suite:** tabs for Damage / Healing / Boss / Taken / Party / Kills, Reset, sort & hide rows, heal done↔received, party drill, pet/DoT hits, Max Hit–style spell tips. Same spell across ranks stays one row.
+• **Boss timeline (opt-in):** Chronicle schedule bar with next-boss countdown (replaces the native run clock while on).
+• **Boss frames:** portraits + Chronicle chrome; name / HP above the bar; tags under — no overlapping draft text.
+• **Settings:** no more mega “Windows” scroll — HUD cards, Combat meter, Layout, Look and Co-op are separate pages.
+• Effects window no longer sticks under the cursor while timers refresh.
+• Combat text can surface the game’s Show Target Damage switch.
 
-**Update:** download `AzerothFieldKit-0.3.2.zip` from Assets, replace the addon folder and restart. Your layout and preferences are kept. No external program needed.
-
-Difficulty numbers match the in-game Difficulty menu — they are not live combat meters. Affix names still appear only when the client sends recognized values.
+**Update:** download `AzerothFieldKit-0.3.4.zip` from Assets, replace the addon folder and restart. Layout and preferences are kept. No external program needed.
 
 Maintained fork of **MASH by Malk** — credit to him for the original addon. Published as a GitHub prerelease; feedback welcome!
 
-**Download & full changelog:** https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.2
+**Download & full changelog:** https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.4
+```
+
+Optional French follow-up (separate message if the channel allows):
+
+```md
+# Azeroth FieldKit 0.3.4
+Compteur à onglets (rangs fusionnés), timeline Chroniques + cadres boss, réglages HUD découpés, correctif fenêtres Effets. ZIP `AzerothFieldKit-0.3.4.zip` — remplacer le dossier AddOns et redémarrer. Préférences conservées.
+https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.4
 ```

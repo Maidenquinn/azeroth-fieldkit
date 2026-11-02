@@ -60,11 +60,28 @@ make conflicting decisions; a UI reload is the reliable session reset.
 
 ### Optional native HUD replacements (fresh default off)
 
-FieldKit.SetHudShown only forwards `bosses`, `tally`, or legacy `meter` restoration
-to AZS_SetHudShown. The game implements this via its own HUD CVars. Boss/tally
-options track that FieldKit hid the native section and restore it when disabled.
-The native damage meter is not replaced; its compatibility path only restores a
-previously hidden meter. These settings can persist after addon removal.
+FieldKit.SetHudShown only forwards `bosses`, `tally`, legacy `meter`, or
+`localClock` (AS 0.136+) to AZS_SetHudShown. The game implements this via its own
+HUD CVars. Boss/tally options track that FieldKit hid the native section and
+restore it when disabled. The native damage meter is not replaced; its
+compatibility path only restores a previously hidden meter. These settings can
+persist after addon removal.
+
+### Optional world-anchored combat text (AS 0.138+, default off)
+
+When `combatTextWorld` is enabled and the Addon API v1 combat-text functions
+exist (`AZS_GetCombatTextCapabilities`, `AZS_GetCombatTextEvents(cursor)`,
+`AZS_ProjectCombatTextAnchors(ids, "follow")`,
+`AZS_RegisterCombatTextFrameHandler`), CombatText.lua consumes the official
+cursor/batch contract for **outgoing** damage and misses only, projects onto
+`WorldFrame` BOTTOMLEFT after the camera moves, and keeps chat / `AZS_HEALING`
+for incoming hits and heals. Without the APIs it keeps the legacy chat parse.
+
+### Minimap world pins
+
+`WorldPins.lua` prefers `AZS_GetPlayerPosition()` (per-frame pose, including
+instances) and skips chest/lair entries whose `spaceId` does not match the
+hero's. It falls back to `AZS_RUN.px` / `py` on older clients.
 
 ### Optional damage numbers and camera (unset until chosen)
 
