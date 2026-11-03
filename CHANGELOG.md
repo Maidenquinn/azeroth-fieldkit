@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0 — 2026-11-03 (bilingual UI, combat text profiles, 19 previews)
+
+Changes since **0.3.4**:
+
+- Polished dark/gold UI: navigation, selected states, tabs, controls, footer layout and scrolling; corrected Undo/Reset HUD positions overlap.
+- Expanded French/English localization throughout navigation, settings, dynamic controls and combat-text simulation examples.
+- Added clearer selection and independent customization for the three combat-text profiles (Balanced / Quiet / All).
+- Improved simulation behavior and reduced redundant updates without altering real combat totals.
+- Reworked the inspector and 19 HUD previews with representative **sample** data; repaired blank Damage/Revive/Bosses/health displays and unsupported button method calls.
+- Hardened incomplete profile defaults and invalid display settings; maintained saved preferences.
+- Maintainer-confirmed in-game acceptance; Lua and TOC checks performed on the packaged runtime. Previews show sample values, not live statistics.
+
+Full release notes: [docs/RELEASE_0.4.0.md](docs/RELEASE_0.4.0.md).
+
 ## 0.3.4 — 2026-11-02 (chronicle HUD, meter suite, settings split; GitHub prerelease)
 
 Maintainer accepted for publication. Changes since **0.3.2**:
