@@ -67,7 +67,7 @@ local function save()
  d.enabled=wantedEnabled;d.aura=auraEnabled;d.pulse=auraPulse;d.intensity=auraIntensity
  d.reviveRing=reviveRingEnabled;d.hints=showLairHints;d.reviveNames=showReviveNames;d.reviveDistance=showReviveDistance;d.categories=categoryEnabled;d.scales=categoryScale;d.ranges=categoryRange
 end
-local function load()
+local function loadSettings()
  local d=db();if not d then return end
  wantedEnabled=d.enabled~=false
  if type(d.aura)=="boolean" then auraEnabled=d.aura end
