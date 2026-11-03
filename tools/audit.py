@@ -56,7 +56,10 @@ for p in sorted(root.rglob('*'),key=lambda p:p.relative_to(root).as_posix()):
   assert p.suffix in ('.lua','.toc','.tga'),('Unexpected runtime file',p.name)
  if p.suffix=='.tga':
   raw=p.read_bytes();width,height=struct.unpack_from('<HH',raw,12)
-  assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height) in ((128,128),(256,256)),p.name
+  allowed_sizes=((128,128),(256,256))
+  if relative.startswith('media/ChroniclePremium/'):
+   allowed_sizes=allowed_sizes+((310,55),(512,128))
+  assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height) in allowed_sizes,(relative,width,height)
   if not relative.startswith('media/'):
    assert (width,height)==(128,128),p.name
    portraits+=1
