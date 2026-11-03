@@ -1,0 +1,57 @@
+name: Publish FieldKit release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify version and addon structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f AzerothFieldKit/AzerothFieldKit.toc
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            VERSION="${TAG#v}"
+            grep -Eq "^## Version: ${VERSION//./\.}([[:space:]]*)$" AzerothFieldKit/AzerothFieldKit.toc
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path("AzerothFieldKit")
+          for line in (root/"AzerothFieldKit.toc").read_text(encoding="utf-8-sig").splitlines():
+              s=line.strip()
+              if not s or s.startswith("#"): continue
+              p=root/s.replace("\\","/")
+              if not p.is_file(): raise SystemExit(f"Missing runtime file: {p}")
+          PY
+      - name: Package installable addon
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          zip -q -r dist/AzerothFieldKit-${GITHUB_REF_NAME#v}.zip AzerothFieldKit -x 'AzerothFieldKit/*.md' 'AzerothFieldKit/*.json' 'AzerothFieldKit/*/__pycache__/*'
+          cd dist
+          sha256sum *.zip > SHA256SUMS.txt
+          unzip -t *.zip >/dev/null
+      - name: Create GitHub release and upload assets
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES="docs/RELEASE_${VERSION}.md"
+          test -f "$NOTES"
+          gh release create "${GITHUB_REF_NAME}" "dist/AzerothFieldKit-${VERSION}.zip" dist/SHA256SUMS.txt --title "Azeroth FieldKit ${VERSION}" --notes-file "$NOTES" --verify-tag
