@@ -44,7 +44,7 @@ function methods:SetChecked(v) self.checked=v end
 function methods:GetChecked() return self.checked end
 function methods:SetParent(p) self.parent=p end
 function methods:GetParent() return self.parent end
-for _,k in ipairs({"SetFont","SetTextColor","SetJustifyH","SetTexCoord","SetFrameStrata","SetFrameLevel","SetStatusBarTexture","SetStatusBarColor","SetMinMaxValues","SetMovable","RegisterForDrag","EnableMouse","SetBackdrop","SetBackdropColor","SetBackdropBorderColor","SetVertexColor","SetClampedToScreen","SetHitRectInsets","SetValueStep","SetNormalTexture","SetPushedTexture","SetHighlightTexture","RegisterForClicks","SetID","SetOwner","AddLine","SetToplevel","StartMoving","StopMovingOrSizing","SetScale","SetAlphaGradient","SetJustifyV"}) do methods[k]=function() end end
+for _,k in ipairs({"SetFont","SetTextColor","SetJustifyH","SetTexCoord","SetFrameStrata","SetFrameLevel","SetStatusBarTexture","SetStatusBarColor","SetMinMaxValues","SetMovable","RegisterForDrag","EnableMouse","SetBackdrop","SetBackdropColor","SetBackdropBorderColor","SetVertexColor","SetBlendMode","SetClampedToScreen","SetHitRectInsets","SetValueStep","SetNormalTexture","SetPushedTexture","SetHighlightTexture","RegisterForClicks","SetID","SetOwner","AddLine","SetToplevel","StartMoving","StopMovingOrSizing","SetScale","SetAlphaGradient","SetJustifyV"}) do methods[k]=function() end end
 function CreateFrame(kind,name,parent,template)
  local o=setmetatable({kind=kind,name=name,_name=name,parent=parent,scripts={},events={},children={}}, {__index=methods})
  if name then _G[name]=o end
