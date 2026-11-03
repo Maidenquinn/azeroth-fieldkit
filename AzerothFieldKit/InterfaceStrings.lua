@@ -254,7 +254,7 @@ labels["Heal"]="Soin"
 labels["Boss"]="Boss"
 labels["Taken"]="Subis"
 labels["Party"]="Groupe"
-labels["Reset"]="Reset"
+labels["Reset"]="Réinitialiser"
 labels["Warn before the next boss"]="Prévenir avant le prochain boss"
 labels["One warning before each observed arrival. Based on native scheduling; no attack prediction."]="Une alerte avant chaque arrivée connue du calendrier natif ; aucune prédiction des attaques."
 labels["Boss arrival warning"]="Alerte d’arrivée des boss"
@@ -325,3 +325,9 @@ labels["No spells yet"]="Aucun sort"
 labels["Portrait texture rejected by client"]="Texture du portrait refusée par le client"
 for key,value in pairs(labels) do fr[key]=value end
 FieldKitLocale.en={};for en,value in pairs(fr) do FieldKitLocale.en[value]=en end
+
+FieldKitLocale.fr["Compact boss frames"]="Cadres de boss compacts"
+FieldKitLocale.fr["Use borderless portraits and health bars with HP inside. Disable to restore the original Chronicle design."]="Affiche des portraits sans cadre et les PV dans la barre. Désactiver pour retrouver le style Chronicle classique."
+
+FieldKitLocale.fr["Chronicle Premium boss frames"]="Barres de boss Chronicle Premium"
+FieldKitLocale.fr["Compact boss frames with subtle gold trim, a dark surface and refined health bars."]="Barres compactes avec dorures discrètes, fond sombre et barres de vie raffinées."
