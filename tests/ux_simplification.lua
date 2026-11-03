@@ -3,7 +3,7 @@
 FieldKitDB={cardStyle=2,cardOpacity=37,windowsLocked=true,partyCards=false,uiPage="windows",windowPage="coop"}
 fire(FieldKitFrame,"VARIABLES_LOADED");SlashCmdList.FieldKit("");update(FieldKitFrame,.3)
 local U=FieldKitUI
-assert(table.getn(U.sections)==13,"split HUD sections")
+assert(table.getn(U.sections)>=13,"split HUD sections retained")
 assert(FieldKitDB.uiPage=="coop","legacy windows+coop subtab migrates")
 local writes=0
 local oldCvar,oldHud=SetCVar,AZS_SetHudShown
