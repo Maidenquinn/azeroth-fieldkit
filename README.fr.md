@@ -1,5 +1,7 @@
 # Azeroth FieldKit
 
+> **Mise à jour 0.4.0 :** interface bilingue, profils de combat et previews améliorées. [Notes de version](docs/RELEASE_0.4.0.md).
+
 > **Mise à jour 0.3.4 :** chronologie et cadres boss, suite de meters et
 > réglages clarifiés. Voir [notes de version](docs/RELEASE_0.3.4.md).
 
@@ -13,7 +15,7 @@ Maintenu par **Kevin Radlowski / Maidenhead**, dérivé de **MASH par Malk**.
 
 ## Version à utiliser
 
-- **Dernier paquet :** [0.3.4](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.3.4), publié comme préversion GitHub.
+- **Dernier paquet :** [0.4.0](https://github.com/Maidenquinn/azeroth-fieldkit/releases/tag/v0.4.0), interface bilingue et aperçus améliorés. [Notes de version](docs/RELEASE_0.4.0.md).
 - Publication validée par le mainteneur le 2 novembre 2026. Changements depuis
   0.3.2 : suite de meters, chronologie/cadres boss et réglages plus clairs.
   [Notes de version](docs/RELEASE_0.3.4.md). Préférences conservées.
@@ -31,7 +33,7 @@ Maintenu par **Kevin Radlowski / Maidenhead**, dérivé de **MASH par Malk**.
    Désactivez l’ancien MASH pour éviter les comportements en double.
 3. Activez FieldKit dans le sélecteur du client puis redémarrez le jeu.
 
-Téléchargez `AzerothFieldKit-0.3.4.zip` dans la release ci-dessus pour obtenir
+Téléchargez `AzerothFieldKit-0.4.0.zip` dans la release ci-dessus pour obtenir
 l’interface actuelle. Aucun programme externe ni addon compagnon n’est nécessaire. FieldKit
 n’importe pas automatiquement MASHDB et ne modifie pas vos sauvegardes de partie.
 
