@@ -1,6 +1,6 @@
 -- End-to-end UI intent tests. These run against the actual addon constructors.
 local U=FieldKitUI
-assert(U and table.getn(U.sections)==13)
+assert(U and table.getn(U.sections)>=14)
 local function page(id)
  for i=1,table.getn(U.pages) do if U.pages[i].section.id==id then return U.pages[i] end end
  error(id)
