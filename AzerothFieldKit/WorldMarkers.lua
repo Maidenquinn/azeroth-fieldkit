@@ -327,7 +327,7 @@ SlashCmdList["FIELDKITMARKERS"]=function(msg)
   local v=tonumber(string.sub(msg,16))
   if v then report("aura intensity="..math.floor(M.SetAuraIntensity(v/100)*100).."%") else report("usage: /fkmarkers aura intensity 35") end
  elseif string.find(msg,"^range ") then
-  local kind,amount=string.match(msg,"^range%s+(%S+)%s+(%d+)$")
+  local _,_,kind,amount=string.find(msg,"^range%s+(%S+)%s+(%d+)$")
   local aliases={finalboss="finalBoss",guardianlair="guardianLair",downedpartymember="downedPartyMember"}
   kind=aliases[kind] or kind
   if kind and amount and categoryRange[kind] then
