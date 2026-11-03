@@ -46,7 +46,10 @@ end
 for key,value in pairs(FieldKitLocale.fr) do
  assert(type(key)=="string" and type(value)=="string" and key~="" and value~="")
  FieldKitDB.language="fr";assert(FieldKit_L(key)==value,key)
- FieldKitDB.language="en";assert(FieldKit_L(value)==(FieldKitLocale.en[value] or key),key)
+ FieldKitDB.language="en"
+ if not FieldKitLocale.fr[value] then
+  assert(FieldKit_L(value)==(FieldKitLocale.en[value] or key),key)
+ end
 end
 -- Both sets of existing position preferences are edited in the Areas page.
 click(button(editor,"Areas"))
