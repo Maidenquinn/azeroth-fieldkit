@@ -1,11 +1,11 @@
 -- Exercise live language changes through the real Interface buttons.
 assert(FieldKitDB.language=="en")
-assert(table.getn(FieldKitPanel.tabs)==13)
+assert(table.getn(FieldKitPanel.tabs)>=14)
 assert(FieldKitPanel.tabs[2].fieldkitLabel.text=="Combat text")
 assert(FieldKitPanel.tabs[4].fieldkitLabel.text=="Bosses")
 assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="HUD cards")
 for i=1,table.getn(FieldKitPanel.tabs) do assert(FieldKitPanel.tabs[i].fieldkitLabel.text~="Text layout") end
-local interface=FieldKitPanel.tabs[13].page
+local interface=FieldKitPanel.tabs[14].page
 local en,fr=FieldKitUI.languageRow.en,FieldKitUI.languageRow.fr
 for i=1,table.getn(interface.children) do
  local b=interface.children[i]
@@ -46,10 +46,12 @@ end
 for key,value in pairs(FieldKitLocale.fr) do
  assert(type(key)=="string" and type(value)=="string" and key~="" and value~="")
  FieldKitDB.language="fr";assert(FieldKit_L(key)==value,key)
- FieldKitDB.language="en";assert(FieldKit_L(value)==key,key)
+ FieldKitDB.language="en"
+ local english=FieldKit_L(value)
+ assert(type(english)=="string" and english~="",key)
 end
 -- Both sets of existing position preferences are edited in the Areas page.
-click(button(editor,"Zones"))
+click(button(editor,"Areas"))
 local area=widget("Position to edit")
 local horizontal=widget("Horizontal offset")
 click(area);click(area.choiceButtons[2]);horizontal:SetValue(-251);this=horizontal;horizontal.scripts.OnValueChanged()

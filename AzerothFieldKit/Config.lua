@@ -3,7 +3,7 @@
 local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,reviveFrame=false,
  nextBossCard=false,nextBossAlert=false,bossTimeline=false,bossTimelineWidth=560,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,partyBannerWarnings=true,
  highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
- bossFrame=false,statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
+ bossFrame=false,bossStyle="classic",statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  meterTabs=true,meterSpellTips=true,meterKeepTakenFrame=false,meterViewKey="damage",
  meterSortKey="dmg",meterSortAsc=false,meterHealDone=false,meterPartyOwner=nil,
 

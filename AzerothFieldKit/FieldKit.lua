@@ -350,6 +350,144 @@ local function CreateBossFrame(i,preview)
 	else
 		f:SetPoint("TOP", bossFrames[i - 1], "TOP", 0, -BOSS_STACK)
 	end
+	-- Separate unframed compact presentation; the original boss frame remains intact.
+ local c=CreateFrame("Frame",prefix.."Compact",UIParent)
+ c:SetWidth(310);c:SetHeight(54);c:SetFrameStrata("HIGH")
+ c:SetPoint("TOPLEFT",f,"TOPLEFT",0,0)
+ c:EnableMouse(false)
+ local portrait=c:CreateTexture(nil,"ARTWORK")
+ portrait:SetWidth(42);portrait:SetHeight(42);portrait:SetPoint("LEFT",c,"LEFT",0,0)
+ portrait:SetTexCoord(.08,.92,.08,.92);c.portrait=portrait
+ local nameText=c:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ nameText:SetPoint("TOPLEFT",c,"TOPLEFT",49,-2);nameText:SetWidth(240);nameText:SetJustifyH("LEFT")
+ if FieldKitTheme and FieldKitTheme.Font then FieldKitTheme.Font(nameText,12,FieldKitTheme.gold,true) end
+ c.name=nameText
+ local bar=CreateFrame("StatusBar",nil,c)
+ bar:SetPoint("TOPLEFT",c,"TOPLEFT",49,-21);bar:SetWidth(241);bar:SetHeight(19)
+ bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+ local bg=bar:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints(bar);bg:SetTexture("Interface\\Buttons\\WHITE8X8");bg:SetVertexColor(.09,.035,.04,.9)
+ c.bar=bar
+ local hpText=bar:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
+ hpText:SetPoint("CENTER",bar,"CENTER",0,0);hpText:SetWidth(235);hpText:SetJustifyH("CENTER");c.hp=hpText
+ local tag=c:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ tag:SetPoint("TOPRIGHT",c,"TOPRIGHT",-9,-3);c.tag=tag
+ -- Chronicle Premium: compact layered chrome, not a large enclosing panel.
+ -- All solid swatches use WHITE8X8; SetTexture(r,g,b,a) is not valid on this client.
+ local function swatch(parent,layer,r,g,b,a)
+  local t=parent:CreateTexture(nil,layer)
+  t:SetTexture("Interface\\Buttons\\WHITE8X8")
+  t:SetVertexColor(r,g,b,a)
+  return t
+ end
+ local surface=swatch(c,"BACKGROUND",.035,.065,.085,.87)
+ surface:SetPoint("TOPLEFT",c,"TOPLEFT",43,1)
+ surface:SetPoint("BOTTOMRIGHT",c,"BOTTOMRIGHT",3,5)
+ c.premiumSurface=surface
+ local line=swatch(c,"BORDER",.67,.48,.24,.88)
+ line:SetPoint("BOTTOMLEFT",c,"BOTTOMLEFT",44,5)
+ line:SetPoint("BOTTOMRIGHT",c,"BOTTOMRIGHT",3,5)
+ line:SetHeight(1);c.premiumLine=line
+ local topLine=swatch(c,"BORDER",.42,.32,.19,.72)
+ topLine:SetPoint("TOPLEFT",c,"TOPLEFT",44,1)
+ topLine:SetPoint("TOPRIGHT",c,"TOPRIGHT",3,1)
+ topLine:SetHeight(1);c.premiumTopLine=topLine
+ local medallion=swatch(c,"BORDER",.68,.47,.22,1)
+ medallion:SetPoint("CENTER",portrait,"CENTER",0,0)
+ medallion:SetWidth(48);medallion:SetHeight(48)
+ c.premiumMedallion=medallion
+ local medallionShadow=swatch(c,"BACKGROUND",.025,.035,.045,.98)
+ medallionShadow:SetPoint("CENTER",portrait,"CENTER",0,0)
+ medallionShadow:SetWidth(52);medallionShadow:SetHeight(52)
+ c.premiumMedallionShadow=medallionShadow
+ local barBorder=swatch(c,"BORDER",.67,.48,.24,.95)
+ barBorder:SetPoint("TOPLEFT",bar,"TOPLEFT",-2,2)
+ barBorder:SetPoint("BOTTOMRIGHT",bar,"BOTTOMRIGHT",2,-2)
+ c.premiumBarBorder=barBorder
+ local shine=swatch(bar,"OVERLAY",1,.84,.64,.29)
+ shine:SetPoint("TOPLEFT",bar,"TOPLEFT",0,0)
+ shine:SetPoint("TOPRIGHT",bar,"TOPRIGHT",0,0)
+ shine:SetHeight(3);c.premiumShine=shine
+ local bottomShade=swatch(bar,"OVERLAY",0,0,0,.3)
+ bottomShade:SetPoint("BOTTOMLEFT",bar,"BOTTOMLEFT",0,0)
+ bottomShade:SetPoint("BOTTOMRIGHT",bar,"BOTTOMRIGHT",0,0)
+ bottomShade:SetHeight(3);c.premiumBottomShade=bottomShade
+ local categoryGlyph=c:CreateTexture(nil,"OVERLAY")
+ categoryGlyph:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+ categoryGlyph:SetWidth(15);categoryGlyph:SetHeight(15)
+ categoryGlyph:SetPoint("RIGHT",tag,"LEFT",-4,0)
+ c.premiumCategoryGlyph=categoryGlyph
+ c.premiumParts={surface,line,topLine,medallion,medallionShadow,barBorder,shine,bottomShade,categoryGlyph}
+ for _,part in ipairs(c.premiumParts) do part:Hide() end
+ -- Chronicle Premium v10: the decorative plate MUST be above the StatusBar.
+ -- A child StatusBar renders above parent textures, regardless of draw layer.
+ -- Use a dedicated overlay frame and recreate labels on that frame.
+ local overlay=CreateFrame("Frame",nil,c)
+ overlay:SetAllPoints(c)
+ overlay:SetFrameLevel(bar:GetFrameLevel()+3)
+ overlay:EnableMouse(false)
+ c.premiumOverlay=overlay
+ local art=overlay:CreateTexture(nil,"ARTWORK")
+ art:SetTexture("Interface\\AddOns\\AzerothFieldKit\\media\\ChroniclePremium\\chronicle_v16.tga")
+ art:SetPoint("TOPLEFT",overlay,"TOPLEFT",0,0)
+ art:SetWidth(310);art:SetHeight(54)
+ art:SetTexCoord(0,310/512,0,54/128)
+ c.premiumArt=art
+ -- V11: the decorative TGA is not reliable in the legacy client.
+ -- Build visible chrome from native textures on an overlay frame instead.
+ art:Hide()
+ local function edge(x1,y1,x2,y2,w,h,r,g,b,a)
+  local t=overlay:CreateTexture(nil,"OVERLAY")
+  t:SetTexture("Interface\\Buttons\\WHITE8X8")
+  t:SetVertexColor(r,g,b,a)
+  t:SetPoint("TOPLEFT",overlay,"TOPLEFT",x1,y1)
+  t:SetWidth(w);t:SetHeight(h)
+  return t
+ end
+ -- Portrait rim: four thin edges, no solid plate obscuring the creature.
+ -- Refined Chronicle: restrained 1px edges, more breathing room and a slim health track.
+ -- V15: restrained FieldKit chrome; one perimeter, no stacked rectangles.
+ c.premiumRim={
+  edge(1,-2,0,0,46,1,.56,.42,.25,.88),
+  edge(1,-48,0,0,46,1,.38,.29,.19,.82),
+  edge(1,-2,0,0,1,47,.56,.42,.25,.88),
+  edge(46,-2,0,0,1,47,.38,.29,.19,.82),
+  edge(50,-2,0,0,259,1,.52,.39,.23,.78),
+  edge(50,-49,0,0,259,1,.52,.39,.23,.78),
+  edge(50,-2,0,0,1,48,.52,.39,.23,.78),
+  edge(308,-2,0,0,1,48,.52,.39,.23,.78),
+  edge(54,-29,0,0,250,1,.48,.36,.23,.78),
+  edge(54,-46,0,0,250,1,.38,.29,.19,.75)
+ }
+ for _,t in ipairs(c.premiumRim) do t:Hide() end
+ -- Native creature portrait sits inside the transparent medallion window.
+ portrait:ClearAllPoints()
+ portrait:SetPoint("TOPLEFT",c,"TOPLEFT",3,-4)
+ portrait:SetWidth(42);portrait:SetHeight(42)
+ bar:ClearAllPoints()
+ -- The status fill must sit strictly INSIDE the native rim (x=55..306, y=-31..-51).
+ -- Inset on every side prevents the fill from covering the 1px metal edges.
+ bar:SetPoint("TOPLEFT",c,"TOPLEFT",57,-33)
+ bar:SetWidth(245);bar:SetHeight(12)
+ -- Recreate text above the art. Old font strings remain hidden for compatibility.
+ nameText:Hide();tag:Hide();hpText:Hide()
+ local premiumName=overlay:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ premiumName:SetPoint("TOPLEFT",overlay,"TOPLEFT",56,-7)
+ premiumName:SetWidth(192);premiumName:SetHeight(16)
+ premiumName:SetJustifyH("LEFT")
+ if FieldKitTheme and FieldKitTheme.Font then FieldKitTheme.Font(premiumName,11,FieldKitTheme.gold,true) end
+ local premiumTag=overlay:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ premiumTag:SetPoint("TOPRIGHT",overlay,"TOPRIGHT",-8,-7)
+ premiumTag:SetWidth(58);premiumTag:SetHeight(16)
+ premiumTag:SetJustifyH("RIGHT")
+ if FieldKitTheme and FieldKitTheme.Font then FieldKitTheme.Font(premiumTag,10,FieldKitTheme.gold) end
+ local premiumHP=overlay:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
+ premiumHP:SetPoint("CENTER",bar,"CENTER",0,0)
+ premiumHP:SetWidth(235);premiumHP:SetHeight(13)
+ premiumHP:SetJustifyH("CENTER")
+ c.premiumName=premiumName;c.premiumTag=premiumTag;c.premiumHP=premiumHP
+ c.premiumLegacyName=nameText;c.premiumLegacyTag=tag;c.premiumLegacyHP=hpText
+ overlay:Hide()
+ c:Hide();f.compact=c
 	f:Hide()
 	return f
 end
@@ -378,6 +516,55 @@ end
 
 -- Fill one frame from a native instance id, HP and state, then its native debuffs.
 local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
+ local compact=f.compact
+ if compact then
+  if DB.bossStyle=="compact" or DB.bossStyle=="premium" then
+   f:SetAlpha(0);compact:Show()
+   local premium=DB.bossStyle=="premium"
+   for _,part in ipairs(compact.premiumParts) do part:Hide() end
+   compact.premiumOverlay:Hide()
+   for _,part in ipairs(compact.premiumRim) do part:Hide() end
+   if premium then
+    local guardian=(kind=="guardian")
+    -- Native frame accents, deliberately independent of external TGA assets.
+    compact.premiumSurface:Show()
+    compact.premiumLine:Show()
+    compact.premiumTopLine:Show()
+    compact.premiumShine:Show()
+    compact.premiumBottomShade:Show()
+    compact.premiumSurface:SetVertexColor(.035,.065,.085,.79)
+    -- V16: one authored chrome asset replaces the stacked native rectangles.
+    for _,part in ipairs(compact.premiumRim) do part:Hide() end
+    compact.premiumSurface:Hide()
+    compact.premiumLine:Hide()
+    compact.premiumTopLine:Hide()
+    compact.premiumShine:Hide()
+    compact.premiumBottomShade:Hide()
+    compact.premiumOverlay:Show()
+    compact.premiumArt:Show()
+   end
+   -- Avoid multi-line names: preserve the full value in the original boss data.
+   local displayName=name or ""
+   if string.len(displayName)>28 then displayName=string.sub(displayName,1,25).."..." end
+   compact.premiumName:SetText(displayName)
+   compact.premiumTag:SetText(kind=="guardian" and FieldKit_L("Guardian") or (kind=="final" and FieldKit_L("Final boss") or FieldKit_L("Boss")))
+   compact.premiumHP:SetText(FieldKit_FormatHealth(hp,hpm,DB.bossHealthMode))
+   if premium then
+    compact.premiumLegacyName:Hide();compact.premiumLegacyTag:Hide();compact.premiumLegacyHP:Hide()
+   else
+    compact.premiumLegacyName:Show();compact.premiumLegacyTag:Show();compact.premiumLegacyHP:Show()
+   end
+   compact.name:SetText(premium and "" or (name or ""))
+   local maxHP=math.max(tonumber(hpm) or 1,1)
+   local currentHP=math.max(0,math.min(tonumber(hp) or 0,maxHP))
+   compact.bar:SetMinMaxValues(0,maxHP);compact.bar:SetValue(currentHP)
+   compact.hp:SetText(premium and "" or FieldKit_FormatHealth(hp,hpm,DB.bossHealthMode))
+   compact.bar:SetStatusBarColor(kind=="guardian" and .19 or .68,kind=="guardian" and .45 or .15,kind=="guardian" and .69 or .17)
+   compact.tag:SetText(premium and "" or (kind=="guardian" and FieldKit_L("Guardian") or (kind=="final" and FieldKit_L("Final boss") or FieldKit_L("Boss"))))
+  else
+   f:SetAlpha(1);compact:Hide()
+  end
+ end
 	f.name:SetText(name)
 	f.bar:SetMinMaxValues(0, math.max(hpm or 1, 1))
 	f.bar:SetValue(hp or 0)
@@ -462,6 +649,7 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
 	end
 
 	FieldKit_Portraits.Apply(f, name, kind, id)
+ if f.compact then f.compact.portrait:SetTexture(f.portrait:GetTexture()) end
 
 	f:Show()
 end
@@ -487,6 +675,11 @@ end
 
 -- Select live final/boss/awake-guardian entries and update the bounded frame pool.
 local function UpdateBossFrame()
+ for bi=2,table.getn(bossFrames) do
+  local bf=bossFrames[bi]
+  bf:ClearAllPoints()
+  bf:SetPoint("TOP",bossFrames[bi-1],"TOP",0,-((DB.bossStyle=="compact" or DB.bossStyle=="premium") and 58 or BOSS_STACK))
+ end
 	if ( table.getn(bossFrames) == 0 ) then
 		return
 	end
@@ -527,6 +720,7 @@ local function UpdateBossFrame()
 		FieldKit_Text(bossFrames[1].hp,"drag to move")
 	end
 	for i = n + 1, BOSS_FRAMES do
+		if bossFrames[i].compact then bossFrames[i].compact:Hide() end
 		bossFrames[i]:Hide()
 	end
 	if FieldKitBossTimeline and FieldKitBossTimeline.Update then FieldKitBossTimeline.Update() end

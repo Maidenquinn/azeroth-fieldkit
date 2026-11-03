@@ -152,23 +152,34 @@ function FieldKit.BuildJourneySections(sections,actions)
   {kind="syncStatus"},
  }
  return {
-  {id="home",title="Overview",glyph=13,group="Start here",items={{kind="home"}}},
-  {id="combat",title="Combat text",glyph=2,group="Combat & health",items={{kind="combat"}}},
-  {id="health",title="Health & buffs",glyph=16,items=health},
-  {id="bosses",title="Bosses",glyph=5,items={{kind="preview",preview=17},options.bossFrame,
+  {id="home",title="Overview",glyph=13,group="01  HOME",items={{kind="home"}}},
+  {id="combat",title="Combat text",glyph=2,group="02  COMBAT",items={{kind="combat"}}},
+  {id="health",title="Health & buffs",glyph=16,group="02  COMBAT",items=health},
+  {id="bosses",title="Bosses",glyph=5,group="02  COMBAT",items={{kind="preview",preview=17},options.bossFrame,
    {kind="check",label="Boss schedule timeline",tip="Chronicle bar under the top of the screen with upcoming boss markers. Hides the native run clock while shown. Off by default.",
     get=function() return FieldKitDB.bossTimeline==true end,
     set=function(v) FieldKitDB.bossTimeline=v and true or false;if FieldKitBossTimeline then FieldKitBossTimeline.Update() end;if not v and FieldKitBossTimeline then FieldKitBossTimeline.RestoreHud() end end},
+   {kind="choice",label="Boss frame appearance",values={"Chronicle classic","Compact","Chronicle Premium"},
+    get=function()
+     if FieldKitDB.bossStyle=="compact" then return 2 end
+     if FieldKitDB.bossStyle=="premium" then return 3 end
+     return 1
+    end,
+    set=function(v)
+     FieldKitDB.bossStyle=(v==2 and "compact") or (v==3 and "premium") or "classic"
+     actions.UpdateBossFrame()
+    end},
    HealthChoice("bossHealthMode","Boss health format",actions.UpdateBossFrame)}},
-  {id="alerts",title="Alerts",glyph=12,items=alerts},
-  {id="cards",title="HUD cards",glyph=9,group="Your HUD",items=cards},
-  {id="meter",title="Combat meter",glyph=8,items=meter},
-  {id="layout",title="Layout & arrange",glyph=14,items=layout},
-  {id="look",title="Look",glyph=4,items=look},
-  {id="coop",title="Co-op / test",glyph=15,items=coop},
-  {id="map",title="Minimap",glyph=1,group="World & client",items=old.Map.items},
-  {id="nameplates",title="Nameplates",glyph=7,items=old.Nameplates.items},
-  {id="interface",title="Interface",glyph=11,items=interface},
+  {id="alerts",title="Alerts",glyph=12,group="02  COMBAT",items=alerts},
+  {id="cards",title="HUD cards",glyph=9,group="03  INTERFACE",items=cards},
+  {id="meter",title="Combat meter",group="03  INTERFACE",glyph=8,items=meter},
+  {id="layout",title="Layout & arrange",group="03  INTERFACE",glyph=14,items=layout},
+  {id="look",title="Look",group="03  INTERFACE",glyph=4,items=look},
+  {id="worldmarkers",title="World markers",glyph=6,group="04  WORLD",items={{kind="worldmarkers"}}},
+  {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
+  {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
+  {id="coop",title="Group & co-op",glyph=15,group="05  MULTIPLAYER",items=coop},
+  {id="interface",title="Preferences",glyph=11,group="06  PREFERENCES",items=interface},
  }
 
 end
@@ -277,6 +288,109 @@ local function Slider(page,item,y,camera)
  table.insert(U.controls,s);table.insert(page.flow,{frame=row,y=y});return y+(camera and 106 or 84)
 end
 
+-- World marker gallery: category tabs, real texture preview and live saved settings.
+local function BuildMarkerGallery(page,y)
+ local M=FieldKitWorldMarkers
+ local kinds={"boss","finalBoss","guardian","elite","cache","guardianLair","downedPartyMember"}
+ local names={"Boss","Final boss","Guardian","Elite","Treasure","Spawn","Revive"}
+ local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(720)
+ local hint=T.Label(row,FieldKit_L("Choose an icon to preview and configure. Changes apply immediately."),0,0,560,38,13,T.muted)
+ local tabs={};local selected="boss"
+ local preview=CreateFrame("Frame",nil,row);preview:SetPoint("TOPLEFT",row,"TOPLEFT",8,-96);preview:SetWidth(156);preview:SetHeight(156)
+ T.Surface(preview,"card")
+ local aura=preview:CreateTexture(nil,"ARTWORK");aura:SetTexture(M.GetAuraTexture());aura:SetBlendMode("ADD");aura:SetPoint("CENTER",preview,"CENTER",0,0)
+ local icon=preview:CreateTexture(nil,"OVERLAY");icon:SetPoint("CENTER",preview,"CENTER",0,0);icon:SetWidth(88);icon:SetHeight(88)
+ local name=T.Label(row,"",182,112,330,32,19,T.gold,true)
+ local info=T.Label(row,FieldKit_L("Preview uses the exact installed texture."),182,149,320,52,12,T.muted)
+ local toggle=T.Button(row,nil,"",182,208,160,29,function()
+  M.SetCategoryEnabled(selected,not M.GetCategoryEnabled(selected));row.Refresh()
+ end)
+ local sizeLabel=T.Label(row,FieldKit_L("Icon size"),0,278,500,24,14,T.gold)
+ local sliderName="FieldKitMarkerScaleSlider"
+ local slider=CreateFrame("Slider",sliderName,row,"OptionsSliderTemplate");slider:SetPoint("TOPLEFT",row,"TOPLEFT",8,-319);slider:SetHeight(18);slider:SetMinMaxValues(60,150);slider:SetValueStep(5)
+ local low=getglobal(sliderName.."Low");if low then low:SetText("60%") end
+ local high=getglobal(sliderName.."High");if high then high:SetText("150%") end
+ local title=getglobal(sliderName.."Text");if title then title:Hide() end
+ local lock=false
+ slider:SetScript("OnValueChanged",function()
+  if lock then return end
+  M.SetCategoryScale(selected,math.floor(this:GetValue()/5+0.5)*5);row.Refresh()
+ end)
+ local rangeLabel=T.Label(row,"",0,365,500,24,14,T.gold)
+ local rangeName="FieldKitMarkerRangeSlider"
+ local rangeSlider=CreateFrame("Slider",rangeName,row,"OptionsSliderTemplate")
+ rangeSlider:SetPoint("TOPLEFT",row,"TOPLEFT",8,-406)
+ rangeSlider:SetHeight(18);rangeSlider:SetMinMaxValues(10,250);rangeSlider:SetValueStep(5)
+ local rangeLow=getglobal(rangeName.."Low");if rangeLow then rangeLow:SetText("10 yd") end
+ local rangeHigh=getglobal(rangeName.."High");if rangeHigh then rangeHigh:SetText("250 yd") end
+ local rangeTitle=getglobal(rangeName.."Text");if rangeTitle then rangeTitle:Hide() end
+ rangeSlider:SetScript("OnValueChanged",function()
+  if lock then return end
+  M.SetCategoryRange(selected,math.floor(this:GetValue()/5+0.5)*5);row.Refresh()
+ end)
+ local auraButton=T.Button(row,nil,"",0,456,166,30,function() M.SetAura(not M.GetAura());row.Refresh() end)
+ local pulseButton=T.Button(row,nil,"",178,456,166,30,function() M.SetAuraPulse(not M.GetAuraPulse());row.Refresh() end)
+ local intensity=T.Label(row,FieldKit_L("Aura intensity"),0,506,500,24,14,T.gold)
+ local auraName="FieldKitMarkerAuraSlider"
+ local auraSlider=CreateFrame("Slider",auraName,row,"OptionsSliderTemplate");auraSlider:SetPoint("TOPLEFT",row,"TOPLEFT",8,-549);auraSlider:SetHeight(18);auraSlider:SetMinMaxValues(0,100);auraSlider:SetValueStep(5)
+ local lo=getglobal(auraName.."Low");if lo then lo:SetText("0%") end
+ local hi=getglobal(auraName.."High");if hi then hi:SetText("100%") end
+ local tx=getglobal(auraName.."Text");if tx then tx:Hide() end
+ auraSlider:SetScript("OnValueChanged",function()
+  if lock then return end
+  M.SetAuraIntensity(math.floor(this:GetValue()/5+0.5)*5/100);row.Refresh()
+ end)
+ local reviveName=T.Button(row,nil,"",0,642,166,30,function() M.SetReviveNames(not M.GetReviveNames());row.Refresh() end)
+ local reviveDistance=T.Button(row,nil,"",178,642,166,30,function() M.SetReviveDistance(not M.GetReviveDistance());row.Refresh() end)
+ local enable=T.Button(row,nil,"",0,600,166,30,function() if M.IsEnabled() then M.Disable() else M.Enable() end;row.Refresh() end)
+ local hints=T.Button(row,nil,"",178,600,166,30,function() M.SetLairHints(not M.GetLairHints());row.Refresh() end)
+ FieldKit_RefreshLanguage(function()
+  for i=1,table.getn(tabs) do if tabs[i] then FieldKit_Text(tabs[i],names[i]) end end
+  FieldKit_Text(hint,"Choose an icon to preview and configure. Changes apply immediately.")
+  if row:IsVisible() then row.Refresh() end
+ end)
+ function row.Refresh()
+  lock=true
+  for i=1,table.getn(kinds) do T.State(tabs[i],kinds[i]==selected) end
+  icon:SetTexture(M.GetTexture(selected));icon:SetWidth(88*M.GetCategoryScale(selected)/100);icon:SetHeight(88*M.GetCategoryScale(selected)/100)
+  aura:SetWidth(142*M.GetCategoryScale(selected)/100);aura:SetHeight(142*M.GetCategoryScale(selected)/100)
+  if M.GetAura() then aura:SetVertexColor(0.85,0.6,1,M.GetAuraIntensity());aura:Show() else aura:Hide() end
+  FieldKit_Text(name,names[({boss=1,finalBoss=2,guardian=3,elite=4,cache=5,guardianLair=6,downedPartyMember=7})[selected]])
+  if selected=="guardianLair" then info:SetText(FieldKit_L("Spawn hints show a tooltip when you hover the world marker. They do not predict future spawns.")) else info:SetText(FieldKit_L("Preview uses the exact installed texture.")) end
+  FieldKit_Text(toggle,M.GetCategoryEnabled(selected) and "Show marker: yes" or "Show marker: no")
+  FieldKit_Text(auraButton,M.GetAura() and "Aura: on" or "Aura: off")
+  FieldKit_Text(pulseButton,M.GetAuraPulse() and "Pulse: on" or "Pulse: off")
+  FieldKit_Text(enable,M.IsEnabled() and "Engine: on" or "Engine: off")
+  FieldKit_Text(hints,M.GetLairHints() and "Spawn hints: on" or "Spawn hints: off")
+  if selected=="guardianLair" then hints:Show() else hints:Hide() end
+  if selected=="downedPartyMember" then
+   reviveName:Show();reviveDistance:Show()
+   FieldKit_Text(reviveName,M.GetReviveNames() and "Ally name: on" or "Ally name: off")
+   FieldKit_Text(reviveDistance,M.GetReviveDistance() and "Distance: on" or "Distance: off")
+  else reviveName:Hide();reviveDistance:Hide() end
+  FieldKit_Text(rangeLabel,"Marker visibility range: "..M.GetCategoryRange(selected).." yd")
+  rangeSlider:SetValue(M.GetCategoryRange(selected))
+  FieldKit_Text(sizeLabel,"Icon size: "..M.GetCategoryScale(selected).."%")
+  FieldKit_Text(intensity,"Aura intensity: "..math.floor(M.GetAuraIntensity()*100+0.5).."%")
+  slider:SetValue(M.GetCategoryScale(selected));auraSlider:SetValue(M.GetAuraIntensity()*100)
+  lock=false
+ end
+ for i=1,table.getn(kinds) do
+  local k=kinds[i]
+  tabs[i]=T.Button(row,nil,names[i],0,49,88,29,function() selected=k;row.Refresh() end)
+ end
+ row.Reflow=function(w)
+  row:SetWidth(w);hint:SetWidth(w)
+  local tw=(w-10)/4
+  for i=1,table.getn(tabs) do
+   local b=tabs[i];b:ClearAllPoints();b:SetPoint("TOPLEFT",row,"TOPLEFT",math.mod(i-1,4)*(tw+4),-45-math.floor((i-1)/4)*34)
+   b:SetWidth(tw);b.fieldkitLabel:SetWidth(tw-8);T.Update(b)
+  end
+  slider:SetWidth(w-20);rangeSlider:SetWidth(w-20);auraSlider:SetWidth(w-20)
+ end
+ row.Refresh();table.insert(page.flow,{frame=row,y=y});return y+730
+end
+
 -- A small visibility preset only. Existing geometry/style and other addons are
 -- untouched; its in-memory Undo lasts until reload and is never auto-applied.
 function U.EssentialHud(undo)
@@ -295,27 +409,28 @@ end
 
 -- Small cards lead to the relevant page; no implicit presets/native changes.
 local function BuildHome(page)
- page.intro=T.Label(page,"Choose your tools, then arrange your interface. Only enable what you need.",0,48,650,48,14,T.muted)
- local defs={{"Combat text","Animated damage and healing, with your own filters.",2,"combat","combatText"},
-  {"Health & buffs","Readable player and target health, shields and buffs.",16,"health","playerBar"},
-  {"Bosses","Independent portraits and health for tracked enemies.",5,"bosses","bossFrame"},
-  {"Minimap","Choose chest and guardian-lair markers separately.",1,"map","chestPins"}}
+ page.intro=T.Label(page,"Choose a feature to customize. Your settings are saved.",0,48,650,48,14,T.muted)
+ FieldKit_Text(page.intro,"Choose a feature to customize. Your settings are saved.")
+ local defs={{"Combat text","Choose which damage and healing messages appear.",2,"combat","combatText"},
+  {"Health and buffs","Health bars, shields and buffs.",16,"health","playerBar"},
+  {"Tracked bosses","Portraits, health bars and timeline.",5,"bosses","bossFrame"},
+  {"World markers","Chests, bosses, runes and revives.",6,"worldmarkers","worldMarkersEnabled"}}
  for i=1,4 do
   local d=defs[i];local c=CreateFrame("Frame",nil,page);c:SetHeight(142);T.Surface(c,"card")
   T.Glyph(c,d[3],14,16,32)
-  c.title=T.Label(c,d[1],58,14,230,28,18,T.gold,true)
+  c.title=T.Label(c,d[1],58,14,230,28,18,T.gold,true);FieldKit_Text(c.title,d[1])
   c.state=T.Label(c,"",58,45,230,20,12,T.muted)
-  c.detail=T.Label(c,d[2],16,72,280,38,12,T.muted)
-  c.open=T.Button(c,nil,"Configure",16,110,260,25,function() U.Select(d[4]) end)
+  c.detail=T.Label(c,d[2],16,72,280,38,12,T.muted);FieldKit_Text(c.detail,d[2])
+  c.open=T.Button(c,nil,"Configure",16,110,260,25,function() U.Select(d[4]) end);FieldKit_Text(c.open,"Configure")
   c.key=d[5];table.insert(U.homeCards,c)
  end
  page.layoutCard=CreateFrame("Frame",nil,page);page.layoutCard:SetHeight(96);T.Surface(page.layoutCard,"card")
- page.layoutTitle=T.Label(page.layoutCard,"Arrange your HUD",16,12,400,26,19,T.gold,true)
- page.layoutHint=T.Label(page.layoutCard,"Drag active windows directly. Arrange hidden previews and combat areas here.",16,44,400,38,12,T.muted)
- page.layoutAction=T.Button(page.layoutCard,nil,"Arrange previews",0,32,164,30,function() U.SetLayoutEditing(true,false) end)
- page.presetHint=T.Label(page,"Essential HUD: damage, lairs, gold and group totals. Other addons are unchanged.",0,540,650,46,12,T.muted)
- page.essential=T.Button(page,nil,"Use essential HUD",0,594,190,30,function() U.EssentialHud(false) end)
- page.undoPreset=T.Button(page,nil,"Undo HUD preset",202,594,190,30,function() U.EssentialHud(true) end)
+ page.layoutTitle=T.Label(page.layoutCard,"Arrange your HUD",16,12,400,26,19,T.gold,true);FieldKit_Text(page.layoutTitle,"Arrange your HUD")
+ page.layoutHint=T.Label(page.layoutCard,"Drag active windows directly. Arrange hidden previews and combat areas here.",16,44,400,38,12,T.muted);FieldKit_Text(page.layoutHint,"Drag active windows directly. Arrange hidden previews and combat areas here.")
+ page.layoutAction=T.Button(page.layoutCard,nil,"Arrange previews",0,32,164,30,function() U.SetLayoutEditing(true,false) end);FieldKit_Text(page.layoutAction,"Arrange previews")
+ page.presetHint=T.Label(page,"Essential HUD: damage, lairs, gold and group totals. Other addons are unchanged.",0,540,650,46,12,T.muted);FieldKit_Text(page.presetHint,"Essential HUD: damage, lairs, gold and group totals. Other addons are unchanged.")
+ page.essential=T.Button(page,nil,"Use essential HUD",0,594,190,30,function() U.EssentialHud(false) end);FieldKit_Text(page.essential,"Use essential HUD")
+ page.undoPreset=T.Button(page,nil,"Undo HUD preset",202,594,190,30,function() U.EssentialHud(true) end);FieldKit_Text(page.undoPreset,"Undo HUD preset")
  U.presetUndo=page.undoPreset
  page.contentHeight=640
 end
@@ -340,7 +455,7 @@ function U.BuildPage(section,index)
  local scroll=CreateFrame("ScrollFrame","FieldKitJourneyScroll"..index,U.frame,"UIPanelScrollFrameTemplate")
  local page=CreateFrame("Frame","FieldKitPanelPage"..index,scroll);page:SetWidth(700);page.flow={};page.section=section
  scroll:SetScrollChild(page);page.scroll=scroll;U.Wheel(scroll,page)
- page.heading=T.Label(page,section.title,0,0,640,36,26,T.gold,true)
+ page.heading=T.Label(page,section.title,0,0,640,36,26,T.gold,true);FieldKit_Text(page.heading,section.title)
  local y=56
  local items=section.items
  if section.windowTabs then
@@ -371,6 +486,7 @@ function U.BuildPage(section,index)
    if item.kind=="syncStatus" then U.syncStatus=detail end
    table.insert(page.flow,{frame=row,y=y});y=y+110
   elseif item.kind=="combat" then FieldKit_CreateCombatOptions(page);y=570
+  elseif item.kind=="worldmarkers" then y=BuildMarkerGallery(page,y)
   elseif item.kind=="check" then y=Checkbox(page,item,y)
   elseif item.kind=="slider" then y=Slider(page,item,y)
   elseif item.kind=="choice" then
@@ -395,7 +511,7 @@ function U.BuildPage(section,index)
    for _,tab in ipairs(page.windowTabs) do if tab.id==item.windowTab then tab.height=y+16 end end
   end
  end
- page.contentHeight=y+16;U.pages[index]=page
+ page.contentHeight=y+48;U.pages[index]=page
  if section.windowTabs then U.SelectWindowTab(page,FieldKitDB.windowPage) end
  return page
 end
@@ -442,10 +558,35 @@ function U.Select(id)
  local selected=1
  for i=1,table.getn(U.sections) do if U.sections[i].id==id then selected=i end end
  U.CloseMenus()
+ if U.navGroups then
+  for i=1,table.getn(U.navOrder) do
+   local group=U.navGroups[U.navOrder[i]]
+   if group.sectionIds[U.sections[selected].id] and U.navOpen~=group.name then
+    U.navOpen=group.name;U.LayoutNavigation();break
+   end
+  end
+ end
  for i=1,table.getn(U.pages) do
   local page=U.pages[i];local tab=U.frame.tabs[i];local active=i==selected
   if active then page.scroll:Show();page:Show() else page:Hide();page.scroll:Hide() end
   tab.fieldkitSelected=active;T.State(tab,active)
+ end
+ -- Keep the selected category in view after direct navigation from home.
+ if U.navigation and U.navigation.SetVerticalScroll then
+  local tab=U.frame.tabs[selected]
+  -- Lua 5.0 sandbox does not necessarily expose the global select().
+  -- T.Button anchors navigation tabs to the scroll child using TOPLEFT.
+  local pointY=nil
+  if tab and tab.GetPoint then local point,relativeTo,relativePoint,pointX,y=tab:GetPoint(1);pointY=y end
+  if type(pointY)=="number" then
+   local top=-pointY
+   local offset=U.navigation:GetVerticalScroll() or 0
+   local height=U.navigation:GetHeight() or 0
+   if height>0 then
+    if top<offset then U.navigation:SetVerticalScroll(math.max(0,top-12))
+    elseif top+34>offset+height then U.navigation:SetVerticalScroll(math.max(0,top+46-height)) end
+   end
+  end
  end
  FieldKitDB.uiPage=U.sections[selected].id;FieldKitDB.panelTab=selected;FieldKitDB.panelSection=U.sections[selected].title
  U.Refresh()
@@ -459,14 +600,34 @@ function U.Reflow()
  U.screenWidth=sw;U.screenHeight=sh;U.frame:SetWidth(w);U.frame:SetHeight(h)
  U.frame:SetScale(math.min(1,(sw-16)/w,(sh-16)/h));T.Update(U.frame)
  local sidebar=w<900 and 174 or 204;local x=sidebar+36;local content=w-x-34
+ if U.navigation then
+  U.navigation:SetWidth(sidebar+6)
+  U.navigation:SetHeight(math.max(180,h-236))
+  U.navigationBody:SetWidth(sidebar-16)
+ end
  U.header:SetWidth(w-64);U.headerLine:SetWidth(w-44)
  U.title:SetWidth(w-220);U.subtitle:SetWidth(w-230)
  U.status:ClearAllPoints();U.status:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-(h-78));U.contentWidth=content;U.status:SetWidth(U.reloadNeeded and content-166 or content)
  local y=h-44
- U.move:ClearAllPoints();U.move:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-y)
- U.reset:ClearAllPoints();U.reset:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x+152,-y)
- U.undo:ClearAllPoints();U.undo:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x+320,-y)
+ -- C10.4: reserve the close button first; distribute footer actions within
+ -- the remaining width. Undo is optional, but must never cover Close.
+ local closeWidth=90
+ local available=content-closeWidth-14
+ local gap=8
+ local previewWidth=math.min(120,math.max(88,available*.23))
+ local resetWidth=math.min(190,math.max(140,available*.43))
+ local undoWidth=75
+ if previewWidth+resetWidth+undoWidth+gap*2>available then
+  resetWidth=math.max(120,available-previewWidth-undoWidth-gap*2)
+ end
+ U.move:ClearAllPoints();U.move:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-y);U.move:SetWidth(previewWidth)
+ U.reset:ClearAllPoints();U.reset:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x+previewWidth+gap,-y);U.reset:SetWidth(resetWidth)
+ U.undo:ClearAllPoints();U.undo:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x+previewWidth+gap+resetWidth+gap,-y);U.undo:SetWidth(undoWidth)
  U.close:ClearAllPoints();U.close:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-22,-y)
+ U.move.fieldkitLabel:SetWidth(previewWidth-20)
+ U.reset.fieldkitLabel:SetWidth(resetWidth-16)
+ U.undo.fieldkitLabel:SetWidth(undoWidth-16)
+ T.Update(U.move);T.Update(U.reset);T.Update(U.undo)
  U.reload:ClearAllPoints();U.reload:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-22,-(h-80))
  for i=1,table.getn(U.pages) do
   local page=U.pages[i];local scroll=page.scroll
@@ -482,7 +643,7 @@ function U.Reflow()
    end
   end
   if page.combatEditor and page.combatEditor.Reflow then page.combatEditor.Reflow(content-16) end
-  local tab=U.frame.tabs[i];tab:SetWidth(sidebar-14);tab.fieldkitLabel:SetWidth(sidebar-59);T.Update(tab)
+  local tab=U.frame.tabs[i];tab:SetWidth(sidebar-24);tab.fieldkitLabel:SetWidth(sidebar-69);T.Update(tab)
   if page.intro then
    page.intro:SetWidth(content-16);page.presetHint:SetWidth(content-16)
    local cw=(content-28)/2
@@ -542,7 +703,7 @@ function U.Build(sections,context)
  T.Surface(frame,"window")
  U.seal=frame:CreateTexture(nil,"ARTWORK");U.seal:SetPoint("TOPLEFT",frame,"TOPLEFT",22,-16);U.seal:SetWidth(82);U.seal:SetHeight(82);U.seal:SetTexture(T.media.."ChronicleSeal.tga")
  U.title=T.Label(frame,"AZEROTH FIELDKIT",116,21,700,42,30,T.gold,true)
- U.subtitle=T.Label(frame,"Combat and interface tools",119,69,600,22,13,T.muted)
+ U.subtitle=T.Label(frame,"Combat and interface tools",119,69,600,22,13,T.muted);FieldKit_Text(U.subtitle,"Combat and interface tools")
  U.version=T.Label(frame,"v"..FieldKit.version,810,19,146,20,11,T.muted)
  U.version:ClearAllPoints();U.version:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-48,-22)
  local line=frame:CreateTexture(nil,"ARTWORK");line:SetPoint("TOPLEFT",frame,"TOPLEFT",22,-111);line:SetWidth(956);line:SetHeight(1);line:SetTexture(.54,.44,.27);U.headerLine=line
@@ -551,19 +712,78 @@ function U.Build(sections,context)
  header:SetScript("OnDragStart",function() frame:StartMoving() end)
  header:SetScript("OnDragStop",function() frame:StopMovingOrSizing() end)
  local x=CreateFrame("Button","FieldKitPanelClose",frame,"UIPanelCloseButton");x:SetWidth(26);x:SetHeight(26);x:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-10,-10);x:SetFrameLevel(120);x:SetScript("OnClick",function() frame:Hide() end)
- frame.tabs={};local y=128
+ -- The navigation has its own scroll viewport. On 768px screens all pages
+ -- remain reachable without shrinking labels or covering the footer.
+ local nav=CreateFrame("ScrollFrame","FieldKitV2Navigation",frame)
+ nav:SetPoint("TOPLEFT",frame,"TOPLEFT",14,-126)
+ nav:SetWidth(208);nav:SetHeight(520)
+ local navBody=CreateFrame("Frame","FieldKitV2NavigationContent",nav)
+ navBody:SetWidth(190);navBody:SetHeight(600)
+ nav:SetScrollChild(navBody)
+ -- C7 polish: wheel scrolling without the intrusive native scrollbar.
+ U.Wheel(nav,navBody)
+ U.navigation=nav;U.navigationBody=navBody
+ -- V2-C1: one expanded category at a time. Every existing page remains intact.
+ U.navGroups={};U.navOrder={};U.navOpen=nil
+ frame.tabs={}
+ local lastGroup=nil
  for i=1,table.getn(sections) do
   local section=sections[i];local id=section.id
-  if section.group then T.Label(frame,section.group,26,y,174,20,11,T.muted);y=y+24 end
-  local b=T.Button(frame,"FieldKitPanelTab"..i,section.title,22,y,190,32,function() U.Select(id) end)
-  b.section=section;b.fieldkitNavigation=true;T.State(b,false);b.fieldkitLabel:ClearAllPoints();b.fieldkitLabel:SetPoint("LEFT",b,"LEFT",37,0)
-  T.Glyph(b,section.glyph,7,6,21);b.page=U.BuildPage(section,i);frame.tabs[i]=b;y=y+34
+  local group=section.group or "Other"
+  if not U.navGroups[group] then
+   U.navGroups[group]={items={},name=group}
+   table.insert(U.navOrder,group)
+  end
+  local b=T.Button(navBody,"FieldKitPanelTab"..i,section.title,8,0,180,32,function() U.Select(id) end);FieldKit_Text(b,section.title)
+  b.section=section;b.fieldkitNavigation=true;T.State(b,false)
+  b.fieldkitLabel:ClearAllPoints();b.fieldkitLabel:SetPoint("LEFT",b,"LEFT",37,0);b.fieldkitLabel:SetWidth(137)
+  T.Glyph(b,section.glyph,7,6,21);b.page=U.BuildPage(section,i);frame.tabs[i]=b
+  table.insert(U.navGroups[group].items,b)
+  U.navGroups[group].firstId=U.navGroups[group].firstId or id
+  U.navGroups[group].sectionIds=U.navGroups[group].sectionIds or {}
+  U.navGroups[group].sectionIds[id]=true
  end
+ function U.LayoutNavigation()
+  local y=0
+  for i=1,table.getn(U.navOrder) do
+   local group=U.navGroups[U.navOrder[i]]
+   if not group.header then
+    local name=group.name
+    group.header=T.Button(navBody,nil,name,8,0,180,30,function()
+     if U.navOpen==name then return end
+     U.navOpen=name
+     U.LayoutNavigation()
+     U.Select(group.firstId)
+    end)
+   end
+   local header=group.header
+   header:ClearAllPoints();header:SetPoint("TOPLEFT",navBody,"TOPLEFT",8,-y)
+   header:SetWidth(180);header:SetHeight(30)
+   T.State(header,U.navOpen==group.name)
+   y=y+33
+   for j=1,table.getn(group.items) do
+    local tab=group.items[j]
+    if U.navOpen==group.name then
+     tab:ClearAllPoints();tab:SetPoint("TOPLEFT",navBody,"TOPLEFT",8,-y)
+     tab:Show();y=y+34
+    else tab:Hide() end
+   end
+   y=y+4
+  end
+  navBody:SetHeight(y+12);U.navigationHeight=y+12
+ end
+ local initialId=FieldKitDB and FieldKitDB.uiPage or sections[1].id
+ for i=1,table.getn(U.navOrder) do
+  local group=U.navGroups[U.navOrder[i]]
+  if group.sectionIds[initialId] then U.navOpen=group.name end
+ end
+ U.navOpen=U.navOpen or U.navOrder[1]
+ U.LayoutNavigation()
  U.status=T.Label(frame,"",240,680,650,24,12,T.muted)
- U.move=T.Button(frame,"FieldKitMoveWindows","Previews",240,716,142,28,function() U.SetLayoutEditing(true,false) end)
- U.reset=T.Button(frame,"FieldKitPanelReset","Reset HUD positions",392,716,158,28,U.ResetPositions)
- U.undo=T.Button(frame,nil,"Undo",560,716,66,28,U.UndoPositions)
- U.close=T.Button(frame,nil,"Close",874,716,100,28,function() frame:Hide() end)
+ U.move=T.Button(frame,"FieldKitMoveWindows","Previews",240,716,120,28,function() U.SetLayoutEditing(true,false) end);FieldKit_Text(U.move,"Previews")
+ U.reset=T.Button(frame,"FieldKitPanelReset","Reset HUD positions",372,716,190,28,U.ResetPositions);FieldKit_Text(U.reset,"Reset HUD positions");U.reset.fieldkitLabel:SetWidth(170);T.Font(U.reset.fieldkitLabel,12,T.gold)
+ U.undo=T.Button(frame,nil,"Undo",574,716,75,28,U.UndoPositions);FieldKit_Text(U.undo,"Undo")
+ U.close=T.Button(frame,nil,"Close",874,716,90,28,function() frame:Hide() end);FieldKit_Text(U.close,"Close")
  U.reload=T.Button(frame,nil,"Reload UI",824,680,150,26,function() if U.reloadNeeded then context.reload() end end)
  local dock=CreateFrame("Frame","FieldKitLayoutDock",UIParent);U.dock=dock
  dock:SetWidth(560);dock:SetHeight(172);dock:SetPoint("TOP",UIParent,"TOP",0,-30);dock:SetFrameStrata("DIALOG");dock:SetFrameLevel(150);T.Surface(dock,"window")
@@ -581,7 +801,7 @@ function U.Build(sections,context)
  end)
  U.otherUI=T.Button(dock,"FieldKitPreviewOtherUI","Show other interface elements",18,126,520,28,FieldKitPreviewVisibility.Toggle)
  local previewElapsed=0
- dock:SetScript("OnUpdate",function() previewElapsed=previewElapsed+(arg1 or 0);if previewElapsed>=.15 then previewElapsed=0;FieldKitPreview.Refresh() end end)
+ dock:SetScript("OnUpdate",function() if not dock:IsShown() then previewElapsed=0;return end;previewElapsed=previewElapsed+(arg1 or 0);if previewElapsed>=.15 then previewElapsed=0;FieldKitPreview.Refresh() end end)
  dock:SetScript("OnHide",function() if FieldKit.layoutEditing then U.SetLayoutEditing(false,false) end end);dock:Hide()
  frame:SetScript("OnShow",function() U.Refresh() end)
  frame:SetScript("OnHide",function()

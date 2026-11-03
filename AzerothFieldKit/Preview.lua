@@ -68,6 +68,8 @@ end
 function P.HealthFrame()
  local f=CreateFrame("Frame",nil,UIParent);f:SetWidth(280);f:SetHeight(108)
  f.title=T.Label(f,"Preview — sample data",0,0,280,24,12,T.gold)
+ f.healthInfo=T.Label(f,"",0,23,280,18,12,T.text)
+ f.targetInfo=T.Label(f,"",0,78,280,18,11,T.muted)
  local bar=CreateFrame("StatusBar",nil,f);f.health=bar
  bar:SetPoint("TOPLEFT",f,"TOPLEFT",0,-48);bar:SetHeight(9)
  bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");bar:SetStatusBarColor(.1,.9,.1)
@@ -86,10 +88,28 @@ function P.Frame(index)
  if P.frames[index] then return P.frames[index] end
  local f
  if index>=P.playerIndex then f=P.HealthFrame()
- elseif index==P.bossIndex then f=P.createBoss(1,true)
+ elseif index==P.bossIndex then
+  f=P.createBoss(1,true)
+  -- The native boss name/HP text may be hidden by live-HUD visibility
+  -- controllers. Own a separate overlay with independent fixture values.
+  f.previewOverlay=CreateFrame("Frame",nil,f)
+  f.previewOverlay:SetAllPoints(f)
+  f.previewOverlay:SetFrameLevel(f:GetFrameLevel()+15)
+  f.previewName=T.Label(f.previewOverlay,"",104,9,210,18,12,T.gold)
+  f.previewHealth=T.Label(f.previewOverlay,"",104,57,210,18,12,T.text)
+  f.previewDetail=T.Label(f.previewOverlay,"",104,75,210,15,11,T.muted)
  else
   f=P.createBar("FieldKitPreviewCard"..index,P.labels[index],8)
   f.mashCollapseButton:Hide();f.mashCollapsed=false;FieldKit.CreateMeterColumns(f)
+  -- Dedicated sample labels: native meter row visibility and layout are controlled
+  -- by the live HUD, so preview data must not depend on that row pool.
+  f.sampleLines={}
+  for n=1,8 do
+   local line=f:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
+   line:SetJustifyH("LEFT");line:SetTextColor(.92,.84,.63)
+   line:SetPoint("TOPLEFT",f,"TOPLEFT",10,-27-(n-1)*18)
+   line:SetHeight(16);f.sampleLines[n]=line
+  end
   if index==5 then
    for _,row in ipairs(f.rows) do row.sampleBonus=row:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");row.sampleBonus:SetPoint("TOPLEFT",row,"TOPLEFT",3,-15);row.sampleBonus:SetHeight(12);row.sampleBonus:SetTextColor(.3,1,.4) end
   end
@@ -116,7 +136,7 @@ function P.Rows(index)
  if index==5 and FieldKitDB.loadoutTab==2 then return {{"Fireball","Rank 3","+8% / -16%"},{"Melee","Rank 3","+4%"}} end
  if index==5 then return {{"Amulet","Example"},{"Trinket 1","Example"},{"Trinket 2","Example"},{"Ring 1","Example"},{"Ring 2","Example"}} end
  if index==6 then return {{"Damage","+120%"},{"Haste","+30%"},{"Crit Chance","25%"},{"Lifesteal","3%"}} end
- if index==7 then return {{"Kills","1250"},{"Gold","640"},{"Chest","86"}} end
+ if index==7 then return {{"Gold","640"},{"Chest price","86"},{"Next chest","720"}} end
  if index==8 then return {{"Player A",42000,1400,.4},{"Player B",31500,1050,.3},{"Player C",21000,700,.2},{"Player D",10500,350,.1}} end
  if index>=9 and index<=12 then return {{"Health",hp,.55},{"Mana","65 / 100",.65},{"Damage / DPS","42000 / 1400"}} end
  if index==13 then
@@ -142,7 +162,10 @@ function P.Render(index)
   local player=index==P.playerIndex
   local mode=player and FieldKitDB.playerHealthMode or FieldKitDB.targetHealthMode
   f.health:SetWidth(player and FieldKitPlayerBar:GetWidth() or 180)
+  f.health:SetMinMaxValues(0,12200);f.health:SetValue(6705)
   f.hp:SetText(FieldKit_FormatHealth(6705,12200,mode));FieldKit_Text(f.title,"Preview — sample data")
+  f.healthInfo:SetText((player and FieldKit_L("Player") or FieldKit_L("Target")).."  ·  "..FieldKit_FormatHealth(6705,12200,mode))
+  f.targetInfo:SetText(player and FieldKit_L("Shield").."  2,440  ·  "..FieldKit_L("Buffs").."  3" or FieldKit_L("Target").."  55%")
   f.shield:SetWidth(f.health:GetWidth()*.2)
   if player and FieldKitDB.playerShield then f.shield:Show() else f.shield:Hide() end
   for _,icon in ipairs(f.buffs) do if player and FieldKitDB.playerBuffs then icon:Show() else icon:Hide() end end
@@ -150,6 +173,9 @@ function P.Render(index)
   f.name:SetText(FieldKit_L("Boss").." · "..FieldKit_L("Preview"))
   f.hp:SetText(FieldKit_FormatHealth(6705,12200,FieldKitDB.bossHealthMode))
   f.bar:SetMinMaxValues(0,12200);f.bar:SetValue(6705);f.level:SetText("7")
+  f.previewName:SetText(FieldKit_L("Boss").." · "..FieldKit_L("Preview").."  Lv. 7")
+  f.previewHealth:SetText(FieldKit_FormatHealth(6705,12200,FieldKitDB.bossHealthMode).."  (55%)")
+  f.previewDetail:SetText(FieldKit_L("Shield").."  1,250  ·  3 debuffs")
   FieldKit_Text(f.tag,"Preview — sample data")
   local data=FieldKit_PortraitCatalog.feralas and FieldKit_PortraitCatalog.feralas["Brute gordunni"]
   f.portrait:SetTexture(data and "Interface\\AddOns\\AzerothFieldKit\\Portraits\\"..data.key..".tga" or "Interface\\Icons\\INV_Misc_QuestionMark")
@@ -164,11 +190,29 @@ function P.Render(index)
   local width=math.max(280,size and size.width or source:GetWidth())
   if index==2 or index==8 or index==3 then width=math.max(width,FieldKit.MeterWidth(FieldKitDB.meterValues)) end
   local rowHeight=(index==5) and 32 or 14
-  f:SetWidth(width);f:SetHeight(math.max(28+rowHeight*table.getn(rows),size and size.height or 0))
+  local nativeRows=f.rows and table.getn(f.rows) or 0
+  -- All inspector cards use independent sample text. Live row widgets may be
+  -- hidden/repositioned by HUD layout and must never suppress fixture data.
+  local useSamples=true
+  f:SetWidth(width);f:SetHeight(math.max(36+18*table.getn(rows),size and size.height or 0,94))
+  for n=1,table.getn(f.sampleLines or {}) do
+   local line=f.sampleLines[n]
+   local d=useSamples and rows[n] or nil
+   if d then
+    line:SetWidth(width-20)
+    local detail=FieldKit_L(tostring(d[2]))
+    if type(d[2])=="number" then
+     detail=tostring(d[2])
+     if type(d[3])=="number" then detail=detail.."  /  "..tostring(d[3]).." DPS" end
+    end
+    line:SetText(FieldKit_L(d[1]).."    "..detail)
+    line:Show()
+   else line:Hide() end
+  end
   FieldKit_Text(f.title,"Preview");f.title:SetWidth(width*.28)
   FieldKit_Text(f.total,P.labels[index]);f.total:SetWidth(width*.6)
   for i=1,table.getn(f.rows) do
-   local row=f.rows[i];local d=rows[i]
+   local row=f.rows[i];local d=useSamples and nil or rows[i]
    if d then
     row:ClearAllPoints();row:SetPoint("TOPLEFT",f,"TOPLEFT",6,-22-(i-1)*math.min(32,(f:GetHeight()-28)/table.getn(rows)))
     row:SetPoint("TOPRIGHT",f,"TOPRIGHT",-6,-22-(i-1)*math.min(32,(f:GetHeight()-28)/table.getn(rows)))
@@ -186,6 +230,10 @@ function P.Render(index)
    else row:Hide() end
   end
   T.Update(f)
+  -- Keep fixture labels above the native card artwork after theme updates.
+  for n=1,table.getn(f.sampleLines) do
+   if n<=table.getn(rows) then f.sampleLines[n]:Show() end
+  end
  end
  -- Sample label is inside every frame's bounds. It cannot be cropped offscreen.
  if P.mode=="inspect" then
@@ -239,8 +287,14 @@ function P.Refresh()
  end
  FieldKitPreviewVisibility.Update()
  if P.inspector then
-  FieldKit_Text(P.inspector.place,P.selected>=P.playerIndex and "Health preview only; drag the active player bar directly" or "Place this window")
-  FieldKit_Text(P.inspector.reset,P.selected>=P.playerIndex and "Health preview only; drag the active player bar directly" or P.Group(P.selected) and "Ungroup this side to reset one window" or "Reset this window position")
+  local health=P.selected>=P.playerIndex
+  FieldKit_Text(P.inspector.place,health and "Preview only" or "Place this window")
+  FieldKit_Text(P.inspector.reset,health and "No position to reset" or P.Group(P.selected) and "Ungroup to reset" or "Reset this window position")
+  if health then P.inspector.place:Disable() else P.inspector.place:Enable() end
+  if health or P.Group(P.selected) then P.inspector.reset:Disable() else P.inspector.reset:Enable() end
+  if P.inspector.help then
+   FieldKit_Text(P.inspector.help,health and "Health preview only; drag the active player bar directly" or "Examples only. No combat data is recorded or shared.")
+  end
  end
 end
 
@@ -284,7 +338,7 @@ function P.Open(index)
   f:SetMovable(true);f:SetClampedToScreen(true);f:EnableMouse(true);f:RegisterForDrag("LeftButton");T.Surface(f,"window")
   f:SetScript("OnDragStart",function() f:StartMoving() end);f:SetScript("OnDragStop",function() f:StopMovingOrSizing() end)
   T.Label(f,"Preview — sample data",12,12,390,28,18,T.gold,true)
-  T.Label(f,"Examples only. No combat data is recorded or shared.",12,43,410,32,12,T.muted)
+  f.help=T.Label(f,"Examples only. No combat data is recorded or shared.",12,43,410,32,12,T.muted)
   local x=CreateFrame("Button",nil,f,"UIPanelCloseButton");x:SetWidth(24);x:SetHeight(24);x:SetPoint("TOPRIGHT",f,"TOPRIGHT",-4,-4);x:SetScript("OnClick",P.Stop)
   f.choice=FieldKitUI.Choice(f,"FieldKitPreviewChoice","Test display",12,90,416,P.labels,function() return P.selected end,function(v) P.selected=v;if v<=table.getn(FieldKitCardLayout.names) then FieldKitCardLayout.selected=v;FieldKitUI.Refresh() end;P.Refresh() end,P.Refresh)
   f.include=CreateFrame("CheckButton",nil,f,"UICheckButtonTemplate");f.include:SetWidth(24);f.include:SetHeight(24);f.include:SetPoint("TOPLEFT",f,"TOPLEFT",12,-414)

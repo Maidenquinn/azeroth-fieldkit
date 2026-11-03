@@ -47,7 +47,8 @@ function C.Event(kind)
 end
 -- Resolve and clamp an RGB override against its category default.
 function C.Color(kind)
- local d=C.byKind[kind];local e=C.Event(kind);local c=e and e.color
+ local d=C.byKind[kind];if not d then return 1,1,1 end
+ local e=C.Event(kind);local c=e and e.color
  local r={}
  for i=1,3 do
   local v=type(c)=="table" and tonumber(c[i]) or d[3][i]
@@ -59,7 +60,9 @@ end
 -- Bound a UTF-8 text field without cutting an accented character in half.
 -- Truncate UTF-8 safely for bounded labels/lists.
 function C.LimitText(text,limit)
- local last=math.min(string.len(text),limit);if last<=0 then return "" end
+ if type(text)~="string" then return "" end
+ limit=tonumber(limit) or 0
+ local last=math.min(string.len(text),math.max(0,math.floor(limit)));if last<=0 then return "" end
  local first=last
  while first>1 and string.byte(text,first)>=128 and string.byte(text,first)<192 do first=first-1 end
  local lead=string.byte(text,first)
@@ -154,8 +157,11 @@ local function WorldReady()
  end
  return true
 end
+local function FiniteNumber(n)
+ return type(n)=="number" and n==n and n>-100000000 and n<100000000
+end
 local function PlaceWorld(fs,x,y,rise)
- if type(x)~="number" or type(y)~="number" then return false end
+ if not FiniteNumber(x) or not FiniteNumber(y) then return false end
  local parent=WorldFrame or UIParent
  fs:ClearAllPoints()
  fs:SetPoint("CENTER",parent,"BOTTOMLEFT",x,y+(rise or 0))
@@ -265,18 +271,33 @@ local function ProjectWorldSlots()
  end
  if table.getn(ids)==0 then return end
  local ok,projection=pcall(AZS_ProjectCombatTextAnchors,ids,"follow")
- if not ok or type(projection)~="table" or type(projection.entries)~="table" then return end
+ if not ok or type(projection)~="table" or type(projection.entries)~="table" then
+  for i=1,table.getn(map) do if map[i] then map[i].fs:Hide() end end
+  return
+ end
  for i=1,math.min(table.getn(ids),table.getn(projection.entries)) do
   local point,s=projection.entries[i],map[i]
   if s and s.active and s.value then
    local size=C.Number(s.value.kind=="crit" and "combatTextCritSize" or "combatTextFontSize",s.value.kind=="crit" and 20 or 16,10,40)
    if type(point)=="table" and point.state=="onScreen" and type(point.x)=="number" and type(point.y)=="number" then
-    local yards=tonumber(point.cameraDistance)
-    if yards and yards>0 then size=math.max(10,math.min(40,math.floor(size*(28/math.max(yards,6))+.5))) end
-    StyleSlot(s,s.value,size,now,lifetime)
-    local rise=(now-s.start)*18
-    PlaceWorld(s.fs,point.x,point.y,rise)
-    s.fs:Show()
+    -- 0.139.2 exposes both player and camera distances. Camera distance
+    -- controls legibility; player distance is used only as a safety cull.
+    local playerYards=tonumber(point.playerDistance)
+    local cameraYards=tonumber(point.cameraDistance)
+    if (playerYards and (not FiniteNumber(playerYards) or playerYards>130))
+       or not FiniteNumber(point.x) or not FiniteNumber(point.y) then
+     s.fs:Hide()
+    else
+     -- Gentle scaling, bounded to avoid giant text near the camera.
+     if cameraYards and FiniteNumber(cameraYards) and cameraYards>0 then
+      local factor=math.sqrt(28/math.max(cameraYards,8))
+      factor=math.max(0.75,math.min(1.25,factor))
+      size=math.max(10,math.min(40,math.floor(size*factor+0.5)))
+     end
+     StyleSlot(s,s.value,size,now,lifetime)
+     local rise=(now-s.start)*18
+     if PlaceWorld(s.fs,point.x,point.y,rise) then s.fs:Show() else s.fs:Hide() end
+    end
    else
     s.fs:Hide()
    end
@@ -419,6 +440,117 @@ function C.Preset(name)
   local kind=C.defs[i][1];C.Event(kind).enabled=name=="all" or i<=7 or kind=="dodge" or kind=="parry"
  end
  C.Clear()
+end
+-- Persistent independent combat-text presets. Active settings remain in the legacy
+-- flat DB so every existing renderer and editor continues to work unchanged.
+local function CopyTable(value)
+ if type(value)~="table" then return value end
+ local result={};for k,v in pairs(value) do result[k]=CopyTable(v) end;return result
+end
+local function CaptureProfile()
+ local result={}
+ for key in pairs(C.defaults) do result[key]=CopyTable(FieldKitDB[key]) end
+ result.combatEvents=CopyTable(FieldKitDB.combatEvents)
+ return result
+end
+local function ApplyProfile(profile)
+ if type(profile)~="table" then return end
+ for key in pairs(C.defaults) do if profile[key]~=nil then FieldKitDB[key]=CopyTable(profile[key]) end end
+ FieldKitDB.combatEvents=CopyTable(profile.combatEvents or {})
+ C.owner=nil;C.Ensure();C.Clear()
+end
+local function ValidProfile(name)
+ return name=="balanced" or name=="quiet" or name=="all"
+end
+local function DefaultProfile(name,base)
+ local old=CaptureProfile()
+ ApplyProfile(base)
+ if name~="balanced" then C.Preset(name) end
+ local result=CaptureProfile()
+ ApplyProfile(old)
+ return result
+end
+function C.ActiveProfile()
+ local name=FieldKitDB and FieldKitDB.combatProfileActive
+ if ValidProfile(name) then return name end
+ return "balanced"
+end
+function C.InitProfiles()
+ if not C.Ensure() then return end
+ local existing=FieldKitDB.combatProfiles
+ if type(existing)~="table" then existing={} end
+ local original=CaptureProfile()
+ -- Migration: keep the player's current flat settings as Balanced.
+ if type(existing.balanced)~="table" then existing.balanced=CopyTable(original) end
+ if type(existing.quiet)~="table" then existing.quiet=DefaultProfile("quiet",original) end
+ if type(existing.all)~="table" then existing.all=DefaultProfile("all",original) end
+ -- Repair only missing or invalid fields; retain every valid customized value.
+ for _,name in ipairs({"balanced","quiet","all"}) do
+  local profile=existing[name]
+  for key,value in pairs(C.defaults) do
+   if type(profile[key])~=type(value) then profile[key]=CopyTable(value) end
+  end
+  if type(profile.combatEvents)~="table" then profile.combatEvents={} end
+  for i=1,table.getn(C.defs) do
+   local kind=C.defs[i][1]
+   if type(profile.combatEvents[kind])~="table" then profile.combatEvents[kind]={enabled=true} end
+  end
+ end
+ FieldKitDB.combatProfiles=existing
+ if not ValidProfile(FieldKitDB.combatProfileActive) then FieldKitDB.combatProfileActive="balanced" end
+end
+function C.SelectProfile(name)
+ if not ValidProfile(name) or not C.Ensure() then return end
+ C.InitProfiles()
+ local current=C.ActiveProfile()
+ FieldKitDB.combatProfiles[current]=CaptureProfile()
+ if name~=current then
+  ApplyProfile(FieldKitDB.combatProfiles[name])
+  FieldKitDB.combatProfileActive=name
+ end
+end
+function C.SaveActiveProfile()
+ if not C.Ensure() then return end
+ C.InitProfiles()
+ FieldKitDB.combatProfiles[C.ActiveProfile()]=CaptureProfile()
+end
+function C.ResetActiveProfile()
+ if not C.Ensure() then return end
+ C.InitProfiles()
+ local name=C.ActiveProfile()
+ -- Restore factory values for this profile only. Other profiles stay untouched.
+ local old=CaptureProfile()
+ local base={}
+ for key,value in pairs(C.defaults) do base[key]=CopyTable(value) end
+ base.combatEvents={}
+ ApplyProfile(base)
+ local fresh=CaptureProfile()
+ ApplyProfile(old)
+ local replacement=DefaultProfile(name,fresh)
+ FieldKitDB.combatProfiles[name]=CopyTable(replacement)
+ ApplyProfile(replacement)
+end
+-- Persist the active profile on logout even if the editor was never reopened.
+local profileSaver=CreateFrame("Frame")
+profileSaver:RegisterEvent("PLAYER_LOGOUT")
+profileSaver:SetScript("OnEvent",function()
+ if FieldKitDB and type(FieldKitDB.combatProfiles)=="table" then C.SaveActiveProfile() end
+end)
+-- C5: route synthetic on-screen samples through the SAME renderer as live text.
+-- Samples bypass combat ingestion, persistence, and statistics. They are
+-- explicitly marked preview and are never submitted to the grouping queue.
+function C.PreviewEmit(kind,amount,label)
+ if not C.Ensure() then return end
+ local def=C.byKind[kind]
+ if not def then return end
+ local event=C.Event(kind)
+ if not event or not event.enabled then return end
+ if kind=="heal" and not FieldKitDB.combatTextHealing then return end
+ local incoming=kind=="incoming" or kind=="incomingCrit" or kind=="incomingPeriodic"
+ if incoming and not FieldKitDB.combatTextIncoming then return end
+ if not incoming and kind~="heal" and not FieldKitDB.combatTextOutgoing then return end
+ Emit({label=label or def[4] or def[2],amount=amount,kind=kind,
+       incoming=incoming,count=1,preview=true})
 end
 -- Create clearly marked, non-recorded sample messages for the editor.
 function C.Preview(kind)
