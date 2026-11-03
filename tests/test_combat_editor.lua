@@ -69,18 +69,18 @@ local function button(parent,text)
  for i=1,table.getn(parent.children) do local b=parent.children[i];if b.kind=="Button" and b.text==FieldKit_L(text) then return b end end
  error("Button not found: "..text)
 end
-for i,label in ipairs({"Général","Événements","Police","Filtres","Zones"}) do
+for i,label in ipairs({"Essentials","Events","Fonts","Filters","Areas","Game","Advanced"}) do
  click(button(editor,label));assert(editor.selected==i)
- for j=1,5 do assert(editor.pages[j]:IsShown()==(i==j)) end
+ for j=1,7 do assert(editor.pages[j]:IsShown()==(i==j)) end
 end
 local function widget(label)
  for i=1,table.getn(editor.widgets) do if editor.widgets[i].label==label then return editor.widgets[i] end end
  error("Widget not found: "..label)
 end
-click(button(editor,"Événements"));editor.eventKind="out";editor.Refresh()
+click(button(editor,"Events"));editor.eventKind="out";editor.Refresh()
 click(widget("Catégorie à personnaliser"));click(widget("Catégorie à personnaliser").choiceButtons[2]);assert(editor.eventKind=="crit")
 local red=widget("Rouge");red:SetValue(51);this=red;red.scripts.OnValueChanged();assert(math.abs(C.Event("crit").color[1]-.2)<.001)
-editor.ignoreEdit:SetText("Backstab\nRenew");click(button(editor.pages[4],"Appliquer la liste"));assert(FieldKitDB.combatTextIgnore=="Backstab\nRenew")
+editor.ignoreEdit:SetText("Backstab\nRenew");click(button(editor.pages[4],"Apply list"));assert(FieldKitDB.combatTextIgnore=="Backstab\nRenew")
 C.ShowAnchors();assert(FieldKitCombatAnchor1:IsShown() and FieldKitCombatAnchor2:IsShown())
 function FieldKitCombatAnchor1:GetCenter() return 650,450 end
 this=FieldKitCombatAnchor1;FieldKitCombatAnchor1.scripts.OnDragStop();assert(FieldKitDB.combatTextX==150 and FieldKitDB.combatTextY==50)
@@ -89,10 +89,10 @@ this=FieldKitPanel;FieldKitPanel.scripts.OnHide();assert(not FieldKitCombatAncho
 FieldKitDB.combatTextX=savedX;FieldKitDB.uiPage="health";FieldKitDB.panelTab=3;FieldKitDB.panelSection="Health & buffs";FieldKitDB.combatText=true
 assert(FieldKitDB.moneyDockRepair==1 and FieldKitDB.guardianPins==false)
 
-click(button(editor,"Général"));FieldKitDB.hideDamage=false;editor.Refresh()
+click(button(editor,"Essentials"));FieldKitDB.hideDamage=false;editor.Refresh()
 local targetDamage=widget("Show target damage (game)")
 assert(targetDamage:GetChecked())
-click(button(editor.pages[1],"Utiliser seulement ce texte"))
+click(button(editor.pages[7],"Utiliser seulement ce texte"))
 assert(FieldKitDB.combatText and FieldKitDB.hideDamage and FieldKitDB.showCrits==false)
 assert(not targetDamage:GetChecked())
 
