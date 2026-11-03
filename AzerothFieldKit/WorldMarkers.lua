@@ -310,7 +310,7 @@ function M.SetCategoryRange(kind,value)
 end
 function M.GetTexture(kind) local style=styles[kind];return style and style[1] end
 function M.GetAuraTexture() return auraTexture end
-load()
+loadSettings()
 local function report(msg)
  if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffc7a6ffFieldKit Markers:|r "..msg) end
 end
