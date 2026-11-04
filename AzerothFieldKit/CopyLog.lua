@@ -182,7 +182,8 @@ local function OpenCopy()
   FieldKitTheme.Font(hint,12,FieldKitTheme.muted)
   copyFrame=f;copyEdit=e;f.fieldkitHint=hint
  end
- ImportVisible()\n local text=table.concat(history[1] or {},"\n")
+ ImportVisible()
+ local text=table.concat(history[1] or {},"\n")
  if copyFrame and copyFrame.fieldkitHint then
   if text=="" then FieldKit_Text(copyFrame.fieldkitHint,"No captured messages yet. Enable recording and wait for new chat messages.")
   else FieldKit_Text(copyFrame.fieldkitHint,"Ctrl+A, then Ctrl+C to copy these captured messages.") end
