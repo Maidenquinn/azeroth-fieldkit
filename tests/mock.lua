@@ -27,6 +27,8 @@ function methods:GetTexture() return self.texture end
 function methods:SetAlpha(v) self.alpha=v end
 function methods:GetFrameLevel() return 1 end
 function methods:GetCenter() return 500,400 end
+function methods:GetLeft() return self.left end
+function methods:GetBottom() return self.bottom end
 function methods:GetEffectiveScale() return 1 end
 function methods:GetScale() return 1 end
 function methods:GetStringWidth() return string.len(self.text or "")*6 end
