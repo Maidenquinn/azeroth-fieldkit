@@ -47,6 +47,21 @@ math.huge=originalHuge
 assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
 assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
+-- The player can drag the real chat and preserve its position without replacing it.
+FieldKitDB.chatStyle=true;FieldKitDB.chatMove=true;FieldKit.ApplyChatStyle()
+assert(FieldKitChatMoveHandle and FieldKitChatMoveHandle:IsShown())
+this=FieldKitChatMoveHandle;FieldKitChatMoveHandle:GetScript("OnDragStart")()
+ChatFrame1.left=210;ChatFrame1.bottom=150
+FieldKitChatMoveHandle:GetScript("OnDragStop")()
+assert(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.x==210 and FieldKitDB.chatAnchor.y==150)
+FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
+assert(not FieldKitChatMoveHandle:IsShown())
+FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
+FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==510 and FieldKitDB.chatBackgroundColor==3)
+-- Leave the native chat restored for the remaining security fixtures.
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+
 
 for i=1,120 do ChatFrame1:AddMessage("test"..i..string.rep("x",1000)) end
 assert(type(FieldKit.OpenChatCopy)=="function")
