@@ -166,7 +166,7 @@ function FieldKit.ApplyChatStyle()
  local w=Clamp(FieldKitDB.chatWidth,440,280,800)
  local h=Clamp(FieldKitDB.chatHeight,180,100,450)
  local fontSize=Clamp(FieldKitDB.chatFontSize,12,10,20)
- local fading=FieldKitDB.chatFading==true
+ local fading=false -- legacy-client-safe mode; fading temporarily suspended
  local maxLines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
  local bg=Clamp(FieldKitDB.chatBackgroundColor,1,1,table.getn(backgrounds))
@@ -190,13 +190,10 @@ function FieldKit.ApplyChatStyle()
   -- In the Azeroth Survivors legacy client, fading with a zero visibility
   -- duration hides each newly added line immediately. Never enable it without
   -- first establishing a safe, positive visibility interval.
-  if fading and f.SetTimeVisible then
-   f:SetTimeVisible(120)
-   if f.SetFadeDuration then f:SetFadeDuration(3) end
-  elseif fading then
-   fading=false -- API cannot guarantee a safe visible interval.
-  end
-  if f.SetFading then f:SetFading(fading) end
+  -- Safety fallback: on Azeroth Survivors, native chat fading can drop
+  -- incoming lines immediately even after a visibility duration is set.
+  -- Never enable it in this candidate. Keep the real chat always visible.
+  if f.SetFading then f:SetFading(false) end
   if f.SetMaxLines then f:SetMaxLines(maxLines) end
   styleStamp=stamp
  end
@@ -331,7 +328,7 @@ function FieldKit.SyncChat()
  end
  if FieldKitDB and FieldKitDB.chatStyle then
   FieldKit.ApplyChatStyle()
-  if FieldKitDB.chatOverrideText then ColorHook() end
+  -- Do not install a second AddMessage wrapper. Native color handling wins.
  end
 end
 
