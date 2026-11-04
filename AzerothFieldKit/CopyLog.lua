@@ -3,38 +3,153 @@
 local history,hooked={},{}
 local copyFrame,copyEdit
 local active=false
-local button, chatFrame, styleBefore, styleStamp, chatBackdrop
+local button, chatFrame, styleBefore, styleStamp, chatBackdrop, moveHandle
+local moving=false
 local copiedNative=false
 local MAX_MESSAGES,MAX_BYTES=100,512
 
--- Prat-inspired native main-chat controls. Opt-in, reversible, bounded.
+local backgrounds={
+ {0.035,0.045,0.055}, -- charcoal
+ {0.012,0.015,0.023}, -- obsidian
+ {0.035,0.065,0.11}, -- midnight blue
+ {0.13,0.085,0.055}, -- warm brown
+ {0.035,0.09,0.075}, -- forest
+ {0,0,0}, -- black
+}
+local foregrounds={
+ {1,1,1}, {.95,.92,.83}, {1,.82,.49},
+ {.69,.93,.77}, {.69,.85,1}, {.76,.77,.78},
+}
+local fontFiles={
+ nil, -- retain the user's native font, even if customized by another addon
+ "Fonts\\FRIZQT__.TTF",
+ "Fonts\\ARIALN.TTF",
+ "Fonts\\MORPHEUS.TTF",
+ "Fonts\\SKURRI.TTF",
+}
+
+-- Native chat only. These controls never replace chat tabs or channel logic.
 local function NativeChat()
  return getglobal("ChatFrame1") or DEFAULT_CHAT_FRAME
 end
 local function Clamp(v,default,minimum,maximum)
  v=tonumber(v)
- if not v or v~=v then v=default end -- Lua 5.0 may not expose math.huge
+ if not v or v~=v then v=default end
  return math.floor(math.max(minimum,math.min(maximum,v))+.5)
+end
+local function ApplyAnchor(f)
+ local anchor=FieldKitDB and FieldKitDB.chatAnchor
+ if not anchor or type(anchor)~="table" or moving then return end
+ local x=tonumber(anchor.x);local y=tonumber(anchor.y)
+ if not x or not y or x~=x or y~=y then return end
+ local maxX=math.max(0,UIParent:GetWidth()-f:GetWidth())
+ local maxY=math.max(0,UIParent:GetHeight()-f:GetHeight())
+ x=math.max(0,math.min(x,maxX));y=math.max(0,math.min(y,maxY))
+ f:ClearAllPoints()
+ f:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",x,y)
+end
+local function SaveAnchor(f)
+ if not FieldKitDB then return end
+ local x=f.GetLeft and f:GetLeft()
+ local y=f.GetBottom and f:GetBottom()
+ if type(x)~="number" or type(y)~="number" then
+  local point,relative,relPoint,offX,offY=f:GetPoint()
+  if point=="BOTTOMLEFT" and relPoint=="BOTTOMLEFT" and relative==UIParent then
+   x=offX;y=offY
+  end
+ end
+ if type(x)=="number" and type(y)=="number" then
+  FieldKitDB.chatAnchor={
+   x=Clamp(x,0,0,UIParent:GetWidth()),
+   y=Clamp(y,0,0,UIParent:GetHeight())
+  }
+ end
+end
+local function FinishMove()
+ if not moving then return end
+ moving=false
+ local f=NativeChat()
+ if f then
+  f:StopMovingOrSizing()
+  SaveAnchor(f)
+ end
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+end
+local function MoveControl()
+ local f=NativeChat()
+ if not f then return end
+ if not moveHandle then
+  moveHandle=CreateFrame("Button","FieldKitChatMoveHandle",UIParent)
+  moveHandle:SetWidth(112);moveHandle:SetHeight(19)
+  moveHandle:SetFrameStrata("MEDIUM")
+  moveHandle:EnableMouse(true)
+  moveHandle:RegisterForDrag("LeftButton")
+  moveHandle:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",
+   edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile=true,tileSize=16,
+   edgeSize=8,insets={left=3,right=3,top=3,bottom=3}})
+  moveHandle:SetBackdropColor(.015,.025,.037,.95)
+  moveHandle:SetBackdropBorderColor(.50,.41,.25,.8)
+  local title=moveHandle:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+  title:SetPoint("CENTER",moveHandle,"CENTER",0,0)
+  FieldKit_Text(title,"Move chat")
+  moveHandle:SetScript("OnDragStart",function()
+   if not FieldKitDB or not FieldKitDB.chatStyle or not FieldKitDB.chatMove then return end
+   local frame=NativeChat();if not frame then return end
+   frame:SetMovable(true)
+   if frame.SetClampedToScreen then frame:SetClampedToScreen(true) end
+   moving=true
+   frame:StartMoving()
+  end)
+  moveHandle:SetScript("OnDragStop",FinishMove)
+  moveHandle:SetScript("OnMouseUp",FinishMove)
+  moveHandle:SetScript("OnHide",FinishMove)
+ end
+ if moveHandle.fieldkitAnchor~=f then
+  moveHandle:ClearAllPoints()
+  moveHandle:SetPoint("BOTTOMLEFT",f,"TOPLEFT",56,2)
+  moveHandle.fieldkitAnchor=f
+ end
+ if FieldKitDB and FieldKitDB.chatStyle and FieldKitDB.chatMove then moveHandle:Show()
+ else moveHandle:Hide() end
+end
+function FieldKit.ResetChatPosition()
+ FinishMove()
+ if FieldKitDB then FieldKitDB.chatAnchor=nil end
+ local f=NativeChat()
+ if not f then return end
+ if styleBefore and styleBefore.point and styleBefore.point[1] then
+  f:ClearAllPoints()
+  f:SetPoint(unpack(styleBefore.point))
+ end
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
 end
 function FieldKit.ApplyChatStyle()
  local f=NativeChat()
  if not f or not FieldKitDB then return end
  if not FieldKitDB.chatStyle then
+  if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end
   if styleBefore and chatFrame==f then
    if styleBefore.width then f:SetWidth(styleBefore.width) end
    if styleBefore.height then f:SetHeight(styleBefore.height) end
+   if styleBefore.point and styleBefore.point[1] then
+    f:ClearAllPoints();f:SetPoint(unpack(styleBefore.point))
+   end
    if styleBefore.font and f.SetFont then f:SetFont(styleBefore.font,styleBefore.fontSize,styleBefore.flags) end
    if styleBefore.fading~=nil and f.SetFading then f:SetFading(styleBefore.fading) end
   end
   styleBefore=nil;styleStamp=nil;chatFrame=nil
+  if moveHandle then moveHandle:Hide() end
   return
  end
  if not styleBefore or chatFrame~=f then
   local font,size,flags
   if f.GetFont then font,size,flags=f:GetFont() end
+  if (not font or font=="") and ChatFontNormal and ChatFontNormal.GetFont then
+   font,size,flags=ChatFontNormal:GetFont()
+  end
   styleBefore={width=f:GetWidth(),height=f:GetHeight(),font=font,fontSize=size,flags=flags,
-   fading=f.GetFading and f:GetFading()}
+   fading=f.GetFading and f:GetFading(),point={f:GetPoint()}}
   chatFrame=f;styleStamp=nil
  end
  local w=Clamp(FieldKitDB.chatWidth,440,280,800)
@@ -43,22 +158,31 @@ function FieldKit.ApplyChatStyle()
  local fading=FieldKitDB.chatFading==true
  local maxLines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
- local stamp=table.concat({w,h,fontSize,tostring(fading),maxLines,opacity},":")
- if styleStamp==stamp and f:GetWidth()==w and f:GetHeight()==h then return end
- if opacity>0 then
-  if not chatBackdrop then
-   chatBackdrop=f:CreateTexture(nil,"BACKGROUND")
-   chatBackdrop:SetAllPoints(f)
-   chatBackdrop:SetTexture("Interface\\Buttons\\WHITE8X8")
-  end
-  chatBackdrop:SetVertexColor(0,0,0,opacity/100)
-  chatBackdrop:Show()
- elseif chatBackdrop then chatBackdrop:Hide() end
- f:SetWidth(w);f:SetHeight(h)
- if styleBefore.font and f.SetFont then f:SetFont(styleBefore.font,fontSize,styleBefore.flags) end
- if f.SetFading then f:SetFading(fading) end
- if f.SetMaxLines then f:SetMaxLines(maxLines) end
- styleStamp=stamp
+ local bg=Clamp(FieldKitDB.chatBackgroundColor,1,1,table.getn(backgrounds))
+ local face=Clamp(FieldKitDB.chatFontFace,1,1,table.getn(fontFiles))
+ -- fontFiles[1] is intentionally nil, so table.getn cannot determine its size.
+ face=Clamp(FieldKitDB.chatFontFace,1,1,5)
+ local stamp=table.concat({w,h,fontSize,tostring(fading),maxLines,opacity,bg,face},":")
+ if styleStamp~=stamp or f:GetWidth()~=w or f:GetHeight()~=h then
+  if opacity>0 then
+   if not chatBackdrop then
+    chatBackdrop=f:CreateTexture(nil,"BACKGROUND")
+    chatBackdrop:SetAllPoints(f)
+    chatBackdrop:SetTexture("Interface\\Buttons\\WHITE8X8")
+   end
+   local c=backgrounds[bg]
+   chatBackdrop:SetVertexColor(c[1],c[2],c[3],opacity/100)
+   chatBackdrop:Show()
+  elseif chatBackdrop then chatBackdrop:Hide() end
+  f:SetWidth(w);f:SetHeight(h)
+  local font=fontFiles[face] or styleBefore.font or "Fonts\\FRIZQT__.TTF"
+  if f.SetFont then f:SetFont(font,fontSize,styleBefore.flags) end
+  if f.SetFading then f:SetFading(fading) end
+  if f.SetMaxLines then f:SetMaxLines(maxLines) end
+  styleStamp=stamp
+ end
+ ApplyAnchor(f)
+ MoveControl()
 end
 
 -- Reuse the native chat frame as anchor, without replacing its handlers.
