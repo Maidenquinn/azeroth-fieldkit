@@ -3,6 +3,7 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Reset position"]="Réinit. position",
  ["Chat layout"]="Disposition du chat",
  ["Chat colors & fonts"]="Couleurs et polices",
  ["Chat colors and typography"]="Couleurs et typographie",
