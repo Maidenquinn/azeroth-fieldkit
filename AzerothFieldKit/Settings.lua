@@ -149,6 +149,15 @@ local function ChatSlider(key,label,minimum,maximum,step)
   end,
   format=function(v) return FieldKit_L(label)..": "..v end}
 end
+local function ChatChoice(key,label,values)
+ return {kind="choice",label=label,values=values,
+  get=function() return FieldKitDB[key] or 1 end,
+  set=function(v)
+   FieldKitDB[key]=v
+   if FieldKit.SyncChat then FieldKit.SyncChat() end
+   if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+  end}
+end
 -- Extend the existing schema with language, privacy, combat editor and boss HP controls.
 function FieldKit_AddSettingsSections(sections)
  table.insert(sections,{title="Combat text",items={{kind="combat"}}})
@@ -169,11 +178,30 @@ function FieldKit_AddSettingsSections(sections)
     local old=style.set
     style.set=function(v) old(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
     table.insert(sections[i].items,style)
+    local move=Check("chatMove","Unlock chat position","Displays a discreet Move chat handle just above the chat. Drag it anywhere, then lock to keep the position. Position persists after /reload.",false)
+    local previousMove=move.set
+    move.set=function(v)
+     previousMove(v)
+     if v then FieldKitDB.chatStyle=true end
+     if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+    end
+    move.button={text="Reset chat position",onClick=function()
+     if FieldKit.ResetChatPosition then FieldKit.ResetChatPosition() end
+    end}
+    table.insert(sections[i].items,move)
     table.insert(sections[i].items,ChatSlider("chatWidth","Chat width",280,800,10))
     table.insert(sections[i].items,ChatSlider("chatHeight","Chat height",100,450,10))
     table.insert(sections[i].items,ChatSlider("chatFontSize","Chat font size",10,20,1))
     table.insert(sections[i].items,ChatSlider("chatHistoryLines","Chat history lines",100,500,25))
     table.insert(sections[i].items,ChatSlider("chatBackgroundOpacity","Chat background opacity",0,85,5))
+    table.insert(sections[i].items,ChatChoice("chatFontFace","Chat font family",{"Original font","Friz Quadrata","Arial Narrow","Morpheus","Skurri"}))
+    table.insert(sections[i].items,ChatChoice("chatBackgroundColor","Chat background color",{"Charcoal","Obsidian","Midnight blue","Warm brown","Forest","Black"}))
+    local override=Check("chatOverrideText","Override chat text colors","Optional monochrome colors for NEW messages, including channel-colored text. Existing chat history is not recolored. Disable to preserve native per-channel colors.",false)
+    local oldOverride=override.set
+    override.set=function(v) oldOverride(v);if FieldKit.SyncChat then FieldKit.SyncChat() end end
+    table.insert(sections[i].items,override)
+    table.insert(sections[i].items,ChatChoice("chatTextColor","Chat text color",{"White","Warm white","Gold","Soft green","Ice blue","Muted gray"}))
+
     local fading=Check("chatFading","Fade older chat lines","Fade native chat text when not actively reading. Disable to keep messages visible until scrolled away.",true)
     local original=fading.set
     fading.set=function(v) original(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
