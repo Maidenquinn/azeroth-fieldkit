@@ -39,7 +39,11 @@ assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
 -- Prat-inspired style controls only affect the native frame when enabled.
 local oldWidth,oldHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
 FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230;FieldKitDB.chatFontSize=15
+-- Emulate legacy Lua environments where math.huge is unavailable.
+local originalHuge=math.huge
+math.huge=nil
 FieldKitDB.chatStyle=true;FieldKit.ApplyChatStyle()
+math.huge=originalHuge
 assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
 assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
