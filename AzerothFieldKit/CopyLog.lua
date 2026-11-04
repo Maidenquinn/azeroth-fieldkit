@@ -83,18 +83,6 @@ end
 
 -- Only newer client variants expose read access to the rendered chat buffer.
 -- Vanilla 1.12 lacks this API; no fabricated retroactive text is inserted.
-local function ImportVisible()
- if copiedNative then return end
- local f=NativeChat()
- if not f or type(f.GetNumMessages)~="function" or type(f.GetMessageInfo)~="function" then return end
- local ok,n=pcall(function() return f:GetNumMessages() end)
- if not ok or type(n)~="number" then return end
- copiedNative=true
- for i=math.max(1,n-MAX_MESSAGES+1),n do
-  local success,line=pcall(function() return f:GetMessageInfo(i) end)
-  if success and type(line)=="string" and line~="" then Capture(1,line) end
- end
-end
 
 -- Remove display markup and bound each retained message, UTF-8 safely.
 local function Clean(text)
@@ -111,6 +99,19 @@ local function Capture(index,text)
  local list=history[index] or {};history[index]=list
  if table.getn(list)>=MAX_MESSAGES then table.remove(list,1) end
  table.insert(list,Clean(text))
+end
+
+local function ImportVisible()
+ if copiedNative then return end
+ local f=NativeChat()
+ if not f or type(f.GetNumMessages)~="function" or type(f.GetMessageInfo)~="function" then return end
+ local ok,n=pcall(function() return f:GetNumMessages() end)
+ if not ok or type(n)~="number" then return end
+ copiedNative=true
+ for i=math.max(1,n-MAX_MESSAGES+1),n do
+  local success,line=pcall(function() return f:GetMessageInfo(i) end)
+  if success and type(line)=="string" and line~="" then Capture(1,line) end
+ end
 end
 
 -- Clear both memory and any text already visible in the local copy editbox.
