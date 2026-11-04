@@ -28,7 +28,20 @@ function FieldKit.BuildJourneySections(sections,actions)
    interface[i].tip="Saved now. Use Reload UI below to apply the compact bar; your current run is not reloaded automatically."
   end
  end
+ -- Chat deserves dedicated navigation rather than buried Preferences controls.
+ local chatCopy,chatAppearance,keep={},{},{}
+ local copyKeys={["Enable local chat copy"]=true,["Show chat Copy button"]=true}
+ local appearanceKeys={["Customize main chat"]=true,["Chat width"]=true,["Chat height"]=true,
+  ["Chat font size"]=true,["Chat history lines"]=true,["Chat background opacity"]=true,["Fade older chat lines"]=true}
+ for _,item in ipairs(interface) do
+  if copyKeys[item.label] then table.insert(chatCopy,item)
+  elseif appearanceKeys[item.label] then table.insert(chatAppearance,item)
+  else table.insert(keep,item) end
+ end
+ interface=keep
  table.insert(interface,{kind="camera"})
+ table.insert(chatCopy,1,{kind="note",label="Local chat copy",tip="Enable capture to copy NEW messages. Open the copy window from the button beside your chat, or use /fieldkitlog. Messages are kept only in memory."})
+ table.insert(chatAppearance,1,{kind="note",label="Chat layout",tip="Prat-inspired controls for the actual game chat. Change width, height, font and fading. No separate chat replacement is installed."})
  local cards={
   {kind="note",label="Which HUD cards to show",tip="Turn modules on or off here. Positions and sizes are under Layout & arrange."},
   {kind="check",label="Run mode card",tip="Native difficulty and zone with Difficulty-screen multipliers. Hover for the full chart.",
@@ -179,7 +192,9 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
   {id="coop",title="Group & co-op",glyph=15,group="05  MULTIPLAYER",items=coop},
-  {id="interface",title="Preferences",glyph=11,group="06  PREFERENCES",items=interface},
+  {id="chat",title="Chat appearance",glyph=11,group="06  CHAT",items=chatAppearance},
+  {id="chatcopy",title="Chat copy",glyph=12,group="06  CHAT",items=chatCopy},
+  {id="interface",title="Preferences",glyph=11,group="07  PREFERENCES",items=interface},
  }
 
 end

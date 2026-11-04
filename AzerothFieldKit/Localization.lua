@@ -3,6 +3,16 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Chat appearance"]="Apparence du chat",
+ ["Chat copy"]="Copie du chat",
+ ["Local chat copy"]="Copie locale du chat",
+ ["Chat layout"]="Présentation du chat",
+ ["Chat background opacity"]="Opacité du fond du chat",
+ ["Show chat Copy button"]="Afficher le bouton Copier",
+ ["Show a compact Copy shortcut just above the in-game chat. Capture remains disabled until you explicitly turn it on."]="Affiche un petit bouton Copier au-dessus du chat en jeu. L'enregistrement reste désactivé tant que vous ne l'activez pas.",
+ ["Enable capture to copy NEW messages. Open the copy window from the button beside your chat, or use /fieldkitlog. Messages are kept only in memory."]="Activez la capture pour copier les NOUVEAUX messages. Ouvrez la fenêtre depuis le bouton du chat ou avec /fieldkitlog. Les messages sont uniquement conservés en mémoire.",
+ ["Prat-inspired controls for the actual game chat. Change width, height, font and fading. No separate chat replacement is installed."]="Réglages inspirés de Prat pour le véritable chat du jeu : largeur, hauteur, police et atténuation. Aucun remplacement du chat natif.",
+
  ["Copy"]="Copier",
  ["No captured messages yet. Enable recording and wait for new chat messages."]="Aucun message enregistré. Activez la copie et attendez de nouveaux messages.",
  ["Ctrl+A, then Ctrl+C to copy these captured messages."]="Ctrl+A, puis Ctrl+C pour copier les messages enregistrés.",

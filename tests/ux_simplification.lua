@@ -10,7 +10,21 @@ local oldCvar,oldHud=SetCVar,AZS_SetHudShown
 SetCVar=function() writes=writes+1 end;AZS_SetHudShown=function() writes=writes+1 end
 local ids={}
 for i=1,table.getn(U.sections) do ids[U.sections[i].id]=true end
-for _,id in ipairs({"cards","meter","layout","look","coop"}) do assert(ids[id],id) end
+for _,id in ipairs({"cards","meter","layout","look","coop","chat","chatcopy"}) do assert(ids[id],id) end
+-- Chat controls have dedicated routes, never remain buried in Preferences.
+local appearances,copies={},{}
+for _,section in ipairs(U.sections) do
+ if section.id=="chat" then for _,item in ipairs(section.items) do appearances[item.label]=true end end
+ if section.id=="chatcopy" then for _,item in ipairs(section.items) do copies[item.label]=true end end
+ if section.id=="interface" then
+  for _,item in ipairs(section.items) do assert(item.label~="Chat width" and item.label~="Enable local chat copy") end
+ end
+end
+assert(appearances["Customize main chat"] and appearances["Chat width"] and appearances["Chat font size"])
+assert(appearances["Chat background opacity"] and appearances["Chat history lines"])
+assert(copies["Enable local chat copy"] and copies["Show chat Copy button"])
+U.Select("chat");assert(FieldKitDB.uiPage=="chat")
+U.Select("chatcopy");assert(FieldKitDB.uiPage=="chatcopy")
 assert(not ids.windows,"mega Windows page removed")
 U.Select("cards");U.Select("meter");U.Select("layout");U.Select("look");U.Select("coop")
 assert(FieldKitDB.uiPage=="coop" and writes==0)
