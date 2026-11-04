@@ -143,6 +143,8 @@ function FieldKit.ApplyChatStyle()
     f:ClearAllPoints();f:SetPoint(unpack(styleBefore.point))
    end
    if styleBefore.font and f.SetFont then f:SetFont(styleBefore.font,styleBefore.fontSize,styleBefore.flags) end
+   if styleBefore.timeVisible and f.SetTimeVisible then f:SetTimeVisible(styleBefore.timeVisible) end
+   if styleBefore.fadeDuration and f.SetFadeDuration then f:SetFadeDuration(styleBefore.fadeDuration) end
    if styleBefore.fading~=nil and f.SetFading then f:SetFading(styleBefore.fading) end
   end
   styleBefore=nil;styleStamp=nil;chatFrame=nil;lastPositionStamp=nil
@@ -156,7 +158,9 @@ function FieldKit.ApplyChatStyle()
    font,size,flags=ChatFontNormal:GetFont()
   end
   styleBefore={width=f:GetWidth(),height=f:GetHeight(),font=font,fontSize=size,flags=flags,
-   fading=f.GetFading and f:GetFading(),point={f:GetPoint()}}
+   fading=f.GetFading and f:GetFading(),
+   timeVisible=f.GetTimeVisible and f:GetTimeVisible(),
+   fadeDuration=f.GetFadeDuration and f:GetFadeDuration(),point={f:GetPoint()}}
   chatFrame=f;styleStamp=nil;lastPositionStamp=nil
  end
  local w=Clamp(FieldKitDB.chatWidth,440,280,800)
@@ -183,6 +187,15 @@ function FieldKit.ApplyChatStyle()
   f:SetWidth(w);f:SetHeight(h)
   local font=fontFiles[face] or styleBefore.font or "Fonts\\FRIZQT__.TTF"
   if f.SetFont then f:SetFont(font,fontSize,styleBefore.flags) end
+  -- In the Azeroth Survivors legacy client, fading with a zero visibility
+  -- duration hides each newly added line immediately. Never enable it without
+  -- first establishing a safe, positive visibility interval.
+  if fading and f.SetTimeVisible then
+   f:SetTimeVisible(120)
+   if f.SetFadeDuration then f:SetFadeDuration(3) end
+  elseif fading then
+   fading=false -- API cannot guarantee a safe visible interval.
+  end
   if f.SetFading then f:SetFading(fading) end
   if f.SetMaxLines then f:SetMaxLines(maxLines) end
   styleStamp=stamp
