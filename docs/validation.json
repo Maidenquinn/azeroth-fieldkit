@@ -44,7 +44,7 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "6845029f510f63712785412b5076ec44702d207a66f05379da6dc4d102ac8530"
+      "sha256": "65685b2b956181532eb5444702164c4235af5c38c0af2df605557af06e8312fa"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
@@ -219,7 +219,7 @@
     "CopyLog.lua": {
       "maxUpvalues": 14,
       "functions": 33,
-      "sha256": "4692f9db20b696d241c337021841b2cf9406caac3abedde35e5a8b23eaf75b6f"
+      "sha256": "e410653ee453e0a2c06b35600cc894778a0d5c2b80224401054cf44779901484"
     }
   }
 }

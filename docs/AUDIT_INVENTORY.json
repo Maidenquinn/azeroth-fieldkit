@@ -73,8 +73,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 7602,
-      "sha256": "6845029f510f63712785412b5076ec44702d207a66f05379da6dc4d102ac8530",
+      "bytes": 7603,
+      "sha256": "65685b2b956181532eb5444702164c4235af5c38c0af2df605557af06e8312fa",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -2384,8 +2384,8 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 15832,
-      "sha256": "4692f9db20b696d241c337021841b2cf9406caac3abedde35e5a8b23eaf75b6f",
+      "bytes": 16580,
+      "sha256": "e410653ee453e0a2c06b35600cc894778a0d5c2b80224401054cf44779901484",
       "namedFunctions": [
         {
           "name": "NativeChat",
@@ -2421,43 +2421,43 @@
         },
         {
           "name": "CopyButton",
-          "line": 195
+          "line": 208
         },
         {
           "name": "ColorHook",
-          "line": 229
+          "line": 242
         },
         {
           "name": "Clean",
-          "line": 252
+          "line": 265
         },
         {
           "name": "Capture",
-          "line": 261
+          "line": 274
         },
         {
           "name": "ImportVisible",
-          "line": 268
+          "line": 281
         },
         {
           "name": "FieldKit.ClearChat",
-          "line": 282
+          "line": 295
         },
         {
           "name": "Hook",
-          "line": 290
+          "line": 303
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 308
+          "line": 321
         },
         {
           "name": "OpenCopy",
-          "line": 326
+          "line": 339
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 364
+          "line": 377
         }
       ],
       "literalEvents": []
