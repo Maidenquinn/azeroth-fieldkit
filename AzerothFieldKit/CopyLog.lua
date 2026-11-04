@@ -91,6 +91,11 @@ local function OpenCopy()
  copyEdit:SetHeight(math.max(320,(lines+1)*16+20));copyFrame:Show();copyEdit:SetFocus();copyEdit:HighlightText()
 end
 
+-- Public action for the Interface button and chat shortcut; recording is still opt-in.
+function FieldKit.OpenChatCopy()
+ OpenCopy()
+end
+
 -- Poll only the preference, at 5 Hz. No per-frame chat traversal or copy buttons.
 local watcher=CreateFrame("Frame","FieldKitChatWatcher",UIParent)
 local elapsed=0
