@@ -139,6 +139,16 @@ local function Check(key,label,tip,default)
  get=function() if not FieldKitDB then return default end;return FieldKitDB[key] end,
  set=function(v) FieldKitDB[key]=v end}
 end
+-- Opt-in styling for the native chat frame (Prat-inspired, no third-party dependencies).
+local function ChatSlider(key,label,minimum,maximum,step)
+ return {kind="slider",label=label,min=minimum,max=maximum,step=step,
+  get=function() return (FieldKitDB and FieldKitDB[key]) or minimum end,
+  set=function(v)
+   FieldKitDB[key]=v
+   if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+  end,
+  format=function(v) return FieldKit_L(label)..": "..v end}
+end
 -- Extend the existing schema with language, privacy, combat editor and boss HP controls.
 function FieldKit_AddSettingsSections(sections)
  table.insert(sections,{title="Combat text",items={{kind="combat"}}})
@@ -151,6 +161,18 @@ function FieldKit_AddSettingsSections(sections)
      if FieldKit.OpenChatCopy then FieldKit.OpenChatCopy() end
     end}
     table.insert(sections[i].items,chat)
+    local style=Check("chatStyle","Customize main chat","Apply FieldKit's native chat size, font size and fading controls. Can be disabled to restore the previous chat appearance. Compatible with the main ChatFrame1.",false)
+    local old=style.set
+    style.set=function(v) old(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
+    table.insert(sections[i].items,style)
+    table.insert(sections[i].items,ChatSlider("chatWidth","Chat width",280,800,10))
+    table.insert(sections[i].items,ChatSlider("chatHeight","Chat height",100,450,10))
+    table.insert(sections[i].items,ChatSlider("chatFontSize","Chat font size",10,20,1))
+    table.insert(sections[i].items,ChatSlider("chatHistoryLines","Chat history lines",100,500,25))
+    local fading=Check("chatFading","Fade older chat lines","Fade native chat text when not actively reading. Disable to keep messages visible until scrolled away.",true)
+    local original=fading.set
+    fading.set=function(v) original(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
+    table.insert(sections[i].items,fading)
   end
   if sections[i].title=="Map" then
    table.insert(sections[i].items,Check("guardianPins","Guardians on the minimap","Exact native lair positions, not moving guardian locations. White: asleep; red: fighting; orange: return countdown. Independent of the Lairs window.",true))
