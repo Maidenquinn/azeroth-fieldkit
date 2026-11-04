@@ -185,7 +185,7 @@ function FieldKit_AddSettingsSections(sections)
      if v then FieldKitDB.chatStyle=true end
      if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
     end
-    move.button={text="Reset chat position",onClick=function()
+    move.button={text="Reset position",onClick=function()
      if FieldKit.ResetChatPosition then FieldKit.ResetChatPosition() end
     end}
     table.insert(sections[i].items,move)
