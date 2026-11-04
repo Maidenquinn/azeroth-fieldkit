@@ -219,7 +219,7 @@
     "CopyLog.lua": {
       "maxUpvalues": 5,
       "functions": 25,
-      "sha256": "61b1c4cff5f6c3a268a06efff9befd8b1306b7b52127e32d461057ff6fbd66ea"
+      "sha256": "ffae52de37a709f167199311c80a15d3ee618cb7d1194cd6ce2bfd0a4e9afa3b"
     }
   }
 }
