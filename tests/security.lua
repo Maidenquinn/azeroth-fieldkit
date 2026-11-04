@@ -37,24 +37,26 @@ assert(ChatFrame2.AddMessage==original)
 assert(FieldKitChatCopyButton and FieldKitChatCopyButton:IsShown(),"copy shortcut must be next to main chat")
 assert(ChatFrame1:AddMessage("opted in")=="forwarded")
 assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
--- Legacy clients may initialize chat visibility time to 0.
--- Enabling fading without fixing this erases every new message immediately.
+-- Regression: legacy chat may start with zero visibility time.
+-- In safe mode styling must NEVER enable native chat fading and AddMessage
+-- must always reach the native frame, even with advanced options selected.
 local chatOps={}
 ChatFrame1.GetTimeVisible=function() return 0 end
-ChatFrame1.SetTimeVisible=function(self,value) table.insert(chatOps,"time:"..value);self.timeVisible=value end
+ChatFrame1.SetTimeVisible=function(self,value)
+ table.insert(chatOps,"time:"..value);self.timeVisible=value
+end
 ChatFrame1.GetFading=function() return false end
 ChatFrame1.SetFading=function(self,value)
  table.insert(chatOps,"fade:"..tostring(value))
- if value then assert((self.timeVisible or 0)>0,"Never fade with zero visible time") end
+ assert(value==false,"FieldKit must not enable native chat fading")
  self.fading=value
 end
 ChatFrame1.SetFadeDuration=function(self,value) self.fadeDuration=value end
-assert(FieldKitDB.chatFading==false,"New users must not inherit risky fading")
-FieldKitDB.chatFading=true
+FieldKitDB.chatFading=true -- Existing saved variables may still enable it.
 FieldKitDB.chatStyle=true
 FieldKit.ApplyChatStyle()
-assert(ChatFrame1.timeVisible==120 and ChatFrame1.fading==true)
-assert(chatOps[1]=="time:120","SetTimeVisible must precede SetFading")
+assert(ChatFrame1.fading==false)
+assert(ChatFrame1:AddMessage("should stay visible")=="forwarded")
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
 FieldKitDB.chatFading=false
 -- Prat-inspired style controls only affect the native frame when enabled.
@@ -80,11 +82,11 @@ assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
 assert(ChatFrame1:GetWidth()==510 and FieldKitDB.chatBackgroundColor==3)
--- Custom text color only changes newly forwarded lines while opted in.
+-- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()
-ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
-assert(lastMessage.text=="Color sample" and lastMessage.r==1 and lastMessage.g==.82 and lastMessage.b==.49)
+assert(ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)=="forwarded")
+assert(lastMessage.text=="|cffff0000Color sample|r" and lastMessage.r==.1 and lastMessage.g==.1 and lastMessage.b==.1)
 FieldKitDB.chatOverrideText=false
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
 -- Leave the native chat restored for the remaining security fixtures.
@@ -106,7 +108,7 @@ ChatFrame1:AddMessage("after opt out")
 SlashCmdList.FieldKitLOG("on");SlashCmdList.FieldKitLOG("")
 assert(FieldKitCopyLogEdit:GetText()=="")
 SlashCmdList.FieldKitLOG("off")
-assert(forwarded==124)
+assert(forwarded==125)
 local d=FieldKitDB
 FieldKitDB={known="bad",pos={broken="bad",nan={0/0,1}},collapsedWindows=true,cameraMax="bad",targetHealthMode=1/0,lowHealthPct=-10,talentToggles={bad=true}}
 FieldKit.InitializeSettings({"crit"})
