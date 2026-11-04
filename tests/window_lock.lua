@@ -45,6 +45,21 @@ assert(not FieldKitTakenFrame.azsMoving and FieldKitDB.frameAnchors.FieldKitTake
 assert(FieldKitDB.windowsLocked and not U.frame:IsShown() and not U.dock:IsShown())
 SlashCmdList.FieldKit("unlock")
 assert(not FieldKitDB.windowsLocked and not U.frame:IsShown() and not U.dock:IsShown())
+-- Run-mode updates must not resize or hide a frame while it is being dragged.
+local oldMouseButton=IsMouseButtonDown
+IsMouseButtonDown=function(button) return button=="LeftButton" end
+FieldKitDB.linkLeftCards=false;FieldKitHudStack.Apply()
+FieldKitModeFrame:Show()
+this=FieldKitModeFrame;FieldKitModeFrame:GetScript("OnDragStart")()
+assert(FieldKitModeFrame.azsMoving)
+local originalHeight=FieldKitModeFrame:GetHeight()
+FieldKitRunMode.Update()
+assert(FieldKitModeFrame.azsMoving and FieldKitModeFrame:GetHeight()==originalHeight)
+-- Simulate a lost OnDragStop: the global watchdog ends the move on mouse release.
+IsMouseButtonDown=function() return false end
+update(FieldKitFrame,.05)
+assert(not FieldKitModeFrame.azsMoving,"lost release must not leave Run mode stuck to the mouse")
+IsMouseButtonDown=oldMouseButton
 -- Global locking also finishes an explicit combat-area preview drag.
 U.SetLayoutEditing(true,false)
 this=FieldKitCombatAnchor1;FieldKitCombatAnchor1:GetScript("OnDragStart")()
