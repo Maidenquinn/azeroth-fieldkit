@@ -534,5 +534,5 @@ Anonymous handlers are explained by their constructor and API_SURFACE.md.
 - [CopyLog.lua: FieldKit.ClearChat](../AzerothFieldKit/CopyLog.lua#L118)
 - [CopyLog.lua: Hook](../AzerothFieldKit/CopyLog.lua#L126)
 - [CopyLog.lua: FieldKit.SyncChat](../AzerothFieldKit/CopyLog.lua#L144)
-- [CopyLog.lua: OpenCopy](../AzerothFieldKit/CopyLog.lua#L158)
-- [CopyLog.lua: FieldKit.OpenChatCopy](../AzerothFieldKit/CopyLog.lua#L196)
+- [CopyLog.lua: OpenCopy](../AzerothFieldKit/CopyLog.lua#L159)
+- [CopyLog.lua: FieldKit.OpenChatCopy](../AzerothFieldKit/CopyLog.lua#L197)

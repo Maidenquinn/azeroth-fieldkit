@@ -2380,8 +2380,8 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 9568,
-      "sha256": "f0482ffe3521e192b0e72157b79db9a1dab250795da3048d0de5de3c33b4e9dc",
+      "bytes": 9615,
+      "sha256": "61b1c4cff5f6c3a268a06efff9befd8b1306b7b52127e32d461057ff6fbd66ea",
       "namedFunctions": [
         {
           "name": "NativeChat",
@@ -2425,11 +2425,11 @@
         },
         {
           "name": "OpenCopy",
-          "line": 158
+          "line": 159
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 196
+          "line": 197
         }
       ],
       "literalEvents": []
