@@ -9,7 +9,7 @@ local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectT
 
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
- lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false}
+ lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false,chatStyle=false,chatFading=true,chatWidth=440,chatHeight=180,chatFontSize=12,chatHistoryLines=200}
 
 -- Normalize persisted shapes before any frame can consume them. Only the new
 -- addon's in-memory DB is repaired; serialization is the client's responsibility.
@@ -66,6 +66,10 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  d.minimapAngle=FieldKit.Number(d.minimapAngle,150,-360,360)
  d.lowHealthPct=FieldKit.Number(d.lowHealthPct,30,10,70)
+ d.chatWidth=math.floor(FieldKit.Number(d.chatWidth,440,280,800))
+ d.chatHeight=math.floor(FieldKit.Number(d.chatHeight,180,100,450))
+ d.chatFontSize=math.floor(FieldKit.Number(d.chatFontSize,12,10,20))
+ d.chatHistoryLines=math.floor(FieldKit.Number(d.chatHistoryLines,200,100,500))
  -- Stable journey ids survive page reordering without resetting user choices.
  if d.uiSchema~=2 then
   local keep=d.uiPage
