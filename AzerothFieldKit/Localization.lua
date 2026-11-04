@@ -3,6 +3,10 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Copy"]="Copier",
+ ["No captured messages yet. Enable recording and wait for new chat messages."]="Aucun message enregistré. Activez la copie et attendez de nouveaux messages.",
+ ["Ctrl+A, then Ctrl+C to copy these captured messages."]="Ctrl+A, puis Ctrl+C pour copier les messages enregistrés.",
+
  ["Open chat copy"]="Ouvrir la copie du chat",
  ["Customize main chat"]="Personnaliser le chat principal",
  ["Chat width"]="Largeur du chat",
