@@ -145,8 +145,9 @@ function FieldKit.SyncChat()
  local enabled=FieldKitDB and FieldKitDB.chatCopy==true
  if not enabled then
   if active then FieldKit.ClearChat() end
-  if button then button:Hide() end
-  copiedNative=false;active=false;return
+  copiedNative=false;active=false
+  CopyButton() -- Keep the shortcut discoverable; never record without consent.
+  return
  end
  if not active then ImportVisible() end
  active=true;Hook(1)
