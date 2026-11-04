@@ -202,7 +202,8 @@ local watcher=CreateFrame("Frame","FieldKitChatWatcher",UIParent)
 local elapsed=0
 watcher:SetScript("OnUpdate",function()
  elapsed=elapsed+(arg1 or 0);if elapsed<.2 then return end
- elapsed=0;FieldKit.SyncChat()\n if FieldKitDB and FieldKitDB.chatStyle then FieldKit.ApplyChatStyle() end
+ elapsed=0;FieldKit.SyncChat()
+ if FieldKitDB and FieldKitDB.chatStyle then FieldKit.ApplyChatStyle() end
 end)
 SLASH_FieldKitLOG1="/fieldkitlog"
 SlashCmdList.FieldKitLOG=function(message)
