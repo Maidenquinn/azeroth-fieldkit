@@ -73,8 +73,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 6564,
-      "sha256": "a43e71ff5a76b7e8224969f223cdc35368c964e8dab7fda50503a35f6945e9b2",
+      "bytes": 6945,
+      "sha256": "14ad117e97c1a26a2af6bfc8905e17a0e81465aaf3146ab26e1701d026fca728",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -84,36 +84,36 @@
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 38578,
-      "sha256": "76da56228709c34f5b565991e1792851e967382cdf39e902a469d7854cf1a515",
+      "bytes": 40202,
+      "sha256": "07a91ec5a5f22fd655f25cb4f2fe56388c263a45d399e9d8bef22c87ffc429b6",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
-          "line": 560
+          "line": 575
         },
         {
           "name": "FieldKit_L",
-          "line": 564
+          "line": 579
         },
         {
           "name": "FieldKit_Text",
-          "line": 571
+          "line": 586
         },
         {
           "name": "FieldKit_RefreshLanguage",
-          "line": 576
+          "line": 591
         },
         {
           "name": "FieldKit_SetLanguage",
-          "line": 578
+          "line": 593
         },
         {
           "name": "FieldKit_CreateLanguageOption",
-          "line": 585
+          "line": 600
         },
         {
           "name": "Refresh",
-          "line": 593
+          "line": 608
         }
       ],
       "literalEvents": []
@@ -195,8 +195,8 @@
       "literalEvents": []
     },
     "Settings.lua": {
-      "bytes": 7440,
-      "sha256": "8b75b03515eba84509bb94a6e11fccfcc20b95895bbbec2bed6c8f48dcb31c65",
+      "bytes": 9002,
+      "sha256": "7077ee2d4ecec7bf34370dce5d9c2cc23f3f86f6950453534404146b2e88e0a9",
       "namedFunctions": [
         {
           "name": "FieldKit_FormatHealth",
@@ -243,8 +243,12 @@
           "line": 137
         },
         {
-          "name": "FieldKit_AddSettingsSections",
+          "name": "ChatSlider",
           "line": 143
+        },
+        {
+          "name": "FieldKit_AddSettingsSections",
+          "line": 153
         }
       ],
       "literalEvents": []
@@ -1348,8 +1352,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 54950,
-      "sha256": "22be46b5da81cedf3b75f8de652417f1c237fc59661379fecff12305f9b092b5",
+      "bytes": 54951,
+      "sha256": "b77a910edb412d942c7c3880d8d2172e3ee2c63fdad2572d1ae3ad7929a45255",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -2376,36 +2380,56 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 5192,
-      "sha256": "9f6c16bcfc959c3429bdc43f38316b9d39b39a37eb3a90dc6da0afb484fd43a9",
+      "bytes": 9615,
+      "sha256": "61b1c4cff5f6c3a268a06efff9befd8b1306b7b52127e32d461057ff6fbd66ea",
       "namedFunctions": [
         {
+          "name": "NativeChat",
+          "line": 11
+        },
+        {
+          "name": "Clamp",
+          "line": 14
+        },
+        {
+          "name": "FieldKit.ApplyChatStyle",
+          "line": 19
+        },
+        {
+          "name": "CopyButton",
+          "line": 54
+        },
+        {
           "name": "Clean",
-          "line": 9
+          "line": 88
         },
         {
           "name": "Capture",
-          "line": 18
+          "line": 97
+        },
+        {
+          "name": "ImportVisible",
+          "line": 104
         },
         {
           "name": "FieldKit.ClearChat",
-          "line": 26
+          "line": 118
         },
         {
           "name": "Hook",
-          "line": 34
+          "line": 126
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 52
+          "line": 144
         },
         {
           "name": "OpenCopy",
-          "line": 62
+          "line": 159
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 95
+          "line": 197
         }
       ],
       "literalEvents": []

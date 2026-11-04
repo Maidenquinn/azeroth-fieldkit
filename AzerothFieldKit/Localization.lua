@@ -3,6 +3,21 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Copy"]="Copier",
+ ["No captured messages yet. Enable recording and wait for new chat messages."]="Aucun message enregistré. Activez la copie et attendez de nouveaux messages.",
+ ["Ctrl+A, then Ctrl+C to copy these captured messages."]="Ctrl+A, puis Ctrl+C pour copier les messages enregistrés.",
+
+ ["Open chat copy"]="Ouvrir la copie du chat",
+ ["Customize main chat"]="Personnaliser le chat principal",
+ ["Chat width"]="Largeur du chat",
+ ["Chat height"]="Hauteur du chat",
+ ["Chat font size"]="Taille de la police du chat",
+ ["Chat history lines"]="Lignes conservées dans le chat",
+ ["Fade older chat lines"]="Atténuer les anciens messages du chat",
+ ["Records up to 100 NEW messages from the main chat after enabling. Click Open chat copy, or type /fieldkitlog, then use Ctrl+A / Ctrl+C. Native chat text itself cannot be selected. Nothing is uploaded or saved."]="Conserve jusqu'à 100 nouveaux messages après activation. Cliquez sur Ouvrir la copie du chat, ou tapez /fieldkitlog, puis Ctrl+A et Ctrl+C. Le chat natif n'est pas sélectionnable. Aucune donnée n'est envoyée ou sauvegardée.",
+ ["Apply FieldKit's native chat size, font size and fading controls. Can be disabled to restore the previous chat appearance. Compatible with the main ChatFrame1."]="Personnalise la taille, la police et l'atténuation du chat natif. Désactivez pour rétablir son apparence précédente. Concerne le chat principal.",
+ ["Fade native chat text when not actively reading. Disable to keep messages visible until scrolled away."]="Atténue progressivement les anciens messages. Désactivez pour les laisser affichés.",
+
  ["World markers"]="Marqueurs du monde",
  ["World & client"]="Monde et client",
  ["Boss"]="Boss",
