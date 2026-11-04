@@ -3,7 +3,7 @@
 local history,hooked={},{}
 local copyFrame,copyEdit
 local active=false
-local button, chatFrame, styleBefore, styleStamp
+local button, chatFrame, styleBefore, styleStamp, chatBackdrop
 local copiedNative=false
 local MAX_MESSAGES,MAX_BYTES=100,512
 
@@ -20,6 +20,7 @@ function FieldKit.ApplyChatStyle()
  local f=NativeChat()
  if not f or not FieldKitDB then return end
  if not FieldKitDB.chatStyle then
+  if chatBackdrop then chatBackdrop:Hide() end
   if styleBefore and chatFrame==f then
    if styleBefore.width then f:SetWidth(styleBefore.width) end
    if styleBefore.height then f:SetHeight(styleBefore.height) end
@@ -41,8 +42,18 @@ function FieldKit.ApplyChatStyle()
  local fontSize=Clamp(FieldKitDB.chatFontSize,12,10,20)
  local fading=FieldKitDB.chatFading==true
  local maxLines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
- local stamp=table.concat({w,h,fontSize,tostring(fading),maxLines},":")
- if styleStamp==stamp then return end
+ local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
+ local stamp=table.concat({w,h,fontSize,tostring(fading),maxLines,opacity},":")
+ if styleStamp==stamp and f:GetWidth()==w and f:GetHeight()==h then return end
+ if opacity>0 then
+  if not chatBackdrop then
+   chatBackdrop=f:CreateTexture(nil,"BACKGROUND")
+   chatBackdrop:SetAllPoints(f)
+   chatBackdrop:SetTexture("Interface\\Buttons\\WHITE8X8")
+  end
+  chatBackdrop:SetVertexColor(0,0,0,opacity/100)
+  chatBackdrop:Show()
+ elseif chatBackdrop then chatBackdrop:Hide() end
  f:SetWidth(w);f:SetHeight(h)
  if styleBefore.font and f.SetFont then f:SetFont(styleBefore.font,fontSize,styleBefore.flags) end
  if f.SetFading then f:SetFading(fading) end
@@ -54,6 +65,8 @@ end
 local function CopyButton()
  local f=NativeChat()
  if not f then return end
+ if button and FieldKitDB and FieldKitDB.chatShowCopyButton==false then button:Hide();return end
+ if FieldKitDB and FieldKitDB.chatShowCopyButton==false then return end
  if not button then
   button=CreateFrame("Button","FieldKitChatCopyButton",UIParent)
   button:SetWidth(48);button:SetHeight(18)
@@ -75,7 +88,7 @@ local function CopyButton()
  end
  if button.fieldkitChatAnchor~=f then
   button:ClearAllPoints()
-  button:SetPoint("BOTTOMRIGHT",f,"TOPRIGHT",0,2)
+  button:SetPoint("BOTTOMLEFT",f,"TOPLEFT",0,2)
   button.fieldkitChatAnchor=f
  end
  button:Show()
