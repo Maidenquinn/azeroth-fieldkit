@@ -30,9 +30,9 @@ function FieldKit.BuildJourneySections(sections,actions)
  end
  -- Chat deserves dedicated navigation rather than buried Preferences controls.
  local chatCopy,chatAppearance,keep={},{},{}
- local copyKeys={["Enable local chat copy"]=true}
+ local copyKeys={["Enable local chat copy"]=true,["Show chat Copy button"]=true}
  local appearanceKeys={["Customize main chat"]=true,["Chat width"]=true,["Chat height"]=true,
-  ["Chat font size"]=true,["Chat history lines"]=true,["Fade older chat lines"]=true}
+  ["Chat font size"]=true,["Chat history lines"]=true,["Chat background opacity"]=true,["Fade older chat lines"]=true}
  for _,item in ipairs(interface) do
   if copyKeys[item.label] then table.insert(chatCopy,item)
   elseif appearanceKeys[item.label] then table.insert(chatAppearance,item)
