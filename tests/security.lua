@@ -37,6 +37,26 @@ assert(ChatFrame2.AddMessage==original)
 assert(FieldKitChatCopyButton and FieldKitChatCopyButton:IsShown(),"copy shortcut must be next to main chat")
 assert(ChatFrame1:AddMessage("opted in")=="forwarded")
 assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
+-- Legacy clients may initialize chat visibility time to 0.
+-- Enabling fading without fixing this erases every new message immediately.
+local chatOps={}
+ChatFrame1.GetTimeVisible=function() return 0 end
+ChatFrame1.SetTimeVisible=function(self,value) table.insert(chatOps,"time:"..value);self.timeVisible=value end
+ChatFrame1.GetFading=function() return false end
+ChatFrame1.SetFading=function(self,value)
+ table.insert(chatOps,"fade:"..tostring(value))
+ if value then assert((self.timeVisible or 0)>0,"Never fade with zero visible time") end
+ self.fading=value
+end
+ChatFrame1.SetFadeDuration=function(self,value) self.fadeDuration=value end
+assert(FieldKitDB.chatFading==false,"New users must not inherit risky fading")
+FieldKitDB.chatFading=true
+FieldKitDB.chatStyle=true
+FieldKit.ApplyChatStyle()
+assert(ChatFrame1.timeVisible==120 and ChatFrame1.fading==true)
+assert(chatOps[1]=="time:120","SetTimeVisible must precede SetFading")
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+FieldKitDB.chatFading=false
 -- Prat-inspired style controls only affect the native frame when enabled.
 local oldWidth,oldHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
 FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230;FieldKitDB.chatFontSize=15
