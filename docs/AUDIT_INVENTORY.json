@@ -73,8 +73,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 7078,
-      "sha256": "bb3f40a03095570640bdb9e32b4317b74477ebdc4183a932da898612eafa5254",
+      "bytes": 7602,
+      "sha256": "6845029f510f63712785412b5076ec44702d207a66f05379da6dc4d102ac8530",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -84,36 +84,36 @@
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 41329,
-      "sha256": "7a264da72d195b83eae0ecc80e046e98c91f7b045ef8ea3e22518aba8d0dc2ba",
+      "bytes": 43518,
+      "sha256": "ece4a32d1cf5cabb098ae2ccecddb3267d5b2883e6127186f0edfb07010d03b7",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
-          "line": 585
+          "line": 618
         },
         {
           "name": "FieldKit_L",
-          "line": 589
+          "line": 622
         },
         {
           "name": "FieldKit_Text",
-          "line": 596
+          "line": 629
         },
         {
           "name": "FieldKit_RefreshLanguage",
-          "line": 601
+          "line": 634
         },
         {
           "name": "FieldKit_SetLanguage",
-          "line": 603
+          "line": 636
         },
         {
           "name": "FieldKit_CreateLanguageOption",
-          "line": 610
+          "line": 643
         },
         {
           "name": "Refresh",
-          "line": 618
+          "line": 651
         }
       ],
       "literalEvents": []
@@ -195,8 +195,8 @@
       "literalEvents": []
     },
     "Settings.lua": {
-      "bytes": 9485,
-      "sha256": "8f67734121892111819c883d46721ac089522b5e2473326f3bcfa1963626f2f9",
+      "bytes": 11269,
+      "sha256": "9e16aa57fb5e3d48f67d716389263adb5a750d0d1d573e49d9afad57bc31bf3c",
       "namedFunctions": [
         {
           "name": "FieldKit_FormatHealth",
@@ -247,8 +247,12 @@
           "line": 143
         },
         {
+          "name": "ChatChoice",
+          "line": 152
+        },
+        {
           "name": "FieldKit_AddSettingsSections",
-          "line": 153
+          "line": 162
         }
       ],
       "literalEvents": []
@@ -1352,8 +1356,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 56180,
-      "sha256": "092e2f0b9a3b21b54c0943d85bc892014ec140a83ea0d170dab4e723a099539b",
+      "bytes": 56658,
+      "sha256": "3db02949365c4bf15ac9b024d386af8b3c650489167e98358ea3bf5c837217cf",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -1365,99 +1369,99 @@
         },
         {
           "name": "U.Tip",
-          "line": 203
-        },
-        {
-          "name": "U.Choice",
           "line": 210
         },
         {
+          "name": "U.Choice",
+          "line": 217
+        },
+        {
           "name": "U.CloseMenus",
-          "line": 248
+          "line": 255
         },
         {
           "name": "U.Wheel",
-          "line": 253
+          "line": 260
         },
         {
           "name": "Checkbox",
-          "line": 264
+          "line": 271
         },
         {
           "name": "Slider",
-          "line": 282
+          "line": 289
         },
         {
           "name": "BuildMarkerGallery",
-          "line": 307
+          "line": 314
         },
         {
           "name": "row.Refresh",
-          "line": 367
+          "line": 374
         },
         {
           "name": "U.EssentialHud",
-          "line": 411
+          "line": 418
         },
         {
           "name": "BuildHome",
-          "line": 426
+          "line": 433
         },
         {
           "name": "U.SelectWindowTab",
-          "line": 455
+          "line": 462
         },
         {
           "name": "U.BuildPage",
-          "line": 469
+          "line": 476
         },
         {
           "name": "U.UpdateRunContext",
-          "line": 535
-        },
-        {
-          "name": "U.UpdateSharingStatus",
           "line": 542
         },
         {
+          "name": "U.UpdateSharingStatus",
+          "line": 549
+        },
+        {
           "name": "U.Refresh",
-          "line": 545
+          "line": 552
         },
         {
           "name": "U.Select",
-          "line": 571
+          "line": 578
         },
         {
           "name": "U.Reflow",
-          "line": 611
+          "line": 618
         },
         {
           "name": "U.SetLayoutEditing",
-          "line": 679
+          "line": 686
         },
         {
           "name": "U.StartLayout",
-          "line": 692
+          "line": 699
         },
         {
           "name": "U.ResetPositions",
-          "line": 697
-        },
-        {
-          "name": "U.UndoPositions",
           "line": 704
         },
         {
+          "name": "U.UndoPositions",
+          "line": 711
+        },
+        {
           "name": "U.Build",
-          "line": 712
+          "line": 719
         },
         {
           "name": "U.LayoutNavigation",
-          "line": 761
+          "line": 768
         },
         {
           "name": "U.Toggle",
-          "line": 838
+          "line": 845
         }
       ],
       "literalEvents": []
@@ -2380,56 +2384,80 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 10271,
-      "sha256": "6449a321d4b4af9fbf9cdc8f915e67ebb6495b72ce753c7cacb361eb731ea262",
+      "bytes": 15832,
+      "sha256": "4692f9db20b696d241c337021841b2cf9406caac3abedde35e5a8b23eaf75b6f",
       "namedFunctions": [
         {
           "name": "NativeChat",
-          "line": 11
+          "line": 34
         },
         {
           "name": "Clamp",
-          "line": 14
+          "line": 37
+        },
+        {
+          "name": "ApplyAnchor",
+          "line": 42
+        },
+        {
+          "name": "SaveAnchor",
+          "line": 56
+        },
+        {
+          "name": "FinishMove",
+          "line": 74
+        },
+        {
+          "name": "MoveControl",
+          "line": 84
+        },
+        {
+          "name": "FieldKit.ResetChatPosition",
+          "line": 121
         },
         {
           "name": "FieldKit.ApplyChatStyle",
-          "line": 19
+          "line": 133
         },
         {
           "name": "CopyButton",
-          "line": 65
+          "line": 195
+        },
+        {
+          "name": "ColorHook",
+          "line": 229
         },
         {
           "name": "Clean",
-          "line": 101
+          "line": 252
         },
         {
           "name": "Capture",
-          "line": 110
+          "line": 261
         },
         {
           "name": "ImportVisible",
-          "line": 117
+          "line": 268
         },
         {
           "name": "FieldKit.ClearChat",
-          "line": 131
+          "line": 282
         },
         {
           "name": "Hook",
-          "line": 139
+          "line": 290
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 157
+          "line": 308
         },
         {
           "name": "OpenCopy",
-          "line": 172
+          "line": 326
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 210
+          "line": 364
         }
       ],
       "literalEvents": []

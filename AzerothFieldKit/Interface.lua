@@ -29,19 +29,25 @@ function FieldKit.BuildJourneySections(sections,actions)
   end
  end
  -- Chat deserves dedicated navigation rather than buried Preferences controls.
- local chatCopy,chatAppearance,keep={},{},{}
+ local chatCopy,chatAppearance,chatColors,keep={},{},{},{}
  local copyKeys={["Enable local chat copy"]=true,["Show chat Copy button"]=true}
- local appearanceKeys={["Customize main chat"]=true,["Chat width"]=true,["Chat height"]=true,
-  ["Chat font size"]=true,["Chat history lines"]=true,["Chat background opacity"]=true,["Fade older chat lines"]=true}
+ local appearanceKeys={["Customize main chat"]=true,["Unlock chat position"]=true,
+  ["Chat width"]=true,["Chat height"]=true,["Chat history lines"]=true}
+ local colorKeys={["Chat font family"]=true,["Chat font size"]=true,
+  ["Chat background color"]=true,["Chat background opacity"]=true,
+  ["Override chat text colors"]=true,["Chat text color"]=true,
+  ["Fade older chat lines"]=true}
  for _,item in ipairs(interface) do
   if copyKeys[item.label] then table.insert(chatCopy,item)
   elseif appearanceKeys[item.label] then table.insert(chatAppearance,item)
+  elseif colorKeys[item.label] then table.insert(chatColors,item)
   else table.insert(keep,item) end
  end
  interface=keep
  table.insert(interface,{kind="camera"})
- table.insert(chatCopy,1,{kind="note",label="Local chat copy",tip="Enable capture to copy NEW messages. Open the copy window from the button beside your chat, or use /fieldkitlog. Messages are kept only in memory."})
- table.insert(chatAppearance,1,{kind="note",label="Chat layout",tip="Prat-inspired controls for the actual game chat. Change width, height, font and fading. No separate chat replacement is installed."})
+ table.insert(chatCopy,1,{kind="note",label="Local chat copy",tip="Capture new messages after opting in, then use the Copy button above chat or /fieldkitlog. Never uploads chat history."})
+ table.insert(chatAppearance,1,{kind="note",label="Chat layout",tip="Unlock and drag the Move chat handle to any position. Lock it again to keep the saved layout."})
+ table.insert(chatColors,1,{kind="note",label="Chat colors and typography",tip="Choose a font and a subtle background. Text overrides affect only NEW messages; leave off to preserve channel colors."})
  local cards={
   {kind="note",label="Which HUD cards to show",tip="Turn modules on or off here. Positions and sizes are under Layout & arrange."},
   {kind="check",label="Run mode card",tip="Native difficulty and zone with Difficulty-screen multipliers. Hover for the full chart.",
@@ -192,7 +198,8 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
   {id="coop",title="Group & co-op",glyph=15,group="05  MULTIPLAYER",items=coop},
-  {id="chat",title="Chat appearance",glyph=11,group="06  CHAT",items=chatAppearance},
+  {id="chat",title="Chat layout",glyph=11,group="06  CHAT",items=chatAppearance},
+  {id="chatcolors",title="Chat colors & fonts",glyph=4,group="06  CHAT",items=chatColors},
   {id="chatcopy",title="Chat copy",glyph=12,group="06  CHAT",items=chatCopy},
   {id="interface",title="Preferences",glyph=11,group="07  PREFERENCES",items=interface},
  }

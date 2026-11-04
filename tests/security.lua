@@ -26,7 +26,8 @@ assert(AZS_TALENT_TOGGLES==sentinel)
 -- No chat wrapper or frame is installed until opt-in, and no old messages replay.
 ChatFrame1=CreateFrame("Frame","ChatFrame1",UIParent)
 local forwarded=0
-local original=function(self,text,r,g,b,id) forwarded=forwarded+1;return "forwarded" end
+local lastMessage
+local original=function(self,text,r,g,b,id) forwarded=forwarded+1;lastMessage={text=text,r=r,g=g,b=b};return "forwarded" end
 ChatFrame1.AddMessage=original
 ChatFrame2=CreateFrame("Frame","ChatFrame2",UIParent);ChatFrame2.AddMessage=original
 FieldKit.SyncChat();assert(ChatFrame1.AddMessage==original)
@@ -47,6 +48,28 @@ math.huge=originalHuge
 assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
 assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
+-- The player can drag the real chat and preserve its position without replacing it.
+FieldKitDB.chatStyle=true;FieldKitDB.chatMove=true;FieldKit.ApplyChatStyle()
+assert(FieldKitChatMoveHandle and FieldKitChatMoveHandle:IsShown())
+this=FieldKitChatMoveHandle;FieldKitChatMoveHandle:GetScript("OnDragStart")()
+ChatFrame1.left=210;ChatFrame1.bottom=150
+FieldKitChatMoveHandle:GetScript("OnDragStop")()
+assert(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.x==210 and FieldKitDB.chatAnchor.y==150,"Chat anchor: "..tostring(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.x)..","..tostring(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.y))
+FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
+assert(not FieldKitChatMoveHandle:IsShown())
+FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
+FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==510 and FieldKitDB.chatBackgroundColor==3)
+-- Custom text color only changes newly forwarded lines while opted in.
+FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
+FieldKit.SyncChat()
+ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
+assert(lastMessage.text=="Color sample" and lastMessage.r==1 and lastMessage.g==.82 and lastMessage.b==.49)
+FieldKitDB.chatOverrideText=false
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+-- Leave the native chat restored for the remaining security fixtures.
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+
 
 for i=1,120 do ChatFrame1:AddMessage("test"..i..string.rep("x",1000)) end
 assert(type(FieldKit.OpenChatCopy)=="function")
@@ -63,7 +86,7 @@ ChatFrame1:AddMessage("after opt out")
 SlashCmdList.FieldKitLOG("on");SlashCmdList.FieldKitLOG("")
 assert(FieldKitCopyLogEdit:GetText()=="")
 SlashCmdList.FieldKitLOG("off")
-assert(forwarded==123)
+assert(forwarded==124)
 local d=FieldKitDB
 FieldKitDB={known="bad",pos={broken="bad",nan={0/0,1}},collapsedWindows=true,cameraMax="bad",targetHealthMode=1/0,lowHealthPct=-10,talentToggles={bad=true}}
 FieldKit.InitializeSettings({"crit"})
