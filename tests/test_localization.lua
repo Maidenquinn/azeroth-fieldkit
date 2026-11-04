@@ -5,7 +5,11 @@ assert(FieldKitPanel.tabs[2].fieldkitLabel.text=="Combat text")
 assert(FieldKitPanel.tabs[4].fieldkitLabel.text=="Bosses")
 assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="HUD cards")
 for i=1,table.getn(FieldKitPanel.tabs) do assert(FieldKitPanel.tabs[i].fieldkitLabel.text~="Text layout") end
-local interface=FieldKitPanel.tabs[14].page
+local interface
+for i=1,table.getn(FieldKitPanel.tabs) do
+ if FieldKitPanel.tabs[i].section.id=="interface" then interface=FieldKitPanel.tabs[i].page end
+end
+assert(interface)
 local en,fr=FieldKitUI.languageRow.en,FieldKitUI.languageRow.fr
 for i=1,table.getn(interface.children) do
  local b=interface.children[i]
