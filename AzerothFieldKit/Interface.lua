@@ -252,12 +252,12 @@ local function Checkbox(page,item,y)
  local label=T.Label(row,item.label,30,1,500,24,14)
  local detail=T.Label(row,item.tip,30,29,500,44,12,T.muted)
  local action
- if item.button then action=T.Button(row,nil,item.button.text,0,1,98,26,item.button.onClick) end
+ if item.button then action=T.Button(row,nil,item.button.text,0,1,132,26,item.button.onClick) end
  check.item=item;check.Refresh=function() check:SetChecked(item.get() and true or false) end
  check:SetScript("OnClick",function() item.set(this:GetChecked() and true or false);U.Refresh() end)
  check:SetScript("OnEnter",function() U.Tip(this,item.label,item.tip) end);check:SetScript("OnLeave",function() GameTooltip:Hide() end)
  row.Reflow=function(w)
-  row:SetWidth(w);label:SetWidth(w-32-(action and 110 or 0));detail:SetWidth(w-32)
+  row:SetWidth(w);label:SetWidth(w-32-(action and 144 or 0));detail:SetWidth(w-32)
   if action then action:ClearAllPoints();action:SetPoint("TOPRIGHT",row,"TOPRIGHT",0,-1) end
  end
  row.control=check;table.insert(U.controls,check);table.insert(page.flow,{frame=row,y=y})
