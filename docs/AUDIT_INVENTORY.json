@@ -84,36 +84,36 @@
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 43477,
-      "sha256": "6600e73fd6638d1306a53066e3870154b192fc80140305100a18baafa9837d10",
+      "bytes": 43518,
+      "sha256": "ece4a32d1cf5cabb098ae2ccecddb3267d5b2883e6127186f0edfb07010d03b7",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
-          "line": 617
+          "line": 618
         },
         {
           "name": "FieldKit_L",
-          "line": 621
+          "line": 622
         },
         {
           "name": "FieldKit_Text",
-          "line": 628
+          "line": 629
         },
         {
           "name": "FieldKit_RefreshLanguage",
-          "line": 633
+          "line": 634
         },
         {
           "name": "FieldKit_SetLanguage",
-          "line": 635
+          "line": 636
         },
         {
           "name": "FieldKit_CreateLanguageOption",
-          "line": 642
+          "line": 643
         },
         {
           "name": "Refresh",
-          "line": 650
+          "line": 651
         }
       ],
       "literalEvents": []
@@ -195,8 +195,8 @@
       "literalEvents": []
     },
     "Settings.lua": {
-      "bytes": 11274,
-      "sha256": "3584059e8741373f73153ba333ca657ff86ba7fac2b17f7caa26484b3ca938db",
+      "bytes": 11269,
+      "sha256": "9e16aa57fb5e3d48f67d716389263adb5a750d0d1d573e49d9afad57bc31bf3c",
       "namedFunctions": [
         {
           "name": "FieldKit_FormatHealth",
