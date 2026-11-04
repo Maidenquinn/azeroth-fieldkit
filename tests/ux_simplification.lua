@@ -20,8 +20,8 @@ for _,section in ipairs(U.sections) do
   for _,item in ipairs(section.items) do assert(item.label~="Chat width" and item.label~="Enable local chat copy") end
  end
 end
-assert(appearances["Customize main chat"] and appearances["Chat width"] and appearances["Chat font size"])
-assert(appearances["Chat background opacity"] and appearances["Chat history lines"])
+assert(appearances["Customize main chat"] and appearances["Chat width"] and appearances["Chat height"])
+assert(appearances["Unlock chat position"] and appearances["Chat history lines"])
 assert(copies["Enable local chat copy"] and copies["Show chat Copy button"])
 local colorLabels={}
 for _,section in ipairs(U.sections) do if section.id=="chatcolors" then
