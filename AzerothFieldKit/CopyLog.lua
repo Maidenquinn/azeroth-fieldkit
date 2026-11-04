@@ -13,7 +13,7 @@ local function NativeChat()
 end
 local function Clamp(v,default,minimum,maximum)
  v=tonumber(v)
- if not v or v~=v or v==math.huge or v==-math.huge then v=default end
+ if not v or v~=v then v=default end -- Lua 5.0 may not expose math.huge
  return math.floor(math.max(minimum,math.min(maximum,v))+.5)
 end
 function FieldKit.ApplyChatStyle()
