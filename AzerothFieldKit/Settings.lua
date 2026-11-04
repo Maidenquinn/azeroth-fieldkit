@@ -146,7 +146,11 @@ function FieldKit_AddSettingsSections(sections)
  for i=1,table.getn(sections) do
   if sections[i].title=="Interface" then
    table.insert(sections[i].items,1,{kind="language"})
-   table.insert(sections[i].items,Check("chatCopy","Enable local chat copy","Off by default. Keeps up to 100 main-chat messages in memory only, including private messages. Nothing is sent or saved. Disabling clears the buffer.",false))
+   local chat=Check("chatCopy","Enable local chat copy","Records up to 100 NEW messages from the main chat after enabling. Click Open chat copy, or type /fieldkitlog, then use Ctrl+A / Ctrl+C. Native chat text itself cannot be selected. Nothing is uploaded or saved.",false)
+    chat.button={text="Open chat copy",onClick=function()
+     if FieldKit.OpenChatCopy then FieldKit.OpenChatCopy() end
+    end}
+    table.insert(sections[i].items,chat)
   end
   if sections[i].title=="Map" then
    table.insert(sections[i].items,Check("guardianPins","Guardians on the minimap","Exact native lair positions, not moving guardian locations. White: asleep; red: fighting; orange: return countdown. Independent of the Lairs window.",true))
