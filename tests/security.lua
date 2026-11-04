@@ -53,7 +53,7 @@ assert(FieldKitChatMoveHandle and FieldKitChatMoveHandle:IsShown())
 this=FieldKitChatMoveHandle;FieldKitChatMoveHandle:GetScript("OnDragStart")()
 ChatFrame1.left=210;ChatFrame1.bottom=150
 FieldKitChatMoveHandle:GetScript("OnDragStop")()
-assert(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.x==210 and FieldKitDB.chatAnchor.y==150)
+assert(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.x==210 and FieldKitDB.chatAnchor.y==150,"Chat anchor: "..tostring(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.x)..","..tostring(FieldKitDB.chatAnchor and FieldKitDB.chatAnchor.y))
 FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
