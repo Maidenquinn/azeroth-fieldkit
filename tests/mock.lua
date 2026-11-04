@@ -128,7 +128,7 @@ function methods:SetInventoryItem() return false end
 
 -- Exercise the actual compact action bar path, which requires the stock MainMenuBar.
 MainMenuBar=CreateFrame("Frame","MainMenuBar",UIParent)
-function methods:GetBottom() return 10 end
+function methods:GetBottom() return self.bottom or 10 end
 function methods:GetAlpha() return self.alpha or 1 end
 function methods:GetNumChildren() return 0 end
 
