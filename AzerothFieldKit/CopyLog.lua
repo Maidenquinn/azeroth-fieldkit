@@ -62,7 +62,7 @@ local function CopyButton()
   button:SetBackdropColor(.025,.045,.065,.85)
   button:SetBackdropBorderColor(.48,.38,.22,.8)
   local label=button:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
-  label:SetPoint("CENTER",button,"CENTER",0,0);label:SetText("Copy")
+  label:SetPoint("CENTER",button,"CENTER",0,0);FieldKit_Text(label,"Copy")
   button:SetScript("OnClick",function() FieldKit.OpenChatCopy() end)
   button:SetScript("OnEnter",function()
    if GameTooltip then
@@ -148,6 +148,7 @@ function FieldKit.SyncChat()
   if button then button:Hide() end
   copiedNative=false;active=false;return
  end
+ if not active then ImportVisible() end
  active=true;Hook(1)
  CopyButton()
  FieldKit.ApplyChatStyle()
@@ -179,9 +180,13 @@ local function OpenCopy()
   local hint=f:CreateFontString(nil,"OVERLAY","GameFontNormalSmall");hint:SetPoint("BOTTOMLEFT",f,"BOTTOMLEFT",16,14)
   FieldKit_Text(hint,"Ctrl+A puis Ctrl+C - texte sans codes de couleur")
   FieldKitTheme.Font(hint,12,FieldKitTheme.muted)
-  copyFrame=f;copyEdit=e
+  copyFrame=f;copyEdit=e;f.fieldkitHint=hint
  end
  ImportVisible()\n local text=table.concat(history[1] or {},"\n")
+ if copyFrame and copyFrame.fieldkitHint then
+  if text=="" then FieldKit_Text(copyFrame.fieldkitHint,"No captured messages yet. Enable recording and wait for new chat messages.")
+  else FieldKit_Text(copyFrame.fieldkitHint,"Ctrl+A, then Ctrl+C to copy these captured messages.") end
+ end
  copyEdit:SetText(text);local _,lines=string.gsub(text,"\n","\n")
  copyEdit:SetHeight(math.max(320,(lines+1)*16+20));copyFrame:Show();copyEdit:SetFocus();copyEdit:HighlightText()
 end
