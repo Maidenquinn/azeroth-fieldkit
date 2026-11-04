@@ -44,12 +44,12 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "14ad117e97c1a26a2af6bfc8905e17a0e81465aaf3146ab26e1701d026fca728"
+      "sha256": "bb3f40a03095570640bdb9e32b4317b74477ebdc4183a932da898612eafa5254"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "07a91ec5a5f22fd655f25cb4f2fe56388c263a45d399e9d8bef22c87ffc429b6"
+      "sha256": "7a264da72d195b83eae0ecc80e046e98c91f7b045ef8ea3e22518aba8d0dc2ba"
     },
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
@@ -78,8 +78,8 @@
     },
     "Settings.lua": {
       "maxUpvalues": 2,
-      "functions": 22,
-      "sha256": "7077ee2d4ecec7bf34370dce5d9c2cc23f3f86f6950453534404146b2e88e0a9"
+      "functions": 23,
+      "sha256": "8f67734121892111819c883d46721ac089522b5e2473326f3bcfa1963626f2f9"
     },
     "GameCompatibility.lua": {
       "maxUpvalues": 1,
@@ -184,7 +184,7 @@
     "Interface.lua": {
       "maxUpvalues": 24,
       "functions": 161,
-      "sha256": "b77a910edb412d942c7c3880d8d2172e3ee2c63fdad2572d1ae3ad7929a45255"
+      "sha256": "092e2f0b9a3b21b54c0943d85bc892014ec140a83ea0d170dab4e723a099539b"
     },
     "FieldKit.lua": {
       "maxUpvalues": 20,
@@ -217,9 +217,9 @@
       "sha256": "e976dd63d4f9343fa3666a0504dcbe7b98631d1cb8b81bf9847dbd6f3c44a4b6"
     },
     "CopyLog.lua": {
-      "maxUpvalues": 5,
+      "maxUpvalues": 6,
       "functions": 25,
-      "sha256": "ffae52de37a709f167199311c80a15d3ee618cb7d1194cd6ce2bfd0a4e9afa3b"
+      "sha256": "6449a321d4b4af9fbf9cdc8f915e67ebb6495b72ce753c7cacb361eb731ea262"
     }
   }
 }
