@@ -2384,8 +2384,8 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 16580,
-      "sha256": "e410653ee453e0a2c06b35600cc894778a0d5c2b80224401054cf44779901484",
+      "bytes": 16648,
+      "sha256": "718ac38d9000744209f26f5e32db68755f66c54b5986efa7682bc7b9053cf88b",
       "namedFunctions": [
         {
           "name": "NativeChat",
@@ -2421,43 +2421,43 @@
         },
         {
           "name": "CopyButton",
-          "line": 208
+          "line": 205
         },
         {
           "name": "ColorHook",
-          "line": 242
+          "line": 239
         },
         {
           "name": "Clean",
-          "line": 265
+          "line": 262
         },
         {
           "name": "Capture",
-          "line": 274
+          "line": 271
         },
         {
           "name": "ImportVisible",
-          "line": 281
+          "line": 278
         },
         {
           "name": "FieldKit.ClearChat",
-          "line": 295
+          "line": 292
         },
         {
           "name": "Hook",
-          "line": 303
+          "line": 300
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 321
+          "line": 318
         },
         {
           "name": "OpenCopy",
-          "line": 339
+          "line": 336
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 377
+          "line": 374
         }
       ],
       "literalEvents": []
