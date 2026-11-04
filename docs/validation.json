@@ -78,8 +78,8 @@
     },
     "Settings.lua": {
       "maxUpvalues": 2,
-      "functions": 15,
-      "sha256": "d7e2677b210414484ad387a9ad59d3a18c9626d51da227980e53c14dc47d5dde"
+      "functions": 16,
+      "sha256": "8b75b03515eba84509bb94a6e11fccfcc20b95895bbbec2bed6c8f48dcb31c65"
     },
     "GameCompatibility.lua": {
       "maxUpvalues": 1,
@@ -89,7 +89,7 @@
     "RunMode.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "bc757119ae460f507cc5ba3b05d7893673ca8d4e1aba6a156b286c86f039f8ec"
+      "sha256": "883dcacb242d1e1c4616f9199891a8ad94988e1e47e58c32ff6dcfafd2b2e7c8"
     },
     "NativeData.lua": {
       "maxUpvalues": 2,
@@ -188,8 +188,8 @@
     },
     "FieldKit.lua": {
       "maxUpvalues": 20,
-      "functions": 174,
-      "sha256": "3b6538e88083180a25c2754b226afd8417a77282f76bd9b4bcf9ef976aa8ca21"
+      "functions": 175,
+      "sha256": "d5a367044001870d43a48cf0c0584f11f5eb4e9d12decee5c3e34019d21ce1c5"
     },
     "WorldPins.lua": {
       "maxUpvalues": 11,
@@ -218,8 +218,8 @@
     },
     "CopyLog.lua": {
       "maxUpvalues": 4,
-      "functions": 14,
-      "sha256": "1fafdbf73cdcb81b1f9b79a81b58d27d290e5b12d962a4c309b990d3c8cb6a0f"
+      "functions": 15,
+      "sha256": "9f6c16bcfc959c3429bdc43f38316b9d39b39a37eb3a90dc6da0afb484fd43a9"
     }
   }
 }
