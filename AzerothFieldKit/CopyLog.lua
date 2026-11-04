@@ -6,6 +6,8 @@ local active=false
 local button, chatFrame, styleBefore, styleStamp, chatBackdrop, moveHandle
 local moving=false
 local copiedNative=false
+local textColorHooked={}
+local lastPositionStamp
 local MAX_MESSAGES,MAX_BYTES=100,512
 
 local backgrounds={
@@ -45,6 +47,9 @@ local function ApplyAnchor(f)
  local maxX=math.max(0,UIParent:GetWidth()-f:GetWidth())
  local maxY=math.max(0,UIParent:GetHeight()-f:GetHeight())
  x=math.max(0,math.min(x,maxX));y=math.max(0,math.min(y,maxY))
+ local stamp=tostring(x)..":"..tostring(y)..":"..tostring(f:GetWidth())..":"..tostring(f:GetHeight())
+ if lastPositionStamp==stamp then return end
+ lastPositionStamp=stamp
  f:ClearAllPoints()
  f:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",x,y)
 end
@@ -59,6 +64,7 @@ local function SaveAnchor(f)
   end
  end
  if type(x)=="number" and type(y)=="number" then
+  lastPositionStamp=nil
   FieldKitDB.chatAnchor={
    x=Clamp(x,0,0,UIParent:GetWidth()),
    y=Clamp(y,0,0,UIParent:GetHeight())
@@ -115,6 +121,7 @@ end
 function FieldKit.ResetChatPosition()
  FinishMove()
  if FieldKitDB then FieldKitDB.chatAnchor=nil end
+ lastPositionStamp=nil
  local f=NativeChat()
  if not f then return end
  if styleBefore and styleBefore.point and styleBefore.point[1] then
@@ -138,7 +145,7 @@ function FieldKit.ApplyChatStyle()
    if styleBefore.font and f.SetFont then f:SetFont(styleBefore.font,styleBefore.fontSize,styleBefore.flags) end
    if styleBefore.fading~=nil and f.SetFading then f:SetFading(styleBefore.fading) end
   end
-  styleBefore=nil;styleStamp=nil;chatFrame=nil
+  styleBefore=nil;styleStamp=nil;chatFrame=nil;lastPositionStamp=nil
   if moveHandle then moveHandle:Hide() end
   return
  end
@@ -150,7 +157,7 @@ function FieldKit.ApplyChatStyle()
   end
   styleBefore={width=f:GetWidth(),height=f:GetHeight(),font=font,fontSize=size,flags=flags,
    fading=f.GetFading and f:GetFading(),point={f:GetPoint()}}
-  chatFrame=f;styleStamp=nil
+  chatFrame=f;styleStamp=nil;lastPositionStamp=nil
  end
  local w=Clamp(FieldKitDB.chatWidth,440,280,800)
  local h=Clamp(FieldKitDB.chatHeight,180,100,450)
@@ -159,9 +166,8 @@ function FieldKit.ApplyChatStyle()
  local maxLines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
  local bg=Clamp(FieldKitDB.chatBackgroundColor,1,1,table.getn(backgrounds))
- local face=Clamp(FieldKitDB.chatFontFace,1,1,table.getn(fontFiles))
- -- fontFiles[1] is intentionally nil, so table.getn cannot determine its size.
- face=Clamp(FieldKitDB.chatFontFace,1,1,5)
+ -- First entry is nil (retain original font): use an explicit bound.
+ local face=Clamp(FieldKitDB.chatFontFace,1,1,5)
  local stamp=table.concat({w,h,fontSize,tostring(fading),maxLines,opacity,bg,face},":")
  if styleStamp~=stamp or f:GetWidth()~=w or f:GetHeight()~=h then
   if opacity>0 then
@@ -216,6 +222,27 @@ local function CopyButton()
   button.fieldkitChatAnchor=f
  end
  button:Show()
+end
+
+-- Optional monochrome mode for NEW messages. Chat's default channel colors remain
+-- untouched unless the player enables this explicit override.
+local function ColorHook()
+ local f=NativeChat()
+ if not f or textColorHooked[f] or type(f.AddMessage)~="function" then return end
+ textColorHooked[f]=true
+ local original=f.AddMessage
+ f.AddMessage=function(self,text,r,g,b,id)
+  local db=FieldKitDB
+  if db and db.chatStyle and db.chatOverrideText and type(text)=="string" then
+   local index=Clamp(db.chatTextColor,1,1,table.getn(foregrounds))
+   local c=foregrounds[index]
+   -- Remove inline color tokens in monochrome mode, but preserve links.
+   text=string.gsub(text,"|c%x%x%x%x%x%x%x%x","")
+   text=string.gsub(text,"|r","")
+   return original(self,text,c[1],c[2],c[3],id)
+  end
+  return original(self,text,r,g,b,id)
+ end
 end
 
 -- Only newer client variants expose read access to the rendered chat buffer.
@@ -283,13 +310,16 @@ function FieldKit.SyncChat()
  if not enabled then
   if active then FieldKit.ClearChat() end
   copiedNative=false;active=false
-  CopyButton() -- Keep the shortcut discoverable; never record without consent.
-  return
+  CopyButton() -- Shortcut does not imply logging consent.
+ else
+  if not active then ImportVisible() end
+  active=true;Hook(1)
+  CopyButton()
  end
- if not active then ImportVisible() end
- active=true;Hook(1)
- CopyButton()
- FieldKit.ApplyChatStyle()
+ if FieldKitDB and FieldKitDB.chatStyle then
+  FieldKit.ApplyChatStyle()
+  if FieldKitDB.chatOverrideText then ColorHook() end
+ end
 end
 
 -- The only export is a user-opened editbox. Ctrl+C is performed by the player.
