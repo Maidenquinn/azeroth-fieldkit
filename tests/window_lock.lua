@@ -2,6 +2,18 @@
 FieldKitDB={linkLeftCards=true,linkRightCards=true,combatText=true}
 fire(FieldKitFrame,"VARIABLES_LOADED");update(FieldKitFrame,.3)
 assert(FieldKitDB.windowsLocked==false and not FieldKit.layoutEditing and not FieldKitUI.frame)
+-- In linked HUD mode the card receives MouseUp, while StartMoving belongs
+-- to FieldKitLeftStack. Releasing any card must finish the root drag.
+assert(FieldKitDB.linkLeftCards)
+for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) do
+ local start=card:GetScript("OnDragStart")
+ local release=card:GetScript("OnMouseUp")
+ assert(start and release)
+ start()
+ assert(FieldKitHudStack.root.azsMoving,"linked root did not start")
+ release()
+ assert(not FieldKitHudStack.root.azsMoving,"linked root stuck after card mouse release")
+end
 this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")()
 assert(FieldKitHudStack.root.azsMoving and not FieldKitUI.frame)
 FieldKitHudStack.root:ClearAllPoints();FieldKitHudStack.root:SetPoint("TOPLEFT",UIParent,"TOPLEFT",14,-60)
