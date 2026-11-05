@@ -355,6 +355,21 @@ function FieldKit.RestoreDisplayedChat()
  replaying=false
 end
 
+-- Color changes cannot mutate existing ScrollingMessageFrame lines in place.
+-- Re-render ONLY when every visible line is represented in our bounded
+-- in-memory history; otherwise clearing would irreversibly destroy messages
+-- that arrived before FieldKit started observing the chat.
+function FieldKit.RecolorDisplayedChat()
+ if not FieldKitDB or not FieldKitDB.chatStyle or replaying then return false end
+ local f=NativeChat()
+ if not f or not f.GetNumMessages or not f.Clear then return false end
+ local known=table.getn(displayHistory)
+ local visible=f:GetNumMessages()
+ if known==0 or type(visible)~="number" or visible~=known then return false end
+ FieldKit.RestoreDisplayedChat()
+ return true
+end
+
 -- Reconcile one boolean preference. No messages are exported by this watcher.
 function FieldKit.SyncChat()
  local enabled=FieldKitDB and FieldKitDB.chatCopy==true
