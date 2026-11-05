@@ -154,6 +154,9 @@ local function ChatChoice(key,label,values)
   get=function() return FieldKitDB[key] or 1 end,
   set=function(v)
    FieldKitDB[key]=v
+   -- Selecting a custom text palette must visibly apply it. The separate
+   -- checkbox can still restore the native channel colors explicitly.
+   if key=="chatTextColor" then FieldKitDB.chatOverrideText=true end
    if FieldKit.SyncChat then FieldKit.SyncChat() end
    if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
   end}
@@ -196,7 +199,7 @@ function FieldKit_AddSettingsSections(sections)
     table.insert(sections[i].items,ChatSlider("chatBackgroundOpacity","Chat background opacity",0,85,5))
     table.insert(sections[i].items,ChatChoice("chatFontFace","Chat font family",{"Original font","Friz Quadrata","Arial Narrow","Morpheus","Skurri"}))
     table.insert(sections[i].items,ChatChoice("chatBackgroundColor","Chat background color",{"Charcoal","Obsidian","Midnight blue","Warm brown","Forest","Black"}))
-    local override=Check("chatOverrideText","Override chat text colors","Optional monochrome colors for NEW messages, including channel-colored text. Existing chat history is not recolored. Disable to preserve native per-channel colors.",false)
+    local override=Check("chatOverrideText","Override chat text colors","When enabled, apply the selected text color to new messages. Selecting a text color automatically enables this option. Turn it off to restore native per-channel colors.",false)
     local oldOverride=override.set
     override.set=function(v) oldOverride(v);if FieldKit.SyncChat then FieldKit.SyncChat() end end
     table.insert(sections[i].items,override)
