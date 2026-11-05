@@ -1,4 +1,6 @@
 NOW=100
+CURSOR_X=100;CURSOR_Y=100
+function GetCursorPosition() return CURSOR_X,CURSOR_Y end
 function GetTime() return NOW end
 SlashCmdList={}
 objects={}
