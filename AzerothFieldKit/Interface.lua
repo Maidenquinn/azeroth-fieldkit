@@ -657,6 +657,14 @@ function U.Refresh()
   FieldKit_Text(c.state,enabled and "Enabled" or "Disabled")
   local color=enabled and T.green or T.muted;c.state:SetTextColor(color[1],color[2],color[3])
  end
+ if U.headerProfileButtons then
+  for i=1,3 do
+   local b=U.headerProfileButtons[i]
+   local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
+   FieldKit_Text(b,saved and tostring(i) or "—")
+   T.State(b,FieldKitDB.activeHudProfile==i)
+  end
+ end
  if U.quickProfileButtons then
   for i=1,3 do
    local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
@@ -734,6 +742,14 @@ function U.Reflow()
  end
  U.header:SetWidth(w-64);U.headerLine:SetWidth(w-44)
  U.title:SetWidth(w-220);U.subtitle:SetWidth(w-230)
+ U.headerProfiles:ClearAllPoints()
+ U.headerProfiles:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-230,-74)
+ for i=1,3 do
+  local button=U.headerProfileButtons[i]
+  button:ClearAllPoints()
+  button:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-24-(3-i)*64,-72)
+  T.Update(button)
+ end
  U.status:ClearAllPoints();U.status:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-(h-78));U.contentWidth=content;U.status:SetWidth(U.reloadNeeded and content-166 or content)
  local y=h-44
  -- C10.4: reserve the close button first; distribute footer actions within
@@ -848,6 +864,17 @@ function U.Build(sections,context)
  header:SetScript("OnDragStart",function() frame:StartMoving() end)
  header:SetScript("OnDragStop",function() frame:StopMovingOrSizing() end)
  local x=CreateFrame("Button","FieldKitPanelClose",frame,"UIPanelCloseButton");x:SetWidth(26);x:SetHeight(26);x:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-10,-10);x:SetFrameLevel(120);x:SetScript("OnClick",function() frame:Hide() end)
+ -- Profile selection on every page; empty slots open the manager.
+ U.headerProfiles=T.Label(frame,"HUD",0,0,42,22,12,T.muted)
+ U.headerProfileButtons={}
+ for i=1,3 do
+  local slot=i
+  U.headerProfileButtons[i]=T.Button(frame,nil,tostring(i),0,0,54,25,function()
+   if FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[slot] then
+    FieldKitProfiles.Load(slot);U.Refresh()
+   else U.Select("profiles") end
+  end)
+ end
  -- The navigation has its own scroll viewport. On 768px screens all pages
  -- remain reachable without shrinking labels or covering the footer.
  local nav=CreateFrame("ScrollFrame","FieldKitV2Navigation",frame)
