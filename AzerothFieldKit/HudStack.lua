@@ -70,12 +70,12 @@ function S.Initialize(frames,makeMovable,placeMovable)
   f:SetScript("OnDragStart",BeginCardDrag)
   f:SetScript("OnDragStop",FinishCardDrag)
   f:SetScript("OnMouseDown",function()
-   if arg1 and arg1~="LeftButton" then return end
+   if type(arg1)=="string" and arg1~="LeftButton" then return end
    BeginCardDrag()
   end)
   S.finishers[i]=FinishCardDrag
   f:SetScript("OnMouseUp",function()
-   if arg1 and arg1~="LeftButton" then return end
+   if type(arg1)=="string" and arg1~="LeftButton" then return end
    FinishCardDrag()
   end)
   local oldHide=f:GetScript("OnHide")
