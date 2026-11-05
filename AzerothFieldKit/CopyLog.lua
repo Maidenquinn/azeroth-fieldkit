@@ -8,6 +8,7 @@ local moving=false
 local copiedNative=false
 local textColorHooked={}
 local lastPositionStamp
+local geometryStamp
 local MAX_MESSAGES,MAX_BYTES=100,512
 
 local backgrounds={
@@ -146,15 +147,21 @@ function FieldKit.ApplyChatStyle()
   if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end
   if moveHandle then moveHandle:Hide() end
+  if styleBefore and chatFrame==f then
+   if styleBefore.width and f.SetWidth then f:SetWidth(styleBefore.width) end
+   if styleBefore.height and f.SetHeight then f:SetHeight(styleBefore.height) end
+  end
+  styleBefore=nil;chatFrame=nil;geometryStamp=nil;lastPositionStamp=nil
   return
  end
  if not styleBefore or chatFrame~=f then
   local point,relative,relativePoint,x,y=f:GetPoint()
   if type(point)=="string" and point~="" then
-   styleBefore={point={point,relative or UIParent,relativePoint or point,tonumber(x) or 0,tonumber(y) or 0}}
+   styleBefore={point={point,relative or UIParent,relativePoint or point,tonumber(x) or 0,tonumber(y) or 0},width=f:GetWidth(),height=f:GetHeight()}
   else
-   styleBefore={}
+   styleBefore={width=f:GetWidth(),height=f:GetHeight()}
   end
+  geometryStamp=nil
   chatFrame=f
  end
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
@@ -169,6 +176,19 @@ function FieldKit.ApplyChatStyle()
   chatBackdrop:SetVertexColor(c[1],c[2],c[3],opacity/100)
   chatBackdrop:Show()
  elseif chatBackdrop then chatBackdrop:Hide() end
+ -- Stage 2: change geometry only when preferences change. Never touch
+ -- fading, the message text, or the native font in this experiment.
+ local w=Clamp(FieldKitDB.chatWidth,440,280,800)
+ local h=Clamp(FieldKitDB.chatHeight,180,100,450)
+ local lines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
+ local stamp=tostring(w)..":"..tostring(h)..":"..tostring(lines)
+ if geometryStamp~=stamp then
+  if f.SetWidth then f:SetWidth(w) end
+  if f.SetHeight then f:SetHeight(h) end
+  if f.SetMaxLines then f:SetMaxLines(lines) end
+  geometryStamp=stamp
+  lastPositionStamp=nil -- clamp a saved anchor against the new dimensions
+ end
  ApplyAnchor(f)
  MoveControl()
  return
