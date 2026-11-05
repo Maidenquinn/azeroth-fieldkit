@@ -37,39 +37,26 @@ assert(ChatFrame2.AddMessage==original)
 assert(FieldKitChatCopyButton and FieldKitChatCopyButton:IsShown(),"copy shortcut must be next to main chat")
 assert(ChatFrame1:AddMessage("opted in")=="forwarded")
 assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
--- Regression: legacy chat may start with zero visibility time.
--- In safe mode styling must NEVER enable native chat fading and AddMessage
--- must always reach the native frame, even with advanced options selected.
-local chatOps={}
-ChatFrame1.GetTimeVisible=function() return 0 end
-ChatFrame1.SetTimeVisible=function(self,value)
- table.insert(chatOps,"time:"..value);self.timeVisible=value
-end
-ChatFrame1.GetFading=function() return false end
-ChatFrame1.SetFading=function(self,value)
- table.insert(chatOps,"fade:"..tostring(value))
- assert(value==false,"FieldKit must not enable native chat fading")
- self.fading=value
-end
-ChatFrame1.SetFadeDuration=function(self,value) self.fadeDuration=value end
-FieldKitDB.chatFading=true -- Existing saved variables may still enable it.
+-- Stage 1 must leave native text rendering APIs entirely untouched.
+local nativeOps=0
+local function unexpectedNativeMutation() nativeOps=nativeOps+1;error("native chat rendering mutated") end
+ChatFrame1.SetTimeVisible=unexpectedNativeMutation
+ChatFrame1.SetFading=unexpectedNativeMutation
+ChatFrame1.SetFadeDuration=unexpectedNativeMutation
+ChatFrame1.SetFont=unexpectedNativeMutation
+ChatFrame1.SetMaxLines=unexpectedNativeMutation
+local oldWidth,oldHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
+local oldSetWidth,oldSetHeight=ChatFrame1.SetWidth,ChatFrame1.SetHeight
+ChatFrame1.SetWidth=unexpectedNativeMutation
+ChatFrame1.SetHeight=unexpectedNativeMutation
+FieldKitDB.chatFading=true
+FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230;FieldKitDB.chatFontSize=15
+FieldKitDB.chatFontFace=2;FieldKitDB.chatHistoryLines=400
 FieldKitDB.chatStyle=true
 FieldKit.ApplyChatStyle()
-assert(ChatFrame1.fading==false)
+assert(nativeOps==0 and ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
 assert(ChatFrame1:AddMessage("should stay visible")=="forwarded")
-FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
-FieldKitDB.chatFading=false
--- Prat-inspired style controls only affect the native frame when enabled.
-local oldWidth,oldHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
-FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230;FieldKitDB.chatFontSize=15
--- Emulate legacy Lua environments where math.huge is unavailable.
-local originalHuge=math.huge
-math.huge=nil
-FieldKitDB.chatStyle=true;FieldKit.ApplyChatStyle()
-math.huge=originalHuge
-assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
-FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
+ChatFrame1.SetWidth=oldSetWidth;ChatFrame1.SetHeight=oldSetHeight
 -- The player can drag the real chat and preserve its position without replacing it.
 FieldKitDB.chatStyle=true;FieldKitDB.chatMove=true;FieldKit.ApplyChatStyle()
 assert(FieldKitChatMoveHandle and FieldKitChatMoveHandle:IsShown())
@@ -81,7 +68,7 @@ FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==510 and FieldKitDB.chatBackgroundColor==3)
+assert(ChatFrame1:GetWidth()==oldWidth and FieldKitDB.chatBackgroundColor==3)
 -- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()
