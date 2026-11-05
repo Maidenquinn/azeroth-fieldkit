@@ -114,7 +114,7 @@ ChatFrame1:AddMessage("after opt out")
 SlashCmdList.FieldKitLOG("on");SlashCmdList.FieldKitLOG("")
 assert(FieldKitCopyLogEdit:GetText()=="")
 SlashCmdList.FieldKitLOG("off")
-assert(forwarded==125)
+assert(forwarded==127)
 local d=FieldKitDB
 FieldKitDB={known="bad",pos={broken="bad",nan={0/0,1}},collapsedWindows=true,cameraMax="bad",targetHealthMode=1/0,lowHealthPct=-10,talentToggles={bad=true}}
 FieldKit.InitializeSettings({"crit"})
