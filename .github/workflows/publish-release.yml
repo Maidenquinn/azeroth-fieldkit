@@ -35,6 +35,10 @@ jobs:
           python tools/package.py
           test -f "dist/AzerothFieldKit-$VERSION.zip"
           unzip -t "dist/AzerothFieldKit-$VERSION.zip" >/dev/null
+          FIRST_HASH=$(sha256sum "dist/AzerothFieldKit-$VERSION.zip" | cut -d' ' -f1)
+          python tools/package.py
+          SECOND_HASH=$(sha256sum "dist/AzerothFieldKit-$VERSION.zip" | cut -d' ' -f1)
+          test "$FIRST_HASH" = "$SECOND_HASH"
           cp build/validation.json dist/validation.json
       - name: Tag and publish verified assets
         env:
