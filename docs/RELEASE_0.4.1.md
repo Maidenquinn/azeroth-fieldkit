@@ -1,6 +1,6 @@
-# Azeroth FieldKit v0.4.1 — Final integration recipe
+# Azeroth FieldKit v0.4.1 — Native chat customization and HUD drag fixes
 
-Date: 2026-11-05. This is a release **candidate** until the integrated ZIP is accepted in game.
+Date: 2026-11-05. The maintainer confirmed the integrated v0.4.1 in-game recipe, including chat, HUD drag, French/English settings and persistence.
 
 ## Changes since 0.4.0
 
@@ -34,8 +34,8 @@ Date: 2026-11-05. This is a release **candidate** until the integrated ZIP is ac
 
 ## Validation boundary and release procedure
 
-Automated CI verifies source/runtime structure and simulated Lua fixtures. It does not reproduce all native UI/mouse events. The maintainer already reported in-game success for native chat controls and the final Mode drag fix; this *combined* 0.4.1 package still requires the final smoke test. Do not merge, tag or publish it before that acceptance.
+Automated CI verifies source/runtime structure and simulated Lua fixtures. It does not reproduce all native UI/mouse events. The maintainer confirmed all seven integrated smoke checks on the current client on 2026-11-05. Simulated CI remains distinct from native client testing.
 
-Upon acceptance: reconcile the dependency PR chain into a single review against main, run CI and deterministic packaging for the merged source, then publish an immutable v0.4.1 prerelease with runtime ZIP, MANIFEST.json, SHA256SUMS.txt and validation.json as separate assets. Preserve v0.4.0 and its assets.
+Publication: merge the consolidated source to main after CI and publish an immutable v0.4.1 prerelease with the runtime ZIP, MANIFEST.json, SHA256SUMS.txt and validation.json as separate assets. Preserve v0.4.0 and its assets.
 
 Credits and rights notices: maintained derivative of MASH by Malk. See NOTICE.md, LICENSE.md and docs/PUBLICATION.md.
