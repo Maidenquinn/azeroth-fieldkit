@@ -18,19 +18,45 @@ function S.Initialize(frames,makeMovable,placeMovable)
  root:EnableMouse(false)
  for i=1,table.getn(frames) do
   local f=frames[i];local start,stop=f:GetScript("OnDragStart"),f:GetScript("OnDragStop")
-  f:SetScript("OnDragStart",function()
-   if FieldKitDB.linkLeftCards then root:GetScript("OnDragStart")() elseif start then start() end
-  end)
+  -- Native dragging must be owned by the *actual clicked frame*.
+  -- Starting native movement on an invisible proxy root loses mouse capture
+  -- in Benilla, leaving the entire stack stuck to the cursor.
+  local dragging=false
+  local cursorX,cursorY,rootPoint
   local function FinishCardDrag()
-   if FieldKitDB.linkLeftCards then
-    local finish=root:GetScript("OnDragStop")
-    if finish then finish() end
+   if dragging then
+    dragging=false
+    f.fieldkitHudDragging=nil
+    f:StopMovingOrSizing()
+    if rootPoint then
+     local cx,cy=GetCursorPosition()
+     local scale=(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+     if scale==0 then scale=1 end
+     local dx=(cx-cursorX)/scale
+     local dy=(cy-cursorY)/scale
+     root:ClearAllPoints()
+     root:SetPoint(rootPoint[1],UIParent,rootPoint[2],rootPoint[3]+dx,rootPoint[4]+dy)
+     FieldKitPositions.Save(root,true)
+     -- Do not leave a moved card with its own temporary native anchor.
+     S.Apply()
+    end
+    rootPoint=nil
    elseif stop then stop() end
   end
+  f:SetScript("OnDragStart",function()
+   if FieldKitDB.linkLeftCards then
+    if FieldKitDB.windowsLocked and not FieldKit.layoutEditing then return end
+    local p,relative,rp,x,y=root:GetPoint(1)
+    if type(p)~="string" or (relative and relative~=UIParent and relative~="UIParent") then return end
+    cursorX,cursorY=GetCursorPosition()
+    rootPoint={p,rp or p,tonumber(x) or 0,tonumber(y) or 0}
+    dragging=true
+    f.fieldkitHudDragging=true
+    f:SetMovable(true)
+    f:StartMoving()
+   elseif start then start() end
+  end)
   f:SetScript("OnDragStop",FinishCardDrag)
-  -- StartMoving runs on the linked root while the mouse belongs to the card.
-  -- The card's old MouseUp only stopped itself, leaving the root stuck to the
-  -- cursor when the native client does not emit OnDragStop.
   f:SetScript("OnMouseUp",FinishCardDrag)
   local oldHide=f:GetScript("OnHide")
   f:SetScript("OnHide",function()
@@ -57,6 +83,8 @@ function S.Apply()
  local width=FieldKit.MeterWidth(FieldKitDB.meterValues);local height,shown=0,0
  for i=1,table.getn(S.frames) do
   local f=S.frames[i]
+  -- Do not re-anchor a card while native mouse capture owns its drag.
+  if f.fieldkitHudDragging then return end
   -- Clamp the complete group once; individual card clamps can move it twice.
   if f.SetClampedToScreen then f:SetClampedToScreen(false) end
   local ownWidth=FieldKitCardLayout.Width(f,width)
