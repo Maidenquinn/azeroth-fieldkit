@@ -1,4 +1,6 @@
 NOW=100
+CURSOR_X=100;CURSOR_Y=100
+function GetCursorPosition() return CURSOR_X,CURSOR_Y end
 function GetTime() return NOW end
 SlashCmdList={}
 objects={}
@@ -27,6 +29,8 @@ function methods:GetTexture() return self.texture end
 function methods:SetAlpha(v) self.alpha=v end
 function methods:GetFrameLevel() return 1 end
 function methods:GetCenter() return 500,400 end
+function methods:GetLeft() return self.left end
+function methods:GetBottom() return self.bottom end
 function methods:GetEffectiveScale() return 1 end
 function methods:GetScale() return 1 end
 function methods:GetStringWidth() return string.len(self.text or "")*6 end
@@ -126,7 +130,7 @@ function methods:SetInventoryItem() return false end
 
 -- Exercise the actual compact action bar path, which requires the stock MainMenuBar.
 MainMenuBar=CreateFrame("Frame","MainMenuBar",UIParent)
-function methods:GetBottom() return 10 end
+function methods:GetBottom() return self.bottom or 10 end
 function methods:GetAlpha() return self.alpha or 1 end
 function methods:GetNumChildren() return 0 end
 

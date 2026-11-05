@@ -139,6 +139,28 @@ local function Check(key,label,tip,default)
  get=function() if not FieldKitDB then return default end;return FieldKitDB[key] end,
  set=function(v) FieldKitDB[key]=v end}
 end
+-- Opt-in styling for the native chat frame (Prat-inspired, no third-party dependencies).
+local function ChatSlider(key,label,minimum,maximum,step)
+ return {kind="slider",label=label,min=minimum,max=maximum,step=step,
+  get=function() return (FieldKitDB and FieldKitDB[key]) or minimum end,
+  set=function(v)
+   FieldKitDB[key]=v
+   if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+  end,
+  format=function(v) return FieldKit_L(label)..": "..v end}
+end
+local function ChatChoice(key,label,values)
+ return {kind="choice",label=label,values=values,
+  get=function() return FieldKitDB[key] or 1 end,
+  set=function(v)
+   FieldKitDB[key]=v
+   -- Selecting a custom text palette must visibly apply it. The separate
+   -- checkbox can still restore the native channel colors explicitly.
+   if key=="chatTextColor" then FieldKitDB.chatOverrideText=true end
+   if FieldKit.SyncChat then FieldKit.SyncChat() end
+   if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+  end}
+end
 -- Extend the existing schema with language, privacy, combat editor and boss HP controls.
 function FieldKit_AddSettingsSections(sections)
  table.insert(sections,{title="Combat text",items={{kind="combat"}}})
@@ -146,7 +168,51 @@ function FieldKit_AddSettingsSections(sections)
  for i=1,table.getn(sections) do
   if sections[i].title=="Interface" then
    table.insert(sections[i].items,1,{kind="language"})
-   table.insert(sections[i].items,Check("chatCopy","Enable local chat copy","Off by default. Keeps up to 100 main-chat messages in memory only, including private messages. Nothing is sent or saved. Disabling clears the buffer.",false))
+   local chat=Check("chatCopy","Enable local chat copy","Records up to 100 NEW messages from the main chat after enabling. Click Open chat copy, or type /fieldkitlog, then use Ctrl+A / Ctrl+C. Native chat text itself cannot be selected. Nothing is uploaded or saved.",false)
+    chat.button={text="Open chat copy",onClick=function()
+     if FieldKit.OpenChatCopy then FieldKit.OpenChatCopy() end
+    end}
+    table.insert(sections[i].items,chat)
+    local copyButton=Check("chatShowCopyButton","Show chat Copy button","Show a compact Copy shortcut just above the in-game chat. Capture remains disabled until you explicitly turn it on.",true)
+    local copySetter=copyButton.set
+    copyButton.set=function(v) copySetter(v);if FieldKit.SyncChat then FieldKit.SyncChat() end end
+    table.insert(sections[i].items,copyButton)
+    local style=Check("chatStyle","Customize main chat","Apply FieldKit's native chat size, font size and fading controls. Can be disabled to restore the previous chat appearance. Compatible with the main ChatFrame1.",false)
+    local old=style.set
+    style.set=function(v) old(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
+    table.insert(sections[i].items,style)
+    local move=Check("chatMove","Unlock chat position","Displays a discreet Move chat handle just above the chat. Drag it anywhere, then lock to keep the position. Position persists after /reload.",false)
+    local previousMove=move.set
+    move.set=function(v)
+     previousMove(v)
+     if v then FieldKitDB.chatStyle=true end
+     if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+    end
+    move.button={text="Reset position",onClick=function()
+     if FieldKit.ResetChatPosition then FieldKit.ResetChatPosition() end
+    end}
+    table.insert(sections[i].items,move)
+    table.insert(sections[i].items,ChatSlider("chatWidth","Chat width",280,800,10))
+    table.insert(sections[i].items,ChatSlider("chatHeight","Chat height",100,450,10))
+    table.insert(sections[i].items,ChatSlider("chatFontSize","Chat font size",10,20,1))
+    table.insert(sections[i].items,ChatSlider("chatHistoryLines","Chat history lines",100,500,25))
+    table.insert(sections[i].items,ChatSlider("chatBackgroundOpacity","Chat background opacity",0,85,5))
+    table.insert(sections[i].items,ChatChoice("chatFontFace","Chat font family",{"Original font","Friz Quadrata","Arial Narrow","Morpheus","Skurri"}))
+    table.insert(sections[i].items,ChatChoice("chatBackgroundColor","Chat background color",{"Charcoal","Obsidian","Midnight blue","Warm brown","Forest","Black"}))
+    local override=Check("chatOverrideText","Override chat text colors","Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable.",false)
+    local oldOverride=override.set
+    override.set=function(v)
+     oldOverride(v)
+     if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
+     if FieldKit.SyncChat then FieldKit.SyncChat() end
+    end
+    table.insert(sections[i].items,override)
+    table.insert(sections[i].items,ChatChoice("chatTextColor","Chat text color",{"White","Warm white","Gold","Soft green","Ice blue","Muted gray"}))
+
+    local fading=Check("chatFading","Fade older chat lines","Fade native chat text when not actively reading. Disable to keep messages visible until scrolled away.",true)
+    local original=fading.set
+    fading.set=function(v) original(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
+    table.insert(sections[i].items,fading)
   end
   if sections[i].title=="Map" then
    table.insert(sections[i].items,Check("guardianPins","Guardians on the minimap","Exact native lair positions, not moving guardian locations. White: asleep; red: fighting; orange: return countdown. Independent of the Lairs window.",true))

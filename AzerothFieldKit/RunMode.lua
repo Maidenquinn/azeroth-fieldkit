@@ -118,6 +118,9 @@ end
 
 function R.Update()
  local f=R.frame;if not f then return end
+ -- Do not resize/hide this card while WoW is processing a mouse drag.
+ -- The next native data tick will apply the latest data after release.
+ if f.azsMoving or f.fieldkitHudDragging or (FieldKitDB.linkLeftCards and FieldKitHudStack and FieldKitHudStack.root and FieldKitHudStack.root.azsMoving) then return end
  local active=type(AZS_GetPhase)=="function" and AZS_GetPhase()
  if not FieldKitDB.runModeCard or (not active and not FieldKit.layoutEditing) then f:Hide();return end
  local level=FieldKit.GetHeroicLevel()

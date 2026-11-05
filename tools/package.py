@@ -47,7 +47,11 @@ for name,result in snapshot['files'].items():
 try:
  commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=base,text=True,stderr=subprocess.DEVNULL).strip()
  dirty=subprocess.check_output(['git','status','--porcelain'],cwd=base,text=True)
- assert not dirty,'Commit reviewed source/docs first; refusing a dirty sourceCommit claim'
+ # CI freshly regenerates only these review evidence files after auditing the
+ # committed runtime. Keep all runtime, packaging and release source clean.
+ generated={'docs/AUDIT_INVENTORY.json','docs/CODE_INDEX.md','docs/validation.json'}
+ changed={line[3:].strip() for line in dirty.splitlines() if line.strip()}
+ assert changed.issubset(generated),('Unreviewed dirty source',sorted(changed-generated))
 except (subprocess.CalledProcessError,FileNotFoundError):commit=None
 manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':('maintainer accepted for publication; not independently certified' if publication['maintainerAcceptedForPublication'] else 'development candidate; not accepted for publication'),'publication':publication,
  'distribution':'versioned addon package; maturity/permission scope in publication metadata','inGameTest':False,

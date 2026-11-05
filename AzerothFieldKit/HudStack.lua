@@ -4,7 +4,7 @@ FieldKitHudStack={}
 local S=FieldKitHudStack
 
 function S.Initialize(frames,makeMovable,placeMovable)
- S.frames=frames;S.place=placeMovable
+ S.frames=frames;S.place=placeMovable;S.finishers={};S.watchdogs={}
  local meter=frames[2]
  local previous=FieldKitDB.pos[meter:GetName()] or {0,0}
  local x,y=previous[1]-meter:GetWidth()/2,previous[2]+meter:GetHeight()/2
@@ -18,13 +18,103 @@ function S.Initialize(frames,makeMovable,placeMovable)
  root:EnableMouse(false)
  for i=1,table.getn(frames) do
   local f=frames[i];local start,stop=f:GetScript("OnDragStart"),f:GetScript("OnDragStop")
-  f:SetScript("OnDragStart",function()
-   if FieldKitDB.linkLeftCards then root:GetScript("OnDragStart")() elseif start then start() end
+  -- Benilla can keep a native StartMoving() active even after mouse release,
+  -- especially on cards anchored to an invisible linked stack. Never call
+  -- StartMoving() for linked HUD cards: move the stack from cursor deltas.
+  -- Individual cards retain their original native handlers when unlinked.
+  local dragging=false
+  local cursorX,cursorY,rootPoint
+  local function MoveGroup()
+   if not dragging or not rootPoint then return end
+   local cx,cy=GetCursorPosition()
+   if type(cx)~="number" or type(cy)~="number" then return end
+   local scale=(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+   if type(scale)~="number" or scale<=0 then scale=1 end
+   local dx=(cx-cursorX)/scale
+   local dy=(cy-cursorY)/scale
+   root:ClearAllPoints()
+   root:SetPoint(rootPoint[1],UIParent,rootPoint[2],rootPoint[3]+dx,rootPoint[4]+dy)
+  end
+  local function FinishCardDrag()
+   if dragging then
+    MoveGroup()
+    dragging=false
+    f.fieldkitHudDragging=nil
+    root.azsMoving=nil
+    if FieldKitPositions.Save(root,true) then FieldKitPositions.Restore(root) end
+    rootPoint=nil
+    S.Apply()
+   elseif not FieldKitDB.linkLeftCards and stop then stop() end
+  end
+  local function BeginCardDrag()
+   if FieldKitDB.linkLeftCards then
+    if dragging or (FieldKitDB.windowsLocked and not FieldKit.layoutEditing) then return end
+    local p,relative,rp,x,y=root:GetPoint(1)
+    if type(p)~="string" or (relative and relative~=UIParent and relative~="UIParent") then return end
+    local cx,cy=GetCursorPosition()
+    if type(cx)~="number" or type(cy)~="number" then return end
+    cursorX,cursorY=cx,cy
+    rootPoint={p,rp or p,tonumber(x) or 0,tonumber(y) or 0}
+    dragging=true
+    f.fieldkitHudDragging=true
+    root.azsMoving=true -- prevents automatic re-anchoring mid-drag
+    -- Deliberately do NOT call StartMoving() on root or card.
+   elseif start then start() end
+  end
+  -- RegisterForDrag consumes native mouse-up events on the 1.12-derived
+  -- client, while IsMouseButtonDown does not exist on original 1.12.
+  -- Use a paired mouse-down/up lifecycle on the clicked card itself.
+  f:RegisterForDrag()
+  -- Script aliases retained for existing unit fixtures and explicit calls;
+  -- RegisterForDrag() with no buttons prevents the native drag event path.
+  f:SetScript("OnDragStart",BeginCardDrag)
+  f:SetScript("OnDragStop",FinishCardDrag)
+  f:SetScript("OnMouseDown",function()
+   if type(arg1)=="string" and arg1~="LeftButton" then return end
+   BeginCardDrag()
   end)
-  f:SetScript("OnDragStop",function()
-   if FieldKitDB.linkLeftCards then root:GetScript("OnDragStop")() elseif stop then stop() end
+  S.finishers[i]=FinishCardDrag
+  -- Run Mode uses child row frames for its dynamic text/tooltip. They can
+  -- receive the release instead of their parent, so delegate both edges.
+  if i==1 and f.rows then
+   for j=1,table.getn(f.rows) do
+    local row=f.rows[j]
+    row:RegisterForDrag()
+    row:SetScript("OnMouseDown",function()
+     if type(arg1)=="string" and arg1~="LeftButton" then return end
+     BeginCardDrag()
+    end)
+    row:SetScript("OnMouseUp",function()
+     if type(arg1)=="string" and arg1~="LeftButton" then return end
+     FinishCardDrag()
+    end)
+   end
+  end
+  f:SetScript("OnMouseUp",function()
+   if type(arg1)=="string" and arg1~="LeftButton" then return end
+   FinishCardDrag()
+  end)
+  local oldHide=f:GetScript("OnHide")
+  f:SetScript("OnHide",function()
+   FinishCardDrag()
+   if oldHide then oldHide() end
+  end)
+  local watchdog=CreateFrame("Frame",nil,UIParent)
+  S.watchdogs[i]=watchdog
+  watchdog:SetScript("OnUpdate",function()
+   if not dragging then return end
+   if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
+    FinishCardDrag()
+   else
+    MoveGroup()
+   end
   end)
  end
+end
+
+function S.FinishDragging()
+ if not S.finishers then return end
+ for i=1,table.getn(S.finishers) do S.finishers[i]() end
 end
 
 function S.Apply()
@@ -44,6 +134,8 @@ function S.Apply()
  local width=FieldKit.MeterWidth(FieldKitDB.meterValues);local height,shown=0,0
  for i=1,table.getn(S.frames) do
   local f=S.frames[i]
+  -- Do not re-anchor a card while native mouse capture owns its drag.
+  if f.fieldkitHudDragging then return end
   -- Clamp the complete group once; individual card clamps can move it twice.
   if f.SetClampedToScreen then f:SetClampedToScreen(false) end
   local ownWidth=FieldKitCardLayout.Width(f,width)

@@ -44,12 +44,12 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "a43e71ff5a76b7e8224969f223cdc35368c964e8dab7fda50503a35f6945e9b2"
+      "sha256": "65685b2b956181532eb5444702164c4235af5c38c0af2df605557af06e8312fa"
     },
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "76da56228709c34f5b565991e1792851e967382cdf39e902a469d7854cf1a515"
+      "sha256": "ece4a32d1cf5cabb098ae2ccecddb3267d5b2883e6127186f0edfb07010d03b7"
     },
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
@@ -77,9 +77,9 @@
       "sha256": "f2a800f652d7495326b82d3207947a470b09681ca8808c9a82f046d0e9b04239"
     },
     "Settings.lua": {
-      "maxUpvalues": 2,
-      "functions": 15,
-      "sha256": "d7e2677b210414484ad387a9ad59d3a18c9626d51da227980e53c14dc47d5dde"
+      "maxUpvalues": 3,
+      "functions": 29,
+      "sha256": "9e16aa57fb5e3d48f67d716389263adb5a750d0d1d573e49d9afad57bc31bf3c"
     },
     "GameCompatibility.lua": {
       "maxUpvalues": 1,
@@ -89,7 +89,7 @@
     "RunMode.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "bc757119ae460f507cc5ba3b05d7893673ca8d4e1aba6a156b286c86f039f8ec"
+      "sha256": "883dcacb242d1e1c4616f9199891a8ad94988e1e47e58c32ff6dcfafd2b2e7c8"
     },
     "NativeData.lua": {
       "maxUpvalues": 2,
@@ -184,12 +184,12 @@
     "Interface.lua": {
       "maxUpvalues": 24,
       "functions": 161,
-      "sha256": "22be46b5da81cedf3b75f8de652417f1c237fc59661379fecff12305f9b092b5"
+      "sha256": "3db02949365c4bf15ac9b024d386af8b3c650489167e98358ea3bf5c837217cf"
     },
     "FieldKit.lua": {
       "maxUpvalues": 20,
-      "functions": 174,
-      "sha256": "3b6538e88083180a25c2754b226afd8417a77282f76bd9b4bcf9ef976aa8ca21"
+      "functions": 175,
+      "sha256": "d5a367044001870d43a48cf0c0584f11f5eb4e9d12decee5c3e34019d21ce1c5"
     },
     "WorldPins.lua": {
       "maxUpvalues": 11,
@@ -217,9 +217,9 @@
       "sha256": "e976dd63d4f9343fa3666a0504dcbe7b98631d1cb8b81bf9847dbd6f3c44a4b6"
     },
     "CopyLog.lua": {
-      "maxUpvalues": 4,
-      "functions": 14,
-      "sha256": "1fafdbf73cdcb81b1f9b79a81b58d27d290e5b12d962a4c309b990d3c8cb6a0f"
+      "maxUpvalues": 14,
+      "functions": 33,
+      "sha256": "718ac38d9000744209f26f5e32db68755f66c54b5986efa7682bc7b9053cf88b"
     }
   }
 }

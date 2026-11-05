@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.1 — 2026-11-05 (native chat customization and grouped HUD drag correction; final review candidate)
+
+Changes since **0.4.0**:
+
+- Customize the **native main chat** without installing a second chat window: move/lock/reset position, adjust width/height/history length, choose font family/size, background palette/opacity, and optionally override message text colors.
+- Keep chat copying local and opt-in, with the Copy shortcut next to the in-game chat. Avoid fading-related instant message disappearance.
+- Preserve messages observed by FieldKit when native layout/font setters clear the rendered chat; bounded in-memory recovery does not duplicate the copy log.
+- Recolor **new messages** immediately; recolor previously displayed lines only where the full visible history can be recovered safely. Older untracked messages are intentionally left unchanged on clients without a readable native history API.
+- Fix the linked Mode / Damage / Lairs HUD drag: use mouse down/up and cursor-based group movement rather than native drag of an invisible root, including Mode's interactive rows and refresh guard.
+- Translate the text-color history guidance in French; preserve EN/FR runtime switching.
+- Maintainer-confirmed in-game acceptance of the grouped drag correction on the current client; earlier native chat customization confirmed in-game. Final integrated 0.4.1 candidate is still pending a last smoke test before publication.
+
+Full release candidate notes: [docs/RELEASE_0.4.1.md](docs/RELEASE_0.4.1.md).
+
+
 ## 0.4.0 — 2026-11-03 (bilingual UI, combat text profiles, 19 previews)
 
 Changes since **0.3.4**:

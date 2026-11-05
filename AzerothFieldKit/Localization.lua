@@ -3,6 +3,64 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Reset position"]="Réinit. position",
+ ["Chat layout"]="Disposition du chat",
+ ["Chat colors & fonts"]="Couleurs et polices",
+ ["Chat colors and typography"]="Couleurs et typographie",
+ ["Unlock chat position"]="Déverrouiller la position du chat",
+ ["Move chat"]="Déplacer le chat",
+ ["Reset chat position"]="Réinitialiser la position",
+ ["Chat font family"]="Police du chat",
+ ["Chat background color"]="Couleur du fond du chat",
+ ["Override chat text colors"]="Remplacer les couleurs du texte",
+ ["Chat text color"]="Couleur du texte",
+ ["Original font"]="Police d’origine",
+ ["Friz Quadrata"]="Friz Quadrata",
+ ["Arial Narrow"]="Arial Narrow",
+ ["Morpheus"]="Morpheus",
+ ["Skurri"]="Skurri",
+ ["Charcoal"]="Anthracite",
+ ["Obsidian"]="Obsidienne",
+ ["Midnight blue"]="Bleu nuit",
+ ["Warm brown"]="Brun chaud",
+ ["Forest"]="Vert forêt",
+ ["Black"]="Noir",
+ ["White"]="Blanc",
+ ["Warm white"]="Blanc chaud",
+ ["Gold"]="Or",
+ ["Soft green"]="Vert doux",
+ ["Ice blue"]="Bleu glacier",
+ ["Muted gray"]="Gris discret",
+ ["Unlock and drag the Move chat handle to any position. Lock it again to keep the saved layout."]="Déverrouille et fais glisser la petite poignée Déplacer le chat où tu le souhaites. Verrouille ensuite pour conserver la position.",
+ ["Choose a font and a subtle background. Text overrides affect only NEW messages; leave off to preserve channel colors."]="Choisis une police et un fond discret. Les couleurs forcées ne s’appliquent qu’aux NOUVEAUX messages. Désactive cette option pour conserver les couleurs des canaux.",
+ ["Displays a discreet Move chat handle just above the chat. Drag it anywhere, then lock to keep the position. Position persists after /reload."]="Affiche une petite poignée au-dessus du chat. Glisse-la où tu le souhaites, puis verrouille. La position est conservée après /reload.",
+ ["Optional monochrome colors for NEW messages, including channel-colored text. Existing chat history is not recolored. Disable to preserve native per-channel colors."]="Applique une couleur unique aux NOUVEAUX messages. L’historique existant n’est pas recoloré. Désactive cette option pour conserver les couleurs natives des canaux.",
+
+ ["Chat appearance"]="Apparence du chat",
+ ["Chat copy"]="Copie du chat",
+ ["Local chat copy"]="Copie locale du chat",
+ ["Chat layout"]="Présentation du chat",
+ ["Chat background opacity"]="Opacité du fond du chat",
+ ["Show chat Copy button"]="Afficher le bouton Copier",
+ ["Show a compact Copy shortcut just above the in-game chat. Capture remains disabled until you explicitly turn it on."]="Affiche un petit bouton Copier au-dessus du chat en jeu. L'enregistrement reste désactivé tant que vous ne l'activez pas.",
+ ["Enable capture to copy NEW messages. Open the copy window from the button beside your chat, or use /fieldkitlog. Messages are kept only in memory."]="Activez la capture pour copier les NOUVEAUX messages. Ouvrez la fenêtre depuis le bouton du chat ou avec /fieldkitlog. Les messages sont uniquement conservés en mémoire.",
+ ["Prat-inspired controls for the actual game chat. Change width, height, font and fading. No separate chat replacement is installed."]="Réglages inspirés de Prat pour le véritable chat du jeu : largeur, hauteur, police et atténuation. Aucun remplacement du chat natif.",
+
+ ["Copy"]="Copier",
+ ["No captured messages yet. Enable recording and wait for new chat messages."]="Aucun message enregistré. Activez la copie et attendez de nouveaux messages.",
+ ["Ctrl+A, then Ctrl+C to copy these captured messages."]="Ctrl+A, puis Ctrl+C pour copier les messages enregistrés.",
+
+ ["Open chat copy"]="Ouvrir la copie du chat",
+ ["Customize main chat"]="Personnaliser le chat principal",
+ ["Chat width"]="Largeur du chat",
+ ["Chat height"]="Hauteur du chat",
+ ["Chat font size"]="Taille de la police du chat",
+ ["Chat history lines"]="Lignes conservées dans le chat",
+ ["Fade older chat lines"]="Atténuer les anciens messages du chat",
+ ["Records up to 100 NEW messages from the main chat after enabling. Click Open chat copy, or type /fieldkitlog, then use Ctrl+A / Ctrl+C. Native chat text itself cannot be selected. Nothing is uploaded or saved."]="Conserve jusqu'à 100 nouveaux messages après activation. Cliquez sur Ouvrir la copie du chat, ou tapez /fieldkitlog, puis Ctrl+A et Ctrl+C. Le chat natif n'est pas sélectionnable. Aucune donnée n'est envoyée ou sauvegardée.",
+ ["Apply FieldKit's native chat size, font size and fading controls. Can be disabled to restore the previous chat appearance. Compatible with the main ChatFrame1."]="Personnalise la taille, la police et l'atténuation du chat natif. Désactivez pour rétablir son apparence précédente. Concerne le chat principal.",
+ ["Fade native chat text when not actively reading. Disable to keep messages visible until scrolled away."]="Atténue progressivement les anciens messages. Désactivez pour les laisser affichés.",
+
  ["World markers"]="Marqueurs du monde",
  ["World & client"]="Monde et client",
  ["Boss"]="Boss",
@@ -552,6 +610,8 @@ T.fr["CRITICAL!"]="CRITIQUE !"
 T.fr["Healing +"]="Soin +"
 T.fr["Damage taken -"]="Dégâts reçus -"
 T.fr["Bleeding"]="Saignement"
+-- v0.4.1 native chat guidance (previously untranslated in French UI).
+T.fr["Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable."]="Applique la couleur choisie aux nouveaux messages et à l'historique récupérable sans risque. Les anciens messages non enregistrés restent inchangés. Désactivez pour rétablir les couleurs natives lorsque c'est possible."
 T.fr["Reset HUD positions"]="Réinitialiser les positions HUD"
 T.fr["Undo"]="Annuler"
 T.fr["Previews"]="Aperçus"

@@ -2,17 +2,76 @@
 FieldKitDB={linkLeftCards=true,linkRightCards=true,combatText=true}
 fire(FieldKitFrame,"VARIABLES_LOADED");update(FieldKitFrame,.3)
 assert(FieldKitDB.windowsLocked==false and not FieldKit.layoutEditing and not FieldKitUI.frame)
+-- In linked HUD mode the card receives MouseUp, while StartMoving belongs
+-- to FieldKitLeftStack. Releasing any card must finish the root drag.
+assert(FieldKitDB.linkLeftCards)
+for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) do
+ local start=card:GetScript("OnDragStart")
+ local release=card:GetScript("OnMouseUp")
+ assert(start and release)
+ start()
+ assert(card.fieldkitHudDragging and FieldKitHudStack.root.azsMoving,"linked root must be in manual movement mode")
+ release()
+ assert(not card.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,"card drag must stop after release")
+end
+-- Regression: original 1.12 has no IsMouseButtonDown; pairing
+-- OnMouseDown and OnMouseUp must complete a single click without any drag event.
+local originalButtonFn=IsMouseButtonDown
+IsMouseButtonDown=nil
+for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) do
+ local mouseDown,mouseUp=card:GetScript("OnMouseDown"),card:GetScript("OnMouseUp")
+ assert(mouseDown and mouseUp)
+ this=card;arg1="LeftButton";mouseDown()
+ assert(card.fieldkitHudDragging and FieldKitHudStack.root.azsMoving)
+ CURSOR_X=CURSOR_X+8
+ mouseUp()
+ assert(not card.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,
+  "1.12 click and release must not leave a card attached")
+end
+IsMouseButtonDown=originalButtonFn
+-- Mode de jeu is uniquely rebuilt on live zone ticks and has interactive
+-- tooltip row frames. Its row release must finish the same movement.
+local modeRow=FieldKitModeFrame.rows[1]
+assert(modeRow:GetScript("OnMouseDown") and modeRow:GetScript("OnMouseUp"))
+local down=modeRow:GetScript("OnMouseDown")
+local up=modeRow:GetScript("OnMouseUp")
+this=modeRow;arg1="LeftButton";down()
+assert(FieldKitModeFrame.fieldkitHudDragging and FieldKitHudStack.root.azsMoving)
+local heldHeight=FieldKitModeFrame:GetHeight()
+FieldKitRunMode.Update()
+assert(FieldKitModeFrame:GetHeight()==heldHeight,"Mode card resized during mouse capture")
+CURSOR_X=CURSOR_X+12
+up()
+assert(not FieldKitModeFrame.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,
+ "Run Mode row release must detach group")
+-- Lost OnMouseUp / OnDragStop must recover via the global button state.
+local oldButtonState=IsMouseButtonDown
+local held=true
+IsMouseButtonDown=function() return held end
+this=FieldKitModeFrame;FieldKitModeFrame:GetScript("OnDragStart")()
+assert(FieldKitHudStack.root.azsMoving and FieldKitModeFrame.fieldkitHudDragging)
+local oldX=CURSOR_X
+CURSOR_X=CURSOR_X+30
+local watchdog=FieldKitHudStack.watchdogs[1]
+assert(watchdog and watchdog:GetScript("OnUpdate"))
+update(watchdog,.05)
+assert(FieldKitHudStack.root.azsMoving,"manual drag must persist while held")
+held=false
+update(watchdog,.05)
+assert(not FieldKitHudStack.root.azsMoving and not FieldKitModeFrame.fieldkitHudDragging,"lost release must stop manual drag")
+assert(CURSOR_X==oldX+30)
+IsMouseButtonDown=oldButtonState
 this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")()
-assert(FieldKitHudStack.root.azsMoving and not FieldKitUI.frame)
-FieldKitHudStack.root:ClearAllPoints();FieldKitHudStack.root:SetPoint("TOPLEFT",UIParent,"TOPLEFT",14,-60)
+assert(FieldKitMeterFrame.fieldkitHudDragging and FieldKitHudStack.root.azsMoving and not FieldKitUI.frame)
+CURSOR_X=CURSOR_X+14;CURSOR_Y=CURSOR_Y-60
 SlashCmdList.FieldKit("lock")
 assert(FieldKitDB.windowsLocked and not FieldKit.layoutEditing and not FieldKitUI.frame)
-assert(not FieldKitHudStack.root.azsMoving and FieldKitDB.frameAnchors.FieldKitLeftStack[3]==14)
-this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")();assert(not FieldKitHudStack.root.azsMoving)
+assert(not FieldKitMeterFrame.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving)
+this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")();assert(not FieldKitMeterFrame.fieldkitHudDragging)
 SlashCmdList.FieldKit("UNLOCK")
 assert(not FieldKitDB.windowsLocked and not FieldKit.layoutEditing and not FieldKitUI.frame)
 this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")()
-assert(FieldKitHudStack.root.azsMoving);FieldKitMeterFrame:GetScript("OnDragStop")()
+assert(FieldKitMeterFrame.fieldkitHudDragging);FieldKitMeterFrame:GetScript("OnDragStop")()
 local shortcut=FieldKitMinimapButton
 this=shortcut;arg1="RightButton";shortcut:GetScript("OnClick")()
 assert(FieldKitDB.windowsLocked and not FieldKitUI.frame)
@@ -45,6 +104,21 @@ assert(not FieldKitTakenFrame.azsMoving and FieldKitDB.frameAnchors.FieldKitTake
 assert(FieldKitDB.windowsLocked and not U.frame:IsShown() and not U.dock:IsShown())
 SlashCmdList.FieldKit("unlock")
 assert(not FieldKitDB.windowsLocked and not U.frame:IsShown() and not U.dock:IsShown())
+-- Run-mode updates must not resize or hide a frame while it is being dragged.
+local oldMouseButton=IsMouseButtonDown
+IsMouseButtonDown=function(button) return button=="LeftButton" end
+FieldKitDB.linkLeftCards=false;FieldKitHudStack.Apply()
+FieldKitModeFrame:Show()
+this=FieldKitModeFrame;FieldKitModeFrame:GetScript("OnDragStart")()
+assert(FieldKitModeFrame.azsMoving)
+local originalHeight=FieldKitModeFrame:GetHeight()
+FieldKitRunMode.Update()
+assert(FieldKitModeFrame.azsMoving and FieldKitModeFrame:GetHeight()==originalHeight)
+-- Simulate a lost OnDragStop: the global watchdog ends the move on mouse release.
+IsMouseButtonDown=function() return false end
+update(FieldKitFrame,.05)
+assert(not FieldKitModeFrame.azsMoving,"lost release must not leave Run mode stuck to the mouse")
+IsMouseButtonDown=oldMouseButton
 -- Global locking also finishes an explicit combat-area preview drag.
 U.SetLayoutEditing(true,false)
 this=FieldKitCombatAnchor1;FieldKitCombatAnchor1:GetScript("OnDragStart")()

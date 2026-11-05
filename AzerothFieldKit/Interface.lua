@@ -28,7 +28,26 @@ function FieldKit.BuildJourneySections(sections,actions)
    interface[i].tip="Saved now. Use Reload UI below to apply the compact bar; your current run is not reloaded automatically."
   end
  end
+ -- Chat deserves dedicated navigation rather than buried Preferences controls.
+ local chatCopy,chatAppearance,chatColors,keep={},{},{},{}
+ local copyKeys={["Enable local chat copy"]=true,["Show chat Copy button"]=true}
+ local appearanceKeys={["Customize main chat"]=true,["Unlock chat position"]=true,
+  ["Chat width"]=true,["Chat height"]=true,["Chat history lines"]=true}
+ local colorKeys={["Chat font family"]=true,["Chat font size"]=true,
+  ["Chat background color"]=true,["Chat background opacity"]=true,
+  ["Override chat text colors"]=true,["Chat text color"]=true,
+  ["Fade older chat lines"]=true}
+ for _,item in ipairs(interface) do
+  if copyKeys[item.label] then table.insert(chatCopy,item)
+  elseif appearanceKeys[item.label] then table.insert(chatAppearance,item)
+  elseif colorKeys[item.label] then table.insert(chatColors,item)
+  else table.insert(keep,item) end
+ end
+ interface=keep
  table.insert(interface,{kind="camera"})
+ table.insert(chatCopy,1,{kind="note",label="Local chat copy",tip="Capture new messages after opting in, then use the Copy button above chat or /fieldkitlog. Never uploads chat history."})
+ table.insert(chatAppearance,1,{kind="note",label="Chat layout",tip="Unlock and drag the Move chat handle to any position. Lock it again to keep the saved layout."})
+ table.insert(chatColors,1,{kind="note",label="Chat colors and typography",tip="Choose a font and a subtle background. Text overrides affect only NEW messages; leave off to preserve channel colors."})
  local cards={
   {kind="note",label="Which HUD cards to show",tip="Turn modules on or off here. Positions and sizes are under Layout & arrange."},
   {kind="check",label="Run mode card",tip="Native difficulty and zone with Difficulty-screen multipliers. Hover for the full chart.",
@@ -179,7 +198,10 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
   {id="coop",title="Group & co-op",glyph=15,group="05  MULTIPLAYER",items=coop},
-  {id="interface",title="Preferences",glyph=11,group="06  PREFERENCES",items=interface},
+  {id="chat",title="Chat layout",glyph=11,group="06  CHAT",items=chatAppearance},
+  {id="chatcolors",title="Chat colors & fonts",glyph=4,group="06  CHAT",items=chatColors},
+  {id="chatcopy",title="Chat copy",glyph=12,group="06  CHAT",items=chatCopy},
+  {id="interface",title="Preferences",glyph=11,group="07  PREFERENCES",items=interface},
  }
 
 end
@@ -252,12 +274,12 @@ local function Checkbox(page,item,y)
  local label=T.Label(row,item.label,30,1,500,24,14)
  local detail=T.Label(row,item.tip,30,29,500,44,12,T.muted)
  local action
- if item.button then action=T.Button(row,nil,item.button.text,0,1,98,26,item.button.onClick) end
+ if item.button then action=T.Button(row,nil,item.button.text,0,1,132,26,item.button.onClick) end
  check.item=item;check.Refresh=function() check:SetChecked(item.get() and true or false) end
  check:SetScript("OnClick",function() item.set(this:GetChecked() and true or false);U.Refresh() end)
  check:SetScript("OnEnter",function() U.Tip(this,item.label,item.tip) end);check:SetScript("OnLeave",function() GameTooltip:Hide() end)
  row.Reflow=function(w)
-  row:SetWidth(w);label:SetWidth(w-32-(action and 110 or 0));detail:SetWidth(w-32)
+  row:SetWidth(w);label:SetWidth(w-32-(action and 144 or 0));detail:SetWidth(w-32)
   if action then action:ClearAllPoints();action:SetPoint("TOPRIGHT",row,"TOPRIGHT",0,-1) end
  end
  row.control=check;table.insert(U.controls,check);table.insert(page.flow,{frame=row,y=y})

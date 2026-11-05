@@ -5,7 +5,11 @@ assert(FieldKitPanel.tabs[2].fieldkitLabel.text=="Combat text")
 assert(FieldKitPanel.tabs[4].fieldkitLabel.text=="Bosses")
 assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="HUD cards")
 for i=1,table.getn(FieldKitPanel.tabs) do assert(FieldKitPanel.tabs[i].fieldkitLabel.text~="Text layout") end
-local interface=FieldKitPanel.tabs[14].page
+local interface
+for i=1,table.getn(FieldKitPanel.tabs) do
+ if FieldKitPanel.tabs[i].section.id=="interface" then interface=FieldKitPanel.tabs[i].page end
+end
+assert(interface)
 local en,fr=FieldKitUI.languageRow.en,FieldKitUI.languageRow.fr
 for i=1,table.getn(interface.children) do
  local b=interface.children[i]
@@ -33,6 +37,9 @@ for n=1,3 do
  assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="Cartes du HUD")
  assert(FieldKitPanelReset.text=="Positions par défaut")
  assert(FieldKit_L("Show only elites and bosses")=="Afficher uniquement les élites et les boss")
+ local chatHelp="Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable."
+ assert(FieldKit_L(chatHelp)~="")
+ assert(FieldKit_L(chatHelp)~=chatHelp,"Chat color help must be translated in French")
  assert(FieldKit_L("Dégâts infligés")=="Dégâts infligés")
  assert(FieldKit_L("Backstab")=="Backstab" and FieldKit_L("Brute gordunni")=="Brute gordunni")
  assert(widget("Catégorie à personnaliser").text==FieldKit_L(FieldKitCombat.byKind[editor.eventKind][2]))

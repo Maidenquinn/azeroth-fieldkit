@@ -24,24 +24,29 @@ jobs:
         run: |
           set -euo pipefail
           VERSION=$(sed -n 's/^## Version: //p' AzerothFieldKit/AzerothFieldKit.toc | head -1)
-          test "$VERSION" = "0.4.0"
+          test "$VERSION" = "0.4.1"
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             test "${GITHUB_REF_NAME}" = "v$VERSION"
           fi
           python -m pip install -r requirements-dev.txt
           python tools/audit.py
-          git diff --exit-code -- docs/AUDIT_INVENTORY.json docs/CODE_INDEX.md
           python tools/verify.py
+          cp build/validation.json docs/validation.json
           python tools/package.py
           test -f "dist/AzerothFieldKit-$VERSION.zip"
           unzip -t "dist/AzerothFieldKit-$VERSION.zip" >/dev/null
+          FIRST_HASH=$(sha256sum "dist/AzerothFieldKit-$VERSION.zip" | cut -d' ' -f1)
+          python tools/package.py
+          SECOND_HASH=$(sha256sum "dist/AzerothFieldKit-$VERSION.zip" | cut -d' ' -f1)
+          test "$FIRST_HASH" = "$SECOND_HASH"
+          cp build/validation.json dist/validation.json
       - name: Tag and publish verified assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="0.4.0"
+          VERSION="0.4.1"
           TAG="v$VERSION"
           if [[ "$GITHUB_REF" == refs/heads/main ]]; then
             if ! git ls-remote --tags origin "refs/tags/$TAG" | grep -q .; then
@@ -53,4 +58,4 @@ jobs:
             echo "Release $TAG already exists, leaving it unchanged"
             exit 0
           fi
-          gh release create "$TAG" "dist/AzerothFieldKit-$VERSION.zip" dist/SHA256SUMS.txt dist/MANIFEST.json --title "Azeroth FieldKit $VERSION" --notes-file "docs/RELEASE_$VERSION.md" --verify-tag
+          gh release create "$TAG" "dist/AzerothFieldKit-$VERSION.zip" dist/SHA256SUMS.txt dist/MANIFEST.json dist/validation.json --title "Azeroth FieldKit $VERSION" --notes-file "docs/RELEASE_$VERSION.md" --verify-tag

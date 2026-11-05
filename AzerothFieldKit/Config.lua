@@ -9,7 +9,7 @@ local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectT
 
  takenFrame=true,replaceTally=false,playerShield=true,chestPins=false,guardianPins=false,
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
- lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false}
+ lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false,chatStyle=false,chatFading=false,chatWidth=440,chatHeight=180,chatFontSize=12,chatHistoryLines=200,chatBackgroundOpacity=0,chatShowCopyButton=true,chatFontFace=1,chatBackgroundColor=1,chatTextColor=1,chatOverrideText=false,chatMove=false}
 
 -- Normalize persisted shapes before any frame can consume them. Only the new
 -- addon's in-memory DB is repaired; serialization is the client's responsibility.
@@ -66,6 +66,20 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  d.minimapAngle=FieldKit.Number(d.minimapAngle,150,-360,360)
  d.lowHealthPct=FieldKit.Number(d.lowHealthPct,30,10,70)
+ d.chatWidth=math.floor(FieldKit.Number(d.chatWidth,440,280,800))
+ d.chatHeight=math.floor(FieldKit.Number(d.chatHeight,180,100,450))
+ d.chatFontSize=math.floor(FieldKit.Number(d.chatFontSize,12,10,20))
+ d.chatHistoryLines=math.floor(FieldKit.Number(d.chatHistoryLines,200,100,500))
+ d.chatBackgroundOpacity=math.floor(FieldKit.Number(d.chatBackgroundOpacity,0,0,85))
+ d.chatFontFace=math.floor(FieldKit.Number(d.chatFontFace,1,1,5))
+ d.chatBackgroundColor=math.floor(FieldKit.Number(d.chatBackgroundColor,1,1,6))
+ d.chatTextColor=math.floor(FieldKit.Number(d.chatTextColor,1,1,6))
+ if type(d.chatAnchor)~="table" then d.chatAnchor=nil
+ else
+  local x=FieldKit.Number(d.chatAnchor.x,nil,0,10000)
+  local y=FieldKit.Number(d.chatAnchor.y,nil,0,10000)
+  d.chatAnchor=(x and y) and {x=x,y=y} or nil
+ end
  -- Stable journey ids survive page reordering without resetting user choices.
  if d.uiSchema~=2 then
   local keep=d.uiPage

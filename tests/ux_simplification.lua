@@ -10,7 +10,30 @@ local oldCvar,oldHud=SetCVar,AZS_SetHudShown
 SetCVar=function() writes=writes+1 end;AZS_SetHudShown=function() writes=writes+1 end
 local ids={}
 for i=1,table.getn(U.sections) do ids[U.sections[i].id]=true end
-for _,id in ipairs({"cards","meter","layout","look","coop"}) do assert(ids[id],id) end
+for _,id in ipairs({"cards","meter","layout","look","coop","chat","chatcolors","chatcopy"}) do assert(ids[id],id) end
+-- Chat controls have dedicated routes, never remain buried in Preferences.
+local appearances,copies={},{}
+for _,section in ipairs(U.sections) do
+ if section.id=="chat" then for _,item in ipairs(section.items) do appearances[item.label]=true end end
+ if section.id=="chatcopy" then for _,item in ipairs(section.items) do copies[item.label]=true end end
+ if section.id=="interface" then
+  for _,item in ipairs(section.items) do assert(item.label~="Chat width" and item.label~="Enable local chat copy") end
+ end
+end
+assert(appearances["Customize main chat"] and appearances["Chat width"] and appearances["Chat height"])
+assert(appearances["Unlock chat position"] and appearances["Chat history lines"])
+assert(copies["Enable local chat copy"] and copies["Show chat Copy button"])
+local colorLabels={}
+for _,section in ipairs(U.sections) do if section.id=="chatcolors" then
+ for _,item in ipairs(section.items) do colorLabels[item.label]=true end
+end end
+for _,name in ipairs({"Chat font family","Chat background color","Chat text color",
+ "Override chat text colors","Chat font size","Chat background opacity"}) do
+ assert(colorLabels[name],"Missing customizable chat option: "..name)
+end
+assert(appearances["Unlock chat position"],"Chat drag must be exposed in Chat layout")
+U.Select("chat");assert(FieldKitDB.uiPage=="chat")
+U.Select("chatcopy");assert(FieldKitDB.uiPage=="chatcopy")
 assert(not ids.windows,"mega Windows page removed")
 U.Select("cards");U.Select("meter");U.Select("layout");U.Select("look");U.Select("coop")
 assert(FieldKitDB.uiPage=="coop" and writes==0)

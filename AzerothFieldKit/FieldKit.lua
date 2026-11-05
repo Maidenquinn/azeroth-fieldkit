@@ -193,6 +193,12 @@ local function MakeMovable(frame, defaultX, defaultY, freeDrag, handle)
 	-- OnDragStop alone can be swallowed after a live resize (Effects timers); MouseUp is the release fallback.
 	handle:SetScript("OnDragStop", function() FinishMoving(frame) end)
 	handle:SetScript("OnMouseUp", function() FinishMoving(frame) end)
+ -- If the handle disappears or a game UI overlay swallows the release, recover.
+ local previousHide=handle:GetScript("OnHide")
+ handle:SetScript("OnHide",function()
+  FinishMoving(frame)
+  if previousHide then previousHide() end
+ end)
 	handle.azsFreeDrag = freeDrag
  handle:EnableMouse(not handle.fieldkitMouseProxy and (not DB.windowsLocked or freeDrag) and 1 or nil)
 	table.insert(movables, handle)
@@ -201,6 +207,7 @@ end
 -- Shared editing gate, available from settings, slash commands or the minimap.
 local function SetMovablesUnlocked(unlocked)
  if not unlocked then
+  if FieldKitHudStack and FieldKitHudStack.FinishDragging then FieldKitHudStack.FinishDragging() end
   -- A lock issued while a button is held must finish the native drag too.
   for i=1,table.getn(movableFrames) do
    local f=movableFrames[i]
@@ -2740,6 +2747,13 @@ frame:SetScript("OnUpdate", function()
 		return
 	end
 	local dt = arg1 or 0
+ -- Native drag release can be lost when the run-mode card is reflowed mid-drag.
+ -- Poll the actual mouse button as a fail-safe; do not end a held drag.
+ if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
+  for i=1,table.getn(movableFrames) do
+   if movableFrames[i].azsMoving then FinishMoving(movableFrames[i]) end
+  end
+ end
 	local choosing = FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen()
 	-- Yield every FieldKit HUD while native level-up/jewelry cards own the screen.
 	-- Re-apply while choosing so a late Show() cannot paint over the cards.
