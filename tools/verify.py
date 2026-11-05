@@ -26,6 +26,7 @@ def runtime(saved=None):
  for name in files:l.execute((root/name).read_text(encoding='utf8'),name=name)
  return l
 
+diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 fresh=runtime();fresh.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
 fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 assert fresh.globals().FieldKitDB.uiPage=='home'
