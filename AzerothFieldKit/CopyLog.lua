@@ -214,6 +214,18 @@ function FieldKit.ApplyChatStyle()
  local wanted=tostring(width)..":"..tostring(height)..":"..tostring(lines)..":"..tostring(requestedFont)..":"..tostring(size)
  if geometryStamp~=wanted then
   local before=f.GetNumMessages and f:GetNumMessages() or nil
+  -- Re-enabling styling after an opt-out can encounter messages which were
+  -- never observed by the render-history hook. On Benilla 1.12, changing native
+  -- width/height/font/max-lines may CLEAR the entire chat. Do not invoke any
+  -- such setter until every visible line is safely recoverable or chat is empty.
+  -- Leave geometryStamp unset so the requested settings can apply later.
+  local known=table.getn(displayHistory)
+  local recoverable=type(before)=="number" and (before==0 or (known>0 and before==known))
+  if not recoverable then
+   ApplyAnchor(f)
+   MoveControl()
+   return
+  end
   if f.SetWidth and f:GetWidth()~=width then f:SetWidth(width) end
   if f.SetHeight and f:GetHeight()~=height then f:SetHeight(height) end
   if f.SetMaxLines and (not f.GetMaxLines or f:GetMaxLines()~=lines) then f:SetMaxLines(lines) end
