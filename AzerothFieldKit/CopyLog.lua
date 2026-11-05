@@ -181,7 +181,7 @@ function FieldKit.ApplyChatStyle()
   if type(point)=="string" and point~="" then
    styleBefore={point={point,relative or UIParent,relativePoint or point,tonumber(x) or 0,tonumber(y) or 0},width=f:GetWidth(),height=f:GetHeight(),maxLines=f.GetMaxLines and f:GetMaxLines() or nil}
   else
-   styleBefore={width=f:GetWidth(),height=f:GetHeight()}
+   styleBefore={width=f:GetWidth(),height=f:GetHeight(),maxLines=f.GetMaxLines and f:GetMaxLines() or nil}
   end
   if f.GetFont then
    styleBefore.font,styleBefore.fontSize,styleBefore.flags=f:GetFont()
