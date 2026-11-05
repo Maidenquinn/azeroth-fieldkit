@@ -2747,6 +2747,7 @@ frame:SetScript("OnUpdate", function()
 		return
 	end
 	local dt = arg1 or 0
+ FieldKitDiagnostics.Tick(dt)
  -- Native drag release can be lost when the run-mode card is reflowed mid-drag.
  -- Poll the actual mouse button as a fail-safe; do not end a held drag.
  if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
@@ -2774,12 +2775,14 @@ frame:SetScript("OnUpdate", function()
 		if (not platesFilterOn) or plateElapsed >= PLATE_INTERVAL then
 			plateElapsed = 0
 			UpdatePlates()
+   FieldKitDiagnostics.Mark("plates")
 		end
 		platesFilterOn = true
 	else
 		if platesFilterOn or plateElapsed >= 1 then
 			plateElapsed = 0
 			UpdatePlates()
+   FieldKitDiagnostics.Mark("plates")
 		end
 		platesFilterOn = false
 	end
@@ -2794,6 +2797,7 @@ frame:SetScript("OnUpdate", function()
 		return
 	end
 	elapsed = 0
+ FieldKitDiagnostics.Mark("scan")
 	KeepCompactBar()
 	if not choosing then
 		UpdateBossFrame()
@@ -2802,6 +2806,7 @@ frame:SetScript("OnUpdate", function()
 	end
 	if dataClock.elapsed>=DATA_INTERVAL then
 		dataClock.elapsed=0
+  FieldKitDiagnostics.Mark("snapshot")
 		FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update()
 		FieldKitNativeTools.Update()
 		-- Loadout tooltip scans hitch hard; keep them off the choosing overlay path.
@@ -2809,11 +2814,11 @@ frame:SetScript("OnUpdate", function()
 		FieldKitScreenLayers.Update()
 		-- Cards may show/hide after native snapshots; restack once here, not every paint.
 		layoutElapsed = 0
-		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight() end
+		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitDiagnostics.Mark("layout") end
 	elseif layoutElapsed >= LAYOUT_INTERVAL then
 		-- Safety restack when no snapshot landed (collapse/options already call Apply).
 		layoutElapsed = 0
-		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight() end
+		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitDiagnostics.Mark("layout") end
 	end
 	if not choosing then FieldKitPartySync.Tick() end
 end)
@@ -2826,6 +2831,8 @@ SlashCmdList["FieldKit"] = function(msg)
 		return
 	end
 	msg = string.lower(msg or "")
+ if msg=="diag" then FieldKitDiagnostics.Command("");return end
+ if string.sub(msg,1,5)=="diag " then FieldKitDiagnostics.Command(string.sub(msg,6));return end
  if msg=="native" then FieldKitNativeTools.Diagnostic();return end
  if msg=="lock" or msg=="unlock" then FieldKit.SetWindowsLocked(msg=="lock");return end
 	if msg == "money" then

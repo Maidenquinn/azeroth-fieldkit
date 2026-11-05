@@ -65,6 +65,9 @@ ChatFrame1.SetHeight=function(self,value) rawSetHeight(self,value);self:Clear() 
 ChatFrame1.SetMaxLines=function(self,value)
  assert(value>=100 and value<=500);self.maxLines=value;self:Clear()
 end
+-- The baseline layout tests begin with an empty native frame: changing native
+-- dimensions with untracked preexisting lines must now defer instead.
+ChatFrame1:Clear()
 FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230
 FieldKitDB.chatHistoryLines=400;FieldKitDB.chatFontSize=15
 FieldKitDB.chatFontFace=2;FieldKitDB.chatStyle=true
@@ -81,6 +84,72 @@ assert(ChatFrame1.fontSize==18 and string.find(ChatFrame1.fontPath,"ARIALN",1,tr
 assert(table.getn(visible)==1 and visible[1].text=="survive layout","layout lost text or replayed twice")
 assert(visible[1].r==.2 and visible[1].g==.4 and visible[1].b==.6)
 assert(nativeOps==0)
+-- Opting out restores native dimensions/font only when all visible lines were
+-- captured. This client mock empties chat on every native setter.
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight,
+ "safe chat opt-out should restore original dimensions")
+assert(ChatFrame1.maxLines==200 and ChatFrame1.fontSize==12,
+ "safe chat opt-out should restore original font and history length")
+assert(table.getn(visible)==1 and visible[1].text=="survive layout",
+ "restoring native chat must not erase or duplicate visible messages")
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260,
+ "re-enabling chat styling should restore selected configuration")
+assert(table.getn(visible)==1 and visible[1].text=="survive layout")
+-- Real-client regression: the settings remain responsive after temporary
+-- opt-out even when additional native messages arrive while styling is off.
+-- The display journal must remain intact across the SyncChat 5 Hz ticker.
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle();FieldKit.SyncChat()
+ChatFrame1:AddMessage("native message while styling off",.3,.6,.9)
+local retained=table.getn(visible)
+assert(retained==2,"native off-mode line must remain visible")
+FieldKitDB.chatWidth=620;FieldKitDB.chatHeight=275
+FieldKitDB.chatFontSize=17;FieldKitDB.chatFontFace=4
+FieldKitDB.chatHistoryLines=425
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+assert(ChatFrame1:GetWidth()==620 and ChatFrame1:GetHeight()==275,
+ "chat width and height must remain adjustable on re-enable")
+assert(ChatFrame1.fontSize==17 and string.find(ChatFrame1.fontPath,"MORPHEUS",1,true),
+ "chat font size and family must apply on re-enable")
+assert(ChatFrame1.maxLines==425,"chat history size must remain adjustable")
+assert(table.getn(visible)==retained,"re-enable lost an off-mode message")
+assert(visible[1].text=="survive layout" and visible[2].text=="native message while styling off",
+ "re-enable reordered or erased chat lines")
+-- The same four controls must also work on subsequent changes, with
+-- messages still visible even though native setters clear their display.
+FieldKitDB.chatWidth=590;FieldKitDB.chatHeight=295
+FieldKitDB.chatFontSize=16;FieldKitDB.chatFontFace=3
+FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==590 and ChatFrame1:GetHeight()==295)
+assert(ChatFrame1.fontSize==16 and string.find(ChatFrame1.fontPath,"ARIALN",1,true))
+assert(table.getn(visible)==retained and visible[2].text=="native message while styling off")
+-- Exercise the actual settings callbacks, not only direct ApplyChatStyle calls.
+local settings={{title="Interface",items={}}}
+FieldKit_AddSettingsSections(settings)
+local byLabel={}
+for _,control in ipairs(settings[1].items) do if type(control.label)=="string" then byLabel[control.label]=control end end
+for _,label in ipairs({"Chat width","Chat height","Chat font size","Chat font family"}) do
+ assert(byLabel[label] and type(byLabel[label].set)=="function",label.." callback missing")
+end
+byLabel["Chat width"].set(610)
+byLabel["Chat height"].set(305)
+byLabel["Chat font size"].set(19)
+byLabel["Chat font family"].set(4)
+assert(ChatFrame1:GetWidth()==610 and ChatFrame1:GetHeight()==305,
+ "settings width/height callbacks did not affect native chat")
+assert(ChatFrame1.fontSize==19 and string.find(ChatFrame1.fontPath,"MORPHEUS",1,true),
+ "settings font-size/family callbacks did not affect native chat")
+assert(table.getn(visible)==retained and visible[2].text=="native message while styling off",
+ "settings callbacks must not erase any visible chat line")
+ChatFrame1:AddMessage("still receiving after reenable",.4,.7,.9)
+assert(table.getn(visible)==retained+1 and visible[retained+1].text=="still receiving after reenable")
+-- Reset the independent test scenario without clearing any real client data.
+FieldKitDB.chatStyle=false;FieldKit.SyncChat()
+ChatFrame1:Clear()
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+ChatFrame1:AddMessage("survive layout",.2,.4,.6)
+assert(table.getn(visible)==1)
 FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
 assert(table.getn(visible)==2 and visible[2].text=="Color sample")
@@ -106,9 +175,10 @@ assert(visible[1].text=="legacy not captured")
 assert(visible[1].r==.69 and visible[1].g==.85 and visible[1].b==1)
 ChatFrame1.GetMessageInfo=nil
 FieldKitDB.chatOverrideText=false
--- Controlled full-history case: every visible line is captured by FieldKit.
+-- Controlled full-history case: simulate a native chat reset / fresh UI session.
 FieldKitDB.chatStyle=false;FieldKit.SyncChat()
 ChatFrame1:Clear()
+FieldKit.ClearChatRenderHistory()
 FieldKitDB.chatStyle=true;FieldKit.SyncChat()
 ChatFrame1:AddMessage("historical A",.25,.5,.75)
 ChatFrame1:AddMessage("|cffff0000historical B|r",.1,.2,.3)
@@ -122,6 +192,23 @@ FieldKitDB.chatOverrideText=false
 assert(FieldKit.RecolorDisplayedChat()==true)
 assert(table.getn(visible)==2 and visible[1].r==.25 and visible[1].g==.5)
 assert(visible[2].text=="|cffff0000historical B|r" and visible[2].r==.1)
+-- The actual settings palette setter must refresh safely recoverable visible
+-- history, not just recolor messages arriving after a palette change.
+local chatSchema={{title="Interface",items={}}}
+FieldKit_AddSettingsSections(chatSchema)
+local palette
+for _,item in ipairs(chatSchema[1].items) do
+ if item.label=="Chat text color" then palette=item end
+end
+assert(palette and type(palette.set)=="function")
+palette.set(2)
+assert(FieldKitDB.chatOverrideText==true)
+assert(table.getn(visible)==2 and visible[1].text=="historical A"
+ and visible[2].text=="historical B","palette change must preserve messages and order")
+assert(visible[1].r==.95 and visible[2].g==.92 and visible[2].b==.83,
+ "palette setter failed to recolor existing fully-tracked lines")
+FieldKitDB.chatOverrideText=false
+assert(FieldKit.RecolorDisplayedChat()==true)
 -- Real client regression: reset can be called when the chat has no native
 -- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
 local strictSetPoint=ChatFrame1.SetPoint
@@ -152,7 +239,7 @@ FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==570 and FieldKitDB.chatBackgroundColor==3)
+assert(ChatFrame1:GetWidth()==FieldKitDB.chatWidth and FieldKitDB.chatBackgroundColor==3)
 -- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()

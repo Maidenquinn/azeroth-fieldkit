@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.4.2 — 2026-11-05 (chat stabilization, runtime diagnostics and compatibility)
+
+Changes since **0.4.1**:
+
+- Improved native chat opt-out/re-enable behavior, retaining a bounded in-memory display-recovery journal across temporary styling toggles. FieldKit can rebuild observed messages after destructive native layout/font changes; older untracked lines can remain unrecoverable.
+- Restored interactive chat width, height, font size and font family after a guarded-setter regression in review builds; the maintainer confirmed these controls working in-game.
+- Recolor existing text only when its history is safely recoverable; clarify in EN/FR that local copy uses an opt-in 100-message buffer separate from the 500-message, session-only display journal.
+- Added optional session-only `/fieldkit diag on|off|reset|report` counters for update cadence, without changing scheduling. **Not** addon CPU/FPS measurements.
+- Added `/fieldkit diag api` for presence checks of 12 fixed native APIs, without asserting functional correctness.
+- Added `/fieldkit diag compat` for passive checks of ChatFrame1 methods and linked left HUD root; not a universal addon-conflict detector.
+- Expanded Lua fixture coverage for real settings callbacks, chat lifecycle, diagnostics commands and absent optional APIs. Previously validated linked HUD movement remains unchanged.
+- Maintainer confirmed all three review lots on the Azeroth Survivors client on 2026-11-05. No independent performance or security certification is claimed.
+
+
+## 0.4.2-review.3 — 2026-11-05 (passive compatibility review, unpublished)
+
+- Adds `/fieldkit diag compat`, a passive check of native ChatFrame1 message/count methods and the linked left HUD root.
+- Reports missing functions without touching frames, intercepting chat, probing other addons, or performing native writes.
+- Does not claim to detect all conflicts between addons. Missing capabilities are a diagnostic observation.
+- Adds Lua 5.1 and optional native Lua 5.0 regression assertions for absent native chat.
+- Preserves v0.4.2-review.2 diagnostic counters and the already accepted chat/HUD fixes.
+- **Review only:** requires client acceptance before final v0.4.2 publication.
+
+
+## 0.4.2-review.2 — 2026-11-05 (unpublished diagnostic candidate)
+
+- Add opt-in, session-only counters for the existing update loop: frame callbacks, data refreshes, scans, plate updates and HUD layout passes. No scheduling change.
+- New `/fieldkit diag on|off|reset|report|api` commands; diagnostics disabled by default and reset on logout/reload.
+- The API report checks a fixed set of native function names; missing functions are expected on some builds. Availability does not prove the function works or that co-op forwarding is supported.
+- Counts and maximum observed frame delta are **not** precise per-addon CPU cost, FPS measurement or a performance benchmark.
+- No network traffic, new SavedVariables, user data capture, foreign-addon scanning or gameplay actions.
+- Adds standalone Lua 5.1/native Lua 5.0 diagnostics tests.
+- Includes all accepted `0.4.2-review.1` chat lifecycle fixes, unchanged in this lot.
+- **Not released:** a dedicated in-game smoke test is required before merging.
+
+
+## 0.4.2-review.1 — 2026-11-05 (unpublished chat lifecycle stabilization candidate)
+
+- Recolor fully recoverable visible chat history when selecting a new text palette in settings, not just on override checkbox changes.
+- Restore original chat dimensions, font and maximum lines when styling is disabled **only if all displayed lines are safely recoverable**; otherwise preserve current native content and leave those settings until UI reload.
+- Prevent native messages from disappearing when styling is **re-enabled after an off-mode interval**: defer destructive size, font and history setters whenever rendered native messages are no longer completely tracked; new messages continue displaying normally.
+- Clearly disclose local styling's separate 500-message in-memory recovery buffer versus the opt-in 100-message copy buffer, in both English and French.
+- Remove unused legacy chat color-hook and obsolete stage variables, without changing the validated HUD drag controller.
+- Extend simulated native-client regressions for destructive geometry/font setters, color selection, safe opt-out and reactivation.
+- **Not released:** final native-client smoke test remains required.
+
+
 ## 0.4.1 — 2026-11-05 (native chat customization and grouped HUD drag correction; final review candidate)
 
 Changes since **0.4.0**:
