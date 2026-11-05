@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.2-review.2 — 2026-11-05 (unpublished diagnostic candidate)
+
+- Add opt-in, session-only counters for the existing update loop: frame callbacks, data refreshes, scans, plate updates and HUD layout passes. No scheduling change.
+- New `/fieldkit diag on|off|reset|report|api` commands; diagnostics disabled by default and reset on logout/reload.
+- The API report checks a fixed set of native function names; missing functions are expected on some builds. Availability does not prove the function works or that co-op forwarding is supported.
+- Counts and maximum observed frame delta are **not** precise per-addon CPU cost, FPS measurement or a performance benchmark.
+- No network traffic, new SavedVariables, user data capture, foreign-addon scanning or gameplay actions.
+- Adds standalone Lua 5.1/native Lua 5.0 diagnostics tests.
+- Includes all accepted `0.4.2-review.1` chat lifecycle fixes, unchanged in this lot.
+- **Not released:** a dedicated in-game smoke test is required before merging.
+
+
 ## 0.4.2-review.1 — 2026-11-05 (unpublished chat lifecycle stabilization candidate)
 
 - Recolor fully recoverable visible chat history when selecting a new text palette in settings, not just on override checkbox changes.
