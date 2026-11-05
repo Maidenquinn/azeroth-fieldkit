@@ -18,42 +18,47 @@ function S.Initialize(frames,makeMovable,placeMovable)
  root:EnableMouse(false)
  for i=1,table.getn(frames) do
   local f=frames[i];local start,stop=f:GetScript("OnDragStart"),f:GetScript("OnDragStop")
-  -- Native dragging must be owned by the *actual clicked frame*.
-  -- Starting native movement on an invisible proxy root loses mouse capture
-  -- in Benilla, leaving the entire stack stuck to the cursor.
+  -- Benilla can keep a native StartMoving() active even after mouse release,
+  -- especially on cards anchored to an invisible linked stack. Never call
+  -- StartMoving() for linked HUD cards: move the stack from cursor deltas.
+  -- Individual cards retain their original native handlers when unlinked.
   local dragging=false
   local cursorX,cursorY,rootPoint
+  local function MoveGroup()
+   if not dragging or not rootPoint then return end
+   local cx,cy=GetCursorPosition()
+   if type(cx)~="number" or type(cy)~="number" then return end
+   local scale=(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+   if type(scale)~="number" or scale<=0 then scale=1 end
+   local dx=(cx-cursorX)/scale
+   local dy=(cy-cursorY)/scale
+   root:ClearAllPoints()
+   root:SetPoint(rootPoint[1],UIParent,rootPoint[2],rootPoint[3]+dx,rootPoint[4]+dy)
+  end
   local function FinishCardDrag()
    if dragging then
+    MoveGroup()
     dragging=false
     f.fieldkitHudDragging=nil
-    f:StopMovingOrSizing()
-    if rootPoint then
-     local cx,cy=GetCursorPosition()
-     local scale=(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
-     if scale==0 then scale=1 end
-     local dx=(cx-cursorX)/scale
-     local dy=(cy-cursorY)/scale
-     root:ClearAllPoints()
-     root:SetPoint(rootPoint[1],UIParent,rootPoint[2],rootPoint[3]+dx,rootPoint[4]+dy)
-     FieldKitPositions.Save(root,true)
-     -- Do not leave a moved card with its own temporary native anchor.
-     S.Apply()
-    end
+    root.azsMoving=nil
+    if FieldKitPositions.Save(root,true) then FieldKitPositions.Restore(root) end
     rootPoint=nil
-   elseif stop then stop() end
+    S.Apply()
+   elseif not FieldKitDB.linkLeftCards and stop then stop() end
   end
   f:SetScript("OnDragStart",function()
    if FieldKitDB.linkLeftCards then
-    if FieldKitDB.windowsLocked and not FieldKit.layoutEditing then return end
+    if dragging or (FieldKitDB.windowsLocked and not FieldKit.layoutEditing) then return end
     local p,relative,rp,x,y=root:GetPoint(1)
     if type(p)~="string" or (relative and relative~=UIParent and relative~="UIParent") then return end
-    cursorX,cursorY=GetCursorPosition()
+    local cx,cy=GetCursorPosition()
+    if type(cx)~="number" or type(cy)~="number" then return end
+    cursorX,cursorY=cx,cy
     rootPoint={p,rp or p,tonumber(x) or 0,tonumber(y) or 0}
     dragging=true
     f.fieldkitHudDragging=true
-    f:SetMovable(true)
-    f:StartMoving()
+    root.azsMoving=true -- prevents automatic re-anchoring mid-drag
+    -- Deliberately do NOT call StartMoving() on root or card.
    elseif start then start() end
   end)
   S.finishers[i]=FinishCardDrag
@@ -63,6 +68,15 @@ function S.Initialize(frames,makeMovable,placeMovable)
   f:SetScript("OnHide",function()
    FinishCardDrag()
    if oldHide then oldHide() end
+  end)
+  local watchdog=CreateFrame("Frame",nil,UIParent)
+  watchdog:SetScript("OnUpdate",function()
+   if not dragging then return end
+   if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
+    FinishCardDrag()
+   else
+    MoveGroup()
+   end
   end)
  end
 end
