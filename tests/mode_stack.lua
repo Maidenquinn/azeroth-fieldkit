@@ -51,7 +51,7 @@ assert(FieldKitDB.pos.FieldKitMeterFrame[1]==legacyX and FieldKitDB.pos.FieldKit
 
 -- Dragging any member in layout mode moves the same anchor, not one card.
 FieldKit.layoutEditing=true;this=FieldKitLairFrame;FieldKitLairFrame:GetScript("OnDragStart")()
-assert(FieldKitLairFrame.fieldkitHudDragging and not S.root.azsMoving)
+assert(FieldKitLairFrame.fieldkitHudDragging and S.root.azsMoving)
 FieldKitLairFrame:GetScript("OnDragStop")();FieldKit.layoutEditing=false
 assert(not S.root.azsMoving and not FieldKitLairFrame.fieldkitHudDragging)
 assert(FieldKitDB.pos.FieldKitMeterFrame[1]==legacyX)
