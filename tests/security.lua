@@ -37,26 +37,33 @@ assert(ChatFrame2.AddMessage==original)
 assert(FieldKitChatCopyButton and FieldKitChatCopyButton:IsShown(),"copy shortcut must be next to main chat")
 assert(ChatFrame1:AddMessage("opted in")=="forwarded")
 assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
--- Stage 1 must leave native text rendering APIs entirely untouched.
+-- Stage 2 permits native geometry/history but not message rendering or fonts.
 local nativeOps=0
-local function unexpectedNativeMutation() nativeOps=nativeOps+1;error("native chat rendering mutated") end
+local function unexpectedNativeMutation() nativeOps=nativeOps+1;error("native chat text rendering mutated") end
 ChatFrame1.SetTimeVisible=unexpectedNativeMutation
 ChatFrame1.SetFading=unexpectedNativeMutation
 ChatFrame1.SetFadeDuration=unexpectedNativeMutation
 ChatFrame1.SetFont=unexpectedNativeMutation
-ChatFrame1.SetMaxLines=unexpectedNativeMutation
+local historyCalls=0
+ChatFrame1.SetMaxLines=function(self,number)
+ assert(number>=100 and number<=500)
+ historyCalls=historyCalls+1;self.maxLines=number
+end
 local oldWidth,oldHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
-local oldSetWidth,oldSetHeight=ChatFrame1.SetWidth,ChatFrame1.SetHeight
-ChatFrame1.SetWidth=unexpectedNativeMutation
-ChatFrame1.SetHeight=unexpectedNativeMutation
 FieldKitDB.chatFading=true
 FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230;FieldKitDB.chatFontSize=15
 FieldKitDB.chatFontFace=2;FieldKitDB.chatHistoryLines=400
 FieldKitDB.chatStyle=true
 FieldKit.ApplyChatStyle()
-assert(nativeOps==0 and ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
+assert(nativeOps==0 and ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
+assert(ChatFrame1.maxLines==400 and historyCalls==1)
 assert(ChatFrame1:AddMessage("should stay visible")=="forwarded")
-ChatFrame1.SetWidth=oldSetWidth;ChatFrame1.SetHeight=oldSetHeight
+-- Verify changes are applied and dimensions restored when disabled.
+FieldKitDB.chatWidth=570;FieldKitDB.chatHeight=260;FieldKitDB.chatHistoryLines=350
+FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260 and ChatFrame1.maxLines==350)
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
 -- Real client regression: reset can be called when the chat has no native
 -- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
 local strictSetPoint=ChatFrame1.SetPoint
@@ -87,7 +94,7 @@ FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==oldWidth and FieldKitDB.chatBackgroundColor==3)
+assert(ChatFrame1:GetWidth()==570 and FieldKitDB.chatBackgroundColor==3)
 -- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()
