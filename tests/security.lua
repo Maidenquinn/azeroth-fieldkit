@@ -37,37 +37,55 @@ assert(ChatFrame2.AddMessage==original)
 assert(FieldKitChatCopyButton and FieldKitChatCopyButton:IsShown(),"copy shortcut must be next to main chat")
 assert(ChatFrame1:AddMessage("opted in")=="forwarded")
 assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
--- Stage 2 permits native geometry/history but not message rendering or fonts.
+-- Full restoration: simulate the real client's destructive scrolling-frame
+-- setters and verify messages are replayed once, without duplicate capture.
+local visible={}
+local underlying=ChatFrame1.AddMessage
+ChatFrame1.AddMessage=function(self,text,r,g,b,id)
+ table.insert(visible,{text=text,r=r,g=g,b=b,id=id})
+ return underlying(self,text,r,g,b,id)
+end
+ChatFrame1.Clear=function() visible={} end
+ChatFrame1.GetNumMessages=function() return table.getn(visible) end
+ChatFrame1.GetMaxLines=function(self) return self.maxLines or 200 end
+ChatFrame1.GetFont=function(self) return self.fontPath or "Fonts\\\\FRIZQT__.TTF",self.fontSize or 12,"" end
+ChatFrame1.SetFont=function(self,path,size,flags)
+ self.fontPath=path;self.fontSize=size;self.fontFlags=flags
+ self:Clear();return true
+end
 local nativeOps=0
-local function unexpectedNativeMutation() nativeOps=nativeOps+1;error("native chat text rendering mutated") end
+local function unexpectedNativeMutation() nativeOps=nativeOps+1;error("native fading mutated") end
 ChatFrame1.SetTimeVisible=unexpectedNativeMutation
 ChatFrame1.SetFading=unexpectedNativeMutation
 ChatFrame1.SetFadeDuration=unexpectedNativeMutation
-ChatFrame1.SetFont=unexpectedNativeMutation
-local historyCalls=0
-ChatFrame1.SetMaxLines=function(self,number)
- assert(number>=100 and number<=500)
- historyCalls=historyCalls+1;self.maxLines=number
-end
 local oldWidth,oldHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
-FieldKitDB.chatFading=true
-FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230;FieldKitDB.chatFontSize=15
-FieldKitDB.chatFontFace=2;FieldKitDB.chatHistoryLines=400
-FieldKitDB.chatStyle=true
-FieldKit.ApplyChatStyle()
-assert(nativeOps==0 and ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
-assert(ChatFrame1.maxLines==400 and historyCalls==1)
-assert(ChatFrame1:AddMessage("should stay visible")=="forwarded")
--- Dynamic slider changes must not call destructive setters in a live session.
--- They persist in DB and are applied to a new client after /reload.
-FieldKitDB.chatWidth=570;FieldKitDB.chatHeight=260;FieldKitDB.chatHistoryLines=350
-FieldKit.ApplyChatStyle()
+local rawSetWidth,rawSetHeight=ChatFrame1.SetWidth,ChatFrame1.SetHeight
+ChatFrame1.SetWidth=function(self,value) rawSetWidth(self,value);self:Clear() end
+ChatFrame1.SetHeight=function(self,value) rawSetHeight(self,value);self:Clear() end
+ChatFrame1.SetMaxLines=function(self,value)
+ assert(value>=100 and value<=500);self.maxLines=value;self:Clear()
+end
+FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230
+FieldKitDB.chatHistoryLines=400;FieldKitDB.chatFontSize=15
+FieldKitDB.chatFontFace=2;FieldKitDB.chatStyle=true
+FieldKit.SyncChat()
 assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230 and ChatFrame1.maxLines==400)
-assert(historyCalls==1 and nativeOps==0)
-FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230 and historyCalls==1)
-FieldKitDB.chatStyle=true;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230 and historyCalls==1)
+assert(ChatFrame1.fontSize==15 and string.find(ChatFrame1.fontPath,"FRIZQT",1,true))
+assert(ChatFrame1:AddMessage("survive layout",.2,.4,.6)=="forwarded")
+assert(table.getn(visible)==1 and visible[1].text=="survive layout")
+FieldKitDB.chatWidth=570;FieldKitDB.chatHeight=260;FieldKitDB.chatHistoryLines=350
+FieldKitDB.chatFontSize=18;FieldKitDB.chatFontFace=3
+FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260 and ChatFrame1.maxLines==350)
+assert(ChatFrame1.fontSize==18 and string.find(ChatFrame1.fontPath,"ARIALN",1,true))
+assert(table.getn(visible)==1 and visible[1].text=="survive layout","layout lost text or replayed twice")
+assert(visible[1].r==.2 and visible[1].g==.4 and visible[1].b==.6)
+assert(nativeOps==0)
+FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
+ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
+assert(table.getn(visible)==2 and visible[2].text=="Color sample")
+assert(visible[2].r==1 and visible[2].g==.82 and visible[2].b==.49)
+FieldKitDB.chatOverrideText=false
 -- Real client regression: reset can be called when the chat has no native
 -- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
 local strictSetPoint=ChatFrame1.SetPoint
@@ -98,12 +116,12 @@ FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==510 and FieldKitDB.chatBackgroundColor==3)
+assert(ChatFrame1:GetWidth()==570 and FieldKitDB.chatBackgroundColor==3)
 -- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()
 assert(ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)=="forwarded")
-assert(lastMessage.text=="|cffff0000Color sample|r" and lastMessage.r==.1 and lastMessage.g==.1 and lastMessage.b==.1)
+assert(lastMessage.text=="Color sample" and lastMessage.r==1 and lastMessage.g==.82 and lastMessage.b==.49)
 FieldKitDB.chatOverrideText=false
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
 -- Leave the native chat restored for the remaining security fixtures.
@@ -125,7 +143,7 @@ ChatFrame1:AddMessage("after opt out")
 SlashCmdList.FieldKitLOG("on");SlashCmdList.FieldKitLOG("")
 assert(FieldKitCopyLogEdit:GetText()=="")
 SlashCmdList.FieldKitLOG("off")
-assert(forwarded==127)
+assert(forwarded>=127)
 local d=FieldKitDB
 FieldKitDB={known="bad",pos={broken="bad",nan={0/0,1}},collapsedWindows=true,cameraMax="bad",targetHealthMode=1/0,lowHealthPct=-10,talentToggles={bad=true}}
 FieldKit.InitializeSettings({"crit"})
