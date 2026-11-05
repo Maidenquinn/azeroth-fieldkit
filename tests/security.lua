@@ -124,6 +124,24 @@ FieldKit.ApplyChatStyle()
 assert(ChatFrame1:GetWidth()==590 and ChatFrame1:GetHeight()==295)
 assert(ChatFrame1.fontSize==16 and string.find(ChatFrame1.fontPath,"ARIALN",1,true))
 assert(table.getn(visible)==retained and visible[2].text=="native message while styling off")
+-- Exercise the actual settings callbacks, not only direct ApplyChatStyle calls.
+local settings={{title="Interface",items={}}}
+FieldKit_AddSettingsSections(settings)
+local byLabel={}
+for _,control in ipairs(settings[1].items) do byLabel[control.label]=control end
+for _,label in ipairs({"Chat width","Chat height","Chat font size","Chat font family"}) do
+ assert(byLabel[label] and type(byLabel[label].set)=="function",label.." callback missing")
+end
+byLabel["Chat width"].set(610)
+byLabel["Chat height"].set(305)
+byLabel["Chat font size"].set(19)
+byLabel["Chat font family"].set(4)
+assert(ChatFrame1:GetWidth()==610 and ChatFrame1:GetHeight()==305,
+ "settings width/height callbacks did not affect native chat")
+assert(ChatFrame1.fontSize==19 and string.find(ChatFrame1.fontPath,"MORPHEUS",1,true),
+ "settings font-size/family callbacks did not affect native chat")
+assert(table.getn(visible)==retained and visible[2].text=="native message while styling off",
+ "settings callbacks must not erase any visible chat line")
 ChatFrame1:AddMessage("still receiving after reenable",.4,.7,.9)
 assert(table.getn(visible)==retained+1 and visible[retained+1].text=="still receiving after reenable")
 -- Reset the independent test scenario without clearing any real client data.
