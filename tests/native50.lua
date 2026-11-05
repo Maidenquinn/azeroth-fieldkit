@@ -12,6 +12,9 @@ dofile("tests/diagnostics.lua")
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 dofile("tests/profiles.lua")
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/profile_ui.lua")
 -- Official API scheduling, stale-table, pause/countdown and portrait-cache contracts.
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
