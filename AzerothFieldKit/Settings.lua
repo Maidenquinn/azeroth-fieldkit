@@ -199,9 +199,13 @@ function FieldKit_AddSettingsSections(sections)
     table.insert(sections[i].items,ChatSlider("chatBackgroundOpacity","Chat background opacity",0,85,5))
     table.insert(sections[i].items,ChatChoice("chatFontFace","Chat font family",{"Original font","Friz Quadrata","Arial Narrow","Morpheus","Skurri"}))
     table.insert(sections[i].items,ChatChoice("chatBackgroundColor","Chat background color",{"Charcoal","Obsidian","Midnight blue","Warm brown","Forest","Black"}))
-    local override=Check("chatOverrideText","Override chat text colors","When enabled, apply the selected text color to new messages. Selecting a text color automatically enables this option. Turn it off to restore native per-channel colors.",false)
+    local override=Check("chatOverrideText","Override chat text colors","Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable.",false)
     local oldOverride=override.set
-    override.set=function(v) oldOverride(v);if FieldKit.SyncChat then FieldKit.SyncChat() end end
+    override.set=function(v)
+     oldOverride(v)
+     if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
+     if FieldKit.SyncChat then FieldKit.SyncChat() end
+    end
     table.insert(sections[i].items,override)
     table.insert(sections[i].items,ChatChoice("chatTextColor","Chat text color",{"White","Warm white","Gold","Soft green","Ice blue","Muted gray"}))
 
