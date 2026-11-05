@@ -93,7 +93,7 @@ function FieldKit.InitializeSettings(defaultStats)
   d.uiPage=map[d.windowPage] or "cards"
  elseif d.uiPage=="appearance" then d.uiPage="look"
  elseif d.uiPage=="display" then d.uiPage="cards" end
- local valid={home=true,combat=true,health=true,bosses=true,alerts=true,cards=true,meter=true,layout=true,look=true,coop=true,map=true,nameplates=true,interface=true}
+ local valid={home=true,combat=true,health=true,bosses=true,alerts=true,cards=true,meter=true,layout=true,look=true,profiles=true,coop=true,map=true,nameplates=true,interface=true}
  if not valid[d.uiPage] then d.uiPage="home" end
  d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,16))
  d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)
