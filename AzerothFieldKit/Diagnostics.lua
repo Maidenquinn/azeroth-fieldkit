@@ -80,11 +80,42 @@ function D.ReportAPIs()
   if table.getn(right)>0 then Say("Unavailable: "..table.concat(right,", ")) end
  end
 end
+-- Passive sanity checks for the actual native chat and FieldKit layout.
+-- No hooks, reparenting, scanning of other addons or API side effects.
+function D.Compatibility()
+ local native=getglobal("ChatFrame1")
+ local chatPresent=type(native)=="table" or type(native)=="userdata"
+ local chatWrite=chatPresent and type(native.AddMessage)=="function"
+ local chatRead=chatPresent and type(native.GetNumMessages)=="function"
+ local hud=FieldKitHudStack and FieldKitHudStack.root
+ local linked=FieldKitDB and FieldKitDB.linkLeftCards==true
+ local rootUsable=not linked or (hud and type(hud.GetPoint)=="function")
+ local issues={}
+ if not chatPresent then table.insert(issues,"ChatFrame1 unavailable") end
+ if chatPresent and not chatWrite then table.insert(issues,"ChatFrame1:AddMessage unavailable") end
+ if chatPresent and not chatRead then table.insert(issues,"ChatFrame1:GetNumMessages unavailable") end
+ if not rootUsable then table.insert(issues,"linked left HUD root unavailable") end
+ return {chat=chatPresent and true or false,write=chatWrite and true or false,
+  read=chatRead and true or false,linked=linked and true or false,
+  root=rootUsable and true or false,issues=issues}
+end
+function D.ReportCompatibility()
+ local state=D.Compatibility()
+ Say("Compatibility: native chat="..(state.chat and "present" or "missing")..
+  ", message API="..(state.write and "present" or "missing")..
+  ", readable count="..(state.read and "present" or "missing")..
+  ", linked HUD root="..(state.root and "ready" or "missing"))
+ if table.getn(state.issues)>0 then
+  for i=1,table.getn(state.issues) do Say("Check: "..state.issues[i]) end
+ end
+ Say("Passive capability check only; does not detect all addon conflicts.")
+end
 function D.Command(command)
  if command=="on" then D.Enable(true);Say("Diagnostics enabled for this session. /fieldkit diag off to stop.")
  elseif command=="off" then D.Enable(false);Say("Diagnostics disabled and counters cleared.")
  elseif command=="reset" then D.Reset();Say("Diagnostics counters reset.")
  elseif command=="api" then D.ReportAPIs()
+ elseif command=="compat" then D.ReportCompatibility()
  elseif command=="" or command=="report" then D.Report()
- else Say("Usage: /fieldkit diag on | off | reset | report | api") end
+ else Say("Usage: /fieldkit diag on | off | reset | report | api | compat") end
 end
