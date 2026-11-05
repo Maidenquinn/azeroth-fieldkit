@@ -157,9 +157,10 @@ assert(visible[1].text=="legacy not captured")
 assert(visible[1].r==.69 and visible[1].g==.85 and visible[1].b==1)
 ChatFrame1.GetMessageInfo=nil
 FieldKitDB.chatOverrideText=false
--- Controlled full-history case: every visible line is captured by FieldKit.
+-- Controlled full-history case: simulate a native chat reset / fresh UI session.
 FieldKitDB.chatStyle=false;FieldKit.SyncChat()
 ChatFrame1:Clear()
+FieldKit.ClearChatRenderHistory()
 FieldKitDB.chatStyle=true;FieldKit.SyncChat()
 ChatFrame1:AddMessage("historical A",.25,.5,.75)
 ChatFrame1:AddMessage("|cffff0000historical B|r",.1,.2,.3)
