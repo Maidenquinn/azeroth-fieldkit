@@ -156,7 +156,10 @@ local function ChatChoice(key,label,values)
    FieldKitDB[key]=v
    -- Selecting a custom text palette must visibly apply it. The separate
    -- checkbox can still restore the native channel colors explicitly.
-   if key=="chatTextColor" then FieldKitDB.chatOverrideText=true end
+   if key=="chatTextColor" then
+    FieldKitDB.chatOverrideText=true
+    if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
+   end
    if FieldKit.SyncChat then FieldKit.SyncChat() end
    if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
   end}
@@ -168,7 +171,7 @@ function FieldKit_AddSettingsSections(sections)
  for i=1,table.getn(sections) do
   if sections[i].title=="Interface" then
    table.insert(sections[i].items,1,{kind="language"})
-   local chat=Check("chatCopy","Enable local chat copy","Records up to 100 NEW messages from the main chat after enabling. Click Open chat copy, or type /fieldkitlog, then use Ctrl+A / Ctrl+C. Native chat text itself cannot be selected. Nothing is uploaded or saved.",false)
+   local chat=Check("chatCopy","Enable local chat copy","Copying is opt-in: capture up to 100 new messages in memory, including whispers. Chat styling separately keeps up to 500 recent messages in memory to protect visible history when native layout changes. No chat is saved or uploaded. Use Open chat copy or /fieldkitlog.",false)
     chat.button={text="Open chat copy",onClick=function()
      if FieldKit.OpenChatCopy then FieldKit.OpenChatCopy() end
     end}
@@ -177,7 +180,7 @@ function FieldKit_AddSettingsSections(sections)
     local copySetter=copyButton.set
     copyButton.set=function(v) copySetter(v);if FieldKit.SyncChat then FieldKit.SyncChat() end end
     table.insert(sections[i].items,copyButton)
-    local style=Check("chatStyle","Customize main chat","Apply FieldKit's native chat size, font size and fading controls. Can be disabled to restore the previous chat appearance. Compatible with the main ChatFrame1.",false)
+    local style=Check("chatStyle","Customize main chat","Customize native chat width, height, font, background and colors. Changes do not replace ChatFrame1; native rendering may retain selected settings until UI reload.",false)
     local old=style.set
     style.set=function(v) old(v);if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end end
     table.insert(sections[i].items,style)
