@@ -1,7 +1,7 @@
 {
   "version": "0.4.1",
-  "maintainerAcceptedForPublication": false,
-  "maintainerAcceptanceDate": null,
+  "maintainerAcceptedForPublication": true,
+  "maintainerAcceptanceDate": "2026-11-05",
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
