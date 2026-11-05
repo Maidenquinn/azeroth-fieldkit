@@ -610,6 +610,8 @@ T.fr["CRITICAL!"]="CRITIQUE !"
 T.fr["Healing +"]="Soin +"
 T.fr["Damage taken -"]="Dégâts reçus -"
 T.fr["Bleeding"]="Saignement"
+-- v0.4.1 native chat guidance (previously untranslated in French UI).
+T.fr["Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable."]="Applique la couleur choisie aux nouveaux messages et à l'historique récupérable sans risque. Les anciens messages non enregistrés restent inchangés. Désactivez pour rétablir les couleurs natives lorsque c'est possible."
 T.fr["Reset HUD positions"]="Réinitialiser les positions HUD"
 T.fr["Undo"]="Annuler"
 T.fr["Previews"]="Aperçus"
