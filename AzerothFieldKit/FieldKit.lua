@@ -2588,7 +2588,7 @@ end
 -- Initialize only FieldKitDB via Config.lua, then apply the selected UI language.
 local function InitDB()
 	DB = FieldKit.InitializeSettings(DEFAULT_SHOWN)
- FieldKitProfiles.Init()
+ FieldKitProfiles.ActivatePending()
  FieldKit_SetLanguage(DB.language)
 end
 
