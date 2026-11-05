@@ -4,7 +4,7 @@ FieldKitHudStack={}
 local S=FieldKitHudStack
 
 function S.Initialize(frames,makeMovable,placeMovable)
- S.frames=frames;S.place=placeMovable
+ S.frames=frames;S.place=placeMovable;S.finishers={}
  local meter=frames[2]
  local previous=FieldKitDB.pos[meter:GetName()] or {0,0}
  local x,y=previous[1]-meter:GetWidth()/2,previous[2]+meter:GetHeight()/2
@@ -56,6 +56,7 @@ function S.Initialize(frames,makeMovable,placeMovable)
     f:StartMoving()
    elseif start then start() end
   end)
+  S.finishers[i]=FinishCardDrag
   f:SetScript("OnDragStop",FinishCardDrag)
   f:SetScript("OnMouseUp",FinishCardDrag)
   local oldHide=f:GetScript("OnHide")
@@ -64,6 +65,11 @@ function S.Initialize(frames,makeMovable,placeMovable)
    if oldHide then oldHide() end
   end)
  end
+end
+
+function S.FinishDragging()
+ if not S.finishers then return end
+ for i=1,table.getn(S.finishers) do S.finishers[i]() end
 end
 
 function S.Apply()
