@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.2-review.3 — 2026-11-05 (passive compatibility review, unpublished)
+
+- Adds `/fieldkit diag compat`, a passive check of native ChatFrame1 message/count methods and the linked left HUD root.
+- Reports missing functions without touching frames, intercepting chat, probing other addons, or performing native writes.
+- Does not claim to detect all conflicts between addons. Missing capabilities are a diagnostic observation.
+- Adds Lua 5.1 and optional native Lua 5.0 regression assertions for absent native chat.
+- Preserves v0.4.2-review.2 diagnostic counters and the already accepted chat/HUD fixes.
+- **Review only:** requires client acceptance before final v0.4.2 publication.
+
+
 ## 0.4.2-review.2 — 2026-11-05 (unpublished diagnostic candidate)
 
 - Add opt-in, session-only counters for the existing update loop: frame callbacks, data refreshes, scans, plate updates and HUD layout passes. No scheduling change.
