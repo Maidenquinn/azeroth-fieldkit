@@ -28,6 +28,26 @@ def runtime(saved=None):
 
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
+# Simulate a real SavedVariables round-trip. Staged loading must occur only on
+# the next VARIABLES_LOADED and preserve unrelated preferences.
+profile_stage=runtime()
+profile_stage.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+FieldKitDB.cardOpacity=51;FieldKitDB.frameAnchors.FieldKitLeftStack={"TOPLEFT","TOPLEFT",71,-91}
+assert(FieldKitProfiles.Save(1))
+FieldKitDB.cardOpacity=94;FieldKitDB.chatWidth=720
+assert(FieldKitProfiles.Load(1))
+assert(FieldKitDB.cardOpacity==94 and FieldKitDB.profilePendingSlot==1)
+''')
+profile_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+profile_reload=runtime(profile_stage.eval('SNAPSHOT(FieldKitDB)'))
+profile_reload.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==720)
+assert(FieldKitDB.frameAnchors.FieldKitLeftStack[3]==71)
+assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile==1)
+assert(FieldKitDB.interfaceProfiles[1].tables.frameAnchors.FieldKitLeftStack[3]==71)
+''')
 fresh=runtime();fresh.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
 fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 assert fresh.globals().FieldKitDB.uiPage=='home'
