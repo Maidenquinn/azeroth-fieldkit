@@ -3,6 +3,17 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["HUD profiles"]="Profils HUD",
+ ["Save FieldKit HUD layouts. Chat and gameplay data are not included."]="Enregistre les dispositions du HUD FieldKit. Le chat et les données de jeu sont exclus.",
+ ["No pending profile change."]="Aucun changement de profil en attente.",
+ ["Cancel pending switch"]="Annuler le changement",
+ ["Save current HUD"]="Enregistrer le HUD",
+ ["Load on /reload"]="Charger au /reload",
+ ["Queued"]="En attente",
+ ["Delete"]="Supprimer",
+ ["Confirm overwrite"]="Confirmer l'écrasement",
+ ["Confirm delete"]="Confirmer la suppression",
+
  ["Reset position"]="Réinit. position",
  ["Chat layout"]="Disposition du chat",
  ["Chat colors & fonts"]="Couleurs et polices",
