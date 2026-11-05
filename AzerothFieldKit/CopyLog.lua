@@ -151,15 +151,35 @@ function FieldKit.ApplyChatStyle()
   if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end
   if moveHandle then moveHandle:Hide() end
-  -- Restore user preferences without leaving rendered messages permanently
-  -- empty. Replay is handled after setters by RestoreDisplayedMessages().
+  if styleBefore and chatFrame==f then
+   local snap=styleBefore
+   local count=f.GetNumMessages and f:GetNumMessages() or nil
+   -- Only invoke native destructive setters when all displayed messages are
+   -- known, or when the chat is empty. Untracked lines are never cleared.
+   local recoverable=type(count)=="number"
+    and (count==0 or (count==table.getn(displayHistory) and count<=DISPLAY_LIMIT))
+   if recoverable then
+    if snap.width and f.SetWidth and f:GetWidth()~=snap.width then f:SetWidth(snap.width) end
+    if snap.height and f.SetHeight and f:GetHeight()~=snap.height then f:SetHeight(snap.height) end
+    if snap.maxLines and f.SetMaxLines and
+     (not f.GetMaxLines or f:GetMaxLines()~=snap.maxLines) then f:SetMaxLines(snap.maxLines) end
+    if snap.font and snap.fontSize and f.SetFont then f:SetFont(snap.font,snap.fontSize,snap.flags) end
+    if count>0 and f.GetNumMessages and f:GetNumMessages()<count then FieldKit.RestoreDisplayedChat() end
+   end
+   if snap.point and type(snap.point[1])=="string" and type(snap.point[3])=="string" then
+    local p=snap.point
+    f:ClearAllPoints()
+    f:SetPoint(p[1],p[2] or UIParent,p[3],p[4] or 0,p[5] or 0)
+   end
+  end
   styleBefore=nil;chatFrame=nil;lastPositionStamp=nil
+  geometryStamp=nil;fontStamp=nil
   return
  end
  if not styleBefore or chatFrame~=f then
   local point,relative,relativePoint,x,y=f:GetPoint()
   if type(point)=="string" and point~="" then
-   styleBefore={point={point,relative or UIParent,relativePoint or point,tonumber(x) or 0,tonumber(y) or 0},width=f:GetWidth(),height=f:GetHeight()}
+   styleBefore={point={point,relative or UIParent,relativePoint or point,tonumber(x) or 0,tonumber(y) or 0},width=f:GetWidth(),height=f:GetHeight(),maxLines=f.GetMaxLines and f:GetMaxLines() or nil}
   else
    styleBefore={width=f:GetWidth(),height=f:GetHeight()}
   end
