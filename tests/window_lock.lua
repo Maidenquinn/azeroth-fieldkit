@@ -29,6 +29,21 @@ for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) d
   "1.12 click and release must not leave a card attached")
 end
 IsMouseButtonDown=originalButtonFn
+-- Mode de jeu is uniquely rebuilt on live zone ticks and has interactive
+-- tooltip row frames. Its row release must finish the same movement.
+local modeRow=FieldKitModeFrame.rows[1]
+assert(modeRow:GetScript("OnMouseDown") and modeRow:GetScript("OnMouseUp"))
+local down=modeRow:GetScript("OnMouseDown")
+local up=modeRow:GetScript("OnMouseUp")
+this=modeRow;arg1="LeftButton";down()
+assert(FieldKitModeFrame.fieldkitHudDragging and FieldKitHudStack.root.azsMoving)
+local heldHeight=FieldKitModeFrame:GetHeight()
+FieldKitRunMode.Update()
+assert(FieldKitModeFrame:GetHeight()==heldHeight,"Mode card resized during mouse capture")
+CURSOR_X=CURSOR_X+12
+up()
+assert(not FieldKitModeFrame.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,
+ "Run Mode row release must detach group")
 -- Lost OnMouseUp / OnDragStop must recover via the global button state.
 local oldButtonState=IsMouseButtonDown
 local held=true
