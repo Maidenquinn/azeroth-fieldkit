@@ -612,6 +612,8 @@ T.fr["Damage taken -"]="Dégâts reçus -"
 T.fr["Bleeding"]="Saignement"
 -- v0.4.1 native chat guidance (previously untranslated in French UI).
 T.fr["Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable."]="Applique la couleur choisie aux nouveaux messages et à l'historique récupérable sans risque. Les anciens messages non enregistrés restent inchangés. Désactivez pour rétablir les couleurs natives lorsque c'est possible."
+T.fr["Customize native chat width, height, font, background and colors. Changes do not replace ChatFrame1; native rendering may retain selected settings until UI reload."]="Personnalise la largeur, la hauteur, la police, le fond et les couleurs du chat natif sans remplacer ChatFrame1. Certains réglages natifs peuvent rester actifs jusqu'au rechargement de l'interface."
+T.fr["Copying is opt-in: capture up to 100 new messages in memory, including whispers. Chat styling separately keeps up to 500 recent messages in memory to protect visible history when native layout changes. No chat is saved or uploaded. Use Open chat copy or /fieldkitlog."]="La copie est facultative : elle conserve en mémoire jusqu'à 100 nouveaux messages, y compris les messages privés. La personnalisation du chat conserve séparément jusqu'à 500 messages récents en mémoire pour protéger l'historique visible lors des changements de disposition. Aucun message n'est enregistré ni envoyé. Utilise Ouvrir la copie du chat ou /fieldkitlog."
 T.fr["Reset HUD positions"]="Réinitialiser les positions HUD"
 T.fr["Undo"]="Annuler"
 T.fr["Previews"]="Aperçus"
