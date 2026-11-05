@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.2-review.1 — 2026-11-05 (unpublished chat lifecycle stabilization candidate)
+
+- Recolor fully recoverable visible chat history when selecting a new text palette in settings, not just on override checkbox changes.
+- Restore original chat dimensions, font and maximum lines when styling is disabled **only if all displayed lines are safely recoverable**; otherwise preserve current native content and leave those settings until UI reload.
+- Clearly disclose local styling's separate 500-message in-memory recovery buffer versus the opt-in 100-message copy buffer, in both English and French.
+- Remove unused legacy chat color-hook and obsolete stage variables, without changing the validated HUD drag controller.
+- Extend simulated native-client regressions for destructive geometry/font setters, color selection, safe opt-out and reactivation.
+- **Not released:** final native-client smoke test remains required.
+
+
 ## 0.4.1 — 2026-11-05 (native chat customization and grouped HUD drag correction; final review candidate)
 
 Changes since **0.4.0**:
