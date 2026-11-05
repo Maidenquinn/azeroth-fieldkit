@@ -4,6 +4,7 @@
 
 - Recolor fully recoverable visible chat history when selecting a new text palette in settings, not just on override checkbox changes.
 - Restore original chat dimensions, font and maximum lines when styling is disabled **only if all displayed lines are safely recoverable**; otherwise preserve current native content and leave those settings until UI reload.
+- Prevent native messages from disappearing when styling is **re-enabled after an off-mode interval**: defer destructive size, font and history setters whenever rendered native messages are no longer completely tracked; new messages continue displaying normally.
 - Clearly disclose local styling's separate 500-message in-memory recovery buffer versus the opt-in 100-message copy buffer, in both English and French.
 - Remove unused legacy chat color-hook and obsolete stage variables, without changing the validated HUD drag controller.
 - Extend simulated native-client regressions for destructive geometry/font setters, color selection, safe opt-out and reactivation.
