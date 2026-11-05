@@ -152,7 +152,7 @@ function FieldKit.ApplyChatStyle()
   if not chatBackdrop then
    chatBackdrop=f:CreateTexture(nil,"BACKGROUND")
    chatBackdrop:SetAllPoints(f)
-   chatBackdrop:SetTexture("Interface\\\\Buttons\\\\WHITE8X8")
+   chatBackdrop:SetTexture("Interface\\Buttons\\WHITE8X8")
   end
   local c=backgrounds[bg]
   chatBackdrop:SetVertexColor(c[1],c[2],c[3],opacity/100)
