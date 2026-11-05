@@ -10,12 +10,29 @@ for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) d
  local release=card:GetScript("OnMouseUp")
  assert(start and release)
  start()
- assert(card.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,"clicked card must own native drag")
+ assert(card.fieldkitHudDragging and FieldKitHudStack.root.azsMoving,"linked root must be in manual movement mode")
  release()
  assert(not card.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,"card drag must stop after release")
 end
+-- Lost OnMouseUp / OnDragStop must recover via the global button state.
+local oldButtonState=IsMouseButtonDown
+local held=true
+IsMouseButtonDown=function() return held end
+this=FieldKitModeFrame;FieldKitModeFrame:GetScript("OnDragStart")()
+assert(FieldKitHudStack.root.azsMoving and FieldKitModeFrame.fieldkitHudDragging)
+local oldX=CURSOR_X
+CURSOR_X=CURSOR_X+30
+local watchdog=FieldKitHudStack.watchdogs[1]
+assert(watchdog and watchdog:GetScript("OnUpdate"))
+update(watchdog,.05)
+assert(FieldKitHudStack.root.azsMoving,"manual drag must persist while held")
+held=false
+update(watchdog,.05)
+assert(not FieldKitHudStack.root.azsMoving and not FieldKitModeFrame.fieldkitHudDragging,"lost release must stop manual drag")
+assert(CURSOR_X==oldX+30)
+IsMouseButtonDown=oldButtonState
 this=FieldKitMeterFrame;FieldKitMeterFrame:GetScript("OnDragStart")()
-assert(FieldKitMeterFrame.fieldkitHudDragging and not FieldKitUI.frame)
+assert(FieldKitMeterFrame.fieldkitHudDragging and FieldKitHudStack.root.azsMoving and not FieldKitUI.frame)
 CURSOR_X=CURSOR_X+14;CURSOR_Y=CURSOR_Y-60
 SlashCmdList.FieldKit("lock")
 assert(FieldKitDB.windowsLocked and not FieldKit.layoutEditing and not FieldKitUI.frame)
