@@ -65,6 +65,9 @@ ChatFrame1.SetHeight=function(self,value) rawSetHeight(self,value);self:Clear() 
 ChatFrame1.SetMaxLines=function(self,value)
  assert(value>=100 and value<=500);self.maxLines=value;self:Clear()
 end
+-- The baseline layout tests begin with an empty native frame: changing native
+-- dimensions with untracked preexisting lines must now defer instead.
+ChatFrame1:Clear()
 FieldKitDB.chatWidth=510;FieldKitDB.chatHeight=230
 FieldKitDB.chatHistoryLines=400;FieldKitDB.chatFontSize=15
 FieldKitDB.chatFontFace=2;FieldKitDB.chatStyle=true
