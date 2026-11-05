@@ -122,6 +122,23 @@ FieldKitDB.chatOverrideText=false
 assert(FieldKit.RecolorDisplayedChat()==true)
 assert(table.getn(visible)==2 and visible[1].r==.25 and visible[1].g==.5)
 assert(visible[2].text=="|cffff0000historical B|r" and visible[2].r==.1)
+-- The actual settings palette setter must refresh safely recoverable visible
+-- history, not just recolor messages arriving after a palette change.
+local chatSchema={{title="Interface",items={}}}
+FieldKit_AddSettingsSections(chatSchema)
+local palette
+for _,item in ipairs(chatSchema[1].items) do
+ if item.label=="Chat text color" then palette=item end
+end
+assert(palette and type(palette.set)=="function")
+palette.set(2)
+assert(FieldKitDB.chatOverrideText==true)
+assert(table.getn(visible)==2 and visible[1].text=="historical A"
+ and visible[2].text=="historical B","palette change must preserve messages and order")
+assert(visible[1].r==.95 and visible[2].g==.92 and visible[2].b==.83,
+ "palette setter failed to recolor existing fully-tracked lines")
+FieldKitDB.chatOverrideText=false
+assert(FieldKit.RecolorDisplayedChat()==true)
 -- Real client regression: reset can be called when the chat has no native
 -- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
 local strictSetPoint=ChatFrame1.SetPoint
