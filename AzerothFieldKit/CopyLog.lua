@@ -147,11 +147,9 @@ function FieldKit.ApplyChatStyle()
   if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end
   if moveHandle then moveHandle:Hide() end
-  if styleBefore and chatFrame==f then
-   if styleBefore.width and f.SetWidth then f:SetWidth(styleBefore.width) end
-   if styleBefore.height and f.SetHeight then f:SetHeight(styleBefore.height) end
-  end
-  styleBefore=nil;chatFrame=nil;geometryStamp=nil;lastPositionStamp=nil
+  -- Never restore geometry in-session: doing so erases chat history.
+  -- Preserve the one-shot guard until the next client /reload.
+  styleBefore=nil;chatFrame=nil;lastPositionStamp=nil
   return
  end
  if not styleBefore or chatFrame~=f then
@@ -161,7 +159,6 @@ function FieldKit.ApplyChatStyle()
   else
    styleBefore={width=f:GetWidth(),height=f:GetHeight()}
   end
-  geometryStamp=nil
   chatFrame=f
  end
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
@@ -181,13 +178,16 @@ function FieldKit.ApplyChatStyle()
  local w=Clamp(FieldKitDB.chatWidth,440,280,800)
  local h=Clamp(FieldKitDB.chatHeight,180,100,450)
  local lines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
- local stamp=tostring(w)..":"..tostring(h)..":"..tostring(lines)
- if geometryStamp~=stamp then
-  if f.SetWidth then f:SetWidth(w) end
-  if f.SetHeight then f:SetHeight(h) end
+ -- The legacy client clears its rendered chat buffer on these setters.
+ -- Execute them at most once per client session, on initial application.
+ -- Subsequent changes are saved but must wait for /reload, never clearing
+ -- messages in the middle of a conversation.
+ if not geometryStamp then
+  if f.SetWidth and f:GetWidth()~=w then f:SetWidth(w) end
+  if f.SetHeight and f:GetHeight()~=h then f:SetHeight(h) end
   if f.SetMaxLines then f:SetMaxLines(lines) end
-  geometryStamp=stamp
-  lastPositionStamp=nil -- clamp a saved anchor against the new dimensions
+  geometryStamp=true
+  lastPositionStamp=nil
  end
  ApplyAnchor(f)
  MoveControl()
