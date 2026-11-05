@@ -440,7 +440,7 @@ local function BuildProfileManager(page,y)
    else P.Save(idx);row.confirmSave=nil end
    row.Refresh()
   end)
-  local load=T.Button(card,nil,"Load on /reload",179,80,160,29,function()
+  local loadButton=T.Button(card,nil,"Load on /reload",179,80,160,29,function()
    P.Load(idx);row.confirmDelete=nil;row.confirmSave=nil;row.Refresh()
   end)
   local del=T.Button(card,nil,"Delete",349,80,120,29,function()
@@ -449,7 +449,7 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  slots[i]={frame=card,label=label,summary=summary,save=save,load=load,delete=del}
+  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del}
  end
  function row.Refresh()
   local d=FieldKitDB
@@ -471,10 +471,10 @@ local function BuildProfileManager(page,y)
       tostring((values and values.cardOpacity) or 100).."%")
    else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
    FieldKit_Text(item.save,row.confirmSave==i and "Confirm overwrite" or "Save current HUD")
-   FieldKit_Text(item.load,queued==i and "Queued" or "Load on /reload")
+   FieldKit_Text(item.loadButton,queued==i and "Queued" or "Load on /reload")
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
-   if saved then item.load:Show();item.delete:Show()
-   else item.load:Hide();item.delete:Hide() end
+   if saved then item.loadButton:Show();item.delete:Show()
+   else item.loadButton:Hide();item.delete:Hide() end
   end
  end
  row.Reflow=function(w)
@@ -484,7 +484,7 @@ local function BuildProfileManager(page,y)
    local item=slots[i];item.frame:SetWidth(cw);T.Update(item.frame)
    item.label:SetWidth(cw-24);item.summary:SetWidth(cw-24)
    local bw=(cw-56)/3
-   for j,b in ipairs({item.save,item.load,item.delete}) do
+   for j,b in ipairs({item.save,item.loadButton,item.delete}) do
     b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+14),-80)
     b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
    end
