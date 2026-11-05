@@ -21,8 +21,21 @@ function S.Initialize(frames,makeMovable,placeMovable)
   f:SetScript("OnDragStart",function()
    if FieldKitDB.linkLeftCards then root:GetScript("OnDragStart")() elseif start then start() end
   end)
-  f:SetScript("OnDragStop",function()
-   if FieldKitDB.linkLeftCards then root:GetScript("OnDragStop")() elseif stop then stop() end
+  local function FinishCardDrag()
+   if FieldKitDB.linkLeftCards then
+    local finish=root:GetScript("OnDragStop")
+    if finish then finish() end
+   elseif stop then stop() end
+  end
+  f:SetScript("OnDragStop",FinishCardDrag)
+  -- StartMoving runs on the linked root while the mouse belongs to the card.
+  -- The card's old MouseUp only stopped itself, leaving the root stuck to the
+  -- cursor when the native client does not emit OnDragStop.
+  f:SetScript("OnMouseUp",FinishCardDrag)
+  local oldHide=f:GetScript("OnHide")
+  f:SetScript("OnHide",function()
+   FinishCardDrag()
+   if oldHide then oldHide() end
   end)
  end
 end
