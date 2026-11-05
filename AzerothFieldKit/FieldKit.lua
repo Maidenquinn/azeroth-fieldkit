@@ -207,6 +207,7 @@ end
 -- Shared editing gate, available from settings, slash commands or the minimap.
 local function SetMovablesUnlocked(unlocked)
  if not unlocked then
+  if FieldKitHudStack and FieldKitHudStack.FinishDragging then FieldKitHudStack.FinishDragging() end
   -- A lock issued while a button is held must finish the native drag too.
   for i=1,table.getn(movableFrames) do
    local f=movableFrames[i]
