@@ -2,6 +2,9 @@
 -- Whispers can be included. Copying to the OS clipboard remains a player action.
 local history,hooked={},{}
 local displayHistory={}
+-- Keep a bounded in-memory render journal across temporary style toggles.
+-- This is distinct from the opt-in copy buffer and never saved to disk.
+local styleWasEnabled=false
 local replaying=false
 local DISPLAY_LIMIT=500
 local copyFrame,copyEdit
@@ -214,18 +217,9 @@ function FieldKit.ApplyChatStyle()
  local wanted=tostring(width)..":"..tostring(height)..":"..tostring(lines)..":"..tostring(requestedFont)..":"..tostring(size)
  if geometryStamp~=wanted then
   local before=f.GetNumMessages and f:GetNumMessages() or nil
-  -- Re-enabling styling after an opt-out can encounter messages which were
-  -- never observed by the render-history hook. On Benilla 1.12, changing native
-  -- width/height/font/max-lines may CLEAR the entire chat. Do not invoke any
-  -- such setter until every visible line is safely recoverable or chat is empty.
-  -- Leave geometryStamp unset so the requested settings can apply later.
-  local known=table.getn(displayHistory)
-  local recoverable=type(before)=="number" and (before==0 or (known>0 and before==known))
-  if not recoverable then
-   ApplyAnchor(f)
-   MoveControl()
-   return
-  end
+  -- Never suppress interactive width/height/font controls. The bounded
+  -- journal is kept across temporary style toggles so messages received while
+  -- disabled can be reconstructed if these native setters clear the display.
   if f.SetWidth and f:GetWidth()~=width then f:SetWidth(width) end
   if f.SetHeight and f:GetHeight()~=height then f:SetHeight(height) end
   if f.SetMaxLines and (not f.GetMaxLines or f:GetMaxLines()~=lines) then f:SetMaxLines(lines) end
@@ -328,7 +322,7 @@ local function Hook(index)
  frame.AddMessage=function(self,text,r,g,b,id)
   if not replaying then
    Capture(index,text)
-   if FieldKitDB and FieldKitDB.chatStyle and type(text)=="string" then
+   if FieldKitDB and (FieldKitDB.chatStyle or styleWasEnabled) and type(text)=="string" then
     if table.getn(displayHistory)>=DISPLAY_LIMIT then table.remove(displayHistory,1) end
     table.insert(displayHistory,{text=text,r=r,g=g,b=b,id=id})
    end
@@ -412,10 +406,14 @@ function FieldKit.SyncChat()
   CopyButton()
  end
  if FieldKitDB and FieldKitDB.chatStyle then
+  styleWasEnabled=true
   Hook(1)
   FieldKit.ApplyChatStyle()
  else
-  displayHistory={}
+  -- Do not discard the only recoverable display copy on opt-out. Keep
+  -- observing new native lines without changing their colors or copying them
+  -- to the opt-in export buffer. The journal stays bounded at DISPLAY_LIMIT.
+  if not styleWasEnabled then displayHistory={} end
  end
 end
 
