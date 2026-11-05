@@ -6,10 +6,9 @@ local replaying=false
 local DISPLAY_LIMIT=500
 local copyFrame,copyEdit
 local active=false
-local button, chatFrame, styleBefore, styleStamp, chatBackdrop, moveHandle
+local button, chatFrame, styleBefore, chatBackdrop, moveHandle
 local moving=false
 local copiedNative=false
-local textColorHooked={}
 local lastPositionStamp
 local geometryStamp
 local fontStamp
@@ -204,11 +203,6 @@ function FieldKit.ApplyChatStyle()
   chatBackdrop:SetVertexColor(c[1],c[2],c[3],opacity/100)
   chatBackdrop:Show()
  elseif chatBackdrop then chatBackdrop:Hide() end
- -- Stage 2: change geometry only when preferences change. Never touch
- -- fading, the message text, or the native font in this experiment.
- local w=Clamp(FieldKitDB.chatWidth,440,280,800)
- local h=Clamp(FieldKitDB.chatHeight,180,100,450)
- local lines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
  -- Preserve the native scrolling frame. The client's SetMaxLines,
  -- SetFont and size setters can empty its visible lines. Apply only on changes,
  -- then recover the messages observed since styling was enabled.
@@ -269,27 +263,6 @@ local function CopyButton()
   button.fieldkitChatAnchor=f
  end
  button:Show()
-end
-
--- Optional monochrome mode for NEW messages. Chat's default channel colors remain
--- untouched unless the player enables this explicit override.
-local function ColorHook()
- local f=NativeChat()
- if not f or textColorHooked[f] or type(f.AddMessage)~="function" then return end
- textColorHooked[f]=true
- local original=f.AddMessage
- f.AddMessage=function(self,text,r,g,b,id)
-  local db=FieldKitDB
-  if db and db.chatStyle and db.chatOverrideText and type(text)=="string" then
-   local index=Clamp(db.chatTextColor,1,1,table.getn(foregrounds))
-   local c=foregrounds[index]
-   -- Remove inline color tokens in monochrome mode, but preserve links.
-   text=string.gsub(text,"|c%x%x%x%x%x%x%x%x","")
-   text=string.gsub(text,"|r","")
-   return original(self,text,c[1],c[2],c[3],id)
-  end
-  return original(self,text,r,g,b,id)
- end
 end
 
 -- Only newer client variants expose read access to the rendered chat buffer.
