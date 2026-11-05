@@ -81,6 +81,19 @@ assert(ChatFrame1.fontSize==18 and string.find(ChatFrame1.fontPath,"ARIALN",1,tr
 assert(table.getn(visible)==1 and visible[1].text=="survive layout","layout lost text or replayed twice")
 assert(visible[1].r==.2 and visible[1].g==.4 and visible[1].b==.6)
 assert(nativeOps==0)
+-- Opting out restores native dimensions/font only when all visible lines were
+-- captured. This client mock empties chat on every native setter.
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight,
+ "safe chat opt-out should restore original dimensions")
+assert(ChatFrame1.maxLines==200 and ChatFrame1.fontSize==12,
+ "safe chat opt-out should restore original font and history length")
+assert(table.getn(visible)==1 and visible[1].text=="survive layout",
+ "restoring native chat must not erase or duplicate visible messages")
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260,
+ "re-enabling chat styling should restore selected configuration")
+assert(table.getn(visible)==1 and visible[1].text=="survive layout")
 FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
 assert(table.getn(visible)==2 and visible[2].text=="Color sample")
