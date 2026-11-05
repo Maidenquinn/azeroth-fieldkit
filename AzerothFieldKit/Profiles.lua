@@ -74,14 +74,30 @@ function P.Save(number)
  FieldKitDB.interfaceProfiles[slot]=Capture()
  return true
 end
+-- A slot selection is only a pending request. Do not mutate live FieldKitDB
+-- preferences while its OnUpdate readers and mouse handlers are running.
 function P.Load(number)
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
+ if not FieldKitDB.interfaceProfiles[slot] then return false end
+ FieldKitDB.profilePendingSlot=slot
+ return true
+end
+function P.Undo()
+ if not FieldKitDB or not FieldKitDB.profilePendingSlot then return false end
+ FieldKitDB.profilePendingSlot=nil
+ return true
+end
+-- Called exactly once at VARIABLES_LOADED, before any addon HUD is created.
+function P.ActivatePending()
+ if not FieldKitDB then return false end
+ P.Init()
+ local slot=Slot(FieldKitDB.profilePendingSlot)
+ FieldKitDB.profilePendingSlot=nil
+ if not slot then return false end
  local saved=FieldKitDB.interfaceProfiles[slot]
  if not saved then return false end
- -- Make an independent undo snapshot for the current session.
- P.undo=Capture()
  for i=1,table.getn(scalar) do
   local key=scalar[i];local value=saved.values[key]
   if type(value)=="boolean" or (type(value)=="number" and FieldKit.Number(value)) then
@@ -92,23 +108,7 @@ function P.Load(number)
   local key=tables[i]
   FieldKitDB[key]=Clone(saved.tables[key] or {},1,160) or {}
  end
- -- Revalidate all restored shapes against existing Config.lua constraints.
- -- Do not refresh live native frames: /reload safely applies them.
- FieldKit.InitializeSettings({})
- return true
-end
-function P.Undo()
- if not P.undo or not FieldKitDB then return false end
- local saved=P.undo;P.undo=nil
- for i=1,table.getn(scalar) do
-  local key=scalar[i];local value=saved.values[key]
-  if type(value)=="boolean" or (type(value)=="number" and FieldKit.Number(value)) then
-   FieldKitDB[key]=value
-  end
- end
- for i=1,table.getn(tables) do
-  local key=tables[i];FieldKitDB[key]=Clone(saved.tables[key] or {},1,160) or {}
- end
+ FieldKitDB.activeHudProfile=slot
  FieldKit.InitializeSettings({})
  return true
 end
@@ -117,7 +117,9 @@ function P.Delete(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
  if not FieldKitDB.interfaceProfiles[slot] then return false end
- FieldKitDB.interfaceProfiles[slot]=nil;return true
+ FieldKitDB.interfaceProfiles[slot]=nil
+ if FieldKitDB.profilePendingSlot==slot then FieldKitDB.profilePendingSlot=nil end
+ return true
 end
 function P.Command(message)
  if not FieldKitDB then return end
@@ -134,7 +136,7 @@ function P.Command(message)
   return
  end
  if message=="undo" then
-  if P.Undo() then Say("Previous HUD settings restored. Use /reload to apply.")
+  if P.Undo() then Say("Pending HUD profile switch cancelled.")
   else Say("No profile change to undo.") end
   return
  end
@@ -147,7 +149,7 @@ function P.Command(message)
  end
  if not op or not number then Say("Usage: /fieldkit profile save|load|delete 1-3, list, undo");return end
  if op=="save" and P.Save(number) then Say("HUD profile "..number.." saved (chat and game data excluded).")
- elseif op=="load" and P.Load(number) then Say("HUD profile "..number.." loaded. Use /reload to apply. /fieldkit profile undo before reloading to revert.")
+ elseif op=="load" and P.Load(number) then Say("HUD profile "..number.." queued. Use /reload to apply, or /fieldkit profile undo to cancel.")
  elseif op=="delete" and P.Delete(number) then Say("HUD profile "..number.." deleted.")
  else Say("Slot "..number.." is empty.") end
 end
