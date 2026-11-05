@@ -22,7 +22,8 @@ local function Clone(source,depth,limit)
  local out={};local count=0
  for key,value in pairs(source) do
   if count>=limit then break end
-  if type(key)=="string" and string.len(key)<=128 then
+  if (type(key)=="string" and string.len(key)<=128) or
+    (type(key)=="number" and key==math.floor(key) and key>=1 and key<=8) then
    if type(value)=="number" and FieldKit.Number(value) then
     out[key]=value;count=count+1
    elseif type(value)=="boolean" or (type(value)=="string" and string.len(value)<=100) then
