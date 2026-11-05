@@ -423,8 +423,8 @@ local function BuildProfileManager(page,y)
  row:SetWidth(610);row:SetHeight(636)
  local intro=T.Label(row,"Save FieldKit HUD layouts. Chat and gameplay data are not included.",0,0,600,38,13,T.muted)
  local pending=T.Label(row,"",0,42,600,25,13,T.gold)
- local cancel=T.Button(row,nil,"Cancel pending switch",0,74,210,29,function()
-  P.Undo();row.Refresh()
+ local cancel=T.Button(row,nil,"Undo last switch",0,74,210,29,function()
+  P.Undo();row.Refresh();U.Refresh()
  end)
  local slots={}
  for i=1,3 do
@@ -440,8 +440,8 @@ local function BuildProfileManager(page,y)
    else P.Save(idx);row.confirmSave=nil end
    row.Refresh()
   end)
-  local loadButton=T.Button(card,nil,"Load on /reload",179,80,160,29,function()
-   P.Load(idx);row.confirmDelete=nil;row.confirmSave=nil;row.Refresh()
+  local loadButton=T.Button(card,nil,"Apply now",179,80,160,29,function()
+   P.Load(idx);row.confirmDelete=nil;row.confirmSave=nil;row.Refresh();U.Refresh()
   end)
   local del=T.Button(card,nil,"Delete",349,80,120,29,function()
    if row.confirmDelete==idx then
@@ -454,10 +454,10 @@ local function BuildProfileManager(page,y)
  function row.Refresh()
   local d=FieldKitDB
   if not d then return end
-  local queued=d.profilePendingSlot
-  FieldKit_Text(pending,queued and ("Profile "..queued.." queued — /reload to apply.") or "No pending profile change.")
-  FieldKit_Text(cancel,"Cancel pending switch")
-  if queued then cancel:Show() else cancel:Hide() end
+  local active=d.activeHudProfile
+  FieldKit_Text(pending,active and string.format(FieldKit_L("Active HUD profile: %d"),active) or "No active HUD profile.")
+  FieldKit_Text(cancel,"Undo last switch")
+  if P.undo then cancel:Show() else cancel:Hide() end
   for i=1,3 do
    local item=slots[i]
    local saved=d.interfaceProfiles and d.interfaceProfiles[i]
@@ -465,13 +465,12 @@ local function BuildProfileManager(page,y)
    local anchors=saved and saved.tables and saved.tables.frameAnchors
    local count=0
    if type(anchors)=="table" then for _ in pairs(anchors) do count=count+1 end end
-   FieldKit_Text(item.label,"HUD profile "..i)
+   FieldKit_Text(item.label,string.format(FieldKit_L("HUD profile %d"),i))
    if saved then
-    FieldKit_Text(item.summary,"Saved · "..count.." positions · opacity "..
-      tostring((values and values.cardOpacity) or 100).."%")
+    FieldKit_Text(item.summary,string.format(FieldKit_L("Saved · %d positions · opacity %d%%"),count,(values and values.cardOpacity) or 100))
    else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
    FieldKit_Text(item.save,row.confirmSave==i and "Confirm overwrite" or "Save current HUD")
-   FieldKit_Text(item.loadButton,queued==i and "Queued" or "Load on /reload")
+   FieldKit_Text(item.loadButton,active==i and "Active" or "Apply now")
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
    if saved then item.loadButton:Show();item.delete:Show()
    else item.loadButton:Hide();item.delete:Hide() end
@@ -537,7 +536,19 @@ local function BuildHome(page)
  page.essential=T.Button(page,nil,"Use essential HUD",0,594,190,30,function() U.EssentialHud(false) end);FieldKit_Text(page.essential,"Use essential HUD")
  page.undoPreset=T.Button(page,nil,"Undo HUD preset",202,594,190,30,function() U.EssentialHud(true) end);FieldKit_Text(page.undoPreset,"Undo HUD preset")
  U.presetUndo=page.undoPreset
- page.contentHeight=640
+ page.quickTitle=T.Label(page,"Quick HUD profiles",0,654,380,27,19,T.gold,true)
+ page.quickHint=T.Label(page,"Switch layouts instantly. Empty slots open the profile manager.",0,684,600,24,12,T.muted)
+ page.quickButtons={}
+ for i=1,3 do
+  local slot=i
+  page.quickButtons[i]=T.Button(page,nil,"",0,719,152,31,function()
+   if FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[slot] then
+    FieldKitProfiles.Load(slot);U.Refresh()
+   else U.Select("profiles") end
+  end)
+ end
+ U.quickProfileButtons=page.quickButtons
+ page.contentHeight=776
 end
 
 -- Each window subpage has its own content height and stable saved id. Reading a
@@ -645,6 +656,15 @@ function U.Refresh()
   if c.key=="playerBar" then enabled=enabled or FieldKitDB.targetHealth end
   FieldKit_Text(c.state,enabled and "Enabled" or "Disabled")
   local color=enabled and T.green or T.muted;c.state:SetTextColor(color[1],color[2],color[3])
+ end
+ if U.quickProfileButtons then
+  for i=1,3 do
+   local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
+   local active=FieldKitDB.activeHudProfile==i
+   local label=string.format(FieldKit_L(active and "Profile %d · active" or (saved and "Profile %d" or "Profile %d · empty")),i)
+   FieldKit_Text(U.quickProfileButtons[i],label)
+   T.State(U.quickProfileButtons[i],active)
+  end
  end
  if U.languageRow then
   T.State(U.languageRow.en,FieldKit_Language()=="en");T.State(U.languageRow.fr,FieldKit_Language()=="fr")
@@ -762,6 +782,15 @@ function U.Reflow()
    page.layoutCard:ClearAllPoints();page.layoutCard:SetPoint("TOPLEFT",page,"TOPLEFT",0,-426);page.layoutCard:SetWidth(content-16)
    page.layoutTitle:SetWidth(content-204);page.layoutHint:SetWidth(content-204)
    page.layoutAction:ClearAllPoints();page.layoutAction:SetPoint("TOPRIGHT",page.layoutCard,"TOPRIGHT",-16,-32);T.Update(page.layoutCard)
+    if page.quickButtons then
+     page.quickHint:SetWidth(content-20)
+     local qw=(content-40)/3
+     for i=1,3 do
+      local b=page.quickButtons[i]
+      b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(qw+12),-719)
+      b:SetWidth(qw);b.fieldkitLabel:SetWidth(qw-20);T.Update(b)
+     end
+    end
   end
  end
  U.CloseMenus()
