@@ -19,11 +19,12 @@ click(s1.save)
 assert(FieldKitDB.interfaceProfiles[1].values.cardOpacity==39)
 FieldKitDB.cardOpacity=88
 click(s1.loadButton)
-assert(FieldKitDB.profilePendingSlot==1 and FieldKitDB.cardOpacity==88,
- "UI profile load must be staged")
+assert(FieldKitDB.activeHudProfile==1 and FieldKitDB.cardOpacity==39,
+ "UI profile load must apply the HUD immediately")
 assert(row.cancel:IsShown())
 click(row.cancel)
 assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.cardOpacity==88)
+assert(FieldKitDB.activeHudProfile~=1)
 click(s1.delete)
 assert(FieldKitDB.interfaceProfiles[1],"first delete click must only ask for confirmation")
 click(s1.delete)
@@ -32,14 +33,23 @@ click(s1.save)
 FieldKitDB.cardOpacity=76
 click(s1.loadButton)
 U.Refresh()
-assert(FieldKitDB.cardOpacity==76 and FieldKitDB.profilePendingSlot==1)
+assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
 U.Select("layout");U.Select("profiles")
-assert(FieldKitDB.profilePendingSlot==1)
+assert(FieldKitDB.activeHudProfile==1)
 -- Reflow and language switching must not mutate current HUD.
 local total=table.getn(objects)
 FieldKit_SetLanguage("fr");U.Refresh();U.Reflow()
-assert(FieldKitDB.cardOpacity==76 and FieldKitDB.profilePendingSlot==1)
+assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
 FieldKit_SetLanguage("en");U.Refresh()
 assert(table.getn(objects)==total,"profile UI must reuse existing controls")
 click(row.cancel)
-assert(not FieldKitDB.profilePendingSlot)
+assert(FieldKitDB.activeHudProfile~=1)
+
+-- Home quick switches are one click, and empty slots navigate to management.
+U.Select("home")
+assert(U.quickProfileButtons and table.getn(U.quickProfileButtons)==3)
+FieldKitDB.cardOpacity=24
+click(U.quickProfileButtons[1])
+assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
+click(U.quickProfileButtons[3])
+assert(FieldKitDB.uiPage=="profiles")
