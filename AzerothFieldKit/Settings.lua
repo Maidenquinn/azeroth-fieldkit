@@ -147,13 +147,7 @@ local function ChatSlider(key,label,minimum,maximum,step)
    FieldKitDB[key]=v
    if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
   end,
-  format=function(v)
-   local suffix=""
-   if key=="chatWidth" or key=="chatHeight" or key=="chatHistoryLines" then
-    suffix=(FieldKitDB and FieldKitDB.language=="fr") and " (apres /reload)" or " (after /reload)"
-   end
-   return FieldKit_L(label)..": "..v..suffix
-  end}
+  format=function(v) return FieldKit_L(label)..": "..v end}
 end
 local function ChatChoice(key,label,values)
  return {kind="choice",label=label,values=values,
