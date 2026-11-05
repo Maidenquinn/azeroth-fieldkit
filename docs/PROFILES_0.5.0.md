@@ -1,6 +1,10 @@
-# Azeroth FieldKit v0.5.0-alpha.1 — HUD profile foundations
+# Azeroth FieldKit v0.5.0-alpha.2 — Visual HUD profile manager
 
-This first alpha builds on the officially published v0.4.2 and introduces **three named-by-number, manual HUD layout slots**.
+This alpha builds on the published v0.4.2 and the in-game accepted alpha.1 profile persistence. Three HUD layout slots are now manageable from a dedicated **HUD profiles** interface page, with the existing slash commands retained.
+
+## Visual manager
+
+Open `/fieldkit` → **03 INTERFACE** → **HUD profiles**. Each of the three cards shows whether a slot is saved, a brief layout summary, and **Save current HUD**, **Load on /reload** and **Delete** actions. Overwriting an existing slot and deleting a slot each require two explicit clicks. A pending load can be cancelled without reloading. All controls are local, and page refresh never applies a profile automatically.
 
 ## Commands
 
@@ -22,7 +26,7 @@ Slot loading is **staged**. The current window state remains unchanged until `/r
 
 ## Client test recipe
 
-1. Back up SavedVariables and the existing addon folder, then install alpha.1. Confirm version in FieldKit UI and zero Lua errors.
+1. Back up SavedVariables and the existing addon folder, then install alpha.2. Confirm version in FieldKit UI and zero Lua errors.
 2. With your current HUD arranged, run `/fieldkit profile save 1`; confirm `profile list` reports slot 1 saved.
 3. Move or resize one HUD card, change FieldKit card opacity and grouping. Keep the native chat visible.
 4. Run `/fieldkit profile load 1` — the current HUD should **not jump immediately**. Use `profile undo` to cancel once and confirm `/reload` keeps the current layout.
@@ -34,6 +38,6 @@ Slot loading is **staged**. The current window state remains unchanged until `/r
 
 ## Boundaries
 
-No new visible profile picker in this alpha. Commands first prove safe persistence and switching. A future v0.5.0 lot can add an in-game profile manager, previews and export/import after the save/load contract is accepted.
+The visual manager is available in alpha.2. Renaming, detailed previews and import/export are not included yet; they require their own safety and UX tests.
 
 Not published or merged into main. The v0.4.2 release remains official.
