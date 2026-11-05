@@ -86,6 +86,26 @@ ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
 assert(table.getn(visible)==2 and visible[2].text=="Color sample")
 assert(visible[2].r==1 and visible[2].g==.82 and visible[2].b==.49)
 FieldKitDB.chatOverrideText=false
+-- Existing native lines that predate capture must never be cleared for recolor.
+local beforeUnsafe=table.getn(visible)
+assert(FieldKit.RecolorDisplayedChat()==false)
+assert(table.getn(visible)==beforeUnsafe)
+-- Controlled full-history case: every visible line is captured by FieldKit.
+FieldKitDB.chatStyle=false;FieldKit.SyncChat()
+ChatFrame1:Clear()
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+ChatFrame1:AddMessage("historical A",.25,.5,.75)
+ChatFrame1:AddMessage("|cffff0000historical B|r",.1,.2,.3)
+assert(table.getn(visible)==2)
+FieldKitDB.chatTextColor=4
+FieldKitDB.chatOverrideText=true
+assert(FieldKit.RecolorDisplayedChat()==true)
+assert(table.getn(visible)==2 and visible[1].text=="historical A" and visible[2].text=="historical B")
+assert(visible[1].r==.69 and visible[1].g==.93 and visible[2].b==.77)
+FieldKitDB.chatOverrideText=false
+assert(FieldKit.RecolorDisplayedChat()==true)
+assert(table.getn(visible)==2 and visible[1].r==.25 and visible[1].g==.5)
+assert(visible[2].text=="|cffff0000historical B|r" and visible[2].r==.1)
 -- Real client regression: reset can be called when the chat has no native
 -- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
 local strictSetPoint=ChatFrame1.SetPoint
