@@ -35,6 +35,18 @@ assert(#messages>=3)
 SlashCmdList.FieldKit("diag report")
 assert(#messages>=6)
 assert(string.find(messages[#messages],"snapshots=",1,true))
+-- Compatibility probe is passive even when the native chat is absent.
+local originalChat=ChatFrame1
+local state=D.Compatibility()
+assert(type(state.issues)=="table" and state.linked==true)
+local before=FieldKitDB.chatStyle
+ChatFrame1=nil
+local absent=D.Compatibility()
+assert(not absent.chat and table.getn(absent.issues)>=1)
+ChatFrame1=originalChat
+SlashCmdList.FieldKit("diag compat")
+assert(string.find(messages[#messages],"does not detect all addon conflicts",1,true))
+assert(FieldKitDB.chatStyle==before and FieldKitDB.diagnostics==nil)
 SlashCmdList.FieldKit("diag reset")
 assert(D.enabled and D.frames==0 and D.counts.scan==0)
 SlashCmdList.FieldKit("diag off")
