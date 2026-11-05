@@ -92,6 +92,20 @@ table.insert(visible,1,{text="legacy not captured",r=.3,g=.3,b=.3})
 local beforeUnsafe=table.getn(visible)
 assert(FieldKit.RecolorDisplayedChat()==false)
 assert(table.getn(visible)==beforeUnsafe)
+-- An optional newer-client read API allows full lossless reconstruction.
+-- The legacy client without it uses the conservative no-op above.
+ChatFrame1.GetMessageInfo=function(self,i)
+ local m=visible[i]
+ if m then return m.text,m.r,m.g,m.b,m.id end
+end
+FieldKitDB.chatTextColor=5
+FieldKitDB.chatOverrideText=true
+assert(FieldKit.RecolorDisplayedChat()==true)
+assert(table.getn(visible)==beforeUnsafe,"native snapshot recolor duplicated or lost lines")
+assert(visible[1].text=="legacy not captured")
+assert(visible[1].r==.69 and visible[1].g==.85 and visible[1].b==1)
+ChatFrame1.GetMessageInfo=nil
+FieldKitDB.chatOverrideText=false
 -- Controlled full-history case: every visible line is captured by FieldKit.
 FieldKitDB.chatStyle=false;FieldKit.SyncChat()
 ChatFrame1:Clear()
