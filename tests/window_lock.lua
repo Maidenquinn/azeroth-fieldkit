@@ -14,6 +14,21 @@ for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) d
  release()
  assert(not card.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,"card drag must stop after release")
 end
+-- Regression: original 1.12 has no IsMouseButtonDown; pairing
+-- OnMouseDown and OnMouseUp must complete a single click without any drag event.
+local originalButtonFn=IsMouseButtonDown
+IsMouseButtonDown=nil
+for _,card in ipairs({FieldKitModeFrame,FieldKitMeterFrame,FieldKitLairFrame}) do
+ local mouseDown,mouseUp=card:GetScript("OnMouseDown"),card:GetScript("OnMouseUp")
+ assert(mouseDown and mouseUp)
+ this=card;arg1="LeftButton";mouseDown()
+ assert(card.fieldkitHudDragging and FieldKitHudStack.root.azsMoving)
+ CURSOR_X=CURSOR_X+8
+ mouseUp()
+ assert(not card.fieldkitHudDragging and not FieldKitHudStack.root.azsMoving,
+  "1.12 click and release must not leave a card attached")
+end
+IsMouseButtonDown=originalButtonFn
 -- Lost OnMouseUp / OnDragStop must recover via the global button state.
 local oldButtonState=IsMouseButtonDown
 local held=true
