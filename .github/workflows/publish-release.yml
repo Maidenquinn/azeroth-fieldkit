@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           VERSION=$(sed -n 's/^## Version: //p' AzerothFieldKit/AzerothFieldKit.toc | head -1)
-          test "$VERSION" = "0.4.1"
+          test "$VERSION" = "0.4.2"
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             test "${GITHUB_REF_NAME}" = "v$VERSION"
           fi
@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="0.4.1"
+          VERSION="0.4.2"
           TAG="v$VERSION"
           if [[ "$GITHUB_REF" == refs/heads/main ]]; then
             if ! git ls-remote --tags origin "refs/tags/$TAG" | grep -q .; then
