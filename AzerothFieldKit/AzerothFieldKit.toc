@@ -5,6 +5,7 @@
 ## Notes: Azeroth Survivors helper (/fieldkit): elite-only nameplates, chronicle boss bars + schedule timeline, health bar with shield, buffs and low health warning, crits, stats, gold and chest price, accessories, tabbed meter with sort/hide/heal done-recv/party drill/pet DoT tips, chests on the minimap, lairs, camera.
 ## SavedVariables: FieldKitDB
 Runtime.lua
+Diagnostics.lua
 Positions.lua
 Config.lua
 Localization.lua
