@@ -29,8 +29,9 @@ stats.GetCenter=center;UIParent.GetCenter=screenCenter
 local S=FieldKitHudStack
 assert(S.root:GetWidth()==S.width and S.root:GetHeight()==S.height and S.root.clamped)
 assert(not S.root.mouseEnabled)
+S.root:ClearAllPoints();S.root:SetPoint("TOPRIGHT",UIParent,"TOPRIGHT",0,0)
 this=FieldKitLairFrame;FieldKitLairFrame:GetScript("OnDragStart")()
-S.root:ClearAllPoints();S.root:SetPoint("TOPRIGHT",UIParent,"TOPRIGHT",0,-30)
+CURSOR_Y=CURSOR_Y-30
 FieldKitLairFrame:GetScript("OnDragStop")();FieldKit.layoutEditing=false;S.Apply()
 local point,relative,rp,x,y=S.root:GetPoint()
 assert(point=="TOPRIGHT" and relative==UIParent and rp=="TOPRIGHT" and x==0 and y==-30)
