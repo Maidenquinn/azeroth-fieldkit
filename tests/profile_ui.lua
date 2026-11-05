@@ -53,3 +53,20 @@ click(U.quickProfileButtons[1])
 assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
 click(U.quickProfileButtons[3])
 assert(FieldKitDB.uiPage=="profiles")
+-- Header controls remain available on every page, without reloading the UI.
+assert(U.headerProfileButtons and table.getn(U.headerProfileButtons)==3)
+U.Select("look")
+FieldKitDB.cardOpacity=31
+click(U.headerProfileButtons[1])
+assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
+assert(FieldKitDB.uiPage=="look","header switch should preserve current page")
+click(U.headerProfileButtons[3])
+assert(FieldKitDB.uiPage=="profiles","empty header slot should open manager")
+FieldKit_SetLanguage("fr")
+U.Refresh()
+assert(FieldKit_L("Empty slot — save your current HUD to start.")~=
+ "Empty slot — save your current HUD to start.")
+assert(FieldKit_L("Saved · %d positions · opacity %d%%")~=
+ "Saved · %d positions · opacity %d%%")
+FieldKit_SetLanguage("en")
+
