@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.1 — 2026-11-05 (unpublished HUD profiles foundation)
+
+- Introduce three opt-in HUD profile slots for window layout, visibility, grouping, opacity, and allowed card sizes/positions.
+- Save, list, load, delete and undo via `/fieldkit profile` commands. Applying a slot is staged until `/reload`, avoiding disruptive native-frame changes mid-run.
+- Profile capture explicitly excludes native chat settings and messages, co-op sharing, gameplay statistics, and game-owned state. Bounded nested copies prevent profile tables from referencing live DB tables.
+- Validate restored layout positions and sizes through existing FieldKit config normalization. Slots survive /reload; undo remains available only before a reload.
+- Extend Lua 5.1 and optional native Lua 5.0 regression fixtures. All existing chat/HUD routines are untouched.
+- **Alpha test candidate only** — not published or merged.
+
+
 ## 0.4.2 — 2026-11-05 (chat stabilization, runtime diagnostics and compatibility)
 
 Changes since **0.4.1**:
