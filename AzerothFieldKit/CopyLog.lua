@@ -365,7 +365,31 @@ function FieldKit.RecolorDisplayedChat()
  if not f or not f.GetNumMessages or not f.Clear then return false end
  local known=table.getn(displayHistory)
  local visible=f:GetNumMessages()
- if known==0 or type(visible)~="number" or visible~=known then return false end
+ if type(visible)~="number" or visible<1 then return false end
+ -- The legacy chat might contain lines predating the addon. If the client
+ -- exposes GetMessageInfo, take a complete snapshot first and avoid dropping
+ -- those lines. Do not assume this newer API exists on a 1.12 client.
+ if visible~=known then
+  if type(f.GetMessageInfo)~="function" then return false end
+  local snapshot={}
+  for i=1,visible do
+   local ok,text,r,g,b,id=pcall(f.GetMessageInfo,f,i)
+   if not ok or type(text)~="string" then return false end
+   table.insert(snapshot,{text=text,r=r,g=g,b=b,id=id})
+  end
+  if table.getn(snapshot)~=visible then return false end
+  -- Recolor all currently available messages. No data is appended to the
+  -- copy/export buffer and no message is duplicated in the display.
+  replaying=true
+  f:Clear()
+  for i=1,table.getn(snapshot) do
+   local m=snapshot[i]
+   f:AddMessage(m.text,m.r,m.g,m.b,m.id)
+  end
+  replaying=false
+  return true
+ end
+ if known==0 then return false end
  FieldKit.RestoreDisplayedChat()
  return true
 end
