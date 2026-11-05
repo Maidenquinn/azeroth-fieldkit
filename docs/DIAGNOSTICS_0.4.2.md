@@ -1,4 +1,4 @@
-# FieldKit 0.4.2-review.2 — Diagnostics & compatibility recipe
+# FieldKit 0.4.2-review.3 — Diagnostics & compatibility recipe
 
 This candidate builds on the maintainer-accepted 0.4.2-review.1 chat stabilization without changing chat or HUD drag code.
 
@@ -13,6 +13,7 @@ Observe *how often* existing work is scheduled and whether a fixed, read-only li
 - `/fieldkit diag api` — show the count of present native API functions and a fixed list of missing names. Presence does not mean behavioral support.
 - `/fieldkit diag reset` — reset all counters, keep recording if active.
 - `/fieldkit diag off` — disable and clear counters.
+- `/fieldkit diag compat` — passive report of native chat method availability and linked left HUD root presence. It cannot prove addons are conflict-free.
 
 Diagnostics are disabled by default and are not persisted in FieldKitDB. The counters are in-memory only, have a fixed size and do not inspect players' data, messages or other addon frames. Reports are local chat messages only. There is no outbound traffic.
 
@@ -29,10 +30,11 @@ The native API report uses 12 named function probes. Any missing symbol is norma
 3. Run `/fieldkit diag`: should report OFF, zero counters. Play briefly; verify remains OFF.
 4. Run `/fieldkit diag on`. Wait a few seconds in an active run, then `/fieldkit diag report`: counters should rise. Save or screenshot the output.
 5. Run `/fieldkit diag api`: no Lua error, fixed set of optional native functions. A missing function is a reported limitation, not a failure.
-6. Run `/fieldkit diag reset`, then report: counters zero. Run `/fieldkit diag off`, verify no counters are recorded afterwards.
-7. Check chat font family/size, width/height, off/on recovery, text colors, copy button, and `/reload`.
-8. Drag Mode, Damage and Lairs together; confirm mouse release and saved positions. Verify Accessories and Statistics unchanged.
-9. If possible, compare perceived smoothness and reported counters in a busy run with diagnostics OFF versus ON. Do not report a numeric FPS gain without an independent frame-rate measurement.
+6. Run `/fieldkit diag compat`: it should report native chat methods and linked HUD root as present. This is an availability check, not a guarantee of compatibility.
+7. Run `/fieldkit diag reset`, then report: counters zero. Run `/fieldkit diag off`, verify no counters are recorded afterwards.
+8. Check chat font family/size, width/height, off/on recovery, text colors, copy button, and `/reload`.
+9. Drag Mode, Damage and Lairs together; confirm mouse release and saved positions. Verify Accessories and Statistics unchanged.
+10. If possible, compare perceived smoothness and reported counters in a busy run with diagnostics OFF versus ON. Do not report a numeric FPS gain without an independent frame-rate measurement.
 
 ## Automated validation
 
