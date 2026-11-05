@@ -46,7 +46,7 @@ function S.Initialize(frames,makeMovable,placeMovable)
     S.Apply()
    elseif not FieldKitDB.linkLeftCards and stop then stop() end
   end
-  f:SetScript("OnDragStart",function()
+  local function BeginCardDrag()
    if FieldKitDB.linkLeftCards then
     if dragging or (FieldKitDB.windowsLocked and not FieldKit.layoutEditing) then return end
     local p,relative,rp,x,y=root:GetPoint(1)
@@ -60,10 +60,22 @@ function S.Initialize(frames,makeMovable,placeMovable)
     root.azsMoving=true -- prevents automatic re-anchoring mid-drag
     -- Deliberately do NOT call StartMoving() on root or card.
    elseif start then start() end
+  end
+  -- RegisterForDrag consumes native mouse-up events on the 1.12-derived
+  -- client, while IsMouseButtonDown does not exist on original 1.12.
+  -- Use a paired mouse-down/up lifecycle on the clicked card itself.
+  f:RegisterForDrag()
+  f:SetScript("OnDragStart",nil)
+  f:SetScript("OnDragStop",nil)
+  f:SetScript("OnMouseDown",function()
+   if arg1 and arg1~="LeftButton" then return end
+   BeginCardDrag()
   end)
   S.finishers[i]=FinishCardDrag
-  f:SetScript("OnDragStop",FinishCardDrag)
-  f:SetScript("OnMouseUp",FinishCardDrag)
+  f:SetScript("OnMouseUp",function()
+   if arg1 and arg1~="LeftButton" then return end
+   FinishCardDrag()
+  end)
   local oldHide=f:GetScript("OnHide")
   f:SetScript("OnHide",function()
    FinishCardDrag()
