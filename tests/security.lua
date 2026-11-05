@@ -58,12 +58,16 @@ FieldKit.ApplyChatStyle()
 assert(nativeOps==0 and ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230)
 assert(ChatFrame1.maxLines==400 and historyCalls==1)
 assert(ChatFrame1:AddMessage("should stay visible")=="forwarded")
--- Verify changes are applied and dimensions restored when disabled.
+-- Dynamic slider changes must not call destructive setters in a live session.
+-- They persist in DB and are applied to a new client after /reload.
 FieldKitDB.chatWidth=570;FieldKitDB.chatHeight=260;FieldKitDB.chatHistoryLines=350
 FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260 and ChatFrame1.maxLines==350)
+assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230 and ChatFrame1.maxLines==400)
+assert(historyCalls==1 and nativeOps==0)
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
+assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230 and historyCalls==1)
+FieldKitDB.chatStyle=true;FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==510 and ChatFrame1:GetHeight()==230 and historyCalls==1)
 -- Real client regression: reset can be called when the chat has no native
 -- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
 local strictSetPoint=ChatFrame1.SetPoint
@@ -94,7 +98,7 @@ FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==570 and FieldKitDB.chatBackgroundColor==3)
+assert(ChatFrame1:GetWidth()==510 and FieldKitDB.chatBackgroundColor==3)
 -- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()
