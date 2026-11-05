@@ -124,9 +124,15 @@ function FieldKit.ResetChatPosition()
  lastPositionStamp=nil
  local f=NativeChat()
  if not f then return end
- if styleBefore and styleBefore.point and styleBefore.point[1] then
+ -- GetPoint may return nil or a partial anchor in this client.
+ local p=styleBefore and styleBefore.point
+ if p and type(p[1])=="string" and p[1]~="" then
+  local relative=p[2] or UIParent
+  local relativePoint=p[3] or p[1]
+  local x=tonumber(p[4]) or 0
+  local y=tonumber(p[5]) or 0
   f:ClearAllPoints()
-  f:SetPoint(unpack(styleBefore.point))
+  f:SetPoint(p[1],relative,relativePoint,x,y)
  end
  if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
 end
@@ -143,7 +149,12 @@ function FieldKit.ApplyChatStyle()
   return
  end
  if not styleBefore or chatFrame~=f then
-  styleBefore={point={f:GetPoint()}}
+  local point,relative,relativePoint,x,y=f:GetPoint()
+  if type(point)=="string" and point~="" then
+   styleBefore={point={point,relative or UIParent,relativePoint or point,tonumber(x) or 0,tonumber(y) or 0}}
+  else
+   styleBefore={}
+  end
   chatFrame=f
  end
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
