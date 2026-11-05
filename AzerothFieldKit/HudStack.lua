@@ -65,8 +65,10 @@ function S.Initialize(frames,makeMovable,placeMovable)
   -- client, while IsMouseButtonDown does not exist on original 1.12.
   -- Use a paired mouse-down/up lifecycle on the clicked card itself.
   f:RegisterForDrag()
-  f:SetScript("OnDragStart",nil)
-  f:SetScript("OnDragStop",nil)
+  -- Script aliases retained for existing unit fixtures and explicit calls;
+  -- RegisterForDrag() with no buttons prevents the native drag event path.
+  f:SetScript("OnDragStart",BeginCardDrag)
+  f:SetScript("OnDragStop",FinishCardDrag)
   f:SetScript("OnMouseDown",function()
    if arg1 and arg1~="LeftButton" then return end
    BeginCardDrag()
