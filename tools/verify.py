@@ -28,6 +28,7 @@ def runtime(saved=None):
 
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
+profile_ui=runtime();profile_ui.execute((base/'tests/profile_ui.lua').read_text(encoding='utf8'))
 # Simulate a real SavedVariables round-trip. Staged loading must occur only on
 # the next VARIABLES_LOADED and preserve unrelated preferences.
 profile_stage=runtime()
