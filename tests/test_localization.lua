@@ -30,11 +30,16 @@ local function widget(label)
  for i=1,table.getn(editor.widgets) do if editor.widgets[i].label==label then return editor.widgets[i] end end
  error(label)
 end
+local function navText(id)
+ for i=1,table.getn(FieldKitUI.sections) do
+  if FieldKitUI.sections[i].id==id then return FieldKitPanel.tabs[i].fieldkitLabel.text end
+ end
+end
 for n=1,3 do
  click(fr)
- assert(FieldKitDB.language=="fr" and FieldKitPanel.tabs[2].fieldkitLabel.text=="Texte de combat")
- assert(FieldKitPanel.tabs[12].fieldkitLabel.text=="Barres ennemies")
- assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="Cartes du HUD")
+ assert(FieldKitDB.language=="fr" and navText("combat")=="Texte de combat")
+ assert(navText("nameplates")=="Barres ennemies")
+ assert(navText("cards")=="Cartes du HUD")
  assert(FieldKitPanelReset.text=="Positions par défaut")
  assert(FieldKit_L("Show only elites and bosses")=="Afficher uniquement les élites et les boss")
  local chatHelp="Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable."
