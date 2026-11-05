@@ -18,7 +18,7 @@ assert(FieldKitDB.interfaceProfiles[1].values.cardOpacity==current,"existing pro
 click(s1.save)
 assert(FieldKitDB.interfaceProfiles[1].values.cardOpacity==39)
 FieldKitDB.cardOpacity=88
-click(s1.load)
+click(s1.loadButton)
 assert(FieldKitDB.profilePendingSlot==1 and FieldKitDB.cardOpacity==88,
  "UI profile load must be staged")
 assert(row.cancel:IsShown())
@@ -30,7 +30,7 @@ click(s1.delete)
 assert(FieldKitDB.interfaceProfiles[1]==nil,"confirmed delete should remove profile")
 click(s1.save)
 FieldKitDB.cardOpacity=76
-click(s1.load)
+click(s1.loadButton)
 U.Refresh()
 assert(FieldKitDB.cardOpacity==76 and FieldKitDB.profilePendingSlot==1)
 U.Select("layout");U.Select("profiles")
