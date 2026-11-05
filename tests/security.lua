@@ -94,6 +94,28 @@ FieldKitDB.chatStyle=true;FieldKit.SyncChat()
 assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260,
  "re-enabling chat styling should restore selected configuration")
 assert(table.getn(visible)==1 and visible[1].text=="survive layout")
+-- Exact real-client regression: a SyncChat ticker runs while customization is
+-- disabled and discards FieldKit's temporary rendered-history buffer. Existing
+-- messages and new native lines must survive when customization is re-enabled.
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle();FieldKit.SyncChat()
+ChatFrame1:AddMessage("native message while styling off",.3,.6,.9)
+local retained=table.getn(visible)
+local retainedWidth,retainedHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
+assert(retained>=2,"off-mode native message should remain visible")
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+assert(table.getn(visible)==retained,"re-enable must not clear untracked native chat messages")
+assert(visible[1].text=="survive layout" and visible[retained].text=="native message while styling off")
+assert(ChatFrame1:GetWidth()==retainedWidth and ChatFrame1:GetHeight()==retainedHeight,
+ "defer destructive geometry until native history can be reconstructed")
+ChatFrame1:AddMessage("still receiving after reenable",.4,.7,.9)
+assert(table.getn(visible)==retained+1 and visible[retained+1].text=="still receiving after reenable")
+-- Clear native messages and re-enable to make the remainder of this fixture
+-- a fully tracked history again.
+FieldKitDB.chatStyle=false;FieldKit.SyncChat()
+ChatFrame1:Clear()
+FieldKitDB.chatStyle=true;FieldKit.SyncChat()
+ChatFrame1:AddMessage("survive layout",.2,.4,.6)
+assert(table.getn(visible)==1)
 FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 ChatFrame1:AddMessage("|cffff0000Color sample|r",.1,.1,.1)
 assert(table.getn(visible)==2 and visible[2].text=="Color sample")
