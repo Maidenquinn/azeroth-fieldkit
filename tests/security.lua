@@ -128,7 +128,7 @@ assert(table.getn(visible)==retained and visible[2].text=="native message while 
 local settings={{title="Interface",items={}}}
 FieldKit_AddSettingsSections(settings)
 local byLabel={}
-for _,control in ipairs(settings[1].items) do byLabel[control.label]=control end
+for _,control in ipairs(settings[1].items) do if type(control.label)=="string" then byLabel[control.label]=control end end
 for _,label in ipairs({"Chat width","Chat height","Chat font size","Chat font family"}) do
  assert(byLabel[label] and type(byLabel[label].set)=="function",label.." callback missing")
 end
