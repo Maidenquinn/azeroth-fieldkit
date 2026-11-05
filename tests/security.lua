@@ -97,23 +97,36 @@ FieldKitDB.chatStyle=true;FieldKit.SyncChat()
 assert(ChatFrame1:GetWidth()==570 and ChatFrame1:GetHeight()==260,
  "re-enabling chat styling should restore selected configuration")
 assert(table.getn(visible)==1 and visible[1].text=="survive layout")
--- Exact real-client regression: a SyncChat ticker runs while customization is
--- disabled and discards FieldKit's temporary rendered-history buffer. Existing
--- messages and new native lines must survive when customization is re-enabled.
+-- Real-client regression: the settings remain responsive after temporary
+-- opt-out even when additional native messages arrive while styling is off.
+-- The display journal must remain intact across the SyncChat 5 Hz ticker.
 FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle();FieldKit.SyncChat()
 ChatFrame1:AddMessage("native message while styling off",.3,.6,.9)
 local retained=table.getn(visible)
-local retainedWidth,retainedHeight=ChatFrame1:GetWidth(),ChatFrame1:GetHeight()
-assert(retained>=2,"off-mode native message should remain visible")
+assert(retained==2,"native off-mode line must remain visible")
+FieldKitDB.chatWidth=620;FieldKitDB.chatHeight=275
+FieldKitDB.chatFontSize=17;FieldKitDB.chatFontFace=4
+FieldKitDB.chatHistoryLines=425
 FieldKitDB.chatStyle=true;FieldKit.SyncChat()
-assert(table.getn(visible)==retained,"re-enable must not clear untracked native chat messages")
-assert(visible[1].text=="survive layout" and visible[retained].text=="native message while styling off")
-assert(ChatFrame1:GetWidth()==retainedWidth and ChatFrame1:GetHeight()==retainedHeight,
- "defer destructive geometry until native history can be reconstructed")
+assert(ChatFrame1:GetWidth()==620 and ChatFrame1:GetHeight()==275,
+ "chat width and height must remain adjustable on re-enable")
+assert(ChatFrame1.fontSize==17 and string.find(ChatFrame1.fontPath,"MORPHEUS",1,true),
+ "chat font size and family must apply on re-enable")
+assert(ChatFrame1.maxLines==425,"chat history size must remain adjustable")
+assert(table.getn(visible)==retained,"re-enable lost an off-mode message")
+assert(visible[1].text=="survive layout" and visible[2].text=="native message while styling off",
+ "re-enable reordered or erased chat lines")
+-- The same four controls must also work on subsequent changes, with
+-- messages still visible even though native setters clear their display.
+FieldKitDB.chatWidth=590;FieldKitDB.chatHeight=295
+FieldKitDB.chatFontSize=16;FieldKitDB.chatFontFace=3
+FieldKit.ApplyChatStyle()
+assert(ChatFrame1:GetWidth()==590 and ChatFrame1:GetHeight()==295)
+assert(ChatFrame1.fontSize==16 and string.find(ChatFrame1.fontPath,"ARIALN",1,true))
+assert(table.getn(visible)==retained and visible[2].text=="native message while styling off")
 ChatFrame1:AddMessage("still receiving after reenable",.4,.7,.9)
 assert(table.getn(visible)==retained+1 and visible[retained+1].text=="still receiving after reenable")
--- Clear native messages and re-enable to make the remainder of this fixture
--- a fully tracked history again.
+-- Reset the independent test scenario without clearing any real client data.
 FieldKitDB.chatStyle=false;FieldKit.SyncChat()
 ChatFrame1:Clear()
 FieldKitDB.chatStyle=true;FieldKit.SyncChat()
