@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.2 — 2026-11-05 (chat stabilization, runtime diagnostics and compatibility)
+
+Changes since **0.4.1**:
+
+- Improved native chat opt-out/re-enable behavior, retaining a bounded in-memory display-recovery journal across temporary styling toggles. FieldKit can rebuild observed messages after destructive native layout/font changes; older untracked lines can remain unrecoverable.
+- Restored interactive chat width, height, font size and font family after a guarded-setter regression in review builds; the maintainer confirmed these controls working in-game.
+- Recolor existing text only when its history is safely recoverable; clarify in EN/FR that local copy uses an opt-in 100-message buffer separate from the 500-message, session-only display journal.
+- Added optional session-only `/fieldkit diag on|off|reset|report` counters for update cadence, without changing scheduling. **Not** addon CPU/FPS measurements.
+- Added `/fieldkit diag api` for presence checks of 12 fixed native APIs, without asserting functional correctness.
+- Added `/fieldkit diag compat` for passive checks of ChatFrame1 methods and linked left HUD root; not a universal addon-conflict detector.
+- Expanded Lua fixture coverage for real settings callbacks, chat lifecycle, diagnostics commands and absent optional APIs. Previously validated linked HUD movement remains unchanged.
+- Maintainer confirmed all three review lots on the Azeroth Survivors client on 2026-11-05. No independent performance or security certification is claimed.
+
+
 ## 0.4.2-review.3 — 2026-11-05 (passive compatibility review, unpublished)
 
 - Adds `/fieldkit diag compat`, a passive check of native ChatFrame1 message/count methods and the linked left HUD root.
