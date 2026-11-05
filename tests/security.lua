@@ -57,6 +57,25 @@ FieldKit.ApplyChatStyle()
 assert(nativeOps==0 and ChatFrame1:GetWidth()==oldWidth and ChatFrame1:GetHeight()==oldHeight)
 assert(ChatFrame1:AddMessage("should stay visible")=="forwarded")
 ChatFrame1.SetWidth=oldSetWidth;ChatFrame1.SetHeight=oldSetHeight
+-- Real client regression: reset can be called when the chat has no native
+-- GetPoint anchor. SetPoint must never receive nil/partial argument lists.
+local strictSetPoint=ChatFrame1.SetPoint
+ChatFrame1.SetPoint=function(self,point,relative,relPoint,x,y)
+ assert(type(point)=="string" and type(relPoint)=="string")
+ assert(relative and type(x)=="number" and type(y)=="number")
+ return strictSetPoint(self,point,relative,relPoint,x,y)
+end
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+ChatFrame1:ClearAllPoints()
+FieldKitDB.chatStyle=true;FieldKit.ApplyChatStyle()
+FieldKit.ResetChatPosition()
+assert(ChatFrame1:AddMessage("after empty-anchor reset")=="forwarded")
+ChatFrame1:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",50,70)
+FieldKitDB.chatStyle=false;FieldKit.ApplyChatStyle()
+FieldKitDB.chatStyle=true;FieldKit.ApplyChatStyle()
+FieldKit.ResetChatPosition()
+assert(ChatFrame1:AddMessage("after valid-anchor reset")=="forwarded")
+ChatFrame1.SetPoint=strictSetPoint
 -- The player can drag the real chat and preserve its position without replacing it.
 FieldKitDB.chatStyle=true;FieldKitDB.chatMove=true;FieldKit.ApplyChatStyle()
 assert(FieldKitChatMoveHandle and FieldKitChatMoveHandle:IsShown())
