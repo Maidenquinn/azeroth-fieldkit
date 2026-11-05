@@ -74,6 +74,22 @@ function S.Initialize(frames,makeMovable,placeMovable)
    BeginCardDrag()
   end)
   S.finishers[i]=FinishCardDrag
+  -- Run Mode uses child row frames for its dynamic text/tooltip. They can
+  -- receive the release instead of their parent, so delegate both edges.
+  if i==1 and f.rows then
+   for j=1,table.getn(f.rows) do
+    local row=f.rows[j]
+    row:RegisterForDrag()
+    row:SetScript("OnMouseDown",function()
+     if type(arg1)=="string" and arg1~="LeftButton" then return end
+     BeginCardDrag()
+    end)
+    row:SetScript("OnMouseUp",function()
+     if type(arg1)=="string" and arg1~="LeftButton" then return end
+     FinishCardDrag()
+    end)
+   end
+  end
   f:SetScript("OnMouseUp",function()
    if type(arg1)=="string" and arg1~="LeftButton" then return end
    FinishCardDrag()
