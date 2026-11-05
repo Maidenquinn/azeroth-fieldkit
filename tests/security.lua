@@ -221,7 +221,7 @@ FieldKitDB.chatMove=false;FieldKit.ApplyChatStyle()
 assert(not FieldKitChatMoveHandle:IsShown())
 FieldKitDB.chatBackgroundOpacity=45;FieldKitDB.chatBackgroundColor=3
 FieldKitDB.chatFontFace=2;FieldKitDB.chatTextColor=3;FieldKit.ApplyChatStyle()
-assert(ChatFrame1:GetWidth()==570 and FieldKitDB.chatBackgroundColor==3)
+assert(ChatFrame1:GetWidth()==FieldKitDB.chatWidth and FieldKitDB.chatBackgroundColor==3)
 -- Safe mode must not rewrite the native message content or channel colors.
 FieldKitDB.chatStyle=true;FieldKitDB.chatOverrideText=true;FieldKitDB.chatTextColor=3
 FieldKit.SyncChat()
