@@ -338,6 +338,12 @@ local function Hook(index)
  end
 end
 
+-- Explicit reset for session boundaries and diagnostics. The bounded render
+-- journal is not the opt-in chat-copy history, and is never persisted.
+function FieldKit.ClearChatRenderHistory()
+ displayHistory={}
+end
+
 -- Rebuild only when a native layout setter demonstrably discards lines.
 -- Never recapture replayed messages and never touch the local copy buffer.
 function FieldKit.RestoreDisplayedChat()
