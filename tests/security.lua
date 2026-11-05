@@ -31,6 +31,12 @@ local original=function(self,text,r,g,b,id) forwarded=forwarded+1;lastMessage={t
 ChatFrame1.AddMessage=original
 ChatFrame2=CreateFrame("Frame","ChatFrame2",UIParent);ChatFrame2.AddMessage=original
 FieldKit.SyncChat();assert(ChatFrame1.AddMessage==original)
+local visible={}
+local underlying=ChatFrame1.AddMessage
+ChatFrame1.AddMessage=function(self,text,r,g,b,id)
+ table.insert(visible,{text=text,r=r,g=g,b=b,id=id})
+ return underlying(self,text,r,g,b,id)
+end
 ChatFrame1:AddMessage("private before consent")
 SlashCmdList.FieldKitLOG("on")
 assert(ChatFrame2.AddMessage==original)
@@ -39,12 +45,6 @@ assert(ChatFrame1:AddMessage("opted in")=="forwarded")
 assert(FieldKit.OpenChatCopy and type(FieldKit.OpenChatCopy)=="function")
 -- Full restoration: simulate the real client's destructive scrolling-frame
 -- setters and verify messages are replayed once, without duplicate capture.
-local visible={}
-local underlying=ChatFrame1.AddMessage
-ChatFrame1.AddMessage=function(self,text,r,g,b,id)
- table.insert(visible,{text=text,r=r,g=g,b=b,id=id})
- return underlying(self,text,r,g,b,id)
-end
 ChatFrame1.Clear=function() visible={} end
 ChatFrame1.GetNumMessages=function() return table.getn(visible) end
 ChatFrame1.GetMaxLines=function(self) return self.maxLines or 200 end
