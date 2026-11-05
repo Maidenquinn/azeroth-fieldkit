@@ -37,6 +37,9 @@ for n=1,3 do
  assert(FieldKitPanel.tabs[6].fieldkitLabel.text=="Cartes du HUD")
  assert(FieldKitPanelReset.text=="Positions par défaut")
  assert(FieldKit_L("Show only elites and bosses")=="Afficher uniquement les élites et les boss")
+ local chatHelp="Apply this color to new messages and safely recoverable history. Older untracked messages are preserved unchanged. Disable to restore native channel colors where recoverable."
+ assert(FieldKit_L(chatHelp)~="")
+ assert(FieldKit_L(chatHelp)~=chatHelp,"Chat color help must be translated in French")
  assert(FieldKit_L("Dégâts infligés")=="Dégâts infligés")
  assert(FieldKit_L("Backstab")=="Backstab" and FieldKit_L("Brute gordunni")=="Brute gordunni")
  assert(widget("Catégorie à personnaliser").text==FieldKit_L(FieldKitCombat.byKind[editor.eventKind][2]))
