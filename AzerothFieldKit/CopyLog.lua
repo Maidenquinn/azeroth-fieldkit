@@ -130,7 +130,42 @@ function FieldKit.ResetChatPosition()
  end
  if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
 end
+-- Stage 1 of the in-game isolation recipe: capture, movement and a separate
+-- backdrop ONLY. Do not touch native message rendering, font, history, sizing,
+-- fading, or AddMessage color hooks until each is validated on the real client.
 function FieldKit.ApplyChatStyle()
+ local f=NativeChat()
+ if not f or not FieldKitDB then return end
+ if not FieldKitDB.chatStyle then
+  if moving then FinishMove() end
+  if chatBackdrop then chatBackdrop:Hide() end
+  if moveHandle then moveHandle:Hide() end
+  return
+ end
+ if not styleBefore or chatFrame~=f then
+  styleBefore={point={f:GetPoint()}}
+  chatFrame=f
+ end
+ local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
+ local bg=Clamp(FieldKitDB.chatBackgroundColor,1,1,table.getn(backgrounds))
+ if opacity>0 then
+  if not chatBackdrop then
+   chatBackdrop=f:CreateTexture(nil,"BACKGROUND")
+   chatBackdrop:SetAllPoints(f)
+   chatBackdrop:SetTexture("Interface\\\\Buttons\\\\WHITE8X8")
+  end
+  local c=backgrounds[bg]
+  chatBackdrop:SetVertexColor(c[1],c[2],c[3],opacity/100)
+  chatBackdrop:Show()
+ elseif chatBackdrop then chatBackdrop:Hide() end
+ ApplyAnchor(f)
+ MoveControl()
+ return
+end
+
+-- Legacy implementation retained below for later, individually gated stages.
+-- It is deliberately unreachable during this isolation recipe.
+local function LegacyChatStyleDisabled()
  local f=NativeChat()
  if not f or not FieldKitDB then return end
  if not FieldKitDB.chatStyle then
@@ -199,6 +234,8 @@ function FieldKit.ApplyChatStyle()
  end
  ApplyAnchor(f)
  MoveControl()
+end
+
 end
 
 -- Reuse the native chat frame as anchor, without replacing its handlers.
