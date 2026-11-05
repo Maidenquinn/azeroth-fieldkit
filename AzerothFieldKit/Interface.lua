@@ -490,7 +490,7 @@ local function BuildProfileManager(page,y)
    end
   end
  end
- row.slots=slots;row.Refresh()
+ row.slots=slots;row.cancel=cancel;row.Refresh()
  U.profileView=row
  table.insert(page.flow,{frame=row,y=y})
  return y+644
