@@ -4,7 +4,7 @@ FieldKitHudStack={}
 local S=FieldKitHudStack
 
 function S.Initialize(frames,makeMovable,placeMovable)
- S.frames=frames;S.place=placeMovable;S.finishers={}
+ S.frames=frames;S.place=placeMovable;S.finishers={};S.watchdogs={}
  local meter=frames[2]
  local previous=FieldKitDB.pos[meter:GetName()] or {0,0}
  local x,y=previous[1]-meter:GetWidth()/2,previous[2]+meter:GetHeight()/2
@@ -70,6 +70,7 @@ function S.Initialize(frames,makeMovable,placeMovable)
    if oldHide then oldHide() end
   end)
   local watchdog=CreateFrame("Frame",nil,UIParent)
+  S.watchdogs[i]=watchdog
   watchdog:SetScript("OnUpdate",function()
    if not dragging then return end
    if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
