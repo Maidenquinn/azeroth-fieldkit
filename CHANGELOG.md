@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.2 — 2026-11-05 (unpublished visual HUD profile manager)
+
+- New HUD profiles page in the interface navigation with 3 profile cards, saved layout summaries, Save, staged Load and Delete buttons.
+- Existing saves cannot be overwritten or deleted until the user clicks the confirmation button a second time.
+- Pending profile switch can be cancelled from the visual page; applying remains deferred to /reload for safety.
+- Added French UI translations, responsive layout support, and mocked end-to-end button/resize/language regression tests.
+- Preserves the previously validated alpha.1 profile persistence and the stable v0.4.2 chat/HUD behavior.
+- **Not released:** requires in-game UI validation.
+
+
 ## 0.5.0-alpha.1 — 2026-11-05 (unpublished HUD profiles foundation)
 
 - Introduce three opt-in HUD profile slots for window layout, visibility, grouping, opacity, and allowed card sizes/positions.
