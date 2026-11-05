@@ -194,6 +194,7 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="meter",title="Combat meter",group="03  INTERFACE",glyph=8,items=meter},
   {id="layout",title="Layout & arrange",group="03  INTERFACE",glyph=14,items=layout},
   {id="look",title="Look",group="03  INTERFACE",glyph=4,items=look},
+  {id="profiles",title="HUD profiles",group="03  INTERFACE",glyph=14,items={{kind="profiles"}}},
   {id="worldmarkers",title="World markers",glyph=6,group="04  WORLD",items={{kind="worldmarkers"}}},
   {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
@@ -413,6 +414,88 @@ local function BuildMarkerGallery(page,y)
  row.Refresh();table.insert(page.flow,{frame=row,y=y});return y+730
 end
 
+-- Three-slot HUD profile manager. Updates text only; only explicit button
+-- clicks can save, queue, cancel or delete. Confirm overwrites and deletions.
+local function BuildProfileManager(page,y)
+ local P=FieldKitProfiles
+ local row=CreateFrame("Frame",nil,page)
+ row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y)
+ row:SetWidth(610);row:SetHeight(636)
+ local intro=T.Label(row,"Save FieldKit HUD layouts. Chat and gameplay data are not included.",0,0,600,38,13,T.muted)
+ local pending=T.Label(row,"",0,42,600,25,13,T.gold)
+ local cancel=T.Button(row,nil,"Cancel pending switch",0,74,210,29,function()
+  P.Undo();row.Refresh()
+ end)
+ local slots={}
+ for i=1,3 do
+  local idx=i
+  local card=CreateFrame("Frame",nil,row)
+  card:SetPoint("TOPLEFT",row,"TOPLEFT",0,-(120+(i-1)*152))
+  card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
+  local label=T.Label(card,"HUD profile "..i,14,8,530,27,18,T.gold,true)
+  local summary=T.Label(card,"",14,35,530,29,12,T.muted)
+  local save=T.Button(card,nil,"Save current HUD",14,80,155,29,function()
+   if FieldKitDB.interfaceProfiles[idx] and row.confirmSave~=idx then
+    row.confirmSave=idx;row.confirmDelete=nil
+   else P.Save(idx);row.confirmSave=nil end
+   row.Refresh()
+  end)
+  local load=T.Button(card,nil,"Load on /reload",179,80,160,29,function()
+   P.Load(idx);row.confirmDelete=nil;row.confirmSave=nil;row.Refresh()
+  end)
+  local del=T.Button(card,nil,"Delete",349,80,120,29,function()
+   if row.confirmDelete==idx then
+    P.Delete(idx);row.confirmDelete=nil
+   else row.confirmDelete=idx;row.confirmSave=nil end
+   row.Refresh()
+  end)
+  slots[i]={frame=card,label=label,summary=summary,save=save,load=load,delete=del}
+ end
+ function row.Refresh()
+  local d=FieldKitDB
+  if not d then return end
+  local queued=d.profilePendingSlot
+  FieldKit_Text(pending,queued and ("Profile "..queued.." queued — /reload to apply.") or "No pending profile change.")
+  FieldKit_Text(cancel,"Cancel pending switch")
+  if queued then cancel:Show() else cancel:Hide() end
+  for i=1,3 do
+   local item=slots[i]
+   local saved=d.interfaceProfiles and d.interfaceProfiles[i]
+   local values=saved and saved.values or nil
+   local anchors=saved and saved.tables and saved.tables.frameAnchors
+   local count=0
+   if type(anchors)=="table" then for _ in pairs(anchors) do count=count+1 end end
+   FieldKit_Text(item.label,"HUD profile "..i)
+   if saved then
+    FieldKit_Text(item.summary,"Saved · "..count.." positions · opacity "..
+      tostring((values and values.cardOpacity) or 100).."%")
+   else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
+   FieldKit_Text(item.save,row.confirmSave==i and "Confirm overwrite" or "Save current HUD")
+   FieldKit_Text(item.load,queued==i and "Queued" or "Load on /reload")
+   FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
+   if saved then item.load:Show();item.delete:Show()
+   else item.load:Hide();item.delete:Hide() end
+  end
+ end
+ row.Reflow=function(w)
+  row:SetWidth(w);intro:SetWidth(w-12);pending:SetWidth(w-12)
+  local cw=w-6
+  for i=1,3 do
+   local item=slots[i];item.frame:SetWidth(cw);T.Update(item.frame)
+   item.label:SetWidth(cw-24);item.summary:SetWidth(cw-24)
+   local bw=(cw-56)/3
+   for j,b in ipairs({item.save,item.load,item.delete}) do
+    b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+14),-80)
+    b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
+   end
+  end
+ end
+ row.slots=slots;row.Refresh()
+ U.profileView=row
+ table.insert(page.flow,{frame=row,y=y})
+ return y+644
+end
+
 -- A small visibility preset only. Existing geometry/style and other addons are
 -- untouched; its in-memory Undo lasts until reload and is never auto-applied.
 function U.EssentialHud(undo)
@@ -509,6 +592,7 @@ function U.BuildPage(section,index)
    table.insert(page.flow,{frame=row,y=y});y=y+110
   elseif item.kind=="combat" then FieldKit_CreateCombatOptions(page);y=570
   elseif item.kind=="worldmarkers" then y=BuildMarkerGallery(page,y)
+  elseif item.kind=="profiles" then y=BuildProfileManager(page,y)
   elseif item.kind=="check" then y=Checkbox(page,item,y)
   elseif item.kind=="slider" then y=Slider(page,item,y)
   elseif item.kind=="choice" then
@@ -552,6 +636,7 @@ end
 function U.Refresh()
  if not U.frame or not FieldKitDB then return end
  U.UpdateRunContext();U.UpdateSharingStatus()
+ if U.profileView and U.profileView.Refresh then U.profileView.Refresh() end
  U.refreshing=true
  for i=1,table.getn(U.controls) do U.controls[i].Refresh() end
  for i=1,table.getn(U.homeCards) do
