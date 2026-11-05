@@ -2486,6 +2486,47 @@ local settingsActions={
  UpdateHudStack=function() FieldKitHudStack.Apply();UpdateMeterFrames(true) end,
  UpdateRunMode=function() FieldKitRunMode.Update();FieldKitHudStack.Apply() end,
 }
+-- Safe live application boundary for a FieldKit HUD-only profile.
+-- This is deliberately NOT a ReloadUI and never invokes chat styling, party
+-- transport, native action bar rebuilding, camera CVars or game-save changes.
+function FieldKit.ApplyHUDProfileLive()
+ if not DB or FieldKit.layoutEditing then return false end
+ if (FieldKitHudStack.root and FieldKitHudStack.root.azsMoving) or
+  (FieldKitCardLayout.root and FieldKitCardLayout.root.azsMoving) then return false end
+ for i=1,table.getn(movableFrames) do
+  if movableFrames[i].azsMoving then return false end
+ end
+ FieldKitHudStack.FinishDragging()
+ -- Restore saved geometry only for registered FieldKit-owned movable frames.
+ for i=1,table.getn(movableFrames) do
+  local f=movableFrames[i]
+  if DB.pos[f:GetName()] then PlaceMovable(f) end
+ end
+ -- Recompute cached group anchors even when the root size is unchanged.
+ FieldKitHudStack.appliedAnchor=nil
+ FieldKitHudStack.legacyX=nil
+ FieldKitCardLayout.anchor=nil
+ settingsActions.UpdateStatsFrame()
+ settingsActions.UpdateGearFrame()
+ settingsActions.UpdateRunMode()
+ settingsActions.UpdateMeterFrames(true)
+ settingsActions.UpdateLairFrame()
+ settingsActions.UpdateMoneyFrame()
+ settingsActions.SyncHudTally()
+ settingsActions.UpdatePlayerBar()
+ settingsActions.UpdatePlayerBuffs()
+ settingsActions.UpdateBossFrame()
+ FieldKitBossTimeline.Update()
+ FieldKitNativeTools.Update()
+ FieldKitCoop.Update()
+ FieldKitHudStack.Apply()
+ FieldKitCardLayout.ApplyRight()
+ FieldKitTheme.Refresh()
+ SetMovablesUnlocked(not DB.windowsLocked)
+ if FieldKitUI and FieldKitUI.frame then FieldKitUI.Refresh() end
+ return true
+end
+
 local SECTIONS=FieldKit.CreateOptionsSchema(settingsActions)
 FieldKit_AddSettingsSections(SECTIONS)
 SECTIONS=FieldKit.BuildJourneySections(SECTIONS,settingsActions)
