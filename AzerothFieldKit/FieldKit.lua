@@ -2588,6 +2588,7 @@ end
 -- Initialize only FieldKitDB via Config.lua, then apply the selected UI language.
 local function InitDB()
 	DB = FieldKit.InitializeSettings(DEFAULT_SHOWN)
+ FieldKitProfiles.Init()
  FieldKit_SetLanguage(DB.language)
 end
 
@@ -2831,6 +2832,8 @@ SlashCmdList["FieldKit"] = function(msg)
 		return
 	end
 	msg = string.lower(msg or "")
+ if msg=="profile" then FieldKitProfiles.Command("");return end
+ if string.sub(msg,1,8)=="profile " then FieldKitProfiles.Command(string.sub(msg,9));return end
  if msg=="diag" then FieldKitDiagnostics.Command("");return end
  if string.sub(msg,1,5)=="diag " then FieldKitDiagnostics.Command(string.sub(msg,6));return end
  if msg=="native" then FieldKitNativeTools.Diagnostic();return end
