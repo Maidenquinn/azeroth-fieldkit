@@ -1,6 +1,9 @@
 -- Optional local chat copy. No capture until opt-in; never persisted or uploaded.
 -- Whispers can be included. Copying to the OS clipboard remains a player action.
 local history,hooked={},{}
+local displayHistory={}
+local replaying=false
+local DISPLAY_LIMIT=500
 local copyFrame,copyEdit
 local active=false
 local button, chatFrame, styleBefore, styleStamp, chatBackdrop, moveHandle
@@ -9,6 +12,7 @@ local copiedNative=false
 local textColorHooked={}
 local lastPositionStamp
 local geometryStamp
+local fontStamp
 local MAX_MESSAGES,MAX_BYTES=100,512
 
 local backgrounds={
@@ -147,8 +151,8 @@ function FieldKit.ApplyChatStyle()
   if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end
   if moveHandle then moveHandle:Hide() end
-  -- Never restore geometry in-session: doing so erases chat history.
-  -- Preserve the one-shot guard until the next client /reload.
+  -- Restore user preferences without leaving rendered messages permanently
+  -- empty. Replay is handled after setters by RestoreDisplayedMessages().
   styleBefore=nil;chatFrame=nil;lastPositionStamp=nil
   return
  end
@@ -159,6 +163,13 @@ function FieldKit.ApplyChatStyle()
   else
    styleBefore={width=f:GetWidth(),height=f:GetHeight()}
   end
+  if f.GetFont then
+   styleBefore.font,styleBefore.fontSize,styleBefore.flags=f:GetFont()
+  end
+  if not styleBefore.font and ChatFontNormal and ChatFontNormal.GetFont then
+   styleBefore.font,styleBefore.fontSize,styleBefore.flags=ChatFontNormal:GetFont()
+  end
+  geometryStamp=nil; fontStamp=nil
   chatFrame=f
  end
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
@@ -178,16 +189,29 @@ function FieldKit.ApplyChatStyle()
  local w=Clamp(FieldKitDB.chatWidth,440,280,800)
  local h=Clamp(FieldKitDB.chatHeight,180,100,450)
  local lines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
- -- The legacy client clears its rendered chat buffer on these setters.
- -- Execute them at most once per client session, on initial application.
- -- Subsequent changes are saved but must wait for /reload, never clearing
- -- messages in the middle of a conversation.
- if not geometryStamp then
-  if f.SetWidth and f:GetWidth()~=w then f:SetWidth(w) end
-  if f.SetHeight and f:GetHeight()~=h then f:SetHeight(h) end
-  if f.SetMaxLines then f:SetMaxLines(lines) end
-  geometryStamp=true
+ -- Preserve the native scrolling frame. The client's SetMaxLines,
+ -- SetFont and size setters can empty its visible lines. Apply only on changes,
+ -- then recover the messages observed since styling was enabled.
+ local face=Clamp(FieldKitDB.chatFontFace,1,1,5)
+ local size=Clamp(FieldKitDB.chatFontSize,12,10,20)
+ local width,height=Clamp(FieldKitDB.chatWidth,440,280,800),Clamp(FieldKitDB.chatHeight,180,100,450)
+ local lines=Clamp(FieldKitDB.chatHistoryLines,200,100,500)
+ local requestedFont=(face==1 and styleBefore.font) or fontFiles[face] or styleBefore.font
+ local wanted=tostring(width)..":"..tostring(height)..":"..tostring(lines)..":"..tostring(requestedFont)..":"..tostring(size)
+ if geometryStamp~=wanted then
+  local before=f.GetNumMessages and f:GetNumMessages() or nil
+  if f.SetWidth and f:GetWidth()~=width then f:SetWidth(width) end
+  if f.SetHeight and f:GetHeight()~=height then f:SetHeight(height) end
+  if f.SetMaxLines and (not f.GetMaxLines or f:GetMaxLines()~=lines) then f:SetMaxLines(lines) end
+  if f.SetFont and requestedFont and (fontStamp~=tostring(requestedFont)..":"..tostring(size)) then
+   local ok=f:SetFont(requestedFont,size,styleBefore.flags)
+   if ok~=false then fontStamp=tostring(requestedFont)..":"..tostring(size) end
+  end
+  geometryStamp=wanted
   lastPositionStamp=nil
+  if before and before>0 and f.GetNumMessages and f:GetNumMessages()<before then
+   FieldKit.RestoreDisplayedChat()
+  end
  end
  ApplyAnchor(f)
  MoveControl()
@@ -288,23 +312,47 @@ function FieldKit.ClearChat()
  if copyFrame then copyFrame:Hide() end
 end
 
--- Hook only after opt-in. A fallback forwarding wrapper remains after opt-out,
--- so we do not overwrite hooks installed later by another addon.
+-- The only local observation of native AddMessage. Its forwarding wrapper
+-- preserves message order, return value, channel colors and links.
+-- Render history is in-memory only and cleared when styling is disabled.
 local function Hook(index)
  local frame=getglobal("ChatFrame"..index)
  if not frame or hooked[frame] or type(frame.AddMessage)~="function" then return end
  hooked[frame]=true
- local captured=false
- if type(hooksecurefunc)=="function" then
-  captured=pcall(function() hooksecurefunc(frame,"AddMessage",function(self,text) Capture(index,text) end) end)
- end
- if not captured then
-  local original=frame.AddMessage
-  frame.AddMessage=function(self,text,r,g,b,id)
+ local original=frame.AddMessage
+ frame.AddMessage=function(self,text,r,g,b,id)
+  if not replaying then
    Capture(index,text)
-   return original(self,text,r,g,b,id)
+   if FieldKitDB and FieldKitDB.chatStyle and type(text)=="string" then
+    if table.getn(displayHistory)>=DISPLAY_LIMIT then table.remove(displayHistory,1) end
+    table.insert(displayHistory,{text=text,r=r,g=g,b=b,id=id})
+   end
   end
+  if FieldKitDB and FieldKitDB.chatStyle and FieldKitDB.chatOverrideText and type(text)=="string" then
+   local color=foregrounds[Clamp(FieldKitDB.chatTextColor,1,1,table.getn(foregrounds))]
+   -- Replace only display color markup. Preserve hyperlinks and text.
+   text=string.gsub(text,"|c%x%x%x%x%x%x%x%x","")
+   text=string.gsub(text,"|r","")
+   r,g,b=color[1],color[2],color[3]
+  end
+  return original(self,text,r,g,b,id)
  end
+end
+
+-- Rebuild only when a native layout setter demonstrably discards lines.
+-- Never recapture replayed messages and never touch the local copy buffer.
+function FieldKit.RestoreDisplayedChat()
+ local f=NativeChat()
+ if not f or not f.AddMessage or replaying then return end
+ local count=table.getn(displayHistory)
+ if count==0 then return end
+ replaying=true
+ if f.Clear then f:Clear() end
+ for i=1,count do
+  local m=displayHistory[i]
+  f:AddMessage(m.text,m.r,m.g,m.b,m.id)
+ end
+ replaying=false
 end
 
 -- Reconcile one boolean preference. No messages are exported by this watcher.
@@ -320,8 +368,10 @@ function FieldKit.SyncChat()
   CopyButton()
  end
  if FieldKitDB and FieldKitDB.chatStyle then
+  Hook(1)
   FieldKit.ApplyChatStyle()
-  -- Do not install a second AddMessage wrapper. Native color handling wins.
+ else
+  displayHistory={}
  end
 end
 
