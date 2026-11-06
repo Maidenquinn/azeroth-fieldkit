@@ -1,54 +1,92 @@
--- v0.5.0: opt-in, bounded HUD layout profile slots.
--- Only allowlisted UI preferences are captured; chat, game statistics,
--- native CVars, account data and network settings are excluded.
--- Ordinary slots apply live through the FieldKit-owned HUD refresh boundary.
+-- v0.5.0-alpha.5: separate EVERY declared FieldKit display preference by
+-- HUD profile, without duplicating messages, run telemetry or UI-navigation
+-- state. Flat FieldKitDB stays the live renderer contract.
 FieldKitProfiles={}
 local P=FieldKitProfiles
-local scalar={
- "windowsLocked","linkLeftCards","linkRightCards","cardOpacity","cardStyle",
- "runModeCard","statsFrame","gearFrame","meterFrame","takenFrame","lairFrame",
- "moneyFrame","effectsFrame","reviveFrame","nextBossCard","bossTimeline",
- "compactBar","playerBar","playerBuffs","bossFrame","meterTabs",
- "nativeWarnings","replaceTally","partyCards","partyMeter"
+local extra={
+ "language","cardStyle","cardOpacity","meterView","meterValues",
+ "bossWarningLead","bossStyle","minimapAngle","playerBarX","playerBarY",
+ "cameraMax","hideDamage","showCrits","groupCrits","hideGryphons",
+ "moneyDetached","meterSortKey","meterSortAsc","meterHealDone",
+ "meterPartyOwner","meterKeepTakenFrame","meterSpellTips",
+ "meterDetach_damage","meterDetach_healing","meterDetach_boss",
+ "meterDetach_taken","meterDetach_party","meterDetach_kills",
+ "meterViewKey","loadoutTab","statsCollapsed","gearCollapsed",
+ "combatProfileActive","moneyDockRepair",
+ "combatText","combatTextFontSize","combatTextCritSize",
+ "combatTextFont","combatTextCritFont","combatTextOutline",
+ "combatTextOpacity","combatTextMax","combatTextSpacing",
+ "combatTextDuration","combatTextWindow","combatTextMin",
+ "combatTextHealMin","combatTextX","combatTextY",
+ "combatTextIncomingX","combatTextIncomingY","combatTextSplit",
+ "combatTextNames","combatTextCounts","combatTextDirection",
+ "combatTextIgnore","combatTextWorld",
+ "combatTextGroup","combatTextHealing","combatTextOutgoing",
+ "combatTextIncoming","hideGryphons","moneyDetached",
+ "combatTextCounts","combatTextCritFont","combatTextHealing",
+ "combatTextFont","combatTextOutgoing","combatTextIncoming"
 }
-local tables={"frameAnchors","pos","collapsedWindows","cardSizes"}
+local tableKeys={
+ "frameAnchors","pos","collapsedWindows","cardSizes","onTopWindows",
+ "shownStats","meterHiddenRows","combatEvents","combatProfiles",
+ "worldMarkerSettings","chatAnchor"
+}
+local keys,seen={},{}
+local function Include(key)
+ if type(key)~="string" or seen[key] then return end
+ seen[key]=true;table.insert(keys,key)
+end
+for key in pairs(FieldKit.ProfilePreferenceDefaults or {}) do Include(key) end
+for i=1,table.getn(extra) do Include(extra[i]) end
+-- Optional combat defaults are present when the game finishes loading; keep
+-- this read-time check in case later builds add new combat preferences.
+local function PreferenceKeys()
+ if FieldKitCombat and type(FieldKitCombat.defaults)=="table" then
+  for key in pairs(FieldKitCombat.defaults) do Include(key) end
+ end
+ return keys
+end
 local function Slot(value)
  local n=tonumber(value)
- if not n or n~=math.floor(n) or n<1 or n>3 then return nil end
- return n
+ return n and n==math.floor(n) and n>=1 and n<=3 and n or nil
 end
-local function Clone(source,depth,limit)
- if type(source)~="table" or depth>3 then return nil end
- local out={};local count=0
- for key,value in pairs(source) do
-  if count>=limit then break end
-  if (type(key)=="string" and string.len(key)<=128) or
-    (type(key)=="number" and key==math.floor(key) and key>=1 and key<=8) then
-   if type(value)=="number" and FieldKit.Number(value) then
-    out[key]=value;count=count+1
-   elseif type(value)=="boolean" or (type(value)=="string" and string.len(value)<=100) then
-    out[key]=value;count=count+1
-   elseif type(value)=="table" and depth<3 then
-    local nested=Clone(value,depth+1,8)
-    if nested then out[key]=nested;count=count+1 end
-   end
+local function Clone(value,depth,budget)
+ local kind=type(value)
+ if kind=="number" then return FieldKit.Number(value) end
+ if kind=="string" then return string.len(value)<=512 and value or nil end
+ if kind=="boolean" then return value end
+ if kind~="table" or depth>7 or budget.left<=0 then return nil end
+ local copy={}
+ for key,item in pairs(value) do
+  if budget.left<=0 then break end
+  local kt=type(key)
+  if (kt=="string" and string.len(key)<=160) or
+     (kt=="number" and key==math.floor(key) and key>=1 and key<=256) then
+   budget.left=budget.left-1
+   local result=Clone(item,depth+1,budget)
+   if result~=nil then copy[key]=result end
   end
  end
- return out
+ return copy
+end
+local function Copy(value)
+ return Clone(value,1,{left=3200})
 end
 local function Capture()
  local d=FieldKitDB
  if type(d)~="table" then return nil end
- local snap={values={},tables={}}
- for i=1,table.getn(scalar) do
-  local k=scalar[i];local v=d[k]
-  if type(v)=="boolean" or (type(v)=="number" and FieldKit.Number(v)) then
-   snap.values[k]=v
-  end
+ local snap={values={},nilValues={},tables={},schema=2}
+ local list=PreferenceKeys()
+ for i=1,table.getn(list) do
+  local key=list[i];local value=d[key]
+  if type(value)=="boolean" or type(value)=="number" or type(value)=="string" then
+   local copy=Copy(value)
+   if copy~=nil then snap.values[key]=copy
+   else snap.nilValues[key]=true end
+  else snap.nilValues[key]=true end
  end
- for i=1,table.getn(tables) do
-  local k=tables[i]
-  snap.tables[k]=Clone(d[k] or {},1,160) or {}
+ for i=1,table.getn(tableKeys) do
+  local key=tableKeys[i];snap.tables[key]=Copy(d[key] or {}) or {}
  end
  return snap
 end
@@ -57,63 +95,103 @@ local function Say(message)
   DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99FieldKit|r: "..message)
  end
 end
+local function Valid(snapshot)
+ return type(snapshot)=="table" and type(snapshot.values)=="table"
+  and type(snapshot.tables)=="table"
+end
+local function Upgrade(snapshot,baseline)
+ -- Alpha.1 through alpha.4 saved only 25 keys and four tables. Hydrate
+ -- missing preferences from the unchanged live settings, never from a new
+ -- hardcoded preset, and preserve each slot's old layout.
+ if not Valid(snapshot) then return end
+ if type(snapshot.nilValues)~="table" then snapshot.nilValues={} end
+ local list=PreferenceKeys()
+ for i=1,table.getn(list) do
+  local key=list[i]
+  if snapshot.values[key]==nil and not snapshot.nilValues[key] then
+   snapshot.values[key]=Copy(baseline.values[key])
+   if snapshot.values[key]==nil then snapshot.nilValues[key]=true end
+  end
+ end
+ for i=1,table.getn(tableKeys) do
+  local key=tableKeys[i]
+  if type(snapshot.tables[key])~="table" then
+   snapshot.tables[key]=Copy(baseline.tables[key]) or {}
+  end
+ end
+ snapshot.schema=2
+end
 function P.Init()
  if type(FieldKitDB)~="table" then return end
  local store=FieldKitDB.interfaceProfiles
  if type(store)~="table" then FieldKitDB.interfaceProfiles={} return end
+ local baseline=Capture()
  for key,value in pairs(store) do
-  local n=Slot(key)
-  if not n or type(value)~="table" or type(value.values)~="table" or
-    type(value.tables)~="table" then store[key]=nil end
+  local slot=Slot(key)
+  if not slot or type(key)~="number" or not Valid(value) then
+   store[key]=nil
+  else Upgrade(value,baseline) end
  end
+end
+local function ApplySnapshot(snapshot)
+ if not Valid(snapshot) then return false end
+ local d=FieldKitDB;local list=PreferenceKeys()
+ for i=1,table.getn(list) do
+  local key=list[i]
+  -- Explicit tombstones prevent nil/optional values leaking from the
+  -- previous slot. A legacy snapshot is hydrated by Init beforehand.
+  local value=snapshot.values[key]
+  if value~=nil then d[key]=Copy(value)
+  elseif snapshot.nilValues and snapshot.nilValues[key] then d[key]=nil end
+ end
+ for i=1,table.getn(tableKeys) do
+  local key=tableKeys[i]
+  d[key]=Copy(snapshot.tables[key] or {}) or {}
+ end
+ FieldKit.InitializeSettings({})
+ if FieldKitCombat then FieldKitCombat.owner=nil;FieldKitCombat.Ensure() end
+ return true
+end
+function P.SaveActive()
+ if not FieldKitDB then return false end
+ local active=Slot(FieldKitDB.activeHudProfile)
+ if not active then return false end
+ P.Init()
+ if not FieldKitDB.interfaceProfiles[active] then return false end
+ FieldKitDB.interfaceProfiles[active]=Capture()
+ return true
 end
 function P.Save(number)
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
  FieldKitDB.interfaceProfiles[slot]=Capture()
- return true
-end
--- The live applicator is provided by FieldKit.lua after native HUD creation.
--- Never rebuild the game UI or alter chat. Compact action bar stays untouched:
--- its native relocation still requires a separately requested UI reload.
-local function ApplySnapshot(saved)
- if type(saved)~="table" or type(saved.values)~="table" or
-  type(saved.tables)~="table" then return false end
- for i=1,table.getn(scalar) do
-  local key=scalar[i];local value=saved.values[key]
-  if key~="compactBar" and
-   (type(value)=="boolean" or (type(value)=="number" and FieldKit.Number(value))) then
-   FieldKitDB[key]=value
-  end
+ if not Slot(FieldKitDB.activeHudProfile) then
+  FieldKitDB.activeHudProfile=slot
  end
- for i=1,table.getn(tables) do
-  local key=tables[i]
-  FieldKitDB[key]=Clone(saved.tables[key] or {},1,160) or {}
- end
- FieldKit.InitializeSettings({})
  return true
 end
 function P.Load(number)
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
- local saved=FieldKitDB.interfaceProfiles[slot]
- if not saved or type(FieldKit.ApplyHUDProfileLive)~="function" then return false end
- if FieldKit.layoutEditing then return false end
+ if not FieldKitDB.interfaceProfiles[slot] or
+  type(FieldKit.ApplyHUDProfileLive)~="function" or FieldKit.layoutEditing then return false end
+ if FieldKitDB.activeHudProfile==slot then return true end
  local before=Capture()
  local previous=FieldKitDB.activeHudProfile
- local ok,reason=pcall(function()
-  assert(ApplySnapshot(saved))
+ -- Preserve all edits in the outgoing slot, even when the player never
+ -- pressed the explicit Save current HUD button.
+ P.SaveActive()
+ local ok=pcall(function()
+  assert(ApplySnapshot(FieldKitDB.interfaceProfiles[slot]))
   assert(FieldKit.ApplyHUDProfileLive())
  end)
  if not ok then
-  ApplySnapshot(before)
-  pcall(FieldKit.ApplyHUDProfileLive)
+  ApplySnapshot(before);pcall(FieldKit.ApplyHUDProfileLive)
   return false
  end
- P.undo=before
- P.undoProfile=previous
+ P.undo=before;P.undoProfile=previous
  FieldKitDB.activeHudProfile=slot
  FieldKitDB.profilePendingSlot=nil
  return true
@@ -124,13 +202,12 @@ function P.Undo()
   local before=P.undo
   local current=Capture()
   local oldActive=FieldKitDB.activeHudProfile
+  P.SaveActive()
   local ok=pcall(function()
-   assert(ApplySnapshot(before))
-   assert(FieldKit.ApplyHUDProfileLive())
+   assert(ApplySnapshot(before));assert(FieldKit.ApplyHUDProfileLive())
   end)
   if not ok then
-   ApplySnapshot(current)
-   pcall(FieldKit.ApplyHUDProfileLive)
+   ApplySnapshot(current);pcall(FieldKit.ApplyHUDProfileLive)
    FieldKitDB.activeHudProfile=oldActive
    return false
   end
@@ -139,12 +216,10 @@ function P.Undo()
   return true
  end
  if FieldKitDB.profilePendingSlot then
-  FieldKitDB.profilePendingSlot=nil
-  return true
+  FieldKitDB.profilePendingSlot=nil;return true
  end
  return false
 end
--- Called exactly once at VARIABLES_LOADED, before any addon HUD is created.
 function P.ActivatePending()
  if not FieldKitDB then return false end
  P.Init()
@@ -153,18 +228,8 @@ function P.ActivatePending()
  if not slot then return false end
  local saved=FieldKitDB.interfaceProfiles[slot]
  if not saved then return false end
- for i=1,table.getn(scalar) do
-  local key=scalar[i];local value=saved.values[key]
-  if type(value)=="boolean" or (type(value)=="number" and FieldKit.Number(value)) then
-   FieldKitDB[key]=value
-  end
- end
- for i=1,table.getn(tables) do
-  local key=tables[i]
-  FieldKitDB[key]=Clone(saved.tables[key] or {},1,160) or {}
- end
+ if not ApplySnapshot(saved) then return false end
  FieldKitDB.activeHudProfile=slot
- FieldKit.InitializeSettings({})
  return true
 end
 function P.Delete(number)
@@ -187,12 +252,12 @@ function P.Command(message)
    table.insert(labels,tostring(i)..":"..
     (FieldKitDB.interfaceProfiles[i] and "saved" or "empty"))
   end
-  Say("HUD profile slots: "..table.concat(labels,", ")..
+  Say("Profile slots: "..table.concat(labels,", ")..
    ". Usage: /fieldkit profile save|load|delete 1-3, undo")
   return
  end
  if message=="undo" then
-  if P.Undo() then Say("Previous HUD layout restored immediately.")
+  if P.Undo() then Say("Previous profile restored immediately.")
   else Say("No profile change to undo.") end
   return
  end
@@ -204,8 +269,8 @@ function P.Command(message)
   end
  end
  if not op or not number then Say("Usage: /fieldkit profile save|load|delete 1-3, list, undo");return end
- if op=="save" and P.Save(number) then Say("HUD profile "..number.." saved (chat and game data excluded).")
- elseif op=="load" and P.Load(number) then Say("HUD profile "..number.." applied. Use /fieldkit profile undo to restore the previous layout.")
- elseif op=="delete" and P.Delete(number) then Say("HUD profile "..number.." deleted.")
- else Say("Slot "..number.." is empty.") end
+ if op=="save" and P.Save(number) then Say("Profile "..number.." saved (settings only, not chat history or run data).")
+ elseif op=="load" and P.Load(number) then Say("Profile "..number.." applied. Use /fieldkit profile undo to revert.")
+ elseif op=="delete" and P.Delete(number) then Say("Profile "..number.." deleted.")
+ else Say("Slot "..number.." is empty, or live switching is currently blocked.") end
 end
