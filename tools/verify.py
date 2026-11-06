@@ -33,6 +33,7 @@ exec(compile((base/'tools/profile_scope_audit.py').read_text(encoding='utf8'),
      {'__name__':'__main__','__file__':str(base/'tools/profile_scope_audit.py')})
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
+profile_chat=runtime();profile_chat.execute((base/'tests/profile_chat.lua').read_text(encoding='utf8'))
 profile_ui=runtime();profile_ui.execute((base/'tests/profile_ui.lua').read_text(encoding='utf8'))
 # Verify immediate switching survives SavedVariables serialization; legacy
 # alpha.2 pending loads are still migrated at VARIABLES_LOADED.
