@@ -219,7 +219,51 @@ local function ApplySnapshot(snapshot)
  if FieldKitCombat then FieldKitCombat.owner=nil;FieldKitCombat.Ensure() end
  return true
 end
+-- A preview changes only the live renderer temporarily. It never writes a
+-- profile slot, active profile ID, or undo history until explicitly accepted.
+function P.Preview(number)
+ local slot=Slot(number)
+ if not slot or not FieldKitDB or FieldKit.layoutEditing or
+  type(FieldKit.ApplyHUDProfileLive)~="function" then return false end
+ if P.preview then return false end
+ P.Init()
+ local saved=FieldKitDB.interfaceProfiles[slot]
+ if not saved then return false end
+ local before=Capture()
+ if not before then return false end
+ local ok=pcall(function()
+  assert(ApplySnapshot(saved))
+  assert(FieldKit.ApplyHUDProfileLive())
+ end)
+ if not ok then
+  local restoredOK,restored=pcall(ApplySnapshot,before)
+  if restoredOK and restored then pcall(FieldKit.ApplyHUDProfileLive) end
+  return false
+ end
+ P.preview={before=before,slot=slot,active=FieldKitDB.activeHudProfile}
+ return true
+end
+function P.CancelPreview()
+ if not P.preview then return false end
+ local state=P.preview
+ local ok=pcall(function()
+  assert(ApplySnapshot(state.before))
+  assert(FieldKit.ApplyHUDProfileLive())
+ end)
+ if not ok then return false end
+ P.preview=nil
+ return true
+end
+function P.AcceptPreview()
+ local state=P.preview
+ if not state or not FieldKitDB then return false end
+ -- Restore the original live settings first, then use the normal guarded
+ -- switch, which preserves outgoing unsaved edits and undo semantics.
+ if not P.CancelPreview() then return false end
+ return P.Load(state.slot)
+end
 function P.SaveActive()
+ if P.preview then return false end
  if not FieldKitDB then return false end
  local active=Slot(FieldKitDB.activeHudProfile)
  if not active then return false end
@@ -233,6 +277,7 @@ function P.SaveActive()
  return true
 end
 function P.Save(number)
+ if P.preview then return false end
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
@@ -247,6 +292,7 @@ function P.Save(number)
  return true
 end
 function P.Load(number)
+ if P.preview then return false end
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
@@ -278,6 +324,7 @@ function P.Load(number)
  return true
 end
 function P.Undo()
+ if P.preview then return false end
  if not FieldKitDB then return false end
  if P.undo then
   local before=P.undo
@@ -304,6 +351,7 @@ function P.Undo()
  return false
 end
 function P.ActivatePending()
+ if P.preview then return false end
  if not FieldKitDB then return false end
  P.Init()
  local slot=Slot(FieldKitDB.profilePendingSlot)
@@ -322,6 +370,7 @@ function P.ActivatePending()
  return true
 end
 function P.Delete(number)
+ if P.preview then return false end
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
