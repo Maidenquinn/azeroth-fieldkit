@@ -3,6 +3,8 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Current"]="Actif",
+ ["Current profile: "]="Profil actif : ",
  ["Save name"]="Enregistrer le nom",
  ["Enter to save · Esc to cancel"]="Entrée : enregistrer · Échap : annuler",
  ["Invalid name (1–40 bytes)."]="Nom invalide (1 à 40 octets).",
