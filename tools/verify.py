@@ -26,8 +26,14 @@ def runtime(saved=None):
  for name in files:l.execute((root/name).read_text(encoding='utf8'),name=name)
  return l
 
+# The profile-scope gate rejects new persisted settings until assigned either
+# to a profile or to a documented shared gameplay/operational category.
+exec(compile((base/'tools/profile_scope_audit.py').read_text(encoding='utf8'),
+             str(base/'tools/profile_scope_audit.py'),'exec'),
+     {'__name__':'__main__','__file__':str(base/'tools/profile_scope_audit.py')})
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
+profile_chat=runtime();profile_chat.execute((base/'tests/profile_chat.lua').read_text(encoding='utf8'))
 profile_ui=runtime();profile_ui.execute((base/'tests/profile_ui.lua').read_text(encoding='utf8'))
 # Verify immediate switching survives SavedVariables serialization; legacy
 # alpha.2 pending loads are still migrated at VARIABLES_LOADED.
@@ -44,7 +50,7 @@ profile_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 profile_reload=runtime(profile_stage.eval('SNAPSHOT(FieldKitDB)'))
 profile_reload.execute('''
 fire(FieldKitFrame,"VARIABLES_LOADED")
-assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==720)
+assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==440) -- chat belongs to slot 1
 assert(FieldKitDB.frameAnchors.FieldKitLeftStack[3]==71)
 assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile==1)
 assert(FieldKitDB.interfaceProfiles[1].tables.frameAnchors.FieldKitLeftStack[3]==71)

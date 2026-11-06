@@ -311,6 +311,24 @@ end
 function M.GetTexture(kind) local style=styles[kind];return style and style[1] end
 function M.GetAuraTexture() return auraTexture end
 loadSettings()
+-- Explicitly refresh module-local cached marker settings when the active
+-- FieldKit profile changes. Do not persist the old profile over the new one.
+function M.ReloadProfileSettings()
+ loadSettings()
+ if not wantedEnabled then
+  if active then
+   active=false
+   if A then A.Unsubscribe("fieldkit-world-markers") end
+   clear()
+  end
+ elseif active then
+  clear()
+  if A and A.Refresh then A.Refresh() end
+ else
+  M.Enable()
+ end
+ for _,f in pairs(icons) do updateAura(f) end
+end
 local function report(msg)
  if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cffc7a6ffFieldKit Markers:|r "..msg) end
 end

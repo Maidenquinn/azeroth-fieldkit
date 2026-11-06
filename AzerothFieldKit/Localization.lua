@@ -3,6 +3,15 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["✓ English"]="✓ Anglais",
+ ["✓ Français"]="✓ Français",
+ ["Profiles"]="Profils",
+ ["Save all FieldKit preferences per profile, including chat. Game stats and message history stay shared."]="Chaque profil conserve tous les réglages FieldKit, y compris le chat. Les statistiques de partie et l'historique des messages restent partagés.",
+ ["Active profile: %d"]="Profil actif : %d",
+ ["No active profile."]="Aucun profil actif.",
+ ["Quick profiles"]="Profils rapides",
+ ["Switch complete FieldKit settings instantly. Empty slots open the profile manager."]="Applique immédiatement tous les réglages du profil. Un emplacement vide ouvre le gestionnaire.",
+
  ["HUD profile %d"]="Profil HUD %d",
  ["Profile %d"]="Profil %d",
  ["Profile %d · active"]="Profil %d · actif",

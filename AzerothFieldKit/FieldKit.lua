@@ -2522,6 +2522,24 @@ function FieldKit.ApplyHUDProfileLive()
  FieldKitHudStack.Apply()
  FieldKitCardLayout.ApplyRight()
  FieldKitTheme.Refresh()
+ -- A profile is now a full preference context, not merely a HUD layout.
+ -- Apply the same existing handlers used by individual settings controls.
+ settingsActions.UpdateTargetHealth()
+ settingsActions.UpdateChestPins()
+ settingsActions.ApplyDamageNumbers()
+ settingsActions.UpdateGryphons()
+ SyncNativePlates()
+ ApplyCamera(false)
+ if FieldKitScreenLayers then FieldKitScreenLayers.Update() end
+ if FieldKitWorldMarkers and FieldKitWorldMarkers.ReloadProfileSettings then
+  FieldKitWorldMarkers.ReloadProfileSettings()
+ end
+ if FieldKitPartySync then FieldKitPartySync.Watch() end
+ if FieldKit.SyncChat then FieldKit.SyncChat() end
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+ -- Repaint only recoverable chat history after switching a palette.
+ if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
+ FieldKit_SetLanguage(DB.language)
  SetMovablesUnlocked(not DB.windowsLocked)
  if FieldKitUI and FieldKitUI.frame then FieldKitUI.Refresh() end
  return true
@@ -2538,6 +2556,7 @@ local function ResetPositions()
   local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
  end
  if AttachMoneyToBar then AttachMoneyToBar(true) end
+ if FieldKit.ResetChatLayout then FieldKit.ResetChatLayout() end
  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
@@ -2636,6 +2655,7 @@ end
 local frame = CreateFrame("Frame", "FieldKitFrame", UIParent)
 frame:RegisterEvent("VARIABLES_LOADED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+frame:RegisterEvent("PLAYER_LOGOUT")
 frame:RegisterEvent("PLAYER_TARGET_CHANGED")
 frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 frame:RegisterEvent("UNIT_HEALTH")
@@ -2651,6 +2671,12 @@ frame:RegisterEvent("CHAT_MSG_COMBAT_SELF_HITS")
 
 -- Initialize once on VARIABLES_LOADED; never persist or restore native talent state.
 local function FieldKitEventLifecycle()
+ if event=="PLAYER_LOGOUT" then
+  -- Persist edits to the current profile even if the user never explicitly
+  -- pressed Save before quitting or /reload. Do not duplicate game data.
+  if DB and FieldKitProfiles then FieldKitProfiles.SaveActive() end
+  return
+ end
 	if ( event == "VARIABLES_LOADED" ) then
 		if DB then return end
 		InitDB()
@@ -2751,7 +2777,7 @@ local function FieldKitEventOther()
 end
 
 frame:SetScript("OnEvent", function()
-	if ( event == "VARIABLES_LOADED" ) then
+	if ( event == "VARIABLES_LOADED" or event=="PLAYER_LOGOUT" ) then
 		FieldKitEventLifecycle()
 	elseif ( not DB ) then
 		return
