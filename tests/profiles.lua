@@ -154,6 +154,12 @@ assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]=="broken")
 -- Invalid saved data in a legitimate slot must remain recoverable in SavedVariables.
 assert(not P.Load(1))
 assert(d.interfaceProfiles[1]=="broken")
+assert(P.Name(1)==nil and not P.Rename(1,"Damaged"))
+local originalActive=d.activeHudProfile
+d.activeHudProfile=1
+assert(not P.SaveActive())
+assert(d.interfaceProfiles[1]=="broken")
+d.activeHudProfile=originalActive
 -- Already migrated slots must not trigger an unnecessary full live capture.
 -- Capture calls FieldKit.Number for numeric settings, so an injected error
 -- here detects accidental snapshot work in the common Init path.
