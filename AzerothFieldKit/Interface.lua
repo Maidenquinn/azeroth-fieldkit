@@ -434,12 +434,20 @@ local function BuildProfileManager(page,y)
   card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
   local label=T.Label(card,"Profile "..i,14,8,530,27,18,T.gold,true)
   local summary=T.Label(card,"",14,35,530,29,12,T.muted)
-  -- Editing has a dedicated line; never overlay the description.
-  local edit=CreateFrame("EditBox",nil,card,"InputBoxTemplate")
-  edit:SetPoint("TOPLEFT",card,"TOPLEFT",18,-38)
-  edit:SetWidth(285);edit:SetHeight(27)
+  -- Native InputBoxTemplate on this Benilla build creates shared visual
+  -- regions for anonymous EditBoxes. The decoration of slot 2/3 can show
+  -- up on slot 1. Use one fully-owned, untemplated EditBox per card instead.
+  local editor=CreateFrame("Frame",nil,card)
+  editor:SetPoint("TOPLEFT",card,"TOPLEFT",14,-36)
+  editor:SetWidth(305);editor:SetHeight(30)
+  T.Surface(editor,"button")
+  local edit=CreateFrame("EditBox",nil,editor)
+  edit:SetPoint("TOPLEFT",editor,"TOPLEFT",10,-4)
+  edit:SetWidth(285);edit:SetHeight(22)
+  edit:SetFont("Fonts\\FRIZQT__.TTF",14,"")
+  edit:SetTextColor(T.text[1],T.text[2],T.text[3])
   edit:SetAutoFocus(false);edit:SetMaxLetters(40)
-  edit:Hide()
+  editor:Hide()
   local hint=T.Label(card,"",314,38,268,27,12,T.muted)
   hint:Hide()
   local rename=T.Button(card,nil,"Rename",474,80,112,29,function()
@@ -479,7 +487,7 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del,rename=rename,edit=edit,hint=hint,commit=commit,abort=abort}
+  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del,rename=rename,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
  end
  function row.Refresh()
   local d=FieldKitDB
@@ -504,12 +512,12 @@ local function BuildProfileManager(page,y)
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
    FieldKit_Text(item.rename,"Rename")
    if saved and row.editing==i then
-    item.summary:Hide();item.edit:Show();item.hint:Show()
+    item.summary:Hide();item.editor:Show();item.hint:Show()
     FieldKit_Text(item.hint,"Enter to save · Esc to cancel")
     item.save:Hide();item.loadButton:Hide();item.delete:Hide();item.rename:Hide()
     item.commit:Show();item.abort:Show()
    else
-    item.summary:Show();item.edit:Hide();item.hint:Hide()
+    item.summary:Show();item.editor:Hide();item.hint:Hide()
     item.commit:Hide();item.abort:Hide();item.save:Show()
     if saved then item.loadButton:Show();item.delete:Show();item.rename:Show()
     else item.loadButton:Hide();item.delete:Hide();item.rename:Hide() end
@@ -528,7 +536,8 @@ local function BuildProfileManager(page,y)
     b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
    end
    local editW=math.min(295,cw*.52)
-   item.edit:SetWidth(editW)
+   item.editor:SetWidth(editW+20);item.edit:SetWidth(editW)
+   T.Update(item.editor)
    item.hint:ClearAllPoints()
    item.hint:SetPoint("TOPLEFT",item.frame,"TOPLEFT",26+editW,-38)
    item.hint:SetWidth(math.max(110,cw-editW-44))

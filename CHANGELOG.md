@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.9 — 2026-11-06 (isolated per-profile rename inputs, unpublished)
+
+- Fix the Benilla native InputBoxTemplate decoration appearing on another profile card when renaming slot 2 or 3.
+- Replace the shared/anonymous native template with independent untemplated EditBoxes, each inside its own styled, parented card input shell.
+- Keep the dedicated Save name/Cancel actions, Enter/Escape keyboard support, validated names and previously accepted profile behavior.
+- Add native UI regression assertions checking individual parent ownership and preventing other slot editors from becoming visible.
+- Keep chat, instant switching, HUD mouse dragging, stored profile names and all existing game data unchanged.
+- **Review build only:** needs in-game validation before merging.
+
+
 ## 0.5.0-alpha.8 — 2026-11-06 (profile rename UI polish, unpublished)
 
 - Rework inline profile naming into a clean editing row that replaces the profile summary while active; the summary is restored after save or cancel.

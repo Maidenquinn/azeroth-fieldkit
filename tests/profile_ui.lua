@@ -7,23 +7,58 @@ U.Select("profiles")
 assert(FieldKitDB.uiPage=="profiles")
 local row=U.profileView
 assert(row and table.getn(row.slots)==3)
+-- Each native EditBox and its decorative shell must be owned by its own card:
+-- the anonymous InputBoxTemplate on Benilla bleeds border art across slots.
+for i=1,3 do
+ local slot=row.slots[i]
+ assert(slot.editor:GetParent()==slot.frame)
+ assert(slot.edit:GetParent()==slot.editor)
+ assert(slot.editor:GetPoint()=="TOPLEFT")
+ assert(slot.editor:GetWidth()>slot.edit:GetWidth())
+ for j=1,3 do
+  if i~=j then assert(slot.editor~=row.slots[j].editor) end
+ end
+end
+
 local s1=row.slots[1]
 assert(not FieldKitDB.interfaceProfiles[1])
 local current=FieldKitDB.cardOpacity
 click(s1.save)
 assert(FieldKitDB.interfaceProfiles[1] and FieldKitDB.interfaceProfiles[1].values.cardOpacity==current)
+-- All three editors use separate frame/card ownership and their native
+-- decorations must never become visible on a different profile card.
+local original2=FieldKitDB.interfaceProfiles[2]
+local original3=FieldKitDB.interfaceProfiles[3]
+FieldKitDB.interfaceProfiles[2]=FieldKitDB.interfaceProfiles[1]
+FieldKitDB.interfaceProfiles[3]=FieldKitDB.interfaceProfiles[1]
+U.Refresh()
+for i=1,3 do
+ local x=row.slots[i]
+ click(x.rename)
+ assert(row.editing==i and x.editor:IsShown())
+ for j=1,3 do
+  if j~=i then assert(not row.slots[j].editor:IsShown(),
+   "another profile editor became visible") end
+ end
+ click(x.abort)
+ assert(not x.editor:IsShown())
+end
+FieldKitDB.interfaceProfiles[2]=original2
+FieldKitDB.interfaceProfiles[3]=original3
+U.Refresh()
+
 assert(s1.rename:IsShown())
 click(s1.rename)
-assert(s1.edit:IsShown() and not s1.summary:IsShown(),
+assert(s1.editor:IsShown() and not s1.summary:IsShown(),
  "rename editor should replace, never overlap, the summary")
 assert(not s1.save:IsShown() and not s1.delete:IsShown())
 assert(s1.commit:IsShown() and s1.abort:IsShown())
 s1.edit:SetText("Donjons FR")
 this=s1.edit;s1.edit.scripts.OnEnterPressed()
 assert(FieldKitProfiles.Name(1)=="Donjons FR")
-assert(not s1.edit:IsShown())
+assert(not s1.editor:IsShown())
 assert(s1.label.text=="Donjons FR")
-assert(s1.summary:IsShown() and not s1.edit:IsShown())
+assert(s1.summary:IsShown() and not s1.editor:IsShown())
 assert(s1.save:IsShown() and not s1.commit:IsShown())
 click(s1.rename)
 s1.edit:SetText("Should not save")
@@ -32,7 +67,7 @@ assert(FieldKitProfiles.Name(1)=="Donjons FR","Cancel must preserve existing nam
 click(s1.rename)
 s1.edit:SetText("")
 click(s1.commit)
-assert(s1.edit:IsShown(),"invalid input should keep edit open")
+assert(s1.editor:IsShown(),"invalid input should keep edit open")
 assert(FieldKitProfiles.Name(1)=="Donjons FR")
 click(s1.abort)
 
