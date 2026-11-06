@@ -46,3 +46,28 @@ assert(FieldKitProfiles.Load(1))
 assert(table.getn(visible)==3 and visible[3].text=="after switching",
  "repeated native chat profile switching lost history")
 assert(not d.chatCopy,"profile selection must not opt in to local copy unexpectedly")
+-- In-place chat RGB is immutable on classic ScrollingMessageFrame: switching
+-- must explicitly replay fully observed history to recolor EXISTING lines.
+d.chatStyle=true
+d.chatOverrideText=true;d.chatTextColor=4
+FieldKit.ApplyChatStyle();FieldKit.RecolorDisplayedChat()
+assert(FieldKitProfiles.Save(1))
+d.chatOverrideText=true;d.chatTextColor=3
+assert(FieldKitProfiles.Save(2))
+assert(FieldKitProfiles.Load(1))
+assert(visible[1].r==.69 and visible[1].g==.93 and visible[1].b==.77,
+ "profile 1 historical chat color not applied")
+assert(FieldKitProfiles.Load(2))
+assert(visible[1].r==1 and visible[1].g==.82 and visible[1].b==.49,
+ "profile 2 historical chat color leaked from profile 1")
+assert(table.getn(visible)==3 and visible[3].text=="after switching")
+-- A reset returns to original native geometry and anchor, but keeps palette
+-- and native messages intact. No save/export history is recreated here.
+d.chatStyle=true;d.chatWidth=730;d.chatHeight=350
+d.chatAnchor={x=340,y=280}
+FieldKit.ApplyChatStyle()
+assert(FieldKit.ResetChatLayout())
+assert(d.chatAnchor==nil and d.chatWidth==280 and d.chatHeight==100)
+assert(d.chatTextColor==3 and d.chatOverrideText==true)
+assert(table.getn(visible)==3)
+
