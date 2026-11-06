@@ -80,4 +80,31 @@ assert(FieldKit_L("Empty slot — save your current HUD to start.")~=
 assert(FieldKit_L("Saved · %d positions · opacity %d%%")~=
  "Saved · %d positions · opacity %d%%")
 FieldKit_SetLanguage("en")
+-- Language state must survive hover release and expose a visible selection.
+U.Select("interface")
+U.Refresh()
+assert(U.languageRow.en.fieldkitSelected==true and
+ U.languageRow.fr.fieldkitSelected==false)
+assert(string.find(U.languageRow.en.fieldkitLabel.text,"✓",1,true),
+ "English selection must be explicit")
+this=U.languageRow.en
+local leave=U.languageRow.en:GetScript("OnLeave")
+leave()
+assert(U.languageRow.en.fieldkitActive==true,
+ "language button must remain highlighted after OnLeave")
+click(U.languageRow.fr)
+assert(U.languageRow.fr.fieldkitSelected==true and
+ U.languageRow.en.fieldkitSelected==false)
+assert(string.find(U.languageRow.fr.fieldkitLabel.text,"✓",1,true))
+click(U.languageRow.en)
+-- Reset HUD positions now resets chat placement and dimensions too, with Undo.
+U.Select("interface")
+FieldKitDB.chatWidth=650;FieldKitDB.chatHeight=260
+FieldKitDB.chatAnchor={x=240,y=340}
+U.ResetPositions()
+assert(FieldKitDB.chatAnchor==nil and FieldKitDB.chatWidth==440
+ and FieldKitDB.chatHeight==180)
+U.UndoPositions()
+assert(FieldKitDB.chatWidth==650 and FieldKitDB.chatHeight==260)
+assert(FieldKitDB.chatAnchor.x==240 and FieldKitDB.chatAnchor.y==340)
 
