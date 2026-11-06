@@ -742,14 +742,11 @@ function U.Reflow()
  end
  U.header:SetWidth(w-64);U.headerLine:SetWidth(w-44)
  U.title:SetWidth(w-220);U.subtitle:SetWidth(w-230)
- U.headerProfiles:ClearAllPoints()
- U.headerProfiles:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-230,-74)
- for i=1,3 do
-  local button=U.headerProfileButtons[i]
-  button:ClearAllPoints()
-  button:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-24-(3-i)*64,-72)
-  T.Update(button)
- end
+ -- Always anchor the whole selector as one unit away from the title,
+ -- close button and panel header's drag hit area.
+ U.headerProfileLayer:ClearAllPoints()
+ U.headerProfileLayer:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-34,-72)
+ for i=1,3 do T.Update(U.headerProfileButtons[i]) end
  U.status:ClearAllPoints();U.status:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-(h-78));U.contentWidth=content;U.status:SetWidth(U.reloadNeeded and content-166 or content)
  local y=h-44
  -- C10.4: reserve the close button first; distribute footer actions within
@@ -864,16 +861,24 @@ function U.Build(sections,context)
  header:SetScript("OnDragStart",function() frame:StartMoving() end)
  header:SetScript("OnDragStop",function() frame:StopMovingOrSizing() end)
  local x=CreateFrame("Button","FieldKitPanelClose",frame,"UIPanelCloseButton");x:SetWidth(26);x:SetHeight(26);x:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-10,-10);x:SetFrameLevel(120);x:SetScript("OnClick",function() frame:Hide() end)
- -- Profile selection on every page; empty slots open the manager.
- U.headerProfiles=T.Label(frame,"HUD",0,0,42,22,12,T.muted)
+ -- Keep quick controls on a dedicated transparent layer ABOVE the drag
+ -- capture frame. Otherwise native Benilla 1.12 can route clicks to the
+ -- header's drag handler and make buttons appear inert.
+ U.headerProfileLayer=CreateFrame("Frame",nil,frame)
+ U.headerProfileLayer:SetWidth(242);U.headerProfileLayer:SetHeight(35)
+ U.headerProfileLayer:SetFrameLevel(header:GetFrameLevel()+12)
+ U.headerProfileLayer:EnableMouse(false)
+ U.headerProfiles=T.Label(U.headerProfileLayer,"HUD",0,6,38,23,12,T.muted)
  U.headerProfileButtons={}
  for i=1,3 do
   local slot=i
-  U.headerProfileButtons[i]=T.Button(frame,nil,tostring(i),0,0,54,25,function()
+  local button=T.Button(U.headerProfileLayer,nil,tostring(i),40+(i-1)*63,5,52,27,function()
    if FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[slot] then
     FieldKitProfiles.Load(slot);U.Refresh()
    else U.Select("profiles") end
   end)
+  button:SetFrameLevel(U.headerProfileLayer:GetFrameLevel()+1)
+  U.headerProfileButtons[i]=button
  end
  -- The navigation has its own scroll viewport. On 768px screens all pages
  -- remain reachable without shrinking labels or covering the footer.
