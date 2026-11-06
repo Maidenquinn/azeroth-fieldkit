@@ -434,26 +434,36 @@ local function BuildProfileManager(page,y)
   card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
   local label=T.Label(card,"Profile "..i,14,8,530,27,18,T.gold,true)
   local summary=T.Label(card,"",14,35,530,29,12,T.muted)
-  -- EditBox is created once per slot; Enter confirms, Escape cancels.
-  -- No profile is renamed until the player submits an explicit action.
+  -- Editing has a dedicated line; never overlay the description.
   local edit=CreateFrame("EditBox",nil,card,"InputBoxTemplate")
-  edit:SetPoint("TOPLEFT",card,"TOPLEFT",14,-32)
-  edit:SetWidth(250);edit:SetHeight(28)
+  edit:SetPoint("TOPLEFT",card,"TOPLEFT",18,-38)
+  edit:SetWidth(285);edit:SetHeight(27)
   edit:SetAutoFocus(false);edit:SetMaxLetters(40)
   edit:Hide()
+  local hint=T.Label(card,"",314,38,268,27,12,T.muted)
+  hint:Hide()
   local rename=T.Button(card,nil,"Rename",474,80,112,29,function()
-   if not P.Name(idx) and not FieldKitDB.interfaceProfiles[idx] then return end
+   if not FieldKitDB.interfaceProfiles[idx] then return end
+   row.CloseEditors(idx)
    edit:SetText(P.Name(idx) or "")
-   edit:Show();edit:SetFocus()
+   row.editing=idx
+   row.Refresh()
+   edit:SetFocus()
   end)
-  edit:SetScript("OnEnterPressed",function()
-   if P.Rename(idx,this:GetText()) then
-    this:ClearFocus();this:Hide();row.Refresh();U.Refresh()
-   end
+  local commit=T.Button(card,nil,"Save name",14,80,148,29,function()
+   if P.Rename(idx,edit:GetText()) then
+    row.editing=nil
+    edit:ClearFocus()
+    row.Refresh();U.Refresh()
+   else FieldKit_Text(hint,"Invalid name (1–40 bytes).") end
   end)
-  edit:SetScript("OnEscapePressed",function()
-   this:ClearFocus();this:Hide()
+  local abort=T.Button(card,nil,"Cancel",174,80,148,29,function()
+   row.editing=nil
+   edit:ClearFocus()
+   row.Refresh()
   end)
+  edit:SetScript("OnEnterPressed",function() commit.callback() end)
+  edit:SetScript("OnEscapePressed",function() abort.callback() end)
   local save=T.Button(card,nil,"Save current HUD",14,80,155,29,function()
    if FieldKitDB.interfaceProfiles[idx] and row.confirmSave~=idx then
     row.confirmSave=idx;row.confirmDelete=nil
@@ -469,7 +479,7 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del,rename=rename,edit=edit}
+  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del,rename=rename,edit=edit,hint=hint,commit=commit,abort=abort}
  end
  function row.Refresh()
   local d=FieldKitDB
@@ -493,8 +503,17 @@ local function BuildProfileManager(page,y)
    FieldKit_Text(item.loadButton,active==i and "Active" or "Apply now")
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
    FieldKit_Text(item.rename,"Rename")
-   if saved then item.loadButton:Show();item.delete:Show();item.rename:Show()
-   else item.loadButton:Hide();item.delete:Hide();item.rename:Hide();item.edit:Hide() end
+   if saved and row.editing==i then
+    item.summary:Hide();item.edit:Show();item.hint:Show()
+    FieldKit_Text(item.hint,"Enter to save · Esc to cancel")
+    item.save:Hide();item.loadButton:Hide();item.delete:Hide();item.rename:Hide()
+    item.commit:Show();item.abort:Show()
+   else
+    item.summary:Show();item.edit:Hide();item.hint:Hide()
+    item.commit:Hide();item.abort:Hide();item.save:Show()
+    if saved then item.loadButton:Show();item.delete:Show();item.rename:Show()
+    else item.loadButton:Hide();item.delete:Hide();item.rename:Hide() end
+   end
   end
  end
  row.Reflow=function(w)
@@ -508,7 +527,24 @@ local function BuildProfileManager(page,y)
     b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+12),-80)
     b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
    end
-   item.edit:SetWidth(math.min(290,cw-32))
+   local editW=math.min(295,cw*.52)
+   item.edit:SetWidth(editW)
+   item.hint:ClearAllPoints()
+   item.hint:SetPoint("TOPLEFT",item.frame,"TOPLEFT",26+editW,-38)
+   item.hint:SetWidth(math.max(110,cw-editW-44))
+   local actionW=math.min(148,(cw-42)/2)
+   item.commit:SetWidth(actionW);item.abort:SetWidth(actionW)
+   item.abort:ClearAllPoints()
+   item.abort:SetPoint("TOPLEFT",item.frame,"TOPLEFT",26+actionW,-80)
+   item.commit.fieldkitLabel:SetWidth(actionW-18)
+   item.abort.fieldkitLabel:SetWidth(actionW-18)
+   T.Update(item.commit);T.Update(item.abort)
+  end
+ end
+ function row.CloseEditors(except)
+  if row.editing and row.editing~=except then
+   slots[row.editing].edit:ClearFocus()
+   row.editing=nil
   end
  end
  row.slots=slots;row.cancel=cancel;row.Refresh()

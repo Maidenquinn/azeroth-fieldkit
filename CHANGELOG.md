@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.8 — 2026-11-06 (profile rename UI polish, unpublished)
+
+- Rework inline profile naming into a clean editing row that replaces the profile summary while active; the summary is restored after save or cancel.
+- Show explicit Save name and Cancel actions below the name input, temporarily hiding normal profile actions to prevent overlapping click targets.
+- Enter saves and Escape cancels, with invalid names retaining focus and a short validation hint.
+- Retain all saved names, live profile switching, chat isolation, Home shortcuts and v0.5.0-alpha.7 behavior.
+- Add UI regression tests for editing/saving/cancelling/invalid names and non-overlapping editor layout.
+- **Unpublished client test candidate:** confirm the new rename editor looks correct in FR/EN and doesn't overlay other text.
+
+
 ## 0.5.0-alpha.7 — 2026-11-06 (profile naming and quick access, unpublished)
 
 - Add optional display names to the 3 independent FieldKit configuration profile slots (up to 40 bytes, rejecting control characters and color markup separators).
