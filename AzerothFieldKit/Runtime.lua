@@ -73,7 +73,7 @@ end
 -- names; never evict a boss classification just because more enemies appeared.
 function FieldKit.RememberClassification(cache,name,class)
  if type(cache)~="table" or type(name)~="string" or
-  string.len(name)>160 or type(class)~="string" then return end
+  string.len(name)>160 then return end
  -- Existing entries are updated in O(1). A full count is only needed when
  -- inserting a previously unseen name; never evict older classifications.
  if cache[name]==nil then
