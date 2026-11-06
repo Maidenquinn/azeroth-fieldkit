@@ -591,9 +591,9 @@ local function BuildProfileManager(page,y)
    end
    FieldKit_Text(previewBody,
     "Positions: "..n.."  |  Opacity: "..ShowValue(v.cardOpacity).."%  |  Language: "..ShowValue(v.language)..
-    "\\nChat: "..ShowValue(v.chatWidth).." x "..ShowValue(v.chatHeight).."  |  Font: "..ShowValue(v.chatFontSize)..
-    "\\nBoss style: "..ShowValue(v.bossStyle).."  |  Nameplates filter: "..ShowValue(v.hidePlates)..
-    "\\nCombat text: "..ShowValue(v.combatText).."  |  World markers: "..ShowValue(type(t.worldMarkerSettings)=="table" and t.worldMarkerSettings.enabled))
+    "\nChat: "..ShowValue(v.chatWidth).." x "..ShowValue(v.chatHeight).."  |  Font: "..ShowValue(v.chatFontSize)..
+    "\nBoss style: "..ShowValue(v.bossStyle).."  |  Nameplates filter: "..ShowValue(v.hidePlates)..
+    "\nCombat text: "..ShowValue(v.combatText).."  |  World markers: "..ShowValue(type(t.worldMarkerSettings)=="table" and t.worldMarkerSettings.enabled))
   end
  end
  row.Reflow=function(w)
