@@ -2568,6 +2568,7 @@ RefreshCollapseDock=function()
  end
  collapseDock:SetHeight(math.max(24,count*26))
  if count>0 then collapseDock:Show() else collapseDock:Hide() end
+ if FieldKitHudStack and FieldKitHudStack.Apply then FieldKitHudStack.Apply() end
 end
 
 local settingsActions={
