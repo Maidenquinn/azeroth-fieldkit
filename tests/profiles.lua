@@ -9,6 +9,10 @@ d.frameAnchors.FieldKitLeftStack={"TOPLEFT","TOPLEFT",125,-80}
 d.pos.FieldKitStatsFrame={-60,95}
 d.cardSizes.FieldKitStatsFrame={width=420,height=180}
 d.collapsedWindows.FieldKitStatsFrame=true
+d.collapsedWindows.FieldKitMeterFrame=true
+d.collapsedWindows.FieldKitTakenFrame=true
+d.collapsedWindows.FieldKitLairFrame=true
+d.statsCollapsed=true;d.gearCollapsed=true
 d.cardOpacity=65;d.linkLeftCards=true
 d.chatWidth=530;d.chatHeight=170;d.chatFontFace=2;d.chatFontSize=15
 d.chatBackgroundColor=3;d.chatStyle=true;d.chatOverrideText=false
@@ -40,6 +44,7 @@ assert(d.interfaceProfiles[1].values.partyDetailSync==true)
 -- Save-as: slot 2 becomes the current editing context, preserving slot 1.
 d.frameAnchors.FieldKitLeftStack={"TOPRIGHT","TOPRIGHT",-20,-20}
 d.cardOpacity=95;d.linkLeftCards=false;d.chatWidth=670;d.chatHeight=330
+d.collapsedWindows={};d.statsCollapsed=false;d.gearCollapsed=false
 d.chatFontFace=4;d.chatFontSize=19;d.chatBackgroundColor=5
 d.chatStyle=false;d.chatOverrideText=true;d.chatAnchor={x=410,y=520}
 d.partyDetailSync=false;d.hidePlates=false;d.combatTextWorld=false
@@ -76,6 +81,8 @@ d.chatWidth=590;d.chatFontSize=16;d.bossWarningLead=13
 d.worldMarkerSettings.categories.cache=true
 assert(P.Load(2))
 assert(d.chatWidth==670 and d.chatFontSize==19 and d.chatHeight==330)
+assert(not d.collapsedWindows.FieldKitMeterFrame and not d.collapsedWindows.FieldKitTakenFrame)
+assert(not d.statsCollapsed and not d.gearCollapsed)
 assert(not d.chatStyle and d.chatOverrideText and d.chatBackgroundColor==5)
 assert(d.chatAnchor.x==410 and d.cardOpacity==95 and not d.linkLeftCards)
 assert(not d.partyDetailSync and not d.hidePlates and not d.combatTextWorld)
@@ -89,6 +96,10 @@ assert(d.interfaceProfiles[1].values.chatWidth==590 and
 assert(d.interfaceProfiles[2].values.chatWidth==670)
 assert(P.Load(1))
 assert(d.chatWidth==590 and d.chatFontSize==16 and d.bossWarningLead==13)
+assert(d.collapsedWindows.FieldKitMeterFrame==true)
+assert(d.collapsedWindows.FieldKitTakenFrame==true)
+assert(d.collapsedWindows.FieldKitLairFrame==true)
+assert(d.statsCollapsed==true and d.gearCollapsed==true)
 assert(d.worldMarkerSettings.categories.cache==true)
 assert(P.Undo() and d.chatWidth==670 and d.language=="fr")
 assert(d.activeHudProfile==2)

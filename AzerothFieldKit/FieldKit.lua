@@ -1295,11 +1295,8 @@ local function ApplyCompactPanel(f, key, expandedHeight)
         if f.slots then
             if collapsed then row:Hide() else row:Show() end
         else
-            if collapsed then
-                if row.label then row.label:Hide() end
-                if row.value then row.value:Hide() end
-            end
-
+            if row.label then if collapsed then row.label:Hide() else row.label:Show() end end
+            if row.value then if collapsed then row.value:Hide() else row.value:Show() end end
         end
     end
     if f.mashCollapseButton then
@@ -1844,6 +1841,30 @@ local function CreateBarWindow(name, title, rows)
 	return f
 end
 
+
+-- Reconcile live profile switches with existing meter/taken/lair panels.
+-- Their collapse buttons are created once, so DB replacement alone does not
+-- update the frame state until explicitly synchronized.
+local function SyncBarWindowCollapse(f)
+ if not f or not DB then return end
+ local wanted=DB.collapsedWindows and DB.collapsedWindows[f:GetName()] and true or false
+ if f.mashCollapsed==wanted then return end
+ f.mashCollapsed=wanted
+ FieldKit_Text(f.mashCollapseButton,wanted and "+" or "-")
+ if wanted then
+  f.total:Hide()
+  for i=1,table.getn(f.rows) do f.rows[i]:Hide() end
+  if f.nextBoss then f.nextBoss:Hide() end
+  if f.nextBossTime then f.nextBossTime:Hide() end
+  if f.bossBar then f.bossBar:Hide() end
+  if f.bossPct then f.bossPct:Hide() end
+  f:SetHeight(24)
+ else
+  f.total:Show()
+  f:SetHeight(f.mashExpandHeight>24 and f.mashExpandHeight or 45)
+ end
+ FieldKitTheme.Update(f)
+end
 
 -- Size the visible row pool while keeping a collapsed window at header height.
 local function FitRows(f, n)
@@ -2508,6 +2529,9 @@ function FieldKit.ApplyHUDProfileLive()
  FieldKitCardLayout.anchor=nil
  settingsActions.UpdateStatsFrame()
  settingsActions.UpdateGearFrame()
+ SyncBarWindowCollapse(meterFrame)
+ SyncBarWindowCollapse(takenFrame)
+ SyncBarWindowCollapse(lairFrame)
  settingsActions.UpdateRunMode()
  settingsActions.UpdateMeterFrames(true)
  settingsActions.UpdateLairFrame()
