@@ -175,9 +175,12 @@ function P.Init()
  local baseline
  for key,value in pairs(store) do
   local slot=Slot(key)
-  if not slot or type(key)~="number" or not Valid(value) then
+  if not slot or type(key)~="number" then
+   -- Discard invalid indices only. Preserve damaged valid slots for
+   -- manual recovery instead of destroying the player's saved data.
    store[key]=nil
-  elseif value.schema~=2 or type(value.nilValues)~="table" then
+  elseif Valid(value) and
+   (value.schema~=2 or type(value.nilValues)~="table") then
    if not baseline then baseline=Capture() end
    if baseline then Upgrade(value,baseline) end
   end
