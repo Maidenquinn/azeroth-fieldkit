@@ -3020,10 +3020,10 @@ frame:SetScript("OnUpdate", function()
   FieldKitDiagnostics.Mark("snapshot")
 		FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update()
 		FieldKitNativeTools.Update()
-  -- Native renderers may show collapsed panels again; dock them after all updates.
-  if RefreshCollapseDock then RefreshCollapseDock() end
 		-- Loadout tooltip scans hitch hard; keep them off the choosing overlay path.
 		if not choosing then FieldKitLoadout.Update() end
+  -- Run the dock reconciliation last, including loadout and native tool renders.
+  if RefreshCollapseDock then RefreshCollapseDock() end
 		FieldKitScreenLayers.Update()
 		-- Cards may show/hide after native snapshots; restack once here, not every paint.
 		layoutElapsed = 0
