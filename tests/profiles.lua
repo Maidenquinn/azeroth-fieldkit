@@ -154,6 +154,7 @@ assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]=="broken")
 -- Invalid saved data in a legitimate slot must remain recoverable in SavedVariables.
 assert(not P.Load(1))
 assert(d.interfaceProfiles[1]=="broken")
+assert(not P.Save(1) and d.interfaceProfiles[1]=="broken")
 assert(P.Name(1)==nil and not P.Rename(1,"Damaged"))
 local originalActive=d.activeHudProfile
 d.activeHudProfile=1
