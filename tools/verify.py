@@ -26,6 +26,11 @@ def runtime(saved=None):
  for name in files:l.execute((root/name).read_text(encoding='utf8'),name=name)
  return l
 
+# The profile-scope gate rejects new persisted settings until assigned either
+# to a profile or to a documented shared gameplay/operational category.
+exec(compile((base/'tools/profile_scope_audit.py').read_text(encoding='utf8'),
+             str(base/'tools/profile_scope_audit.py'),'exec'),
+     {'__name__':'__main__','__file__':str(base/'tools/profile_scope_audit.py')})
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
 profile_ui=runtime();profile_ui.execute((base/'tests/profile_ui.lua').read_text(encoding='utf8'))
