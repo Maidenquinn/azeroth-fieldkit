@@ -2524,15 +2524,14 @@ local function BuildCollapseDock()
  collapseDock:SetWidth(164);collapseDock:SetHeight(24)
  collapseDock:SetPoint("BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-18,110)
  collapseDockButtons={}
- local labels={"Mode de jeu","Dégâts","Dégâts subis","Antres","Statistiques","Accessoires / Sorts"}
+ local labels={"","Dégâts","Dégâts subis","Antres","Statistiques","Accessoires / Sorts"}
  for i=1,6 do
   local index=i
   local button=FieldKitTheme.Button(collapseDock,nil,labels[i],0,0,164,23,nil)
   button:ClearAllPoints()
   button:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,0)
   button:SetScript("OnClick",function()
-   if index==1 and DB.collapsedWindows then DB.collapsedWindows.FieldKitRunModeFrame=nil
-   elseif index==2 or index==3 or index==4 then
+   if index==2 or index==3 or index==4 then
     local f=index==2 and meterFrame or index==3 and takenFrame or lairFrame
     if f and f.mashCollapseButton then f.mashCollapseButton:Click() end
    elseif index==5 then DB.statsCollapsed=false;UpdateStatsFrame()
@@ -2811,6 +2810,7 @@ local function FieldKitEventLifecycle()
   FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
   FieldKitTakenDetails.Reset();FieldKitLoadout.Update()
   FieldKitPreview.Initialize(CreateBarWindow,CreateBossFrame,PlaceMovable)
+  RefreshCollapseDock()
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
