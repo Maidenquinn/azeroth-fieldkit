@@ -137,6 +137,19 @@ FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
 assert(pcall(P.Init))
 FieldKit.Number=originalNumber
 
+-- Corrupted incoming snapshots must be rejected before any live setting
+-- is changed, including when a valid field precedes the corrupted table.
+assert(P.Save(1))
+assert(P.Save(2))
+local incoming=d.interfaceProfiles[1]
+local originalIncoming=incoming.tables.chatAnchor
+incoming.tables.chatAnchor={x=100,invalid=string.rep("z",513)}
+local previousWidth=d.chatWidth
+local previousActive=d.activeHudProfile
+assert(not P.Load(1))
+assert(d.chatWidth==previousWidth and d.activeHudProfile==previousActive)
+incoming.tables.chatAnchor=originalIncoming
+
 -- Oversized nested profile data must never be silently truncated.
 -- A rejected capture must leave both the stored slot and active ID intact.
 assert(P.Save(2))
