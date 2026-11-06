@@ -208,6 +208,28 @@ assert(pcall(function() assert(not P.ActivatePending()) end))
 assert(d.activeHudProfile==pendingActive)
 FieldKit.InitializeSettings=originalInitialize
 
+-- A live preview must change only rendered preferences until accepted.
+assert(P.Save(1))
+d.chatWidth=777
+assert(P.Save(2))
+local previewOriginal=d.chatWidth
+local previewActive=d.activeHudProfile
+local previewStored=d.interfaceProfiles[2]
+assert(P.Preview(1))
+assert(d.chatWidth~=previewOriginal)
+assert(d.activeHudProfile==previewActive)
+assert(d.interfaceProfiles[2]==previewStored)
+assert(not P.SaveActive() and not P.Load(1))
+assert(P.CancelPreview())
+assert(d.chatWidth==previewOriginal and d.activeHudProfile==previewActive)
+assert(not P.CancelPreview())
+assert(P.Preview(1))
+assert(P.AcceptPreview())
+assert(d.activeHudProfile==1)
+assert(d.chatWidth~=previewOriginal)
+assert(P.Undo())
+assert(d.chatWidth==previewOriginal and d.activeHudProfile==2)
+
 -- Final unsaved change must be captured when the game writes SavedVariables.
 assert(P.Save(2))
 d.chatFontSize=18;d.chatBackgroundOpacity=55;d.lowHealthPct=44
