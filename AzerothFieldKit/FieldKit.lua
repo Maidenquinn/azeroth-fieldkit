@@ -2547,6 +2547,7 @@ RefreshCollapseDock=function()
  local states={false,meterFrame and meterFrame.mashCollapsed,takenFrame and takenFrame.mashCollapsed,
   lairFrame and lairFrame.mashCollapsed,DB.statsCollapsed,DB.gearCollapsed}
  local count=0
+ local changed=false
  for i=1,6 do
   local f=frames[i]
   local active=states[i] and f and (f:IsShown() or f.fieldkitDockHidden)
@@ -2555,19 +2556,21 @@ RefreshCollapseDock=function()
    collapseDockButtons[i]:ClearAllPoints()
    collapseDockButtons[i]:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,(count-1)*26)
    collapseDockButtons[i]:Show()
+   if not f.fieldkitDockHidden or f:IsShown() then changed=true end
    f:Hide()
    f.fieldkitDockHidden=true
   else
    collapseDockButtons[i]:Hide()
    if f and f.fieldkitDockHidden then
     f.fieldkitDockHidden=nil
+    changed=true
     if (i==5 and DB.statsFrame) or (i==6 and DB.gearFrame) or (i>=2 and i<=4) then f:Show() end
    end
   end
  end
  collapseDock:SetHeight(math.max(24,count*26))
  if count>0 then collapseDock:Show() else collapseDock:Hide() end
- if FieldKitHudStack and FieldKitHudStack.Apply then FieldKitHudStack.Apply() end
+ if changed and FieldKitHudStack and FieldKitHudStack.Apply then FieldKitHudStack.Apply() end
 end
 
 local settingsActions={
