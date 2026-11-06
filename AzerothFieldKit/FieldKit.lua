@@ -2537,6 +2537,8 @@ function FieldKit.ApplyHUDProfileLive()
  if FieldKitPartySync then FieldKitPartySync.Watch() end
  if FieldKit.SyncChat then FieldKit.SyncChat() end
  if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+ -- Repaint only recoverable chat history after switching a palette.
+ if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
  FieldKit_SetLanguage(DB.language)
  SetMovablesUnlocked(not DB.windowsLocked)
  if FieldKitUI and FieldKitUI.frame then FieldKitUI.Refresh() end
@@ -2554,6 +2556,7 @@ local function ResetPositions()
   local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
  end
  if AttachMoneyToBar then AttachMoneyToBar(true) end
+ if FieldKit.ResetChatLayout then FieldKit.ResetChatLayout() end
  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
