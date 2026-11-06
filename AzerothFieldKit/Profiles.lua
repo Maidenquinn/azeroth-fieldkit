@@ -52,25 +52,40 @@ local function Slot(value)
 end
 local function Clone(value,depth,budget)
  local kind=type(value)
- if kind=="number" then return FieldKit.Number(value) end
- if kind=="string" then return string.len(value)<=512 and value or nil end
+ if kind=="number" then
+  local n=FieldKit.Number(value)
+  if n==nil then budget.invalid=true end
+  return n
+ end
+ if kind=="string" then
+  if string.len(value)>512 then budget.invalid=true;return nil end
+  return value
+ end
  if kind=="boolean" then return value end
- if kind~="table" or depth>7 or budget.left<=0 then return nil end
+ if kind~="table" or depth>7 or budget.left<=0 then
+  budget.invalid=true
+  return nil
+ end
  local copy={}
  for key,item in pairs(value) do
-  if budget.left<=0 then break end
+  if budget.left<=0 then budget.invalid=true;break end
   local kt=type(key)
   if (kt=="string" and string.len(key)<=160) or
      (kt=="number" and key==math.floor(key) and key>=1 and key<=256) then
    budget.left=budget.left-1
    local result=Clone(item,depth+1,budget)
    if result~=nil then copy[key]=result end
+  else
+   budget.invalid=true
   end
  end
  return copy
 end
 local function Copy(value)
- return Clone(value,1,{left=3200})
+ local budget={left=3200,invalid=false}
+ local result=Clone(value,1,budget)
+ if budget.invalid then return nil end
+ return result
 end
 local function Capture()
  local d=FieldKitDB
@@ -81,12 +96,17 @@ local function Capture()
   local key=list[i];local value=d[key]
   if type(value)=="boolean" or type(value)=="number" or type(value)=="string" then
    local copy=Copy(value)
-   if copy~=nil then snap.values[key]=copy
-   else snap.nilValues[key]=true end
-  else snap.nilValues[key]=true end
+   if copy==nil then return nil end
+   snap.values[key]=copy
+  elseif value==nil then snap.nilValues[key]=true
+  else return nil end
  end
  for i=1,table.getn(tableKeys) do
-  local key=tableKeys[i];snap.tables[key]=Copy(d[key] or {}) or {}
+  local key=tableKeys[i]
+  if d[key]~=nil and type(d[key])~="table" then return nil end
+  local copied=Copy(d[key] or {})
+  if copied==nil then return nil end
+  snap.tables[key]=copied
  end
  return snap
 end
@@ -152,28 +172,50 @@ function P.Init()
  if type(FieldKitDB)~="table" then return end
  local store=FieldKitDB.interfaceProfiles
  if type(store)~="table" then FieldKitDB.interfaceProfiles={} return end
- local baseline=Capture()
+ -- Most calls operate on already migrated slots. Avoid repeatedly
+ -- cloning the entire live configuration for these hot-path checks.
+ local baseline
  for key,value in pairs(store) do
   local slot=Slot(key)
   if not slot or type(key)~="number" or not Valid(value) then
    store[key]=nil
-  else Upgrade(value,baseline) end
+  elseif value.schema~=2 or type(value.nilValues)~="table" then
+   if not baseline then baseline=Capture() end
+   if baseline then Upgrade(value,baseline) end
+  end
  end
 end
 local function ApplySnapshot(snapshot)
  if not Valid(snapshot) then return false end
  local d=FieldKitDB;local list=PreferenceKeys()
+ -- Stage and validate every copy before mutating the live database.
+ -- An oversized/corrupted saved slot must never partially overwrite it.
+ local stagedValues,stagedTables={},{}
  for i=1,table.getn(list) do
   local key=list[i]
-  -- Explicit tombstones prevent nil/optional values leaking from the
-  -- previous slot. A legacy snapshot is hydrated by Init beforehand.
   local value=snapshot.values[key]
-  if value~=nil then d[key]=Copy(value)
-  elseif snapshot.nilValues and snapshot.nilValues[key] then d[key]=nil end
+  if value~=nil then
+   local copy=Copy(value)
+   if copy==nil then return false end
+   stagedValues[key]=copy
+  elseif not (snapshot.nilValues and snapshot.nilValues[key]) then
+   return false
+  end
  end
  for i=1,table.getn(tableKeys) do
   local key=tableKeys[i]
-  d[key]=Copy(snapshot.tables[key] or {}) or {}
+  if type(snapshot.tables[key])~="table" then return false end
+  local copy=Copy(snapshot.tables[key])
+  if copy==nil then return false end
+  stagedTables[key]=copy
+ end
+ for i=1,table.getn(list) do
+  local key=list[i]
+  d[key]=stagedValues[key]
+ end
+ for i=1,table.getn(tableKeys) do
+  local key=tableKeys[i]
+  d[key]=stagedTables[key]
  end
  FieldKit.InitializeSettings({})
  if FieldKitCombat then FieldKitCombat.owner=nil;FieldKitCombat.Ensure() end
@@ -186,7 +228,9 @@ function P.SaveActive()
  P.Init()
  if not FieldKitDB.interfaceProfiles[active] then return false end
  local old=FieldKitDB.interfaceProfiles[active]
- local updated=Capture();updated.name=old.name
+ local updated=Capture()
+ if not updated then return false end
+ updated.name=old.name
  FieldKitDB.interfaceProfiles[active]=updated
  return true
 end
@@ -197,7 +241,9 @@ function P.Save(number)
  -- Save-as creates/updates the selected slot and makes it the active
  -- editing context. Do NOT overwrite the previous slot's stored snapshot.
  local old=FieldKitDB.interfaceProfiles[slot]
- local updated=Capture();updated.name=old and old.name or nil
+ local updated=Capture()
+ if not updated then return false end
+ updated.name=old and old.name or nil
  FieldKitDB.interfaceProfiles[slot]=updated
  FieldKitDB.activeHudProfile=slot
  return true
@@ -210,16 +256,22 @@ function P.Load(number)
   type(FieldKit.ApplyHUDProfileLive)~="function" or FieldKit.layoutEditing then return false end
  local sameSlot=FieldKitDB.activeHudProfile==slot
  local before=Capture()
+ if not before then return false end
  local previous=FieldKitDB.activeHudProfile
  -- Preserve all edits in the outgoing slot, even when the player never
  -- pressed the explicit Save current HUD button.
- if not sameSlot then P.SaveActive() end
+ -- Never proceed if autosave fails: otherwise the outgoing edits can be lost.
+ if not sameSlot and Slot(previous) and not P.SaveActive() then return false end
  local ok=pcall(function()
   assert(ApplySnapshot(FieldKitDB.interfaceProfiles[slot]))
   assert(FieldKit.ApplyHUDProfileLive())
  end)
  if not ok then
-  ApplySnapshot(before);pcall(FieldKit.ApplyHUDProfileLive)
+  -- Restore both live preferences and profile metadata on a failed switch.
+  -- The outgoing slot may have been autosaved before the failed apply.
+  local restored=ApplySnapshot(before)
+  if restored then pcall(FieldKit.ApplyHUDProfileLive) end
+  FieldKitDB.activeHudProfile=previous
   return false
  end
  P.undo=before;P.undoProfile=previous
@@ -232,8 +284,9 @@ function P.Undo()
  if P.undo then
   local before=P.undo
   local current=Capture()
+  if not current then return false end
   local oldActive=FieldKitDB.activeHudProfile
-  P.SaveActive()
+  if Slot(oldActive) and not P.SaveActive() then return false end
   local ok=pcall(function()
    assert(ApplySnapshot(before));assert(FieldKit.ApplyHUDProfileLive())
   end)

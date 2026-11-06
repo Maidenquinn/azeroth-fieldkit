@@ -129,6 +129,64 @@ d.interfaceProfiles[22]={values={},tables={}}
 d.interfaceProfiles[1]="broken"
 P.Init()
 assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]==nil)
+-- Already migrated slots must not trigger an unnecessary full live capture.
+-- Capture calls FieldKit.Number for numeric settings, so an injected error
+-- here detects accidental snapshot work in the common Init path.
+local originalNumber=FieldKit.Number
+FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
+assert(pcall(P.Init))
+FieldKit.Number=originalNumber
+
+-- Corrupted incoming snapshots must be rejected before any live setting
+-- is changed, including when a valid field precedes the corrupted table.
+assert(P.Save(1))
+assert(P.Save(2))
+local incoming=d.interfaceProfiles[1]
+local originalIncoming=incoming.tables.chatAnchor
+incoming.tables.chatAnchor={x=100,invalid=string.rep("z",513)}
+local previousWidth=d.chatWidth
+local previousActive=d.activeHudProfile
+assert(not P.Load(1))
+assert(d.chatWidth==previousWidth and d.activeHudProfile==previousActive)
+incoming.tables.chatAnchor=originalIncoming
+
+-- Oversized nested profile data must never be silently truncated.
+-- A rejected capture must leave both the stored slot and active ID intact.
+assert(P.Save(2))
+local savedSlot=d.interfaceProfiles[2]
+local activeSlot=d.activeHudProfile
+d.chatAnchor={x=220,y=310,oversized=string.rep("x",513)}
+assert(not P.Save(1))
+assert(d.interfaceProfiles[2]==savedSlot and d.activeHudProfile==activeSlot)
+assert(not P.Load(1))
+assert(d.activeHudProfile==activeSlot)
+d.chatAnchor={x=220,y=310}
+assert(P.Save(2))
+
+-- An outgoing active slot missing from the store must fail closed rather
+-- than discarding its unsaved changes during a profile switch.
+assert(P.Save(1))
+assert(P.Save(2))
+d.interfaceProfiles[2]=nil
+local retainedWidth=d.chatWidth
+assert(not P.Load(1))
+assert(d.activeHudProfile==2 and d.chatWidth==retainedWidth)
+assert(P.Save(2))
+
+-- A native apply failure must not leave the active slot pointing at
+-- the attempted target, and must restore the live preferences.
+assert(P.Save(1))
+d.chatWidth=555
+assert(P.Save(2))
+local applyLive=FieldKit.ApplyHUDProfileLive
+FieldKit.ApplyHUDProfileLive=function() error("injected native apply failure") end
+local activeBefore=d.activeHudProfile
+local widthBefore=d.chatWidth
+assert(not P.Load(1))
+assert(d.activeHudProfile==activeBefore)
+assert(d.chatWidth==widthBefore)
+FieldKit.ApplyHUDProfileLive=applyLive
+
 -- Final unsaved change must be captured when the game writes SavedVariables.
 assert(P.Save(2))
 d.chatFontSize=18;d.chatBackgroundOpacity=55;d.lowHealthPct=44
