@@ -150,7 +150,10 @@ assert(d.interfaceProfiles[3].tables.pos.FieldKitStatsFrame[1]==33)
 d.interfaceProfiles[22]={values={},tables={}}
 d.interfaceProfiles[1]="broken"
 P.Init()
-assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]==nil)
+assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]=="broken")
+-- Invalid saved data in a legitimate slot must remain recoverable in SavedVariables.
+assert(not P.Load(1))
+assert(d.interfaceProfiles[1]=="broken")
 -- Already migrated slots must not trigger an unnecessary full live capture.
 -- Capture calls FieldKit.Number for numeric settings, so an injected error
 -- here detects accidental snapshot work in the common Init path.
