@@ -434,6 +434,7 @@ local function BuildProfileManager(page,y)
   card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
   local label=T.Label(card,"Profile "..i,14,8,530,27,18,T.gold,true)
   local summary=T.Label(card,"",14,35,530,29,12,T.muted)
+  local activeTag=T.Label(card,"",420,8,163,24,13,T.green,true)
   -- Native InputBoxTemplate on this Benilla build creates shared visual
   -- regions for anonymous EditBoxes. The decoration of slot 2/3 can show
   -- up on slot 1. Use one fully-owned, untemplated EditBox per card instead.
@@ -487,7 +488,7 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del,rename=rename,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
+  slots[i]={frame=card,label=label,summary=summary,activeTag=activeTag,save=save,loadButton=loadButton,delete=del,rename=rename,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
  end
  function row.Refresh()
   local d=FieldKitDB
@@ -504,6 +505,8 @@ local function BuildProfileManager(page,y)
    local count=0
    if type(anchors)=="table" then for _ in pairs(anchors) do count=count+1 end end
    FieldKit_Text(item.label,P.Name(i) or string.format(FieldKit_L("Profile %d"),i))
+   FieldKit_Text(item.activeTag,"✓ "..FieldKit_L("Current"))
+   if active==i and saved then item.activeTag:Show() else item.activeTag:Hide() end
    if saved then
     FieldKit_Text(item.summary,string.format(FieldKit_L("Saved · %d positions · opacity %d%%"),count,(values and values.cardOpacity) or 100))
    else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
@@ -529,7 +532,10 @@ local function BuildProfileManager(page,y)
   local cw=w-6
   for i=1,3 do
    local item=slots[i];item.frame:SetWidth(cw);T.Update(item.frame)
-   item.label:SetWidth(cw-24);item.summary:SetWidth(cw-24)
+   item.label:SetWidth(cw-198);item.summary:SetWidth(cw-24)
+   item.activeTag:ClearAllPoints()
+   item.activeTag:SetPoint("TOPRIGHT",item.frame,"TOPRIGHT",-14,-8)
+   item.activeTag:SetWidth(160)
    local bw=(cw-70)/4
    for j,b in ipairs({item.save,item.loadButton,item.delete,item.rename}) do
     b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+12),-80)
@@ -608,6 +614,7 @@ local function BuildHome(page)
  U.presetUndo=page.undoPreset
  page.quickTitle=T.Label(page,"Quick profiles",0,654,380,27,19,T.gold,true)
  page.quickHint=T.Label(page,"Switch complete FieldKit settings instantly. Empty slots open the profile manager.",0,684,600,24,12,T.muted)
+ page.quickActive=T.Label(page,"",0,761,620,25,13,T.green,true)
  page.quickButtons={}
  for i=1,3 do
   local slot=i
@@ -618,7 +625,8 @@ local function BuildHome(page)
   end)
  end
  U.quickProfileButtons=page.quickButtons
- page.contentHeight=776
+ U.quickProfileActive=page.quickActive
+ page.contentHeight=805
 end
 
 -- Each window subpage has its own content height and stable saved id. Reading a
@@ -736,8 +744,9 @@ function U.Refresh()
    local label=saved and (FieldKitProfiles.Name(i) or
     string.format(FieldKit_L("Profile %d"),i)) or
     string.format(FieldKit_L("Profile %d · empty"),i)
-   FieldKit_Text(b,label)
-   T.State(b,FieldKitDB.activeHudProfile==i)
+   local active=FieldKitDB.activeHudProfile==i
+   FieldKit_Text(b,active and ("✓ "..label) or label)
+   T.State(b,active)
   end
  end
  if U.quickProfileButtons then
@@ -750,6 +759,12 @@ function U.Refresh()
    FieldKit_Text(U.quickProfileButtons[i],label)
    T.State(U.quickProfileButtons[i],active)
   end
+ end
+ if U.quickProfileActive then
+  local active=FieldKitDB.activeHudProfile
+  local saved=active and FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[active]
+  local name=saved and (FieldKitProfiles.Name(active) or string.format(FieldKit_L("Profile %d"),active))
+  FieldKit_Text(U.quickProfileActive,name and (FieldKit_L("Current profile: ")..name) or FieldKit_L("No active profile."))
  end
  if U.languageRow then
   local en=FieldKit_Language()=="en"
@@ -899,6 +914,7 @@ function U.Reflow()
    page.layoutAction:ClearAllPoints();page.layoutAction:SetPoint("TOPRIGHT",page.layoutCard,"TOPRIGHT",-16,-32);T.Update(page.layoutCard)
     if page.quickButtons then
      page.quickHint:SetWidth(content-20)
+     page.quickActive:SetWidth(content-20)
      local qw=(content-40)/3
      for i=1,3 do
       local b=page.quickButtons[i]
