@@ -521,7 +521,16 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  slots[i]={frame=card,label=label,summary=summary,activeTag=activeTag,showActiveBorder=showActiveBorder,save=save,loadButton=loadButton,delete=del,rename=rename,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
+  local inspect=T.Button(card,nil,"Preview HUD",14,112,174,24,function()
+   if P.Preview(idx) then
+    U.EnsureProfilePreviewBar()
+    U.frame:Hide()
+    U.profilePreviewBar:Show()
+    U.profilePreviewSlot=idx
+    U.UpdateProfilePreviewBar()
+   end
+  end)
+  slots[i]={frame=card,label=label,summary=summary,activeTag=activeTag,showActiveBorder=showActiveBorder,save=save,loadButton=loadButton,delete=del,rename=rename,inspect=inspect,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
  end
  function row.Refresh()
   local d=FieldKitDB
@@ -549,10 +558,12 @@ local function BuildProfileManager(page,y)
    FieldKit_Text(item.loadButton,active==i and "Active" or "Apply now")
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
    FieldKit_Text(item.rename,"Rename")
+   FieldKit_Text(item.inspect,"Preview HUD")
+   if saved then item.inspect:Show() else item.inspect:Hide() end
    if saved and row.editing==i then
     item.summary:Hide();item.editor:Show();item.hint:Show()
     FieldKit_Text(item.hint,"Enter to save · Esc to cancel")
-    item.save:Hide();item.loadButton:Hide();item.delete:Hide();item.rename:Hide()
+    item.save:Hide();item.loadButton:Hide();item.delete:Hide();item.rename:Hide();item.inspect:Hide()
     item.commit:Show();item.abort:Show()
    else
     item.summary:Show();item.editor:Hide();item.hint:Hide()
@@ -591,6 +602,7 @@ local function BuildProfileManager(page,y)
    item.abort:SetPoint("TOPLEFT",item.frame,"TOPLEFT",26+actionW,-80)
    item.commit.fieldkitLabel:SetWidth(actionW-18)
    item.abort.fieldkitLabel:SetWidth(actionW-18)
+   item.inspect:SetWidth(math.min(174,cw-28));item.inspect.fieldkitLabel:SetWidth(math.min(156,cw-46));T.Update(item.inspect)
    T.Update(item.commit);T.Update(item.abort)
   end
  end
@@ -1164,7 +1176,42 @@ function U.Build(sections,context)
  return frame
 end
 
+-- Detached confirmation bar stays visible while the settings panel is hidden.
+-- Previewing must never obscure the HUD it is meant to inspect.
+function U.EnsureProfilePreviewBar()
+ if U.profilePreviewBar then return end
+ local bar=CreateFrame("Frame","FieldKitProfilePreviewBar",UIParent)
+ bar:SetWidth(520);bar:SetHeight(82)
+ bar:SetPoint("TOP",UIParent,"TOP",0,-105)
+ bar:SetFrameStrata("DIALOG")
+ T.Surface(bar,"window")
+ U.profilePreviewBar=bar
+ U.profilePreviewTitle=T.Label(bar,"HUD preview",12,8,490,23,16,T.gold,true)
+ T.Button(bar,nil,"Apply profile",12,40,150,29,function()
+  if FieldKitProfiles.AcceptPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ T.Button(bar,nil,"Restore previous",174,40,170,29,function()
+  if FieldKitProfiles.CancelPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ T.Button(bar,nil,"Close",356,40,150,29,function()
+  if FieldKitProfiles.CancelPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ bar:Hide()
+end
+function U.UpdateProfilePreviewBar()
+ U.EnsureProfilePreviewBar()
+ local slot=U.profilePreviewSlot
+ FieldKit_Text(U.profilePreviewTitle,"Preview: "..(slot and (FieldKitProfiles.Name(slot) or ("Profile "..slot)) or "HUD"))
+end
+
 function U.Toggle()
+ if FieldKitProfiles and FieldKitProfiles.preview then return end
  if FieldKit.layoutEditing then U.SetLayoutEditing(false,true)
  elseif U.frame:IsShown() then U.frame:Hide()
  else U.Reflow();U.frame:Show();U.Refresh() end
