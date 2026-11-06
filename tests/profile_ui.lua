@@ -39,6 +39,7 @@ assert(FieldKitDB.interfaceProfiles[1],"first delete click must only ask for con
 click(s1.delete)
 assert(FieldKitDB.interfaceProfiles[1]==nil,"confirmed delete should remove profile")
 click(s1.save)
+assert(FieldKitProfiles.Rename(1,"Donjons FR"))
 FieldKitDB.cardOpacity=76
 click(s1.loadButton)
 U.Refresh()
