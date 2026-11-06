@@ -418,6 +418,12 @@ end
 -- and do not capture mouse input or create textures on each switch.
 local function ProfileActiveBorder(frame)
  local strips={}
+ local glow=frame:CreateTexture(nil,"BACKGROUND")
+ glow:SetPoint("TOPLEFT",frame,"TOPLEFT",2,-2)
+ glow:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-2,2)
+ glow:SetTexture(T.bronze[1],T.bronze[2],T.bronze[3])
+ glow:SetAlpha(.22)
+ glow:Hide()
  local anchors={
   {"TOPLEFT","TOPRIGHT"},
   {"BOTTOMLEFT","BOTTOMRIGHT"},
@@ -435,6 +441,7 @@ local function ProfileActiveBorder(frame)
   strips[i]=t
  end
  return function(active)
+  if active then glow:Show() else glow:Hide() end
   for i=1,4 do if active then strips[i]:Show() else strips[i]:Hide() end end
  end
 end
