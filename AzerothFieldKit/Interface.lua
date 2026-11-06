@@ -675,7 +675,16 @@ function U.Refresh()
   end
  end
  if U.languageRow then
-  T.State(U.languageRow.en,FieldKit_Language()=="en");T.State(U.languageRow.fr,FieldKit_Language()=="fr")
+  local en=FieldKit_Language()=="en"
+  local fr=FieldKit_Language()=="fr"
+  -- Unlike a momentary hover, selected buttons must stay selected after
+  -- OnLeave and show an unambiguous visible check mark.
+  U.languageRow.en.fieldkitSelected=en
+  U.languageRow.fr.fieldkitSelected=fr
+  T.State(U.languageRow.en,en)
+  T.State(U.languageRow.fr,fr)
+  FieldKit_Text(U.languageRow.en,en and "✓ English" or "English")
+  FieldKit_Text(U.languageRow.fr,fr and "✓ Français" or "Français")
  end
  local reload=(FieldKitDB.compactBar==true)~=(FieldKit.appliedCompactBar==true)
  U.reloadNeeded=reload
@@ -829,7 +838,10 @@ end
 
 -- Position reset has a bounded, immediate Undo; feature/style preferences are untouched.
 function U.ResetPositions()
- local snapshot={pos={},anchors={},detached=FieldKitDB.moneyDetached}
+ local snapshot={pos={},anchors={},detached=FieldKitDB.moneyDetached,
+  chatWidth=FieldKitDB.chatWidth,chatHeight=FieldKitDB.chatHeight,
+  chatAnchor=FieldKitDB.chatAnchor and
+   {x=FieldKitDB.chatAnchor.x,y=FieldKitDB.chatAnchor.y} or nil}
  for name,p in pairs(FieldKitDB.pos) do snapshot.pos[name]={p[1],p[2]} end
  for name,a in pairs(FieldKitDB.frameAnchors) do snapshot.anchors[name]={a[1],a[2],a[3],a[4]} end
  U.undoPositions=snapshot;U.context.reset();U.Refresh()
@@ -839,6 +851,12 @@ function U.UndoPositions()
  local saved=U.undoPositions;if not saved then return end
  FieldKitDB.pos=saved.pos;FieldKitDB.moneyDetached=saved.detached
  FieldKitDB.frameAnchors=saved.anchors
+ FieldKitDB.chatWidth=saved.chatWidth
+ FieldKitDB.chatHeight=saved.chatHeight
+ FieldKitDB.chatAnchor=saved.chatAnchor
+ -- ApplyAnchor uses a cached stamp. Reset it through the public chat
+ -- placement helper without discarding the saved anchor.
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
  U.undoPositions=nil;U.context.positions();U.Refresh()
 end
 
