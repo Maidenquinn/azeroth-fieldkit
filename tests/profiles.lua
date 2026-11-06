@@ -137,6 +137,19 @@ FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
 assert(pcall(P.Init))
 FieldKit.Number=originalNumber
 
+-- Oversized nested profile data must never be silently truncated.
+-- A rejected capture must leave both the stored slot and active ID intact.
+assert(P.Save(2))
+local savedSlot=d.interfaceProfiles[2]
+local activeSlot=d.activeHudProfile
+d.chatAnchor={x=220,y=310,oversized=string.rep("x",513)}
+assert(not P.Save(1))
+assert(d.interfaceProfiles[2]==savedSlot and d.activeHudProfile==activeSlot)
+assert(not P.Load(1))
+assert(d.activeHudProfile==activeSlot)
+d.chatAnchor={x=220,y=310}
+assert(P.Save(2))
+
 -- An outgoing active slot missing from the store must fail closed rather
 -- than discarding its unsaved changes during a profile switch.
 assert(P.Save(1))
