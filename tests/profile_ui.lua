@@ -24,7 +24,7 @@ assert(FieldKitDB.activeHudProfile==1 and FieldKitDB.cardOpacity==39,
 assert(row.cancel:IsShown())
 click(row.cancel)
 assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.cardOpacity==88)
-assert(FieldKitDB.activeHudProfile~=1)
+assert(FieldKitDB.activeHudProfile==1)
 click(s1.delete)
 assert(FieldKitDB.interfaceProfiles[1],"first delete click must only ask for confirmation")
 click(s1.delete)
@@ -43,7 +43,7 @@ assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
 FieldKit_SetLanguage("en");U.Refresh()
 assert(table.getn(objects)==total,"profile UI must reuse existing controls")
 click(row.cancel)
-assert(FieldKitDB.activeHudProfile~=1)
+assert(FieldKitDB.activeHudProfile==1)
 
 -- Home quick switches are one click, and empty slots navigate to management.
 U.Select("home")
