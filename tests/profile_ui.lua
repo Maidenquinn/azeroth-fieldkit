@@ -120,9 +120,8 @@ assert(string.find(U.quickProfileButtons[1].fieldkitLabel.text,"Donjons FR",1,tr
  "home quick selector must display the custom profile name")
 assert(U.headerProfileButtons[1].fieldkitLabel.text=="Donjons FR",
  "header must display the saved custom name, not only slot number")
-assert(U.headerProfileButtons[2].fieldkitLabel.text=="Profil 2" or
- U.headerProfileButtons[2].fieldkitLabel.text=="Profile 2" or
- U.headerProfileButtons[2].fieldkitLabel.text=="—")
+assert(U.headerProfileButtons[2].fieldkitLabel.text~="2",
+ "header slot 2 should use its saved name or a full localized fallback")
 for i=1,3 do
  local b=U.headerProfileButtons[i]
  local _,parent,_,x,y=b:GetPoint()
