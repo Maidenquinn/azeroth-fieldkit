@@ -118,7 +118,15 @@ assert(U.quickProfileButtons and table.getn(U.quickProfileButtons)==3)
 U.Refresh()
 assert(string.find(U.quickProfileButtons[1].fieldkitLabel.text,"Donjons FR",1,true),
  "home quick selector must display the custom profile name")
-assert(U.headerProfileButtons[1].fieldkitLabel.text=="Donjons FR",
+assert(string.find(U.headerProfileButtons[1].fieldkitLabel.text,"✓",1,true),
+ "active profile in the header needs an explicit checkmark")
+assert(row.slots[1].activeTag:IsShown(),
+ "current profile card must show its active indicator")
+assert(not row.slots[2].activeTag:IsShown() and not row.slots[3].activeTag:IsShown(),
+ "inactive profile cards must not show the active indicator")
+assert(string.find(U.quickProfileActive.text,"Donjons FR",1,true),
+ "Home must state the active profile name")
+assert(string.find(U.headerProfileButtons[1].fieldkitLabel.text,"Donjons FR",1,true),
  "header must display the saved custom name, not only slot number")
 assert(U.headerProfileButtons[2].fieldkitLabel.text~="2",
  "header slot 2 should use its saved name or a full localized fallback")
@@ -153,6 +161,9 @@ U.Select("look")
 FieldKitDB.cardOpacity=31
 click(U.headerProfileButtons[1])
 assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
+assert(row.slots[1].activeTag:IsShown() and not row.slots[2].activeTag:IsShown())
+assert(string.find(U.headerProfileButtons[1].fieldkitLabel.text,"✓",1,true))
+
 assert(FieldKitDB.uiPage=="look","header switch should preserve current page")
 click(U.headerProfileButtons[3])
 assert(FieldKitDB.uiPage=="profiles","empty header slot should open manager")
