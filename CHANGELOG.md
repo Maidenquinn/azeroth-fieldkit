@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.10 — 2026-11-06 (named header profiles and rename hint spacing, unpublished)
+
+- Show the saved custom profile names in the persistent top-right PROF shortcuts instead of only 1/2/3. Empty slots show localized placeholders and the active button remains highlighted.
+- Reflow the three header shortcuts into three equal, width-constrained buttons within one anchored selector band, maintaining instant profile switching on every settings page.
+- Reduce the rename editor width slightly and reserve a measured gap before the hint so the native text input never overlaps the Enter/Escape guidance.
+- Add regression checks for correctly scoped header labels, responsive button widths and safe input/hint spacing.
+- Keep the accepted independent profile settings, chat history/palettes, Save/Cancel, rename persistence, native drag lifecycle and previous alpha behavior untouched.
+- **Unpublished**: native-client visual QA required.
+
+
 ## 0.5.0-alpha.9 — 2026-11-06 (isolated per-profile rename inputs, unpublished)
 
 - Fix the Benilla native InputBoxTemplate decoration appearing on another profile card when renaming slot 2 or 3.
