@@ -120,6 +120,15 @@ assert(string.find(U.quickProfileButtons[1].fieldkitLabel.text,"Donjons FR",1,tr
  "home quick selector must display the custom profile name")
 assert(string.find(U.headerProfileButtons[1].fieldkitLabel.text,"✓",1,true),
  "active profile in the header needs an explicit checkmark")
+assert(row.slots[1].showActiveBorder and row.slots[2].showActiveBorder,
+ "all cards need reusable active border controls")
+assert(U.headerProfileButtons[1].fieldkitSelected==true,
+ "active header must retain selected state after mouse leave")
+assert(U.headerProfileButtons[2].fieldkitSelected==false and
+ U.headerProfileButtons[3].fieldkitSelected==false,
+ "inactive header buttons must not appear selected")
+assert(U.quickProfileActiveFrame and U.quickProfileActiveFrame:IsShown(),
+ "Home status needs its own compact framed surface")
 assert(row.slots[1].activeTag:IsShown(),
  "current profile card must show its active indicator")
 assert(not row.slots[2].activeTag:IsShown() and not row.slots[3].activeTag:IsShown(),
@@ -162,6 +171,12 @@ FieldKitDB.cardOpacity=31
 click(U.headerProfileButtons[1])
 assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)
 assert(row.slots[1].activeTag:IsShown() and not row.slots[2].activeTag:IsShown())
+assert(U.headerProfileButtons[1].fieldkitSelected==true)
+assert(U.headerProfileButtons[3].fieldkitSelected==false)
+local leaveHeader=U.headerProfileButtons[1]:GetScript("OnLeave")
+leaveHeader()
+assert(U.headerProfileButtons[1].fieldkitActive==true,
+ "mouse leave must preserve active shortcut highlight")
 assert(string.find(U.headerProfileButtons[1].fieldkitLabel.text,"✓",1,true))
 
 assert(FieldKitDB.uiPage=="look","header switch should preserve current page")
