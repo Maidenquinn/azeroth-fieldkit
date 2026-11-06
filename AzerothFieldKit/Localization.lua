@@ -3,6 +3,7 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Rename"]="Renommer",
  ["✓ English"]="✓ Anglais",
  ["✓ Français"]="✓ Français",
  ["Profiles"]="Profils",
