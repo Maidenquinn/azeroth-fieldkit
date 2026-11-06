@@ -72,9 +72,16 @@ end
 -- Bound persisted name learning. At capacity retain old knowledge and ignore new
 -- names; never evict a boss classification just because more enemies appeared.
 function FieldKit.RememberClassification(cache,name,class)
- if type(name)~="string" or string.len(name)>160 then return end
+ if type(cache)~="table" or type(name)~="string" or
+  string.len(name)>160 or type(class)~="string" then return end
+ -- Existing entries are updated in O(1). A full count is only needed when
+ -- inserting a previously unseen name; never evict older classifications.
  if cache[name]==nil then
-  local count=0;for _ in pairs(cache) do count=count+1;if count>=2048 then return end end
+  local count=0
+  for _ in pairs(cache) do
+   count=count+1
+   if count>=2048 then return end
+  end
  end
  cache[name]=class
 end
