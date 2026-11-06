@@ -123,7 +123,7 @@ function P.Name(number)
  local slot=Slot(number)
  local saved=slot and FieldKitDB and FieldKitDB.interfaceProfiles and
   FieldKitDB.interfaceProfiles[slot]
- return saved and CleanName(saved.name) or nil
+ return type(saved)=="table" and CleanName(saved.name) or nil
 end
 function P.Rename(number,name)
  local slot=Slot(number)
@@ -131,7 +131,7 @@ function P.Rename(number,name)
  P.Init()
  local saved=FieldKitDB.interfaceProfiles[slot]
  local clean=CleanName(name)
- if not saved or not clean then return false end
+ if type(saved)~="table" or not clean then return false end
  saved.name=clean
  return true
 end
@@ -289,7 +289,7 @@ function P.Save(number)
  local old=FieldKitDB.interfaceProfiles[slot]
  local updated=Capture()
  if not updated then return false end
- updated.name=old and old.name or nil
+ updated.name=type(old)=="table" and old.name or nil
  FieldKitDB.interfaceProfiles[slot]=updated
  FieldKitDB.activeHudProfile=slot
  return true
