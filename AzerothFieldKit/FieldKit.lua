@@ -2536,14 +2536,14 @@ end
 local function DockEntries()
  local native=FieldKitNativeTools and FieldKitNativeTools.frames or {}
  return {
-  {frame=FieldKitRunMode and FieldKitRunMode.frame,label="Mode de jeu"},
-  {frame=meterFrame,label="Dégâts"},
-  {frame=takenFrame,label="Dégâts subis"},
-  {frame=lairFrame,label="Antres"},
-  {frame=statsFrame,label="Statistiques",setting="statsCollapsed"},
-  {frame=gearFrame,label="Accessoires / Sorts",setting="gearCollapsed"},
-  {frame=native[1],label="Effets"},
-  {frame=native[3],label="Rappels de partie"},
+  {frame=FieldKitRunMode and FieldKitRunMode.frame,label="Game mode"},
+  {frame=meterFrame,label="Damage"},
+  {frame=takenFrame,label="Damage taken"},
+  {frame=lairFrame,label="Lairs"},
+  {frame=statsFrame,label="Statistics",setting="statsCollapsed"},
+  {frame=gearFrame,label="Accessories / Spells",setting="gearCollapsed"},
+  {frame=native[1],label="Effects"},
+  {frame=native[3],label="Run reminders"},
  }
 end
 local function BuildCollapseDock()
@@ -2561,7 +2561,7 @@ local function BuildCollapseDock()
  grip:SetFrameLevel(collapseDock:GetFrameLevel()+3)
  local gripLabel=grip:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
  gripLabel:SetAllPoints(grip)
- gripLabel:SetText("FieldKit - déplacer le dock")
+ FieldKit_Text(gripLabel,"FieldKit - drag dock")
  grip:EnableMouse(1)
  grip:RegisterForDrag("LeftButton")
  grip:SetScript("OnDragStart",function()
