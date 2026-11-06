@@ -152,12 +152,17 @@ function P.Init()
  if type(FieldKitDB)~="table" then return end
  local store=FieldKitDB.interfaceProfiles
  if type(store)~="table" then FieldKitDB.interfaceProfiles={} return end
- local baseline=Capture()
+ -- Most calls operate on already migrated slots. Avoid repeatedly
+ -- cloning the entire live configuration for these hot-path checks.
+ local baseline
  for key,value in pairs(store) do
   local slot=Slot(key)
   if not slot or type(key)~="number" or not Valid(value) then
    store[key]=nil
-  else Upgrade(value,baseline) end
+  elseif value.schema~=2 or type(value.nilValues)~="table" then
+   if not baseline then baseline=Capture() end
+   if baseline then Upgrade(value,baseline) end
+  end
  end
 end
 local function ApplySnapshot(snapshot)
