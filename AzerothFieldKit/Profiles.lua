@@ -219,7 +219,11 @@ function P.Load(number)
   assert(FieldKit.ApplyHUDProfileLive())
  end)
  if not ok then
-  ApplySnapshot(before);pcall(FieldKit.ApplyHUDProfileLive)
+  -- Restore both live preferences and profile metadata on a failed switch.
+  -- The outgoing slot may have been autosaved before the failed apply.
+  local restored=ApplySnapshot(before)
+  if restored then pcall(FieldKit.ApplyHUDProfileLive) end
+  FieldKitDB.activeHudProfile=previous
   return false
  end
  P.undo=before;P.undoProfile=previous
