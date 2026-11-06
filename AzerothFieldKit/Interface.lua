@@ -194,7 +194,7 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="meter",title="Combat meter",group="03  INTERFACE",glyph=8,items=meter},
   {id="layout",title="Layout & arrange",group="03  INTERFACE",glyph=14,items=layout},
   {id="look",title="Look",group="03  INTERFACE",glyph=4,items=look},
-  {id="profiles",title="HUD profiles",group="03  INTERFACE",glyph=14,items={{kind="profiles"}}},
+  {id="profiles",title="Profiles",group="03  INTERFACE",glyph=14,items={{kind="profiles"}}},
   {id="worldmarkers",title="World markers",glyph=6,group="04  WORLD",items={{kind="worldmarkers"}}},
   {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
@@ -421,7 +421,7 @@ local function BuildProfileManager(page,y)
  local row=CreateFrame("Frame",nil,page)
  row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y)
  row:SetWidth(610);row:SetHeight(636)
- local intro=T.Label(row,"Save FieldKit HUD layouts. Chat and gameplay data are not included.",0,0,600,38,13,T.muted)
+ local intro=T.Label(row,"Save all FieldKit preferences per profile, including chat. Game stats and message history stay shared.",0,0,600,38,13,T.muted)
  local pending=T.Label(row,"",0,42,600,25,13,T.gold)
  local cancel=T.Button(row,nil,"Undo last switch",0,74,210,29,function()
   P.Undo();row.Refresh();U.Refresh()
@@ -432,7 +432,7 @@ local function BuildProfileManager(page,y)
   local card=CreateFrame("Frame",nil,row)
   card:SetPoint("TOPLEFT",row,"TOPLEFT",0,-(120+(i-1)*152))
   card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
-  local label=T.Label(card,"HUD profile "..i,14,8,530,27,18,T.gold,true)
+  local label=T.Label(card,"Profile "..i,14,8,530,27,18,T.gold,true)
   local summary=T.Label(card,"",14,35,530,29,12,T.muted)
   local save=T.Button(card,nil,"Save current HUD",14,80,155,29,function()
    if FieldKitDB.interfaceProfiles[idx] and row.confirmSave~=idx then
@@ -455,7 +455,7 @@ local function BuildProfileManager(page,y)
   local d=FieldKitDB
   if not d then return end
   local active=d.activeHudProfile
-  FieldKit_Text(pending,active and string.format(FieldKit_L("Active HUD profile: %d"),active) or "No active HUD profile.")
+  FieldKit_Text(pending,active and string.format(FieldKit_L("Active profile: %d"),active) or "No active profile.")
   FieldKit_Text(cancel,"Undo last switch")
   if P.undo then cancel:Show() else cancel:Hide() end
   for i=1,3 do
@@ -465,7 +465,7 @@ local function BuildProfileManager(page,y)
    local anchors=saved and saved.tables and saved.tables.frameAnchors
    local count=0
    if type(anchors)=="table" then for _ in pairs(anchors) do count=count+1 end end
-   FieldKit_Text(item.label,string.format(FieldKit_L("HUD profile %d"),i))
+   FieldKit_Text(item.label,string.format(FieldKit_L("Profile %d"),i))
    if saved then
     FieldKit_Text(item.summary,string.format(FieldKit_L("Saved · %d positions · opacity %d%%"),count,(values and values.cardOpacity) or 100))
    else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
@@ -536,8 +536,8 @@ local function BuildHome(page)
  page.essential=T.Button(page,nil,"Use essential HUD",0,594,190,30,function() U.EssentialHud(false) end);FieldKit_Text(page.essential,"Use essential HUD")
  page.undoPreset=T.Button(page,nil,"Undo HUD preset",202,594,190,30,function() U.EssentialHud(true) end);FieldKit_Text(page.undoPreset,"Undo HUD preset")
  U.presetUndo=page.undoPreset
- page.quickTitle=T.Label(page,"Quick HUD profiles",0,654,380,27,19,T.gold,true)
- page.quickHint=T.Label(page,"Switch layouts instantly. Empty slots open the profile manager.",0,684,600,24,12,T.muted)
+ page.quickTitle=T.Label(page,"Quick profiles",0,654,380,27,19,T.gold,true)
+ page.quickHint=T.Label(page,"Switch complete FieldKit settings instantly. Empty slots open the profile manager.",0,684,600,24,12,T.muted)
  page.quickButtons={}
  for i=1,3 do
   local slot=i
@@ -868,7 +868,7 @@ function U.Build(sections,context)
  U.headerProfileLayer:SetWidth(242);U.headerProfileLayer:SetHeight(35)
  U.headerProfileLayer:SetFrameLevel(header:GetFrameLevel()+12)
  U.headerProfileLayer:EnableMouse(false)
- U.headerProfiles=T.Label(U.headerProfileLayer,"HUD",0,6,38,23,12,T.muted)
+ U.headerProfiles=T.Label(U.headerProfileLayer,"PROF",0,6,38,23,12,T.muted)
  U.headerProfileButtons={}
  for i=1,3 do
   local slot=i
