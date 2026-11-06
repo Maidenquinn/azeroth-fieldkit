@@ -129,6 +129,14 @@ d.interfaceProfiles[22]={values={},tables={}}
 d.interfaceProfiles[1]="broken"
 P.Init()
 assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]==nil)
+-- Already migrated slots must not trigger an unnecessary full live capture.
+-- Capture calls FieldKit.Number for numeric settings, so an injected error
+-- here detects accidental snapshot work in the common Init path.
+local originalNumber=FieldKit.Number
+FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
+assert(pcall(P.Init))
+FieldKit.Number=originalNumber
+
 -- A native apply failure must not leave the active slot pointing at
 -- the attempted target, and must restore the live preferences.
 assert(P.Save(1))
