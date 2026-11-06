@@ -1,7 +1,7 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.4.2", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.5.0-rc.1", folder = "AzerothFieldKit" }
 
 -- Native level-up/chest choices own the action controls during this phase.
 -- Read the official phase; do not inspect or modify native screen frames.
@@ -72,9 +72,16 @@ end
 -- Bound persisted name learning. At capacity retain old knowledge and ignore new
 -- names; never evict a boss classification just because more enemies appeared.
 function FieldKit.RememberClassification(cache,name,class)
- if type(name)~="string" or string.len(name)>160 then return end
+ if type(cache)~="table" or type(name)~="string" or
+  string.len(name)>160 then return end
+ -- Existing entries are updated in O(1). A full count is only needed when
+ -- inserting a previously unseen name; never evict older classifications.
  if cache[name]==nil then
-  local count=0;for _ in pairs(cache) do count=count+1;if count>=2048 then return end end
+  local count=0
+  for _ in pairs(cache) do
+   count=count+1
+   if count>=2048 then return end
+  end
  end
  cache[name]=class
 end

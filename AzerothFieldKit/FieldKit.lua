@@ -1281,6 +1281,7 @@ end
 
 
 -- Collapse or expand a stats/equipment panel while retaining its saved position.
+local RefreshCollapseDock
 local function ApplyCompactPanel(f, key, expandedHeight)
     if not f then return end
     local collapsed = DB[key]
@@ -1295,11 +1296,8 @@ local function ApplyCompactPanel(f, key, expandedHeight)
         if f.slots then
             if collapsed then row:Hide() else row:Show() end
         else
-            if collapsed then
-                if row.label then row.label:Hide() end
-                if row.value then row.value:Hide() end
-            end
-
+            if row.label then if collapsed then row.label:Hide() else row.label:Show() end end
+            if row.value then if collapsed then row.value:Hide() else row.value:Show() end end
         end
     end
     if f.mashCollapseButton then
@@ -1313,7 +1311,7 @@ local function AddCompactButton(f, key, refresh)
     b:SetPoint("TOPRIGHT", f, "TOPRIGHT", -2, -2)
     FieldKit_Text(b,DB[key] and "+" or "-")
     b:SetFrameLevel(f:GetFrameLevel() + 10)
-    b:SetScript("OnClick", function() DB[key] = not DB[key]; refresh() end)
+    b:SetScript("OnClick", function() DB[key] = not DB[key]; refresh(); if RefreshCollapseDock then RefreshCollapseDock() end end)
     f.mashCollapseButton = b
 end
 
@@ -1760,6 +1758,29 @@ local TAKEN_NAMES = {
 }
 
 
+-- WoW 1.12 does not clip child widgets to a shortened parent frame.
+-- Remember visible children while folded, then restore them on expansion.
+local function FoldChildren(f)
+ local children={f:GetChildren()}
+ for i=1,table.getn(children) do
+  local child=children[i]
+  if child~=f.mashCollapseButton and child:IsShown() then
+   child.fieldkitFoldWasShown=true
+   child:Hide()
+  end
+ end
+end
+local function UnfoldChildren(f)
+ local children={f:GetChildren()}
+ for i=1,table.getn(children) do
+  local child=children[i]
+  if child.fieldkitFoldWasShown then
+   child.fieldkitFoldWasShown=nil
+   child:Show()
+  end
+ end
+end
+
 -- Construct a bounded meter-style window with row pool, collapse button and drag handle.
 local function CreateBarWindow(name, title, rows)
 	local f = CreateFrame("Frame", name, UIParent)
@@ -1804,14 +1825,15 @@ local function CreateBarWindow(name, title, rows)
 			f.mashExpandHeight = f:GetHeight()
 			f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide()
 			for j = 1, table.getn(f.rows) do f.rows[j]:Hide() end
-			FieldKit_Text(this,"+")
+			FieldKit_Text(this,"+");FoldChildren(f)
 		else
 			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
-			f.total:Show(); FieldKit_Text(this,"-")
+			f.total:Show(); FieldKit_Text(this,"-");UnfoldChildren(f)
    for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
    FieldKitCardLayout.Rows(f,f.fieldkitNaturalHeight or (28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1)),f.mashVisibleRows or 0,f.fieldkitRowKind or "bar",false)
 		end
 		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+  if RefreshCollapseDock then RefreshCollapseDock() end
 	end)
 	f.mashCollapseButton = collapse
 	f.rows = {}
@@ -1839,11 +1861,37 @@ local function CreateBarWindow(name, title, rows)
 	end
 	if DB and DB.collapsedWindows and DB.collapsedWindows[name] then
 		f.mashCollapsed = true; f.mashExpandHeight = f:GetHeight()
-		f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide(); FieldKit_Text(collapse,"+")
+		f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide(); FieldKit_Text(collapse,"+");FoldChildren(f)
 	end
 	return f
 end
 
+
+-- Reconcile live profile switches with existing meter/taken/lair panels.
+-- Their collapse buttons are created once, so DB replacement alone does not
+-- update the frame state until explicitly synchronized.
+local function SyncBarWindowCollapse(f)
+ if not f or not DB then return end
+ local wanted=DB.collapsedWindows and DB.collapsedWindows[f:GetName()] and true or false
+ if f.mashCollapsed==wanted then return end
+ f.mashCollapsed=wanted
+ FieldKit_Text(f.mashCollapseButton,wanted and "+" or "-")
+ if wanted then
+  f.total:Hide()
+  for i=1,table.getn(f.rows) do f.rows[i]:Hide() end
+  if f.nextBoss then f.nextBoss:Hide() end
+  if f.nextBossTime then f.nextBossTime:Hide() end
+  if f.bossBar then f.bossBar:Hide() end
+  if f.bossPct then f.bossPct:Hide() end
+  f:SetHeight(24)
+  FoldChildren(f)
+ else
+  UnfoldChildren(f)
+  f.total:Show()
+  f:SetHeight(f.mashExpandHeight>24 and f.mashExpandHeight or 45)
+ end
+ FieldKitTheme.Update(f)
+end
 
 -- Size the visible row pool while keeping a collapsed window at header height.
 local function FitRows(f, n)
@@ -1859,6 +1907,7 @@ local function FitRows(f, n)
 		f:SetHeight(24)
 	else f:SetHeight(height); f.total:Show() end
  f.mashExpandHeight=FieldKitCardLayout.Rows(f,height,n,"bar",f.mashCollapsed)
+ if f.mashCollapsed then FoldChildren(f) end
 end
 
 -- Require the native API and a non-nil native phase before using run data.
@@ -1970,7 +2019,7 @@ local function UpdateMeterFrames(force)
  end
 end
 
-local UpdateChestPins, UpdateLairFrame, CreateLairFrame
+local UpdateChestPins, UpdateLairFrame, CreateLairFrame, lairFrame
 do
 
 
@@ -1982,7 +2031,6 @@ end
 
 local LAIR_ROWS = 10
 local LAIR_DIST_COLORS = { { 0.2, 1.0, 0.2 }, { 1.0, 1.0, 0.2 }, { 1.0, 0.55, 0.1 }, { 1.0, 0.2, 0.2 } }
-local lairFrame
 
 -- Format a non-negative whole-second lair return countdown as minutes:seconds.
 local function FormatClock(s)
@@ -2465,6 +2513,139 @@ local function UpdateGryphons()
 end
 
 
+-- A detached, compact dock keeps folded windows out of the play area.
+-- The original frames retain their saved geometry and can be restored in one click.
+local collapseDock,collapseDockButtons
+local collapseDockDragging=false
+local function PlaceCollapseDock()
+ if not collapseDock or not DB or collapseDockDragging then return end
+ DB.pos=DB.pos or {}
+ local saved=DB.pos.FieldKitCollapseDock
+ local x,y=-18,110
+ if type(saved)=="table" then
+  x=tonumber(saved[1]) or x
+  y=tonumber(saved[2]) or y
+ end
+ local width,height=UIParent:GetWidth(),UIParent:GetHeight()
+ x=math.max(-math.max(0,width-164),math.min(0,x))
+ y=math.max(0,math.min(math.max(0,height-collapseDock:GetHeight()),y))
+ collapseDock:ClearAllPoints()
+ collapseDock:SetPoint("BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",x,y)
+end
+
+local function DockEntries()
+ local native=FieldKitNativeTools and FieldKitNativeTools.frames or {}
+ return {
+  {frame=FieldKitRunMode and FieldKitRunMode.frame,label="Game mode"},
+  {frame=meterFrame,label="Damage"},
+  {frame=takenFrame,label="Damage taken"},
+  {frame=lairFrame,label="Lairs"},
+  {frame=statsFrame,label="Statistics",setting="statsCollapsed"},
+  {frame=gearFrame,label="Accessories / Spells",setting="gearCollapsed"},
+  {frame=native[1],label="Effects"},
+  {frame=native[3],label="Run reminders"},
+ }
+end
+local function BuildCollapseDock()
+ if collapseDock then return end
+ collapseDock=CreateFrame("Frame","FieldKitCollapseDock",UIParent)
+ collapseDock:SetFrameStrata("HIGH")
+ collapseDock:SetWidth(164);collapseDock:SetHeight(24)
+ collapseDockButtons={}
+ collapseDock:SetMovable(1)
+ collapseDock:EnableMouse(1)
+ if collapseDock.SetClampedToScreen then collapseDock:SetClampedToScreen(1) end
+ local grip=CreateFrame("Button",nil,collapseDock)
+ grip:SetWidth(164);grip:SetHeight(21)
+ grip:SetPoint("BOTTOMRIGHT",collapseDock,"TOPRIGHT",0,0)
+ grip:SetFrameLevel(collapseDock:GetFrameLevel()+3)
+ local gripLabel=grip:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ gripLabel:SetAllPoints(grip)
+ FieldKit_Text(gripLabel,"FieldKit - drag dock")
+ grip:EnableMouse(1)
+ grip:RegisterForDrag("LeftButton")
+ grip:SetScript("OnDragStart",function()
+  collapseDockDragging=true
+  collapseDock:StartMoving()
+ end)
+ local function StopDockDrag()
+  if not collapseDockDragging then return end
+  collapseDock:StopMovingOrSizing()
+  collapseDockDragging=false
+  local right=collapseDock:GetRight()
+  local bottom=collapseDock:GetBottom()
+  if right and bottom then
+   DB.pos=DB.pos or {}
+   DB.pos.FieldKitCollapseDock={right-UIParent:GetRight(),bottom-UIParent:GetBottom()}
+  end
+  PlaceCollapseDock()
+ end
+ grip:SetScript("OnDragStop",StopDockDrag)
+ grip:SetScript("OnMouseUp",StopDockDrag)
+ PlaceCollapseDock()
+ for i=1,8 do
+  local index=i
+  local button=FieldKitTheme.Button(collapseDock,nil,"",0,0,164,23,nil)
+  button:ClearAllPoints()
+  button:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,0)
+  button:SetScript("OnClick",function()
+   local entry=DockEntries()[index]
+   if not entry or not entry.frame then return end
+   if entry.setting then
+    DB[entry.setting]=false
+    if index==5 then UpdateStatsFrame() else UpdateGearFrame() end
+   elseif entry.frame.mashCollapseButton then
+    entry.frame.mashCollapseButton:Click()
+   end
+   if RefreshCollapseDock then RefreshCollapseDock() end
+  end)
+  collapseDockButtons[i]=button
+ end
+end
+RefreshCollapseDock=function()
+ if not DB then return end
+ BuildCollapseDock()
+ local entries=DockEntries()
+ local count=0
+ local changed=false
+ for i=1,table.getn(entries) do
+  local entry=entries[i]
+  local f=entry.frame
+  local folded=entry.setting and DB[entry.setting] or
+   (f and DB.collapsedWindows and DB.collapsedWindows[f:GetName()])
+  local active=folded and f and (f:IsShown() or f.fieldkitDockHidden)
+  local button=collapseDockButtons[i]
+  if active then
+   count=count+1
+   FieldKit_Text(button,FieldKit_L(entry.label))
+   button:ClearAllPoints()
+   button:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,(count-1)*26)
+   button:Show()
+   if not f.fieldkitDockHidden or f:IsShown() then changed=true end
+   f:Hide()
+   f.fieldkitDockHidden=true
+  else
+   button:Hide()
+   if f and f.fieldkitDockHidden then
+    f.fieldkitDockHidden=nil
+    changed=true
+    -- A disabled or empty native panel must not be resurrected by the dock.
+    if (i==5 and DB.statsFrame) or (i==6 and DB.gearFrame) or
+     (i==1 and DB.runModeCard) or (i==7 and DB.effectsFrame) or
+     (i==8 and (DB.nextBossCard or DB.storedLevelsBadge)) or
+     (i>=2 and i<=4) then f:Show() end
+   end
+  end
+ end
+ local dockHeight=math.max(24,count*26)
+ if collapseDock:GetHeight()~=dockHeight then
+  collapseDock:SetHeight(dockHeight)
+  PlaceCollapseDock()
+ end
+ if count>0 then collapseDock:Show() else collapseDock:Hide() end
+ if changed and FieldKitHudStack and FieldKitHudStack.Apply then FieldKitHudStack.Apply() end
+end
+
 local settingsActions={
  SetFilter=SetFilter,
  UpdateTargetHealth=UpdateTargetHealth,
@@ -2486,6 +2667,74 @@ local settingsActions={
  UpdateHudStack=function() FieldKitHudStack.Apply();UpdateMeterFrames(true) end,
  UpdateRunMode=function() FieldKitRunMode.Update();FieldKitHudStack.Apply() end,
 }
+-- Safe live application boundary for a FieldKit HUD-only profile.
+-- This is deliberately NOT a ReloadUI and never invokes chat styling, party
+-- transport, native action bar rebuilding, camera CVars or game-save changes.
+function FieldKit.ApplyHUDProfileLive()
+ if not DB or FieldKit.layoutEditing then return false end
+ if (FieldKitHudStack.root and FieldKitHudStack.root.azsMoving) or
+  (FieldKitCardLayout.root and FieldKitCardLayout.root.azsMoving) then return false end
+ for i=1,table.getn(movableFrames) do
+  if movableFrames[i].azsMoving then return false end
+ end
+ FieldKitHudStack.FinishDragging()
+ -- Restore saved geometry only for registered FieldKit-owned movable frames.
+ for i=1,table.getn(movableFrames) do
+  local f=movableFrames[i]
+  if DB.pos[f:GetName()] then PlaceMovable(f) end
+ end
+ -- Recompute cached group anchors even when the root size is unchanged.
+ FieldKitHudStack.appliedAnchor=nil
+ FieldKitHudStack.legacyX=nil
+ FieldKitCardLayout.anchor=nil
+ settingsActions.UpdateStatsFrame()
+ settingsActions.UpdateGearFrame()
+ SyncBarWindowCollapse(meterFrame)
+ SyncBarWindowCollapse(takenFrame)
+ SyncBarWindowCollapse(lairFrame)
+ SyncBarWindowCollapse(FieldKitRunMode and FieldKitRunMode.frame)
+ local nativeProfileFrames=FieldKitNativeTools and FieldKitNativeTools.frames or {}
+ SyncBarWindowCollapse(nativeProfileFrames[1])
+ SyncBarWindowCollapse(nativeProfileFrames[3])
+ settingsActions.UpdateRunMode()
+ settingsActions.UpdateMeterFrames(true)
+ settingsActions.UpdateLairFrame()
+ settingsActions.UpdateMoneyFrame()
+ settingsActions.SyncHudTally()
+ settingsActions.UpdatePlayerBar()
+ settingsActions.UpdatePlayerBuffs()
+ settingsActions.UpdateBossFrame()
+ FieldKitBossTimeline.Update()
+ FieldKitNativeTools.Update()
+ FieldKitCoop.Update()
+ FieldKitHudStack.Apply()
+ FieldKitCardLayout.ApplyRight()
+ FieldKitTheme.Refresh()
+ PlaceCollapseDock()
+ RefreshCollapseDock()
+ -- A profile is now a full preference context, not merely a HUD layout.
+ -- Apply the same existing handlers used by individual settings controls.
+ settingsActions.UpdateTargetHealth()
+ settingsActions.UpdateChestPins()
+ settingsActions.ApplyDamageNumbers()
+ settingsActions.UpdateGryphons()
+ SyncNativePlates()
+ ApplyCamera(false)
+ if FieldKitScreenLayers then FieldKitScreenLayers.Update() end
+ if FieldKitWorldMarkers and FieldKitWorldMarkers.ReloadProfileSettings then
+  FieldKitWorldMarkers.ReloadProfileSettings()
+ end
+ if FieldKitPartySync then FieldKitPartySync.Watch() end
+ if FieldKit.SyncChat then FieldKit.SyncChat() end
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+ -- Repaint only recoverable chat history after switching a palette.
+ if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
+ FieldKit_SetLanguage(DB.language)
+ SetMovablesUnlocked(not DB.windowsLocked)
+ if FieldKitUI and FieldKitUI.frame then FieldKitUI.Refresh() end
+ return true
+end
+
 local SECTIONS=FieldKit.CreateOptionsSchema(settingsActions)
 FieldKit_AddSettingsSections(SECTIONS)
 SECTIONS=FieldKit.BuildJourneySections(SECTIONS,settingsActions)
@@ -2497,6 +2746,7 @@ local function ResetPositions()
   local f=movableFrames[i];DB.pos[f:GetName()]={f.azsDefault[1],f.azsDefault[2]};PlaceMovable(f)
  end
  if AttachMoneyToBar then AttachMoneyToBar(true) end
+ if FieldKit.ResetChatLayout then FieldKit.ResetChatLayout() end
  FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
 end
 local function RefreshPanel() if panel then FieldKitUI.Refresh() end end
@@ -2588,12 +2838,14 @@ end
 -- Initialize only FieldKitDB via Config.lua, then apply the selected UI language.
 local function InitDB()
 	DB = FieldKit.InitializeSettings(DEFAULT_SHOWN)
+ FieldKitProfiles.ActivatePending()
  FieldKit_SetLanguage(DB.language)
 end
 
 local frame = CreateFrame("Frame", "FieldKitFrame", UIParent)
 frame:RegisterEvent("VARIABLES_LOADED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+frame:RegisterEvent("PLAYER_LOGOUT")
 frame:RegisterEvent("PLAYER_TARGET_CHANGED")
 frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 frame:RegisterEvent("UNIT_HEALTH")
@@ -2609,6 +2861,15 @@ frame:RegisterEvent("CHAT_MSG_COMBAT_SELF_HITS")
 
 -- Initialize once on VARIABLES_LOADED; never persist or restore native talent state.
 local function FieldKitEventLifecycle()
+ if event=="PLAYER_LOGOUT" then
+  -- Persist edits to the current profile even if the user never explicitly
+  -- pressed Save before quitting or /reload. Do not duplicate game data.
+  if DB and FieldKitProfiles then
+   if FieldKitProfiles.preview then FieldKitProfiles.CancelPreview() end
+   if not FieldKitProfiles.preview then FieldKitProfiles.SaveActive() end
+  end
+  return
+ end
 	if ( event == "VARIABLES_LOADED" ) then
 		if DB then return end
 		InitDB()
@@ -2630,6 +2891,7 @@ local function FieldKitEventLifecycle()
   FieldKitNativeTools.Create(CreateBarWindow,FitRows,MakeMovable)
   FieldKitTakenDetails.Reset();FieldKitLoadout.Update()
   FieldKitPreview.Initialize(CreateBarWindow,CreateBossFrame,PlaceMovable)
+  RefreshCollapseDock()
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
@@ -2709,7 +2971,7 @@ local function FieldKitEventOther()
 end
 
 frame:SetScript("OnEvent", function()
-	if ( event == "VARIABLES_LOADED" ) then
+	if ( event == "VARIABLES_LOADED" or event=="PLAYER_LOGOUT" ) then
 		FieldKitEventLifecycle()
 	elseif ( not DB ) then
 		return
@@ -2738,6 +3000,7 @@ local function RefreshNativeData()
 	dataClock.phase=phase;dataClock.zone=zone;dataClock.rt=rt
 	dataClock.statsStamp=AZS_STATS_UPDATED;dataClock.statsSource=AZS_STATS
 	UpdateMoneyFrame();UpdateMeterFrames();UpdateChestPins();UpdateLairFrame()
+ if RefreshCollapseDock then RefreshCollapseDock() end
 end
 
 local plateElapsed, layoutElapsed = 0, 0
@@ -2811,6 +3074,8 @@ frame:SetScript("OnUpdate", function()
 		FieldKitNativeTools.Update()
 		-- Loadout tooltip scans hitch hard; keep them off the choosing overlay path.
 		if not choosing then FieldKitLoadout.Update() end
+  -- Run the dock reconciliation last, including loadout and native tool renders.
+  if RefreshCollapseDock then RefreshCollapseDock() end
 		FieldKitScreenLayers.Update()
 		-- Cards may show/hide after native snapshots; restack once here, not every paint.
 		layoutElapsed = 0
@@ -2831,6 +3096,8 @@ SlashCmdList["FieldKit"] = function(msg)
 		return
 	end
 	msg = string.lower(msg or "")
+ if msg=="profile" then FieldKitProfiles.Command("");return end
+ if string.sub(msg,1,8)=="profile " then FieldKitProfiles.Command(string.sub(msg,9));return end
  if msg=="diag" then FieldKitDiagnostics.Command("");return end
  if string.sub(msg,1,5)=="diag " then FieldKitDiagnostics.Command(string.sub(msg,6));return end
  if msg=="native" then FieldKitNativeTools.Diagnostic();return end

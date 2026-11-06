@@ -1,5 +1,145 @@
 # Changelog
 
+## 0.5.0-rc.1 — 2026-11-06 (release candidate, not published)
+
+- Three independent, named HUD profiles with immediate switching, preview, undo, and quick access from Home and the header.
+- Preserve individual HUD layout and display preferences, including combat text, chat appearance, world markers, and native window collapse states.
+- Add a movable bottom-right dock for collapsed windows; its position persists per profile after `/reload`.
+- Improve FR/EN labels and live language refresh for the new profile and dock controls.
+- Harden profile persistence: stage and validate snapshots before applying; roll back failed switches; preserve damaged slots for recovery rather than silently deleting or overwriting them.
+- Expand automated profile, UI, serialization, rollback, and packaging regression checks; CI #659 passed for the candidate.
+- In-game acceptance reported for RC.1. Migration using a real v0.4.2 SavedVariables file and distribution permissions remain publication gates.
+
+## 0.5.0-alpha.12 — 2026-11-06 (active profile visual polish, unpublished)
+
+- Clearly mark the currently active named profile with a persistent **gold border and subtle bronze background** in the top-right PROF selector and in its manager card.
+- Retain the small localized active indicator on the manager card; inactive profile cards have no gold selection border.
+- Set the header button's persistent selected state explicitly, preventing mouse-leave hover transitions from removing its active look.
+- Replace the plain green Home status text with a compact, themed status strip labeled "In use: <name>" / "En cours : <nom>" under Quick profiles.
+- The active visuals switch instantly using the existing profile ID, without changing saved configuration or native chat rendering.
+- Extend mocked UI checks for active/inactive states, mouse leave, and the Home status surface.
+- No changes to chat, profile storage, instant switching, renaming, native HUD drag or gameplay data.
+- **Unpublished test candidate**, subject to native-client visual recipe.
+
+
+## 0.5.0-alpha.11 — 2026-11-06 (explicit current profile indicators, unpublished)
+
+- The persistent PROF selector now displays a visible check mark before the current profile name, in addition to its selected-button styling; the indicator updates instantly when switching.
+- The Profiles manager adds a standalone green "✓ Current" / "✓ Actif" marker on the selected saved slot card, with no active marker shown on inactive cards.
+- Home's Quick profiles section now explicitly states "Current profile: <name>" / "Profil actif : <nom>", while keeping its existing shortcut button highlight and selected check mark.
+- All three indicators survive FR/EN locale switches, settings page navigation and /reload, and update from the same activeHudProfile source of truth.
+- Updated UI regression tests for current/inactive card badges, named header indicator, Home active label and immediate switching.
+- No changes to chat, profile storage, native HUD movement or game-data handling.
+- **Unpublished client review build:** verify visual readability and live switching before merging.
+
+
+## 0.5.0-alpha.10 — 2026-11-06 (named header profiles and rename hint spacing, unpublished)
+
+- Show the saved custom profile names in the persistent top-right PROF shortcuts instead of only 1/2/3. Empty slots show localized placeholders and the active button remains highlighted.
+- Reflow the three header shortcuts into three equal, width-constrained buttons within one anchored selector band, maintaining instant profile switching on every settings page.
+- Reduce the rename editor width slightly and reserve a measured gap before the hint so the native text input never overlaps the Enter/Escape guidance.
+- Add regression checks for correctly scoped header labels, responsive button widths and safe input/hint spacing.
+- Keep the accepted independent profile settings, chat history/palettes, Save/Cancel, rename persistence, native drag lifecycle and previous alpha behavior untouched.
+- **Unpublished**: native-client visual QA required.
+
+
+## 0.5.0-alpha.9 — 2026-11-06 (isolated per-profile rename inputs, unpublished)
+
+- Fix the Benilla native InputBoxTemplate decoration appearing on another profile card when renaming slot 2 or 3.
+- Replace the shared/anonymous native template with independent untemplated EditBoxes, each inside its own styled, parented card input shell.
+- Keep the dedicated Save name/Cancel actions, Enter/Escape keyboard support, validated names and previously accepted profile behavior.
+- Add native UI regression assertions checking individual parent ownership and preventing other slot editors from becoming visible.
+- Keep chat, instant switching, HUD mouse dragging, stored profile names and all existing game data unchanged.
+- **Review build only:** needs in-game validation before merging.
+
+
+## 0.5.0-alpha.8 — 2026-11-06 (profile rename UI polish, unpublished)
+
+- Rework inline profile naming into a clean editing row that replaces the profile summary while active; the summary is restored after save or cancel.
+- Show explicit Save name and Cancel actions below the name input, temporarily hiding normal profile actions to prevent overlapping click targets.
+- Enter saves and Escape cancels, with invalid names retaining focus and a short validation hint.
+- Retain all saved names, live profile switching, chat isolation, Home shortcuts and v0.5.0-alpha.7 behavior.
+- Add UI regression tests for editing/saving/cancelling/invalid names and non-overlapping editor layout.
+- **Unpublished client test candidate:** confirm the new rename editor looks correct in FR/EN and doesn't overlay other text.
+
+
+## 0.5.0-alpha.7 — 2026-11-06 (profile naming and quick access, unpublished)
+
+- Add optional display names to the 3 independent FieldKit configuration profile slots (up to 40 bytes, rejecting control characters and color markup separators).
+- Rename slots from the Profiles manager with an inline input box; press Enter to save, Escape to cancel.
+- Show the custom profile name on its manager card and Home quick-switch button. The compact header keeps the numeric 1/2/3 identifiers to avoid obstructing the header.
+- Slash fallback: `/fieldkit profile name 1 Raid FR` (slots 1, 2 or 3).
+- Names are stored as slot metadata and survive Save, SaveActive, switches and reloads. They never replace any profile settings or chat messages, and older unnamed slots remain compatible.
+- Lua behavioral fixtures cover validation, preservation across save and switches, and renaming through the actual UI controls.
+- The accepted alpha.6 native chat isolation, Reset/Undo, language selection and grouped HUD drag are retained unchanged.
+- **Unpublished:** requires native client verification of inline editing, renaming and persistence.
+
+
+## 0.5.0-alpha.6 — 2026-11-06 (chat palette isolation and reset UX, unpublished)
+
+- Fix profile-specific chat text palettes not updating messages already visible: a profile switch now repaints recoverable native chat history using each profile's saved color/override preferences, without duplicating chat history or erasing untracked messages.
+- Existing background palettes, native chat size, font and position continue using per-slot settings.
+- Reset HUD positions also restores the chat frame's original position and dimensions (measured native baseline, with validated fallback), while preserving font, palette and chat messages.
+- Undo HUD positions now also restores the previous chat width, height and position.
+- Language preference buttons display a visible check mark and retain their active highlight after mouse hover/leave.
+- Add direct mocked native chat color-swap tests, reset/undo and selected-language regression assertions. All existing alpha.5 profile isolation and safety tests remain enabled.
+- **Review candidate, not released:** requires in-game 1→2→1 palette, message preservation and Reset/Undo testing.
+
+
+## 0.5.0-alpha.5 — 2026-11-06 (complete configuration isolation, unpublished)
+
+- Profile switching now restores native chat, combat text, world markers, meter preferences, accessibility, camera, party UI/sharing and the remaining declared FieldKit visual options, not just HUD cards.
+- Audit covers 136 declared preference entries, 11 nested configuration tables, and 16 explicitly classified shared/operational fields. New static profile-scope audit gate prevents future unclassified preference keys.
+- Preserve live chat messages, in-memory copy history, recorded combat/game statistics, learned classifications and navigation state across profile changes. Profile-local chat copy and party-detail synchronization **preferences** may change with the selected slot.
+- Automatically save all changes to the profile being left, and persist the active profile on PLAYER_LOGOUT. Save-as starts editing the chosen slot without overwriting another.
+- Safely migrate older alpha.1–alpha.4 layout-only profiles, keeping their original layout and initializing missing preferences from existing settings; no wipe or forced global reset.
+- Live profile application reuses existing FieldKit chat, world marker, combat, nameplate, camera and display handlers. The native compact action bar option is saved per slot but structural changes still need its existing reload path.
+- Add deep-copy and explicit-nil isolation checks, a destructive native chat preservation fixture, logout persistence tests and comprehensive documentation in docs/PROFILE_SCOPE_0.5.0.md.
+- **Not released:** must pass native client tests for 1→2→1 settings, migration and chat-history retention before merging.
+
+
+## 0.5.0-alpha.4 — 2026-11-06 (header quick-selector hitbox correction, unpublished)
+
+- Keep the already accepted one-click Home shortcuts, immediate 1/2/3 profile switching, Undo, saved layouts, chat isolation and FR/EN UI from alpha.3.
+- Put the universal profile shortcuts in a dedicated frame layer above the draggable settings-header hit area, preventing pointer-event competition on the Benilla-derived client.
+- Anchor the three selectors as a single stable unit near the header's top-right edge, apart from the title and close button.
+- Regression tests now track frame levels and verify that the selector's buttons sit above the drag header and remain clickable after layout reflow.
+- This addresses the only unverified/KO item in the user alpha.3 recipe, without changing profile application or native HUD drag logic.
+- **Unpublished client review**: verify the header selector's visibility and real mouse clicks before merging.
+
+
+## 0.5.0-alpha.3 — 2026-11-05 (unpublished live HUD profile switching)
+
+- Three compact profile shortcuts are now available in the FieldKit header on every page, with an active selection indicator. The Home page also offers quick access to all three profiles.
+- Switching an existing profile immediately reapplies FieldKit-owned HUD visibility, grouping, positions, sizes and visual style without calling ReloadUI.
+- The visual profile manager now offers Apply now and one-step Undo of the previous live layout. Save and Delete confirmations are unchanged.
+- Profiles continue to exclude chat settings/messages, gameplay state and party sync. Native compact action bar configuration remains unchanged during live profile switches; it requires the existing dedicated reload flow.
+- Safe live application is blocked while a FieldKit window is actively dragging or the layout editor is open. Failed application attempts restore the previous settings.
+- Corrected French/English localization for saved and empty slots, profile status and quick actions.
+- Expanded the profile tests to cover immediate visibility/positions, persistence, undo, Home/header shortcuts and language changes.
+- **Unpublished alpha:** the live game client must verify the new behavior before any merge or release.
+
+
+## 0.5.0-alpha.2 — 2026-11-05 (unpublished visual HUD profile manager)
+
+- New HUD profiles page in the interface navigation with 3 profile cards, saved layout summaries, Save, staged Load and Delete buttons.
+- Existing saves cannot be overwritten or deleted until the user clicks the confirmation button a second time.
+- Pending profile switch can be cancelled from the visual page; applying remains deferred to /reload for safety.
+- Added French UI translations, responsive layout support, and mocked end-to-end button/resize/language regression tests.
+- Preserves the previously validated alpha.1 profile persistence and the stable v0.4.2 chat/HUD behavior.
+- **Not released:** requires in-game UI validation.
+
+
+## 0.5.0-alpha.1 — 2026-11-05 (unpublished HUD profiles foundation)
+
+- Introduce three opt-in HUD profile slots for window layout, visibility, grouping, opacity, and allowed card sizes/positions.
+- Save, list, load, delete and undo via `/fieldkit profile` commands. Applying a slot is staged until `/reload`, avoiding disruptive native-frame changes mid-run.
+- Profile capture explicitly excludes native chat settings and messages, co-op sharing, gameplay statistics, and game-owned state. Bounded nested copies prevent profile tables from referencing live DB tables.
+- Validate restored layout positions and sizes through existing FieldKit config normalization. Slots survive /reload; undo remains available only before a reload.
+- Extend Lua 5.1 and optional native Lua 5.0 regression fixtures. All existing chat/HUD routines are untouched.
+- **Alpha test candidate only** — not published or merged.
+
+
 ## 0.4.2 — 2026-11-05 (chat stabilization, runtime diagnostics and compatibility)
 
 Changes since **0.4.1**:

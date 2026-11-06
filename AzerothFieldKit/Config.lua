@@ -11,6 +11,11 @@ local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectT
  lairFrame=true,compactBar=false,lowHealth=true,lowHealthSound=false,
  lowHealthPct=30,targetHealthMode=1,playerHealthMode=1,bossHealthMode=1,chatCopy=false,chatStyle=false,chatFading=false,chatWidth=440,chatHeight=180,chatFontSize=12,chatHistoryLines=200,chatBackgroundOpacity=0,chatShowCopyButton=true,chatFontFace=1,chatBackgroundColor=1,chatTextColor=1,chatOverrideText=false,chatMove=false}
 
+-- Single audited source of defaults for profile-scoped preferences.
+-- State such as run counters, cached monster classifications, UI navigation
+-- and chat contents is intentionally not part of this configuration contract.
+FieldKit.ProfilePreferenceDefaults=defaults
+
 -- Normalize persisted shapes before any frame can consume them. Only the new
 -- addon's in-memory DB is repaired; serialization is the client's responsibility.
 function FieldKit.InitializeSettings(defaultStats)
@@ -93,7 +98,7 @@ function FieldKit.InitializeSettings(defaultStats)
   d.uiPage=map[d.windowPage] or "cards"
  elseif d.uiPage=="appearance" then d.uiPage="look"
  elseif d.uiPage=="display" then d.uiPage="cards" end
- local valid={home=true,combat=true,health=true,bosses=true,alerts=true,cards=true,meter=true,layout=true,look=true,coop=true,map=true,nameplates=true,interface=true}
+ local valid={home=true,combat=true,health=true,bosses=true,alerts=true,cards=true,meter=true,layout=true,look=true,profiles=true,coop=true,map=true,nameplates=true,interface=true}
  if not valid[d.uiPage] then d.uiPage="home" end
  d.panelTab=math.floor(FieldKit.Number(d.panelTab,1,1,16))
  d.playerBarX=FieldKit.Number(d.playerBarX,0,-10000,10000)

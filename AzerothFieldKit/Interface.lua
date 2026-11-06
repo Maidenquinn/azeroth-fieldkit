@@ -194,6 +194,7 @@ function FieldKit.BuildJourneySections(sections,actions)
   {id="meter",title="Combat meter",group="03  INTERFACE",glyph=8,items=meter},
   {id="layout",title="Layout & arrange",group="03  INTERFACE",glyph=14,items=layout},
   {id="look",title="Look",group="03  INTERFACE",glyph=4,items=look},
+  {id="profiles",title="Profiles",group="03  INTERFACE",glyph=14,items={{kind="profiles"}}},
   {id="worldmarkers",title="World markers",glyph=6,group="04  WORLD",items={{kind="worldmarkers"}}},
   {id="map",title="Minimap",glyph=1,group="04  WORLD",items=old.Map.items},
   {id="nameplates",title="Nameplates",glyph=7,group="04  WORLD",items=old.Nameplates.items},
@@ -413,6 +414,210 @@ local function BuildMarkerGallery(page,y)
  row.Refresh();table.insert(page.flow,{frame=row,y=y});return y+730
 end
 
+-- Active profile highlight: gold borders resize with their owning frame
+-- and do not capture mouse input or create textures on each switch.
+local function ProfileActiveBorder(frame)
+ local strips={}
+ local glow=frame:CreateTexture(nil,"BACKGROUND")
+ glow:SetPoint("TOPLEFT",frame,"TOPLEFT",2,-2)
+ glow:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-2,2)
+ glow:SetTexture(T.bronze[1],T.bronze[2],T.bronze[3])
+ glow:SetAlpha(.22)
+ glow:Hide()
+ local anchors={
+  {"TOPLEFT","TOPRIGHT"},
+  {"BOTTOMLEFT","BOTTOMRIGHT"},
+  {"TOPLEFT","BOTTOMLEFT"},
+  {"TOPRIGHT","BOTTOMRIGHT"},
+ }
+ for i=1,4 do
+  local t=frame:CreateTexture(nil,"OVERLAY")
+  t:SetTexture(T.gold[1],T.gold[2],T.gold[3])
+  local c=anchors[i]
+  t:SetPoint(c[1],frame,c[1],0,0)
+  t:SetPoint(c[2],frame,c[2],0,0)
+  if i<=2 then t:SetHeight(2) else t:SetWidth(2) end
+  t:Hide()
+  strips[i]=t
+ end
+ return function(active)
+  if active then glow:Show() else glow:Hide() end
+  for i=1,4 do if active then strips[i]:Show() else strips[i]:Hide() end end
+ end
+end
+
+-- Three-slot HUD profile manager. Updates text only; only explicit button
+-- clicks can save, queue, cancel or delete. Confirm overwrites and deletions.
+local function BuildProfileManager(page,y)
+ local P=FieldKitProfiles
+ local row=CreateFrame("Frame",nil,page)
+ row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y)
+ row:SetWidth(610);row:SetHeight(636)
+ local intro=T.Label(row,"Save all FieldKit preferences per profile, including chat. Game stats and message history stay shared.",0,0,600,38,13,T.muted)
+ local pending=T.Label(row,"",0,42,600,25,13,T.gold)
+ local cancel=T.Button(row,nil,"Undo last switch",0,74,210,29,function()
+  P.Undo();row.Refresh();U.Refresh()
+ end)
+ local slots={}
+ for i=1,3 do
+  local idx=i
+  local card=CreateFrame("Frame",nil,row)
+  card:SetPoint("TOPLEFT",row,"TOPLEFT",0,-(120+(i-1)*152))
+  card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
+  local label=T.Label(card,"Profile "..i,14,8,530,27,18,T.gold,true)
+  local summary=T.Label(card,"",14,35,530,29,12,T.muted)
+  local activeTag=T.Label(card,"",420,8,163,24,13,T.green,true)
+  local showActiveBorder=ProfileActiveBorder(card)
+  -- Native InputBoxTemplate on this Benilla build creates shared visual
+  -- regions for anonymous EditBoxes. The decoration of slot 2/3 can show
+  -- up on slot 1. Use one fully-owned, untemplated EditBox per card instead.
+  local editor=CreateFrame("Frame",nil,card)
+  editor:SetPoint("TOPLEFT",card,"TOPLEFT",14,-36)
+  editor:SetWidth(305);editor:SetHeight(30)
+  T.Surface(editor,"button")
+  local edit=CreateFrame("EditBox",nil,editor)
+  edit:SetPoint("TOPLEFT",editor,"TOPLEFT",10,-4)
+  edit:SetWidth(285);edit:SetHeight(22)
+  edit:SetFont("Fonts\\FRIZQT__.TTF",14,"")
+  edit:SetTextColor(T.text[1],T.text[2],T.text[3])
+  edit:SetAutoFocus(false);edit:SetMaxLetters(40)
+  editor:Hide()
+  local hint=T.Label(card,"",314,38,268,27,12,T.muted)
+  hint:Hide()
+  local rename=T.Button(card,nil,"Rename",474,80,112,29,function()
+   if not FieldKitDB.interfaceProfiles[idx] then return end
+   row.CloseEditors(idx)
+   edit:SetText(P.Name(idx) or "")
+   row.editing=idx
+   row.Refresh()
+   edit:SetFocus()
+  end)
+  local commit=T.Button(card,nil,"Save name",14,80,148,29,function()
+   if P.Rename(idx,edit:GetText()) then
+    row.editing=nil
+    edit:ClearFocus()
+    row.Refresh();U.Refresh()
+   else FieldKit_Text(hint,"Invalid name (1–40 bytes).") end
+  end)
+  local abort=T.Button(card,nil,"Cancel",174,80,148,29,function()
+   row.editing=nil
+   edit:ClearFocus()
+   row.Refresh()
+  end)
+  edit:SetScript("OnEnterPressed",function() commit.callback() end)
+  edit:SetScript("OnEscapePressed",function() abort.callback() end)
+  local save=T.Button(card,nil,"Save current HUD",14,80,155,29,function()
+   if FieldKitDB.interfaceProfiles[idx] and row.confirmSave~=idx then
+    row.confirmSave=idx;row.confirmDelete=nil
+   else P.Save(idx);row.confirmSave=nil end
+   row.Refresh()
+  end)
+  local loadButton=T.Button(card,nil,"Apply now",179,80,160,29,function()
+   P.Load(idx);row.confirmDelete=nil;row.confirmSave=nil;row.Refresh();U.Refresh()
+  end)
+  local del=T.Button(card,nil,"Delete",349,80,120,29,function()
+   if row.confirmDelete==idx then
+    P.Delete(idx);row.confirmDelete=nil
+   else row.confirmDelete=idx;row.confirmSave=nil end
+   row.Refresh()
+  end)
+  local inspect=T.Button(card,nil,"Preview HUD",14,112,174,24,function()
+   if P.Preview(idx) then
+    U.EnsureProfilePreviewBar()
+    U.frame:Hide()
+    U.profilePreviewBar:Show()
+    U.profilePreviewSlot=idx
+    U.UpdateProfilePreviewBar()
+   end
+  end)
+  slots[i]={frame=card,label=label,summary=summary,activeTag=activeTag,showActiveBorder=showActiveBorder,save=save,loadButton=loadButton,delete=del,rename=rename,inspect=inspect,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
+ end
+ function row.Refresh()
+  local d=FieldKitDB
+  if not d then return end
+  local active=d.activeHudProfile
+  FieldKit_Text(pending,active and string.format(FieldKit_L("Active profile: %d"),active) or "No active profile.")
+  FieldKit_Text(cancel,"Undo last switch")
+  if P.undo then cancel:Show() else cancel:Hide() end
+  for i=1,3 do
+   local item=slots[i]
+   local saved=d.interfaceProfiles and d.interfaceProfiles[i]
+   local values=saved and saved.values or nil
+   local anchors=saved and saved.tables and saved.tables.frameAnchors
+   local count=0
+   if type(anchors)=="table" then for _ in pairs(anchors) do count=count+1 end end
+   FieldKit_Text(item.label,P.Name(i) or string.format(FieldKit_L("Profile %d"),i))
+   FieldKit_Text(item.activeTag,"✓ "..FieldKit_L("Current"))
+   local selected=active==i and saved~=nil
+   item.showActiveBorder(selected)
+   if selected then item.activeTag:Show() else item.activeTag:Hide() end
+   if saved then
+    FieldKit_Text(item.summary,string.format(FieldKit_L("Saved · %d positions · opacity %d%%"),count,(values and values.cardOpacity) or 100))
+   else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
+   FieldKit_Text(item.save,row.confirmSave==i and "Confirm overwrite" or "Save current HUD")
+   FieldKit_Text(item.loadButton,active==i and "Active" or "Apply now")
+   FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
+   FieldKit_Text(item.rename,"Rename")
+   FieldKit_Text(item.inspect,"Preview HUD")
+   if saved then item.inspect:Show() else item.inspect:Hide() end
+   if saved and row.editing==i then
+    item.summary:Hide();item.editor:Show();item.hint:Show()
+    FieldKit_Text(item.hint,"Enter to save · Esc to cancel")
+    item.save:Hide();item.loadButton:Hide();item.delete:Hide();item.rename:Hide();item.inspect:Hide()
+    item.commit:Show();item.abort:Show()
+   else
+    item.summary:Show();item.editor:Hide();item.hint:Hide()
+    item.commit:Hide();item.abort:Hide();item.save:Show()
+    if saved then item.loadButton:Show();item.delete:Show();item.rename:Show()
+    else item.loadButton:Hide();item.delete:Hide();item.rename:Hide() end
+   end
+  end
+ end
+ row.Reflow=function(w)
+  row:SetWidth(w);intro:SetWidth(w-12);pending:SetWidth(w-12)
+  local cw=w-6
+  for i=1,3 do
+   local item=slots[i];item.frame:SetWidth(cw);T.Update(item.frame)
+   item.label:SetWidth(cw-198);item.summary:SetWidth(cw-24)
+   item.activeTag:ClearAllPoints()
+   item.activeTag:SetPoint("TOPRIGHT",item.frame,"TOPRIGHT",-14,-8)
+   item.activeTag:SetWidth(160)
+   local bw=(cw-70)/4
+   for j,b in ipairs({item.save,item.loadButton,item.delete,item.rename}) do
+    b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+12),-80)
+    b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
+   end
+   -- Reserve actual space between editor shell and hint. Native glyph
+   -- rendering can overrun a Frame edge even when nominal anchors differ.
+   local editW=math.min(250,cw*.42)
+   item.editor:SetWidth(editW+20);item.edit:SetWidth(editW)
+   T.Update(item.editor)
+   local hintX=14+editW+20+28
+   item.hint:ClearAllPoints()
+   item.hint:SetPoint("TOPLEFT",item.frame,"TOPLEFT",hintX,-42)
+   item.hint:SetWidth(math.max(110,cw-hintX-18))
+   local actionW=math.min(148,(cw-42)/2)
+   item.commit:SetWidth(actionW);item.abort:SetWidth(actionW)
+   item.abort:ClearAllPoints()
+   item.abort:SetPoint("TOPLEFT",item.frame,"TOPLEFT",26+actionW,-80)
+   item.commit.fieldkitLabel:SetWidth(actionW-18)
+   item.abort.fieldkitLabel:SetWidth(actionW-18)
+   item.inspect:SetWidth(math.min(174,cw-28));item.inspect.fieldkitLabel:SetWidth(math.min(156,cw-46));T.Update(item.inspect)
+   T.Update(item.commit);T.Update(item.abort)
+  end
+ end
+ function row.CloseEditors(except)
+  if row.editing and row.editing~=except then
+   slots[row.editing].edit:ClearFocus()
+   row.editing=nil
+  end
+ end
+ row.slots=slots;row.cancel=cancel;row.Refresh()
+ U.profileView=row
+ table.insert(page.flow,{frame=row,y=y})
+ return y+644
+end
+
 -- A small visibility preset only. Existing geometry/style and other addons are
 -- untouched; its in-memory Undo lasts until reload and is never auto-applied.
 function U.EssentialHud(undo)
@@ -454,7 +659,28 @@ local function BuildHome(page)
  page.essential=T.Button(page,nil,"Use essential HUD",0,594,190,30,function() U.EssentialHud(false) end);FieldKit_Text(page.essential,"Use essential HUD")
  page.undoPreset=T.Button(page,nil,"Undo HUD preset",202,594,190,30,function() U.EssentialHud(true) end);FieldKit_Text(page.undoPreset,"Undo HUD preset")
  U.presetUndo=page.undoPreset
- page.contentHeight=640
+ page.quickTitle=T.Label(page,"Quick profiles",0,654,380,27,19,T.gold,true)
+ page.quickHint=T.Label(page,"Switch complete FieldKit settings instantly. Empty slots open the profile manager.",0,684,600,24,12,T.muted)
+ page.quickActiveFrame=CreateFrame("Frame",nil,page)
+ page.quickActiveFrame:SetPoint("TOPLEFT",page,"TOPLEFT",0,-755)
+ page.quickActiveFrame:SetWidth(620);page.quickActiveFrame:SetHeight(42)
+ T.Surface(page.quickActiveFrame,"button")
+ page.quickActiveBorder=ProfileActiveBorder(page.quickActiveFrame)
+ page.quickActive=T.Label(page.quickActiveFrame,"",12,10,592,22,13,T.gold,true)
+ page.quickButtons={}
+ for i=1,3 do
+  local slot=i
+  page.quickButtons[i]=T.Button(page,nil,"",0,719,152,31,function()
+   if FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[slot] then
+    FieldKitProfiles.Load(slot);U.Refresh()
+   else U.Select("profiles") end
+  end)
+ end
+ U.quickProfileButtons=page.quickButtons
+ U.quickProfileActive=page.quickActive
+ U.quickProfileActiveFrame=page.quickActiveFrame
+ U.quickProfileActiveBorder=page.quickActiveBorder
+ page.contentHeight=805
 end
 
 -- Each window subpage has its own content height and stable saved id. Reading a
@@ -509,6 +735,7 @@ function U.BuildPage(section,index)
    table.insert(page.flow,{frame=row,y=y});y=y+110
   elseif item.kind=="combat" then FieldKit_CreateCombatOptions(page);y=570
   elseif item.kind=="worldmarkers" then y=BuildMarkerGallery(page,y)
+  elseif item.kind=="profiles" then y=BuildProfileManager(page,y)
   elseif item.kind=="check" then y=Checkbox(page,item,y)
   elseif item.kind=="slider" then y=Slider(page,item,y)
   elseif item.kind=="choice" then
@@ -552,6 +779,7 @@ end
 function U.Refresh()
  if not U.frame or not FieldKitDB then return end
  U.UpdateRunContext();U.UpdateSharingStatus()
+ if U.profileView and U.profileView.Refresh then U.profileView.Refresh() end
  U.refreshing=true
  for i=1,table.getn(U.controls) do U.controls[i].Refresh() end
  for i=1,table.getn(U.homeCards) do
@@ -561,8 +789,52 @@ function U.Refresh()
   FieldKit_Text(c.state,enabled and "Enabled" or "Disabled")
   local color=enabled and T.green or T.muted;c.state:SetTextColor(color[1],color[2],color[3])
  end
+ if U.headerProfileButtons then
+  for i=1,3 do
+   local b=U.headerProfileButtons[i]
+   local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
+   -- Show user names here too; the compact header remains responsive.
+   -- FontStrings are width-constrained so long names never cover neighbours.
+   local label=saved and (FieldKitProfiles.Name(i) or
+    string.format(FieldKit_L("Profile %d"),i)) or
+    string.format(FieldKit_L("Profile %d · empty"),i)
+   local active=FieldKitDB.activeHudProfile==i
+   FieldKit_Text(b,active and ("✓ "..label) or label)
+   b.fieldkitSelected=active
+   T.State(b,active)
+   if b.fieldkitShowSelected then b.fieldkitShowSelected(active) end
+  end
+ end
+ if U.quickProfileButtons then
+  for i=1,3 do
+   local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
+   local active=FieldKitDB.activeHudProfile==i
+   local label=saved and (FieldKitProfiles.Name(i) or string.format(FieldKit_L("Profile %d"),i)) or
+     string.format(FieldKit_L("Profile %d · empty"),i)
+    if active then label=label.." ✓" end
+   FieldKit_Text(U.quickProfileButtons[i],label)
+   U.quickProfileButtons[i].fieldkitSelected=active
+   T.State(U.quickProfileButtons[i],active)
+  end
+ end
+ if U.quickProfileActive then
+  local active=FieldKitDB.activeHudProfile
+  local saved=active and FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[active]
+  local name=saved and (FieldKitProfiles.Name(active) or string.format(FieldKit_L("Profile %d"),active))
+  FieldKit_Text(U.quickProfileActive,name and (FieldKit_L("In use: ")..name) or FieldKit_L("No active profile."))
+  if U.quickProfileActiveBorder then U.quickProfileActiveBorder(name~=nil) end
+ end
  if U.languageRow then
-  T.State(U.languageRow.en,FieldKit_Language()=="en");T.State(U.languageRow.fr,FieldKit_Language()=="fr")
+  local en=FieldKit_Language()=="en"
+  local fr=FieldKit_Language()=="fr"
+  -- Unlike a momentary hover, selected buttons must stay selected after
+  -- OnLeave and show an unambiguous visible check mark.
+  U.languageRow.en.fieldkitSelected=en
+  U.languageRow.fr.fieldkitSelected=fr
+  T.State(U.languageRow.en,en)
+  T.State(U.languageRow.fr,fr)
+  FieldKit_Text(U.languageRow.en,en and "✓ English" or "English")
+  FieldKit_Text(U.languageRow.fr,fr and "✓ Français" or "Français")
  end
  local reload=(FieldKitDB.compactBar==true)~=(FieldKit.appliedCompactBar==true)
  U.reloadNeeded=reload
@@ -629,6 +901,27 @@ function U.Reflow()
  end
  U.header:SetWidth(w-64);U.headerLine:SetWidth(w-44)
  U.title:SetWidth(w-220);U.subtitle:SetWidth(w-230)
+ -- Always anchor the whole selector as one unit away from the title,
+ -- close button and panel header's drag hit area.
+ -- Fit three named buttons inside a single fixed-width header band.
+ -- Avoid the window close icon, title and native draggable header region.
+ local selectorWidth=math.min(386,math.max(218,w*.40))
+ U.headerProfileLayer:SetWidth(selectorWidth)
+ U.headerProfileLayer:ClearAllPoints()
+ U.headerProfileLayer:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-34,-72)
+ local labelWidth=36
+ local gap=7
+ local buttonWidth=(selectorWidth-labelWidth-gap*3-6)/3
+ U.headerProfiles:SetWidth(labelWidth)
+ for i=1,3 do
+  local b=U.headerProfileButtons[i]
+  b:ClearAllPoints()
+  b:SetPoint("TOPLEFT",U.headerProfileLayer,"TOPLEFT",
+   labelWidth+gap+(i-1)*(buttonWidth+gap),-5)
+  b:SetWidth(buttonWidth)
+  b.fieldkitLabel:SetWidth(buttonWidth-12)
+  T.Update(b)
+ end
  U.status:ClearAllPoints();U.status:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-(h-78));U.contentWidth=content;U.status:SetWidth(U.reloadNeeded and content-166 or content)
  local y=h-44
  -- C10.4: reserve the close button first; distribute footer actions within
@@ -677,6 +970,18 @@ function U.Reflow()
    page.layoutCard:ClearAllPoints();page.layoutCard:SetPoint("TOPLEFT",page,"TOPLEFT",0,-426);page.layoutCard:SetWidth(content-16)
    page.layoutTitle:SetWidth(content-204);page.layoutHint:SetWidth(content-204)
    page.layoutAction:ClearAllPoints();page.layoutAction:SetPoint("TOPRIGHT",page.layoutCard,"TOPRIGHT",-16,-32);T.Update(page.layoutCard)
+    if page.quickButtons then
+     page.quickHint:SetWidth(content-20)
+     page.quickActiveFrame:SetWidth(content-20)
+     page.quickActive:SetWidth(content-44)
+     T.Update(page.quickActiveFrame)
+     local qw=(content-40)/3
+     for i=1,3 do
+      local b=page.quickButtons[i]
+      b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(qw+12),-719)
+      b:SetWidth(qw);b.fieldkitLabel:SetWidth(qw-20);T.Update(b)
+     end
+    end
   end
  end
  U.CloseMenus()
@@ -702,7 +1007,10 @@ end
 
 -- Position reset has a bounded, immediate Undo; feature/style preferences are untouched.
 function U.ResetPositions()
- local snapshot={pos={},anchors={},detached=FieldKitDB.moneyDetached}
+ local snapshot={pos={},anchors={},detached=FieldKitDB.moneyDetached,
+  chatWidth=FieldKitDB.chatWidth,chatHeight=FieldKitDB.chatHeight,
+  chatAnchor=FieldKitDB.chatAnchor and
+   {x=FieldKitDB.chatAnchor.x,y=FieldKitDB.chatAnchor.y} or nil}
  for name,p in pairs(FieldKitDB.pos) do snapshot.pos[name]={p[1],p[2]} end
  for name,a in pairs(FieldKitDB.frameAnchors) do snapshot.anchors[name]={a[1],a[2],a[3],a[4]} end
  U.undoPositions=snapshot;U.context.reset();U.Refresh()
@@ -712,6 +1020,12 @@ function U.UndoPositions()
  local saved=U.undoPositions;if not saved then return end
  FieldKitDB.pos=saved.pos;FieldKitDB.moneyDetached=saved.detached
  FieldKitDB.frameAnchors=saved.anchors
+ FieldKitDB.chatWidth=saved.chatWidth
+ FieldKitDB.chatHeight=saved.chatHeight
+ FieldKitDB.chatAnchor=saved.chatAnchor
+ -- ApplyAnchor uses a cached stamp. Reset it through the public chat
+ -- placement helper without discarding the saved anchor.
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
  U.undoPositions=nil;U.context.positions();U.Refresh()
 end
 
@@ -734,6 +1048,26 @@ function U.Build(sections,context)
  header:SetScript("OnDragStart",function() frame:StartMoving() end)
  header:SetScript("OnDragStop",function() frame:StopMovingOrSizing() end)
  local x=CreateFrame("Button","FieldKitPanelClose",frame,"UIPanelCloseButton");x:SetWidth(26);x:SetHeight(26);x:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-10,-10);x:SetFrameLevel(120);x:SetScript("OnClick",function() frame:Hide() end)
+ -- Keep quick controls on a dedicated transparent layer ABOVE the drag
+ -- capture frame. Otherwise native Benilla 1.12 can route clicks to the
+ -- header's drag handler and make buttons appear inert.
+ U.headerProfileLayer=CreateFrame("Frame",nil,frame)
+ U.headerProfileLayer:SetWidth(386);U.headerProfileLayer:SetHeight(35)
+ U.headerProfileLayer:SetFrameLevel(header:GetFrameLevel()+12)
+ U.headerProfileLayer:EnableMouse(false)
+ U.headerProfiles=T.Label(U.headerProfileLayer,"PROF",0,6,38,23,12,T.muted)
+ U.headerProfileButtons={}
+ for i=1,3 do
+  local slot=i
+  local button=T.Button(U.headerProfileLayer,nil,tostring(i),40+(i-1)*110,5,104,27,function()
+   if FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[slot] then
+    FieldKitProfiles.Load(slot);U.Refresh()
+   else U.Select("profiles") end
+  end)
+  button:SetFrameLevel(U.headerProfileLayer:GetFrameLevel()+1)
+  button.fieldkitShowSelected=ProfileActiveBorder(button)
+  U.headerProfileButtons[i]=button
+ end
  -- The navigation has its own scroll viewport. On 768px screens all pages
  -- remain reachable without shrinking labels or covering the footer.
  local nav=CreateFrame("ScrollFrame","FieldKitV2Navigation",frame)
@@ -842,7 +1176,42 @@ function U.Build(sections,context)
  return frame
 end
 
+-- Detached confirmation bar stays visible while the settings panel is hidden.
+-- Previewing must never obscure the HUD it is meant to inspect.
+function U.EnsureProfilePreviewBar()
+ if U.profilePreviewBar then return end
+ local bar=CreateFrame("Frame","FieldKitProfilePreviewBar",UIParent)
+ bar:SetWidth(520);bar:SetHeight(82)
+ bar:SetPoint("TOP",UIParent,"TOP",0,-105)
+ bar:SetFrameStrata("DIALOG")
+ T.Surface(bar,"window")
+ U.profilePreviewBar=bar
+ U.profilePreviewTitle=T.Label(bar,"HUD preview",12,8,490,23,16,T.gold,true)
+ T.Button(bar,nil,"Apply profile",12,40,150,29,function()
+  if FieldKitProfiles.AcceptPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ T.Button(bar,nil,"Restore previous",174,40,170,29,function()
+  if FieldKitProfiles.CancelPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ T.Button(bar,nil,"Close",356,40,150,29,function()
+  if FieldKitProfiles.CancelPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ bar:Hide()
+end
+function U.UpdateProfilePreviewBar()
+ U.EnsureProfilePreviewBar()
+ local slot=U.profilePreviewSlot
+ FieldKit_Text(U.profilePreviewTitle,"Preview: "..(slot and (FieldKitProfiles.Name(slot) or ("Profile "..slot)) or "HUD"))
+end
+
 function U.Toggle()
+ if FieldKitProfiles and FieldKitProfiles.preview then return end
  if FieldKit.layoutEditing then U.SetLayoutEditing(false,true)
  elseif U.frame:IsShown() then U.frame:Hide()
  else U.Reflow();U.frame:Show();U.Refresh() end

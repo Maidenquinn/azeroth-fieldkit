@@ -125,6 +125,20 @@ local function MoveControl()
  if FieldKitDB and FieldKitDB.chatStyle and FieldKitDB.chatMove then moveHandle:Show()
  else moveHandle:Hide() end
 end
+-- Reset only chat geometry/anchor, keeping the current profile palette,
+-- font and existing messages. Prefer the native dimensions measured before
+-- FieldKit styling; fall back to the validated default dimensions.
+function FieldKit.ResetChatLayout()
+ local db=FieldKitDB
+ if not db then return false end
+ local baseline=styleBefore
+ db.chatWidth=Clamp(baseline and baseline.width,440,280,800)
+ db.chatHeight=Clamp(baseline and baseline.height,180,100,450)
+ FieldKit.ResetChatPosition()
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+ return true
+end
+
 function FieldKit.ResetChatPosition()
  FinishMove()
  if FieldKitDB then FieldKitDB.chatAnchor=nil end
@@ -365,7 +379,7 @@ end
 -- in-memory history; otherwise clearing would irreversibly destroy messages
 -- that arrived before FieldKit started observing the chat.
 function FieldKit.RecolorDisplayedChat()
- if not FieldKitDB or not FieldKitDB.chatStyle or replaying then return false end
+ if not FieldKitDB or replaying then return false end
  local f=NativeChat()
  if not f or not f.GetNumMessages or not f.Clear then return false end
  local known=table.getn(displayHistory)

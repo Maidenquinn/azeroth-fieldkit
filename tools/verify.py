@@ -26,7 +26,58 @@ def runtime(saved=None):
  for name in files:l.execute((root/name).read_text(encoding='utf8'),name=name)
  return l
 
+# The profile-scope gate rejects new persisted settings until assigned either
+# to a profile or to a documented shared gameplay/operational category.
+exec(compile((base/'tools/profile_scope_audit.py').read_text(encoding='utf8'),
+             str(base/'tools/profile_scope_audit.py'),'exec'),
+     {'__name__':'__main__','__file__':str(base/'tools/profile_scope_audit.py')})
+# Synthetic legacy 0.4.2 flat save: explicitly retain opt-outs and layout.
+# This is not a substitute for an authentic saved file from that release.
+legacy_042=runtime('{cardOpacity=37,moneyFrame=false,combatTextX=-217,chatWidth=560,language="fr",frameAnchors={FieldKitLeftStack={"TOPLEFT","TOPLEFT",83,-96}},pos={FieldKitMoneyFrame={-14,-300}}}')
+legacy_042.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+legacy_042.execute((base/'tests/migration_042.lua').read_text(encoding='utf8'))
+legacy_042.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+legacy_042_reload=runtime(legacy_042.eval('SNAPSHOT(FieldKitDB)'))
+legacy_042_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+legacy_042_reload.execute('assert(FieldKitDB.cardOpacity==37 and FieldKitDB.moneyFrame==false and FieldKitDB.combatTextX==-217 and FieldKitDB.chatWidth==560 and FieldKitDB.language=="fr" and FieldKitDB.activeHudProfile==1)')
+print('PASS synthetic 0.4.2 flat SavedVariables migration')
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
+profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
+profile_chat=runtime();profile_chat.execute((base/'tests/profile_chat.lua').read_text(encoding='utf8'))
+profile_ui=runtime();profile_ui.execute((base/'tests/profile_ui.lua').read_text(encoding='utf8'))
+# Verify immediate switching survives SavedVariables serialization; legacy
+# alpha.2 pending loads are still migrated at VARIABLES_LOADED.
+profile_stage=runtime()
+profile_stage.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+FieldKitDB.cardOpacity=51;FieldKitDB.frameAnchors.FieldKitLeftStack={"TOPLEFT","TOPLEFT",71,-91}
+assert(FieldKitProfiles.Save(1))
+FieldKitDB.cardOpacity=94;FieldKitDB.chatWidth=720
+assert(FieldKitProfiles.Load(1))
+assert(FieldKitDB.cardOpacity==51 and FieldKitDB.profilePendingSlot==nil)
+''')
+profile_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+profile_reload=runtime(profile_stage.eval('SNAPSHOT(FieldKitDB)'))
+profile_reload.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==440) -- chat belongs to slot 1
+assert(FieldKitDB.frameAnchors.FieldKitLeftStack[3]==71)
+assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile==1)
+assert(FieldKitDB.interfaceProfiles[1].tables.frameAnchors.FieldKitLeftStack[3]==71)
+''')
+legacy_stage=runtime()
+legacy_stage.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+FieldKitDB.cardOpacity=34;assert(FieldKitProfiles.Save(2))
+FieldKitDB.cardOpacity=89;FieldKitDB.profilePendingSlot=2
+''')
+legacy_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+legacy_reload=runtime(legacy_stage.eval('SNAPSHOT(FieldKitDB)'))
+legacy_reload.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+assert(FieldKitDB.cardOpacity==34 and FieldKitDB.activeHudProfile==2)
+assert(FieldKitDB.profilePendingSlot==nil)
+''')
 fresh=runtime();fresh.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
 fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))
 assert fresh.globals().FieldKitDB.uiPage=='home'

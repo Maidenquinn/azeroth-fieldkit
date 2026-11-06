@@ -1,13 +1,13 @@
 {
-  "version": "0.4.2",
+  "version": "0.5.0-rc.1",
   "maintainerAcceptedForPublication": true,
-  "maintainerAcceptanceDate": "2026-11-05",
+  "maintainerAcceptanceDate": "2026-11-06",
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
   "inGameTestByAgent": false,
   "githubPrerelease": false,
-  "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved.",
+  "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true
 }
