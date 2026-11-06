@@ -1,6 +1,6 @@
 # Azeroth FieldKit 0.5.0 — Release notes (compared with 0.4.2)
 
-> Prepared for publication. RC.1 has passed CI #659 and was accepted in-game by the maintainer. This is **not** a published release; distribution approval and real 0.4.2 save migration have not been independently verified.
+> Final release based on the maintainer-accepted RC.1. Automated checks and synthetic 0.4.2-style migration passed. Authentic old-save migration has not been independently verified.
 
 ## HUD profiles — new
 
@@ -48,4 +48,4 @@
 
 **Compatibility note:** No authentic 0.4.2 SavedVariables file was available for migration testing. Automated fixtures and an in-game RC.1 test are not equivalent to a real old-save migration test. Keep a backup and report any unexpected change.
 
-**Publication status:** Release notes prepared, not a public GitHub release. Rights and package-specific distribution permission still require confirmation.
+**Publication:** Maintainer confirmed distribution authorization on 2026-11-06; original notices and licenses remain included. Authorization was reported by the maintainer, not independently certified.
