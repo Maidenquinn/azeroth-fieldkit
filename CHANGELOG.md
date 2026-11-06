@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.5.0-alpha.4 — 2026-11-06 (header quick-selector hitbox correction, unpublished)
+
+- Keep the already accepted one-click Home shortcuts, immediate 1/2/3 profile switching, Undo, saved layouts, chat isolation and FR/EN UI from alpha.3.
+- Put the universal profile shortcuts in a dedicated frame layer above the draggable settings-header hit area, preventing pointer-event competition on the Benilla-derived client.
+- Anchor the three selectors as a single stable unit near the header's top-right edge, apart from the title and close button.
+- Regression tests now track frame levels and verify that the selector's buttons sit above the drag header and remain clickable after layout reflow.
+- This addresses the only unverified/KO item in the user alpha.3 recipe, without changing profile application or native HUD drag logic.
+- **Unpublished client review**: verify the header selector's visibility and real mouse clicks before merging.
+
+
+## 0.5.0-alpha.3 — 2026-11-05 (unpublished live HUD profile switching)
+
+- Three compact profile shortcuts are now available in the FieldKit header on every page, with an active selection indicator. The Home page also offers quick access to all three profiles.
+- Switching an existing profile immediately reapplies FieldKit-owned HUD visibility, grouping, positions, sizes and visual style without calling ReloadUI.
+- The visual profile manager now offers Apply now and one-step Undo of the previous live layout. Save and Delete confirmations are unchanged.
+- Profiles continue to exclude chat settings/messages, gameplay state and party sync. Native compact action bar configuration remains unchanged during live profile switches; it requires the existing dedicated reload flow.
+- Safe live application is blocked while a FieldKit window is actively dragging or the layout editor is open. Failed application attempts restore the previous settings.
+- Corrected French/English localization for saved and empty slots, profile status and quick actions.
+- Expanded the profile tests to cover immediate visibility/positions, persistence, undo, Home/header shortcuts and language changes.
+- **Unpublished alpha:** the live game client must verify the new behavior before any merge or release.
+
+
 ## 0.5.0-alpha.2 — 2026-11-05 (unpublished visual HUD profile manager)
 
 - New HUD profiles page in the interface navigation with 3 profile cards, saved layout summaries, Save, staged Load and Delete buttons.

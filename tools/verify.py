@@ -29,8 +29,8 @@ def runtime(saved=None):
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
 profile_ui=runtime();profile_ui.execute((base/'tests/profile_ui.lua').read_text(encoding='utf8'))
-# Simulate a real SavedVariables round-trip. Staged loading must occur only on
-# the next VARIABLES_LOADED and preserve unrelated preferences.
+# Verify immediate switching survives SavedVariables serialization; legacy
+# alpha.2 pending loads are still migrated at VARIABLES_LOADED.
 profile_stage=runtime()
 profile_stage.execute('''
 fire(FieldKitFrame,"VARIABLES_LOADED")
@@ -38,7 +38,7 @@ FieldKitDB.cardOpacity=51;FieldKitDB.frameAnchors.FieldKitLeftStack={"TOPLEFT","
 assert(FieldKitProfiles.Save(1))
 FieldKitDB.cardOpacity=94;FieldKitDB.chatWidth=720
 assert(FieldKitProfiles.Load(1))
-assert(FieldKitDB.cardOpacity==94 and FieldKitDB.profilePendingSlot==1)
+assert(FieldKitDB.cardOpacity==51 and FieldKitDB.profilePendingSlot==nil)
 ''')
 profile_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 profile_reload=runtime(profile_stage.eval('SNAPSHOT(FieldKitDB)'))
@@ -48,6 +48,19 @@ assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==720)
 assert(FieldKitDB.frameAnchors.FieldKitLeftStack[3]==71)
 assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile==1)
 assert(FieldKitDB.interfaceProfiles[1].tables.frameAnchors.FieldKitLeftStack[3]==71)
+''')
+legacy_stage=runtime()
+legacy_stage.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+FieldKitDB.cardOpacity=34;assert(FieldKitProfiles.Save(2))
+FieldKitDB.cardOpacity=89;FieldKitDB.profilePendingSlot=2
+''')
+legacy_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+legacy_reload=runtime(legacy_stage.eval('SNAPSHOT(FieldKitDB)'))
+legacy_reload.execute('''
+fire(FieldKitFrame,"VARIABLES_LOADED")
+assert(FieldKitDB.cardOpacity==34 and FieldKitDB.activeHudProfile==2)
+assert(FieldKitDB.profilePendingSlot==nil)
 ''')
 fresh=runtime();fresh.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
 fresh.execute((base/'tests/security.lua').read_text(encoding='utf8'))

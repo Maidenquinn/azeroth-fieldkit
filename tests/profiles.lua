@@ -29,17 +29,8 @@ FieldKitDB.chatWidth=670
 FieldKitDB.partyDetailSync=false
 FieldKitDB.known.TestCreature="boss"
 FieldKitDB.chestsOpened=100
--- Switching is queued; no live preferences or frames should be mutated.
-assert(P.Load(1))
-assert(FieldKitDB.profilePendingSlot==1)
-assert(FieldKitDB.cardOpacity==95 and not FieldKitDB.linkLeftCards)
-assert(FieldKitDB.frameAnchors.FieldKitLeftStack[1]=="TOPRIGHT")
-assert(FieldKitDB.chatWidth==670 and FieldKitDB.partyDetailSync==false)
-assert(FieldKitDB.known.TestCreature=="boss" and FieldKitDB.chestsOpened==100)
-assert(P.Undo() and FieldKitDB.profilePendingSlot==nil)
-assert(not P.Undo())
-assert(P.Load(1))
-assert(P.ActivatePending())
+-- Alpha.3: selecting a profile immediately applies the captured FieldKit HUD.
+assert(P.Load(1),"live HUD profile load must succeed")
 assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile==1)
 assert(FieldKitDB.cardOpacity==65 and FieldKitDB.linkLeftCards)
 assert(FieldKitDB.frameAnchors.FieldKitLeftStack[3]==125)
@@ -47,7 +38,15 @@ assert(FieldKitDB.pos.FieldKitStatsFrame[1]==-60)
 assert(FieldKitDB.cardSizes.FieldKitStatsFrame.width==420)
 assert(FieldKitDB.chatWidth==670 and FieldKitDB.partyDetailSync==false)
 assert(FieldKitDB.known.TestCreature=="boss" and FieldKitDB.chestsOpened==100)
+-- Undo immediately restores the precise previous settings without a reload.
+assert(P.Undo())
+assert(FieldKitDB.cardOpacity==95 and not FieldKitDB.linkLeftCards)
+assert(FieldKitDB.frameAnchors.FieldKitLeftStack[1]=="TOPRIGHT")
+assert(FieldKitDB.cardSizes.FieldKitStatsFrame.width==300)
+assert(FieldKitDB.chatWidth==670 and FieldKitDB.chestsOpened==100)
 assert(not P.Undo())
+-- A second live switch remains available in the same play session.
+assert(P.Load(1) and FieldKitDB.cardOpacity==65)
 assert(P.Delete(1) and not P.Load(1))
 assert(P.Save(2) and P.Save(3) and not P.Save(999))
 local messages={}
@@ -58,10 +57,10 @@ assert(string.find(messages[#messages],"2:saved",1,true))
 SlashCmdList.FieldKit("profile save 1")
 assert(FieldKitDB.interfaceProfiles[1])
 SlashCmdList.FieldKit("profile load 1")
-assert(string.find(messages[#messages],"/reload",1,true))
-assert(FieldKitDB.profilePendingSlot==1)
+assert(string.find(messages[#messages],"applied",1,true))
+assert(FieldKitDB.activeHudProfile==1)
 SlashCmdList.FieldKit("profile undo")
-assert(FieldKitDB.profilePendingSlot==nil)
+assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile~=1)
 SlashCmdList.FieldKit("profile delete 1")
 assert(not FieldKitDB.interfaceProfiles[1])
 DEFAULT_CHAT_FRAME.AddMessage=original

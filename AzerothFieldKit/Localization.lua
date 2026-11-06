@@ -3,6 +3,19 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["HUD profile %d"]="Profil HUD %d",
+ ["Profile %d"]="Profil %d",
+ ["Profile %d · active"]="Profil %d · actif",
+ ["Profile %d · empty"]="Profil %d · vide",
+ ["Active HUD profile: %d"]="Profil HUD actif : %d",
+ ["No active HUD profile."]="Aucun profil HUD actif.",
+ ["Undo last switch"]="Annuler le dernier changement",
+ ["Apply now"]="Appliquer maintenant",
+ ["Active"]="Actif",
+ ["Saved · %d positions · opacity %d%%"]="Enregistré · %d positions · opacité %d %%",
+ ["Empty slot — save your current HUD to start."]="Emplacement vide — enregistre ton HUD pour commencer.",
+ ["Quick HUD profiles"]="Profils HUD rapides",
+ ["Switch layouts instantly. Empty slots open the profile manager."]="Change de disposition immédiatement. Un emplacement vide ouvre la gestion des profils.",
  ["HUD profiles"]="Profils HUD",
  ["Save FieldKit HUD layouts. Chat and gameplay data are not included."]="Enregistre les dispositions du HUD FieldKit. Le chat et les données de jeu sont exclus.",
  ["No pending profile change."]="Aucun changement de profil en attente.",
