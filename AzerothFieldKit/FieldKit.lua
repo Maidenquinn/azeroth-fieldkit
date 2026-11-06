@@ -2920,6 +2920,7 @@ local function RefreshNativeData()
 	dataClock.phase=phase;dataClock.zone=zone;dataClock.rt=rt
 	dataClock.statsStamp=AZS_STATS_UPDATED;dataClock.statsSource=AZS_STATS
 	UpdateMoneyFrame();UpdateMeterFrames();UpdateChestPins();UpdateLairFrame()
+ if RefreshCollapseDock then RefreshCollapseDock() end
 end
 
 local plateElapsed, layoutElapsed = 0, 0
