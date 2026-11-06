@@ -187,6 +187,27 @@ assert(d.activeHudProfile==activeBefore)
 assert(d.chatWidth==widthBefore)
 FieldKit.ApplyHUDProfileLive=applyLive
 
+-- Pending activation must fail closed on a corrupt saved snapshot and
+-- must never throw if a settings initializer fails during application.
+assert(P.Save(1))
+assert(P.Save(2))
+local pendingSlot=d.interfaceProfiles[1]
+local pendingAnchor=pendingSlot.tables.chatAnchor
+pendingSlot.tables.chatAnchor={x=5,oversized=string.rep("p",513)}
+d.profilePendingSlot=1
+local pendingWidth=d.chatWidth
+local pendingActive=d.activeHudProfile
+assert(not P.ActivatePending())
+assert(d.chatWidth==pendingWidth and d.activeHudProfile==pendingActive)
+assert(d.profilePendingSlot==nil)
+pendingSlot.tables.chatAnchor=pendingAnchor
+local originalInitialize=FieldKit.InitializeSettings
+FieldKit.InitializeSettings=function() error("injected pending settings failure") end
+d.profilePendingSlot=1
+assert(pcall(function() assert(not P.ActivatePending()) end))
+assert(d.activeHudProfile==pendingActive)
+FieldKit.InitializeSettings=originalInitialize
+
 -- Final unsaved change must be captured when the game writes SavedVariables.
 assert(P.Save(2))
 d.chatFontSize=18;d.chatBackgroundOpacity=55;d.lowHealthPct=44
