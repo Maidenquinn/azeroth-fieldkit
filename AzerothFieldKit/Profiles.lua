@@ -291,6 +291,9 @@ function P.Save(number)
  -- Save-as creates/updates the selected slot and makes it the active
  -- editing context. Do NOT overwrite the previous slot's stored snapshot.
  local old=FieldKitDB.interfaceProfiles[slot]
+ -- Never overwrite a damaged slot implicitly: it may be the player's
+ -- only recoverable copy. Recovery requires manual SavedVariables repair.
+ if old~=nil and not ValidSnapshotSlot(old) then return false end
  local updated=Capture()
  if not updated then return false end
  updated.name=type(old)=="table" and old.name or nil
@@ -396,7 +399,8 @@ function P.Command(message)
   local labels={}
   for i=1,3 do
    table.insert(labels,tostring(i)..":"..
-    (FieldKitDB.interfaceProfiles[i] and "saved" or "empty"))
+    (FieldKitDB.interfaceProfiles[i]==nil and "empty" or
+     (ValidSnapshotSlot(FieldKitDB.interfaceProfiles[i]) and "saved" or "damaged")))
   end
   Say("Profile slots: "..table.concat(labels,", ")..
    ". Usage: /fieldkit profile save|load|delete 1-3, undo")
