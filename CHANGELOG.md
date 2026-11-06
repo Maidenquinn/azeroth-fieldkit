@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-rc.1 — 2026-11-06 (release candidate, not published)
+
+- Three independent, named HUD profiles with immediate switching, preview, undo, and quick access from Home and the header.
+- Preserve individual HUD layout and display preferences, including combat text, chat appearance, world markers, and native window collapse states.
+- Add a movable bottom-right dock for collapsed windows; its position persists per profile after `/reload`.
+- Improve FR/EN labels and live language refresh for the new profile and dock controls.
+- Harden profile persistence: stage and validate snapshots before applying; roll back failed switches; preserve damaged slots for recovery rather than silently deleting or overwriting them.
+- Expand automated profile, UI, serialization, rollback, and packaging regression checks; CI #659 passed for the candidate.
+- In-game acceptance reported for RC.1. Migration using a real v0.4.2 SavedVariables file and distribution permissions remain publication gates.
+
 ## 0.5.0-alpha.12 — 2026-11-06 (active profile visual polish, unpublished)
 
 - Clearly mark the currently active named profile with a persistent **gold border and subtle bronze background** in the top-right PROF selector and in its manager card.
