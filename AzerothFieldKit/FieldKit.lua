@@ -2516,6 +2516,19 @@ end
 -- A detached, compact dock keeps folded windows out of the play area.
 -- The original frames retain their saved geometry and can be restored in one click.
 local collapseDock,collapseDockButtons
+local function DockEntries()
+ local native=FieldKitNativeTools and FieldKitNativeTools.frames or {}
+ return {
+  {frame=FieldKitRunMode and FieldKitRunMode.frame,label="Mode de jeu"},
+  {frame=meterFrame,label="Dégâts"},
+  {frame=takenFrame,label="Dégâts subis"},
+  {frame=lairFrame,label="Antres"},
+  {frame=statsFrame,label="Statistiques",setting="statsCollapsed"},
+  {frame=gearFrame,label="Accessoires / Sorts",setting="gearCollapsed"},
+  {frame=native[1],label="Effets"},
+  {frame=native[3],label="Rappels de partie"},
+ }
+end
 local function BuildCollapseDock()
  if collapseDock then return end
  collapseDock=CreateFrame("Frame","FieldKitCollapseDock",UIParent)
@@ -2523,18 +2536,20 @@ local function BuildCollapseDock()
  collapseDock:SetWidth(164);collapseDock:SetHeight(24)
  collapseDock:SetPoint("BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-18,110)
  collapseDockButtons={}
- local labels={"","Dégâts","Dégâts subis","Antres","Statistiques","Accessoires / Sorts"}
- for i=1,6 do
+ for i=1,8 do
   local index=i
-  local button=FieldKitTheme.Button(collapseDock,nil,labels[i],0,0,164,23,nil)
+  local button=FieldKitTheme.Button(collapseDock,nil,"",0,0,164,23,nil)
   button:ClearAllPoints()
   button:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,0)
   button:SetScript("OnClick",function()
-   if index==2 or index==3 or index==4 then
-    local f=index==2 and meterFrame or index==3 and takenFrame or lairFrame
-    if f and f.mashCollapseButton then f.mashCollapseButton:Click() end
-   elseif index==5 then DB.statsCollapsed=false;UpdateStatsFrame()
-   elseif index==6 then DB.gearCollapsed=false;UpdateGearFrame() end
+   local entry=DockEntries()[index]
+   if not entry or not entry.frame then return end
+   if entry.setting then
+    DB[entry.setting]=false
+    if index==5 then UpdateStatsFrame() else UpdateGearFrame() end
+   elseif entry.frame.mashCollapseButton then
+    entry.frame.mashCollapseButton:Click()
+   end
    if RefreshCollapseDock then RefreshCollapseDock() end
   end)
   collapseDockButtons[i]=button
@@ -2543,28 +2558,35 @@ end
 RefreshCollapseDock=function()
  if not DB then return end
  BuildCollapseDock()
- local frames={nil,meterFrame,takenFrame,lairFrame,statsFrame,gearFrame}
- local states={false,meterFrame and meterFrame.mashCollapsed,takenFrame and takenFrame.mashCollapsed,
-  lairFrame and lairFrame.mashCollapsed,DB.statsCollapsed,DB.gearCollapsed}
+ local entries=DockEntries()
  local count=0
  local changed=false
- for i=1,6 do
-  local f=frames[i]
-  local active=states[i] and f and (f:IsShown() or f.fieldkitDockHidden)
+ for i=1,table.getn(entries) do
+  local entry=entries[i]
+  local f=entry.frame
+  local folded=entry.setting and DB[entry.setting] or
+   (f and DB.collapsedWindows and DB.collapsedWindows[f:GetName()])
+  local active=folded and f and (f:IsShown() or f.fieldkitDockHidden)
+  local button=collapseDockButtons[i]
   if active then
    count=count+1
-   collapseDockButtons[i]:ClearAllPoints()
-   collapseDockButtons[i]:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,(count-1)*26)
-   collapseDockButtons[i]:Show()
+   FieldKit_Text(button,FieldKit_L(entry.label))
+   button:ClearAllPoints()
+   button:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,(count-1)*26)
+   button:Show()
    if not f.fieldkitDockHidden or f:IsShown() then changed=true end
    f:Hide()
    f.fieldkitDockHidden=true
   else
-   collapseDockButtons[i]:Hide()
+   button:Hide()
    if f and f.fieldkitDockHidden then
     f.fieldkitDockHidden=nil
     changed=true
-    if (i==5 and DB.statsFrame) or (i==6 and DB.gearFrame) or (i>=2 and i<=4) then f:Show() end
+    -- A disabled or empty native panel must not be resurrected by the dock.
+    if (i==5 and DB.statsFrame) or (i==6 and DB.gearFrame) or
+     (i==1 and DB.runModeCard) or (i==7 and DB.effectsFrame) or
+     (i==8 and (DB.nextBossCard or DB.storedLevelsBadge)) or
+     (i>=2 and i<=4) then f:Show() end
    end
   end
  end
@@ -2994,6 +3016,8 @@ frame:SetScript("OnUpdate", function()
   FieldKitDiagnostics.Mark("snapshot")
 		FieldKitNative.Watch();RefreshNativeData();FieldKitRunMode.Update();FieldKitCoop.Update()
 		FieldKitNativeTools.Update()
+  -- Native renderers may show collapsed panels again; dock them after all updates.
+  if RefreshCollapseDock then RefreshCollapseDock() end
 		-- Loadout tooltip scans hitch hard; keep them off the choosing overlay path.
 		if not choosing then FieldKitLoadout.Update() end
 		FieldKitScreenLayers.Update()
