@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0-alpha.11 — 2026-11-06 (explicit current profile indicators, unpublished)
+
+- The persistent PROF selector now displays a visible check mark before the current profile name, in addition to its selected-button styling; the indicator updates instantly when switching.
+- The Profiles manager adds a standalone green "✓ Current" / "✓ Actif" marker on the selected saved slot card, with no active marker shown on inactive cards.
+- Home's Quick profiles section now explicitly states "Current profile: <name>" / "Profil actif : <nom>", while keeping its existing shortcut button highlight and selected check mark.
+- All three indicators survive FR/EN locale switches, settings page navigation and /reload, and update from the same activeHudProfile source of truth.
+- Updated UI regression tests for current/inactive card badges, named header indicator, Home active label and immediate switching.
+- No changes to chat, profile storage, native HUD movement or game-data handling.
+- **Unpublished client review build:** verify visual readability and live switching before merging.
+
+
 ## 0.5.0-alpha.10 — 2026-11-06 (named header profiles and rename hint spacing, unpublished)
 
 - Show the saved custom profile names in the persistent top-right PROF shortcuts instead of only 1/2/3. Empty slots show localized placeholders and the active button remains highlighted.
