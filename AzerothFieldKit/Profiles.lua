@@ -188,17 +188,34 @@ end
 local function ApplySnapshot(snapshot)
  if not Valid(snapshot) then return false end
  local d=FieldKitDB;local list=PreferenceKeys()
+ -- Stage and validate every copy before mutating the live database.
+ -- An oversized/corrupted saved slot must never partially overwrite it.
+ local stagedValues,stagedTables={},{}
  for i=1,table.getn(list) do
   local key=list[i]
-  -- Explicit tombstones prevent nil/optional values leaking from the
-  -- previous slot. A legacy snapshot is hydrated by Init beforehand.
   local value=snapshot.values[key]
-  if value~=nil then d[key]=Copy(value)
-  elseif snapshot.nilValues and snapshot.nilValues[key] then d[key]=nil end
+  if value~=nil then
+   local copy=Copy(value)
+   if copy==nil then return false end
+   stagedValues[key]=copy
+  elseif not (snapshot.nilValues and snapshot.nilValues[key]) then
+   return false
+  end
  end
  for i=1,table.getn(tableKeys) do
   local key=tableKeys[i]
-  d[key]=Copy(snapshot.tables[key] or {}) or {}
+  if type(snapshot.tables[key])~="table" then return false end
+  local copy=Copy(snapshot.tables[key])
+  if copy==nil then return false end
+  stagedTables[key]=copy
+ end
+ for i=1,table.getn(list) do
+  local key=list[i]
+  d[key]=stagedValues[key]
+ end
+ for i=1,table.getn(tableKeys) do
+  local key=tableKeys[i]
+  d[key]=stagedTables[key]
  end
  FieldKit.InitializeSettings({})
  if FieldKitCombat then FieldKitCombat.owner=nil;FieldKitCombat.Ensure() end
