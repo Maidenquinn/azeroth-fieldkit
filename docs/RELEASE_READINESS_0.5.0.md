@@ -9,10 +9,10 @@
 
 ## Automated verification before publication
 
-- [x] RC.1 CI #659 green; audit, verification and packaging succeeded (commit 4971a86).
+- [x] RC.1 CI #659 green; synthetic migration CI #673 green (commit f62f921).
 - [x] Profile regression tests pass, including dock position and collapsed states (CI #652).
 - [x] Automated Lua 5.1 fixture and source checks pass on CI #659. Native Lua 5.0 and game-specific behavior are not fully proven by CI.
-- [ ] Validate fresh installation and migration from stable v0.4.2 using copies of SavedVariables.
+- [x] Synthetic 0.4.2-style flat SavedVariables fixture preserves settings, creates and loads a profile, and survives simulated reload (CI #673).\n- [ ] Migration from an authentic stable v0.4.2 SavedVariables file remains unverified (no copy available).
 - [x] Verify known preference keys in profile capture (combat text, gryphons, money); broader migration with a real v0.4.2 save remains open.
 - [x] New dock and preview labels integrated into FR/EN dictionary (CI #636); final visual review remains open.
 - [x] CI #659 produced RC.1 runtime ZIP with .toc/runtime version aligned; packaging gate excludes development files.
@@ -26,4 +26,4 @@
 4. Merge, tag and publish only after explicit user authorization.
 5. Keep the future HUD redesign and performance expansion for the version after v0.5.0.
 
-**Status:** RC.1 accepted in-game; migration from real v0.4.2 SavedVariables and rights/permission review remain unresolved. No public release authorized.
+**Status:** RC.1 accepted in-game; CI #673 synthetic migration passed. Authentic 0.4.2 migration and rights/permission review remain unresolved. No public release authorized.
