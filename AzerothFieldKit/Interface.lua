@@ -452,7 +452,7 @@ local function BuildProfileManager(page,y)
  local P=FieldKitProfiles
  local row=CreateFrame("Frame",nil,page)
  row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y)
- row:SetWidth(610);row:SetHeight(786)
+ row:SetWidth(610);row:SetHeight(636)
  local intro=T.Label(row,"Save all FieldKit preferences per profile, including chat. Game stats and message history stay shared.",0,0,600,38,13,T.muted)
  local pending=T.Label(row,"",0,42,600,25,13,T.gold)
  local cancel=T.Button(row,nil,"Undo last switch",0,74,210,29,function()
@@ -521,19 +521,17 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  local inspect=T.Button(card,nil,"Preview settings",14,112,174,24,function()
-   row.previewSlot=row.previewSlot==idx and nil or idx
-   row.Refresh()
+  local inspect=T.Button(card,nil,"Preview HUD",14,112,174,24,function()
+   if P.Preview(idx) then
+    U.EnsureProfilePreviewBar()
+    U.frame:Hide()
+    U.profilePreviewBar:Show()
+    U.profilePreviewSlot=idx
+    U.UpdateProfilePreviewBar()
+   end
   end)
   slots[i]={frame=card,label=label,summary=summary,activeTag=activeTag,showActiveBorder=showActiveBorder,save=save,loadButton=loadButton,delete=del,rename=rename,inspect=inspect,editor=editor,edit=edit,hint=hint,commit=commit,abort=abort}
  end
- -- Read-only inspection of the saved snapshot. No profile activation,
- -- settings initialization or native HUD writes occur when opening it.
- local preview=CreateFrame("Frame",nil,row)
- preview:SetPoint("TOPLEFT",row,"TOPLEFT",0,-588)
- preview:SetWidth(600);preview:SetHeight(170);T.Surface(preview,"card")
- local previewTitle=T.Label(preview,"Saved profile preview",14,10,560,25,17,T.gold,true)
- local previewBody=T.Label(preview,"",14,39,560,119,13,T.text)
  function row.Refresh()
   local d=FieldKitDB
   if not d then return end
@@ -560,7 +558,7 @@ local function BuildProfileManager(page,y)
    FieldKit_Text(item.loadButton,active==i and "Active" or "Apply now")
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
    FieldKit_Text(item.rename,"Rename")
-   FieldKit_Text(item.inspect,row.previewSlot==i and "Close preview" or "Preview settings")
+   FieldKit_Text(item.inspect,"Preview HUD")
    if saved then item.inspect:Show() else item.inspect:Hide() end
    if saved and row.editing==i then
     item.summary:Hide();item.editor:Show();item.hint:Show()
@@ -574,31 +572,9 @@ local function BuildProfileManager(page,y)
     else item.loadButton:Hide();item.delete:Hide();item.rename:Hide() end
    end
   end
-  local selected=row.previewSlot and d.interfaceProfiles and d.interfaceProfiles[row.previewSlot]
-  if not selected then
-   row.previewSlot=nil;preview:Hide()
-  else
-   preview:Show()
-   local v=type(selected.values)=="table" and selected.values or {}
-   local t=type(selected.tables)=="table" and selected.tables or {}
-   local positions=type(t.frameAnchors)=="table" and t.frameAnchors or {}
-   local n=0;for _ in pairs(positions) do n=n+1 end
-   FieldKit_Text(previewTitle,(P.Name(row.previewSlot) or ("Profile "..row.previewSlot)).." — saved settings (read-only)")
-   local function ShowValue(value)
-    if type(value)=="boolean" then return value and "On" or "Off" end
-    if type(value)=="number" or type(value)=="string" then return tostring(value) end
-    return "Default"
-   end
-   FieldKit_Text(previewBody,
-    "Positions: "..n.."  |  Opacity: "..ShowValue(v.cardOpacity).."%  |  Language: "..ShowValue(v.language)..
-    "\nChat: "..ShowValue(v.chatWidth).." x "..ShowValue(v.chatHeight).."  |  Font: "..ShowValue(v.chatFontSize)..
-    "\nBoss style: "..ShowValue(v.bossStyle).."  |  Nameplates filter: "..ShowValue(v.hidePlates)..
-    "\nCombat text: "..ShowValue(v.combatText).."  |  World markers: "..ShowValue(type(t.worldMarkerSettings)=="table" and t.worldMarkerSettings.enabled))
-  end
  end
  row.Reflow=function(w)
   row:SetWidth(w);intro:SetWidth(w-12);pending:SetWidth(w-12)
-  preview:SetWidth(w-6);previewTitle:SetWidth(w-34);previewBody:SetWidth(w-34);T.Update(preview)
   local cw=w-6
   for i=1,3 do
    local item=slots[i];item.frame:SetWidth(cw);T.Update(item.frame)
@@ -639,7 +615,7 @@ local function BuildProfileManager(page,y)
  row.slots=slots;row.cancel=cancel;row.Refresh()
  U.profileView=row
  table.insert(page.flow,{frame=row,y=y})
- return y+790
+ return y+644
 end
 
 -- A small visibility preset only. Existing geometry/style and other addons are
@@ -1200,7 +1176,42 @@ function U.Build(sections,context)
  return frame
 end
 
+-- Detached confirmation bar stays visible while the settings panel is hidden.
+-- Previewing must never obscure the HUD it is meant to inspect.
+function U.EnsureProfilePreviewBar()
+ if U.profilePreviewBar then return end
+ local bar=CreateFrame("Frame","FieldKitProfilePreviewBar",UIParent)
+ bar:SetWidth(520);bar:SetHeight(82)
+ bar:SetPoint("TOP",UIParent,"TOP",0,-105)
+ bar:SetFrameStrata("DIALOG")
+ T.Surface(bar,"window")
+ U.profilePreviewBar=bar
+ U.profilePreviewTitle=T.Label(bar,"HUD preview",12,8,490,23,16,T.gold,true)
+ T.Button(bar,nil,"Apply profile",12,40,150,29,function()
+  if FieldKitProfiles.AcceptPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ T.Button(bar,nil,"Restore previous",174,40,170,29,function()
+  if FieldKitProfiles.CancelPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ T.Button(bar,nil,"Close",356,40,150,29,function()
+  if FieldKitProfiles.CancelPreview() then
+   bar:Hide();U.profilePreviewSlot=nil;U.frame:Show();U.Refresh()
+  end
+ end)
+ bar:Hide()
+end
+function U.UpdateProfilePreviewBar()
+ U.EnsureProfilePreviewBar()
+ local slot=U.profilePreviewSlot
+ FieldKit_Text(U.profilePreviewTitle,"Preview: "..(slot and (FieldKitProfiles.Name(slot) or ("Profile "..slot)) or "HUD"))
+end
+
 function U.Toggle()
+ if FieldKitProfiles and FieldKitProfiles.preview then return end
  if FieldKit.layoutEditing then U.SetLayoutEditing(false,true)
  elseif U.frame:IsShown() then U.frame:Hide()
  else U.Reflow();U.frame:Show();U.Refresh() end
