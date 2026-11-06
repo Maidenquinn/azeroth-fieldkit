@@ -55,6 +55,17 @@ click(U.quickProfileButtons[3])
 assert(FieldKitDB.uiPage=="profiles")
 -- Header controls remain available on every page, without reloading the UI.
 assert(U.headerProfileButtons and table.getn(U.headerProfileButtons)==3)
+assert(U.headerProfileLayer and U.headerProfileLayer:GetFrameLevel()>U.header:GetFrameLevel(),
+ "native drag header must not intercept profile selector clicks")
+for i=1,3 do
+ assert(U.headerProfileButtons[i]:GetParent()==U.headerProfileLayer)
+ assert(U.headerProfileButtons[i]:GetFrameLevel()>U.header:GetFrameLevel())
+ assert(U.headerProfileButtons[i]:GetScript("OnClick"))
+end
+local _,parent,_,offx,offy=U.headerProfileLayer:GetPoint()
+assert(parent==U.frame and offx==-34 and offy==-72,
+ "header shortcuts must retain the visible fixed right anchor")
+
 U.Select("look")
 FieldKitDB.cardOpacity=31
 click(U.headerProfileButtons[1])
