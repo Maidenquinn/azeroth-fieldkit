@@ -289,7 +289,10 @@ function P.Command(message)
   return
  end
  if string.sub(lower,1,5)=="name " then
-  local n,tail=string.match(message,"^name ([123]) (.+)$")
+  local rest=string.sub(message,6)
+  local n=Slot(string.sub(rest,1,1))
+  local tail=string.sub(rest,3)
+  if string.sub(rest,2,2)~=" " then n=nil end
   if n and P.Rename(n,tail) then Say("Profile "..n.." renamed.")
   else Say("Usage: /fieldkit profile name 1-3 short name (max 40 bytes).") end
   return
