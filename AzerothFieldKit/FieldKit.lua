@@ -1757,6 +1757,29 @@ local TAKEN_NAMES = {
 }
 
 
+-- WoW 1.12 does not clip child widgets to a shortened parent frame.
+-- Remember visible children while folded, then restore them on expansion.
+local function FoldChildren(f)
+ local children={f:GetChildren()}
+ for i=1,table.getn(children) do
+  local child=children[i]
+  if child~=f.mashCollapseButton and child:IsShown() then
+   child.fieldkitFoldWasShown=true
+   child:Hide()
+  end
+ end
+end
+local function UnfoldChildren(f)
+ local children={f:GetChildren()}
+ for i=1,table.getn(children) do
+  local child=children[i]
+  if child.fieldkitFoldWasShown then
+   child.fieldkitFoldWasShown=nil
+   child:Show()
+  end
+ end
+end
+
 -- Construct a bounded meter-style window with row pool, collapse button and drag handle.
 local function CreateBarWindow(name, title, rows)
 	local f = CreateFrame("Frame", name, UIParent)
@@ -1801,10 +1824,10 @@ local function CreateBarWindow(name, title, rows)
 			f.mashExpandHeight = f:GetHeight()
 			f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide()
 			for j = 1, table.getn(f.rows) do f.rows[j]:Hide() end
-			FieldKit_Text(this,"+")
+			FieldKit_Text(this,"+");FoldChildren(f)
 		else
 			f:SetHeight(f.mashExpandHeight > 24 and f.mashExpandHeight or 45);FieldKitTheme.Update(f)
-			f.total:Show(); FieldKit_Text(this,"-")
+			f.total:Show(); FieldKit_Text(this,"-");UnfoldChildren(f)
    for j=1,(f.mashVisibleRows or 0) do f.rows[j]:Show() end
    FieldKitCardLayout.Rows(f,f.fieldkitNaturalHeight or (28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1)),f.mashVisibleRows or 0,f.fieldkitRowKind or "bar",false)
 		end
@@ -1836,7 +1859,7 @@ local function CreateBarWindow(name, title, rows)
 	end
 	if DB and DB.collapsedWindows and DB.collapsedWindows[name] then
 		f.mashCollapsed = true; f.mashExpandHeight = f:GetHeight()
-		f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide(); FieldKit_Text(collapse,"+")
+		f:SetHeight(24);FieldKitTheme.Update(f); f.total:Hide(); FieldKit_Text(collapse,"+");FoldChildren(f)
 	end
 	return f
 end
@@ -1859,7 +1882,9 @@ local function SyncBarWindowCollapse(f)
   if f.bossBar then f.bossBar:Hide() end
   if f.bossPct then f.bossPct:Hide() end
   f:SetHeight(24)
+  FoldChildren(f)
  else
+  UnfoldChildren(f)
   f.total:Show()
   f:SetHeight(f.mashExpandHeight>24 and f.mashExpandHeight or 45)
  end
@@ -1880,6 +1905,7 @@ local function FitRows(f, n)
 		f:SetHeight(24)
 	else f:SetHeight(height); f.total:Show() end
  f.mashExpandHeight=FieldKitCardLayout.Rows(f,height,n,"bar",f.mashCollapsed)
+ if f.mashCollapsed then FoldChildren(f) end
 end
 
 -- Require the native API and a non-nil native phase before using run data.
