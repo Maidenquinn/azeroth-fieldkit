@@ -2516,8 +2516,9 @@ end
 -- A detached, compact dock keeps folded windows out of the play area.
 -- The original frames retain their saved geometry and can be restored in one click.
 local collapseDock,collapseDockButtons
+local collapseDockDragging=false
 local function PlaceCollapseDock()
- if not collapseDock or not DB then return end
+ if not collapseDock or not DB or collapseDockDragging then return end
  DB.pos=DB.pos or {}
  local saved=DB.pos.FieldKitCollapseDock
  local x,y=-18,110
@@ -2552,6 +2553,7 @@ local function BuildCollapseDock()
  collapseDock:SetWidth(164);collapseDock:SetHeight(24)
  collapseDockButtons={}
  collapseDock:SetMovable(1)
+ collapseDock:EnableMouse(1)
  if collapseDock.SetClampedToScreen then collapseDock:SetClampedToScreen(1) end
  local grip=CreateFrame("Button",nil,collapseDock)
  grip:SetWidth(164);grip:SetHeight(21)
@@ -2562,9 +2564,14 @@ local function BuildCollapseDock()
  gripLabel:SetText("FieldKit - déplacer le dock")
  grip:EnableMouse(1)
  grip:RegisterForDrag("LeftButton")
- grip:SetScript("OnDragStart",function() collapseDock:StartMoving() end)
+ grip:SetScript("OnDragStart",function()
+  collapseDockDragging=true
+  collapseDock:StartMoving()
+ end)
  local function StopDockDrag()
+  if not collapseDockDragging then return end
   collapseDock:StopMovingOrSizing()
+  collapseDockDragging=false
   local right=collapseDock:GetRight()
   local bottom=collapseDock:GetBottom()
   if right and bottom then
@@ -2630,8 +2637,11 @@ RefreshCollapseDock=function()
    end
   end
  end
- collapseDock:SetHeight(math.max(24,count*26))
- PlaceCollapseDock()
+ local dockHeight=math.max(24,count*26)
+ if collapseDock:GetHeight()~=dockHeight then
+  collapseDock:SetHeight(dockHeight)
+  PlaceCollapseDock()
+ end
  if count>0 then collapseDock:Show() else collapseDock:Hide() end
  if changed and FieldKitHudStack and FieldKitHudStack.Apply then FieldKitHudStack.Apply() end
 end
