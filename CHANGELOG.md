@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0-alpha.5 — 2026-11-06 (complete configuration isolation, unpublished)
+
+- Profile switching now restores native chat, combat text, world markers, meter preferences, accessibility, camera, party UI/sharing and the remaining declared FieldKit visual options, not just HUD cards.
+- Audit covers 136 declared preference entries, 11 nested configuration tables, and 16 explicitly classified shared/operational fields. New static profile-scope audit gate prevents future unclassified preference keys.
+- Preserve live chat messages, in-memory copy history, recorded combat/game statistics, learned classifications and navigation state across profile changes. Profile-local chat copy and party-detail synchronization **preferences** may change with the selected slot.
+- Automatically save all changes to the profile being left, and persist the active profile on PLAYER_LOGOUT. Save-as starts editing the chosen slot without overwriting another.
+- Safely migrate older alpha.1–alpha.4 layout-only profiles, keeping their original layout and initializing missing preferences from existing settings; no wipe or forced global reset.
+- Live profile application reuses existing FieldKit chat, world marker, combat, nameplate, camera and display handlers. The native compact action bar option is saved per slot but structural changes still need its existing reload path.
+- Add deep-copy and explicit-nil isolation checks, a destructive native chat preservation fixture, logout persistence tests and comprehensive documentation in docs/PROFILE_SCOPE_0.5.0.md.
+- **Not released:** must pass native client tests for 1→2→1 settings, migration and chat-history retention before merging.
+
+
 ## 0.5.0-alpha.4 — 2026-11-06 (header quick-selector hitbox correction, unpublished)
 
 - Keep the already accepted one-click Home shortcuts, immediate 1/2/3 profile switching, Undo, saved layouts, chat isolation and FR/EN UI from alpha.3.
