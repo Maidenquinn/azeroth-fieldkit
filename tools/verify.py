@@ -31,6 +31,16 @@ def runtime(saved=None):
 exec(compile((base/'tools/profile_scope_audit.py').read_text(encoding='utf8'),
              str(base/'tools/profile_scope_audit.py'),'exec'),
      {'__name__':'__main__','__file__':str(base/'tools/profile_scope_audit.py')})
+# Synthetic legacy 0.4.2 flat save: explicitly retain opt-outs and layout.
+# This is not a substitute for an authentic saved file from that release.
+legacy_042=runtime('{cardOpacity=37,moneyFrame=false,combatTextX=-217,chatWidth=560,language="fr",frameAnchors={FieldKitLeftStack={"TOPLEFT","TOPLEFT",83,-96}},pos={FieldKitMoneyFrame={-14,-300}}}')
+legacy_042.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+legacy_042.execute((base/'tests/migration_042.lua').read_text(encoding='utf8'))
+legacy_042.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
+legacy_042_reload=runtime(legacy_042.eval('SNAPSHOT(FieldKitDB)'))
+legacy_042_reload.execute('fire(FieldKitFrame,"VARIABLES_LOADED")')
+legacy_042_reload.execute('assert(FieldKitDB.cardOpacity==37 and FieldKitDB.moneyFrame==false and FieldKitDB.combatTextX==-217 and FieldKitDB.chatWidth==560 and FieldKitDB.language=="fr" and FieldKitDB.activeHudProfile==1)')
+print('PASS synthetic 0.4.2 flat SavedVariables migration')
 diagnostics=runtime();diagnostics.execute((base/'tests/diagnostics.lua').read_text(encoding='utf8'))
 profiles=runtime();profiles.execute((base/'tests/profiles.lua').read_text(encoding='utf8'))
 profile_chat=runtime();profile_chat.execute((base/'tests/profile_chat.lua').read_text(encoding='utf8'))

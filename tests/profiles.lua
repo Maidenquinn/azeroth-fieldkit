@@ -7,11 +7,14 @@ assert(not P.Load(1) and not P.Save(0) and not P.Save(4))
 local d=FieldKitDB
 d.frameAnchors.FieldKitLeftStack={"TOPLEFT","TOPLEFT",125,-80}
 d.pos.FieldKitStatsFrame={-60,95}
+d.pos.FieldKitCollapseDock={-28,140}
 d.cardSizes.FieldKitStatsFrame={width=420,height=180}
 d.collapsedWindows.FieldKitStatsFrame=true
 d.collapsedWindows.FieldKitMeterFrame=true
 d.collapsedWindows.FieldKitTakenFrame=true
 d.collapsedWindows.FieldKitLairFrame=true
+d.collapsedWindows.FieldKitRunModeFrame=true
+d.collapsedWindows.FieldKitEffectsFrame=true
 d.statsCollapsed=true;d.gearCollapsed=true
 d.cardOpacity=65;d.linkLeftCards=true
 d.chatWidth=530;d.chatHeight=170;d.chatFontFace=2;d.chatFontSize=15
@@ -35,6 +38,8 @@ assert(P.SaveActive() and P.Name(1)=="Raid FR")
 
 assert(d.activeHudProfile==1)
 assert(d.interfaceProfiles[1].values.chatWidth==530)
+assert(d.interfaceProfiles[1].tables.pos.FieldKitCollapseDock[1]==-28)
+assert(d.interfaceProfiles[1].tables.collapsedWindows.FieldKitRunModeFrame==true)
 assert(d.interfaceProfiles[1].tables.chatAnchor.x==220)
 assert(d.interfaceProfiles[1].tables.worldMarkerSettings.categories.cache==false)
 assert(d.interfaceProfiles[1].tables.combatEvents.crit.color[2]==.2)
@@ -45,6 +50,7 @@ assert(d.interfaceProfiles[1].values.partyDetailSync==true)
 d.frameAnchors.FieldKitLeftStack={"TOPRIGHT","TOPRIGHT",-20,-20}
 d.cardOpacity=95;d.linkLeftCards=false;d.chatWidth=670;d.chatHeight=330
 d.collapsedWindows={};d.statsCollapsed=false;d.gearCollapsed=false
+d.pos.FieldKitCollapseDock={-250,220}
 d.chatFontFace=4;d.chatFontSize=19;d.chatBackgroundColor=5
 d.chatStyle=false;d.chatOverrideText=true;d.chatAnchor={x=410,y=520}
 d.partyDetailSync=false;d.hidePlates=false;d.combatTextWorld=false
@@ -60,10 +66,13 @@ assert(P.Name(1)=="Raid FR" and P.Name(2)=="Exploration")
 
 assert(d.interfaceProfiles[1].values.chatWidth==530,"Saving another slot overwrote slot 1")
 assert(d.interfaceProfiles[2].values.chatWidth==670)
+assert(d.interfaceProfiles[2].tables.pos.FieldKitCollapseDock[1]==-250)
 assert(d.interfaceProfiles[2].values.chatStyle==false)
 assert(P.Load(1),"switch to slot 1 must apply in-game")
 assert(P.Name(1)=="Raid FR" and P.Name(2)=="Exploration")
 assert(d.activeHudProfile==1 and d.chatWidth==530 and d.chatHeight==170)
+assert(d.pos.FieldKitCollapseDock[1]==-28 and d.pos.FieldKitCollapseDock[2]==140)
+assert(d.collapsedWindows.FieldKitRunModeFrame and d.collapsedWindows.FieldKitEffectsFrame)
 assert(d.chatFontFace==2 and d.chatFontSize==15 and d.chatBackgroundColor==3)
 assert(d.chatAnchor.x==220 and d.chatStyle and not d.chatOverrideText)
 assert(d.cardOpacity==65 and d.linkLeftCards==true)
@@ -81,6 +90,8 @@ d.chatWidth=590;d.chatFontSize=16;d.bossWarningLead=13
 d.worldMarkerSettings.categories.cache=true
 assert(P.Load(2))
 assert(d.chatWidth==670 and d.chatFontSize==19 and d.chatHeight==330)
+assert(d.pos.FieldKitCollapseDock[1]==-250 and d.pos.FieldKitCollapseDock[2]==220)
+assert(not d.collapsedWindows.FieldKitRunModeFrame and not d.collapsedWindows.FieldKitEffectsFrame)
 assert(not d.collapsedWindows.FieldKitMeterFrame and not d.collapsedWindows.FieldKitTakenFrame)
 assert(not d.statsCollapsed and not d.gearCollapsed)
 assert(not d.chatStyle and d.chatOverrideText and d.chatBackgroundColor==5)
@@ -139,7 +150,17 @@ assert(d.interfaceProfiles[3].tables.pos.FieldKitStatsFrame[1]==33)
 d.interfaceProfiles[22]={values={},tables={}}
 d.interfaceProfiles[1]="broken"
 P.Init()
-assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]==nil)
+assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]=="broken")
+-- Invalid saved data in a legitimate slot must remain recoverable in SavedVariables.
+assert(not P.Load(1))
+assert(d.interfaceProfiles[1]=="broken")
+assert(not P.Save(1) and d.interfaceProfiles[1]=="broken")
+assert(P.Name(1)==nil and not P.Rename(1,"Damaged"))
+local originalActive=d.activeHudProfile
+d.activeHudProfile=1
+assert(not P.SaveActive())
+assert(d.interfaceProfiles[1]=="broken")
+d.activeHudProfile=originalActive
 -- Already migrated slots must not trigger an unnecessary full live capture.
 -- Capture calls FieldKit.Number for numeric settings, so an injected error
 -- here detects accidental snapshot work in the common Init path.
@@ -147,6 +168,10 @@ local originalNumber=FieldKit.Number
 FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
 assert(pcall(P.Init))
 FieldKit.Number=originalNumber
+-- Explicitly simulate manual recovery of the damaged slot before the
+-- remaining independent corruption/rollback test scenarios.
+assert(d.interfaceProfiles[1]=="broken")
+d.interfaceProfiles[1]=nil
 
 -- Corrupted incoming snapshots must be rejected before any live setting
 -- is changed, including when a valid field precedes the corrupted table.

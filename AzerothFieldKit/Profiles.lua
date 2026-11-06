@@ -119,11 +119,15 @@ local function CleanName(name)
  if string.find(name,"[%c]") or string.find(name,"|",1,true) then return nil end
  return name
 end
+local function ValidSnapshotSlot(saved)
+ return type(saved)=="table" and type(saved.values)=="table" and
+  type(saved.tables)=="table"
+end
 function P.Name(number)
  local slot=Slot(number)
  local saved=slot and FieldKitDB and FieldKitDB.interfaceProfiles and
   FieldKitDB.interfaceProfiles[slot]
- return saved and CleanName(saved.name) or nil
+ return type(saved)=="table" and CleanName(saved.name) or nil
 end
 function P.Rename(number,name)
  local slot=Slot(number)
@@ -131,7 +135,7 @@ function P.Rename(number,name)
  P.Init()
  local saved=FieldKitDB.interfaceProfiles[slot]
  local clean=CleanName(name)
- if not saved or not clean then return false end
+ if not ValidSnapshotSlot(saved) or not clean then return false end
  saved.name=clean
  return true
 end
@@ -175,9 +179,12 @@ function P.Init()
  local baseline
  for key,value in pairs(store) do
   local slot=Slot(key)
-  if not slot or type(key)~="number" or not Valid(value) then
+  if not slot or type(key)~="number" then
+   -- Discard invalid indices only. Preserve damaged valid slots for
+   -- manual recovery instead of destroying the player's saved data.
    store[key]=nil
-  elseif value.schema~=2 or type(value.nilValues)~="table" then
+  elseif Valid(value) and
+   (value.schema~=2 or type(value.nilValues)~="table") then
    if not baseline then baseline=Capture() end
    if baseline then Upgrade(value,baseline) end
   end
@@ -268,7 +275,7 @@ function P.SaveActive()
  local active=Slot(FieldKitDB.activeHudProfile)
  if not active then return false end
  P.Init()
- if not FieldKitDB.interfaceProfiles[active] then return false end
+ if not ValidSnapshotSlot(FieldKitDB.interfaceProfiles[active]) then return false end
  local old=FieldKitDB.interfaceProfiles[active]
  local updated=Capture()
  if not updated then return false end
@@ -284,9 +291,12 @@ function P.Save(number)
  -- Save-as creates/updates the selected slot and makes it the active
  -- editing context. Do NOT overwrite the previous slot's stored snapshot.
  local old=FieldKitDB.interfaceProfiles[slot]
+ -- Never overwrite a damaged slot implicitly: it may be the player's
+ -- only recoverable copy. Recovery requires manual SavedVariables repair.
+ if old~=nil and not ValidSnapshotSlot(old) then return false end
  local updated=Capture()
  if not updated then return false end
- updated.name=old and old.name or nil
+ updated.name=type(old)=="table" and old.name or nil
  FieldKitDB.interfaceProfiles[slot]=updated
  FieldKitDB.activeHudProfile=slot
  return true
@@ -389,7 +399,8 @@ function P.Command(message)
   local labels={}
   for i=1,3 do
    table.insert(labels,tostring(i)..":"..
-    (FieldKitDB.interfaceProfiles[i] and "saved" or "empty"))
+    (FieldKitDB.interfaceProfiles[i]==nil and "empty" or
+     (ValidSnapshotSlot(FieldKitDB.interfaceProfiles[i]) and "saved" or "damaged")))
   end
   Say("Profile slots: "..table.concat(labels,", ")..
    ". Usage: /fieldkit profile save|load|delete 1-3, undo")
