@@ -44,7 +44,7 @@ profile_stage.execute((base/'tests/snapshot.lua').read_text(encoding='utf8'))
 profile_reload=runtime(profile_stage.eval('SNAPSHOT(FieldKitDB)'))
 profile_reload.execute('''
 fire(FieldKitFrame,"VARIABLES_LOADED")
-assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==440) # chat now belongs to slot 1
+assert(FieldKitDB.cardOpacity==51 and FieldKitDB.chatWidth==440) -- chat belongs to slot 1
 assert(FieldKitDB.frameAnchors.FieldKitLeftStack[3]==71)
 assert(FieldKitDB.profilePendingSlot==nil and FieldKitDB.activeHudProfile==1)
 assert(FieldKitDB.interfaceProfiles[1].tables.frameAnchors.FieldKitLeftStack[3]==71)
