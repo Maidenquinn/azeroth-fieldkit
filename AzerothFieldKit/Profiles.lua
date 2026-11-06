@@ -52,25 +52,40 @@ local function Slot(value)
 end
 local function Clone(value,depth,budget)
  local kind=type(value)
- if kind=="number" then return FieldKit.Number(value) end
- if kind=="string" then return string.len(value)<=512 and value or nil end
+ if kind=="number" then
+  local n=FieldKit.Number(value)
+  if n==nil then budget.invalid=true end
+  return n
+ end
+ if kind=="string" then
+  if string.len(value)>512 then budget.invalid=true;return nil end
+  return value
+ end
  if kind=="boolean" then return value end
- if kind~="table" or depth>7 or budget.left<=0 then return nil end
+ if kind~="table" or depth>7 or budget.left<=0 then
+  budget.invalid=true
+  return nil
+ end
  local copy={}
  for key,item in pairs(value) do
-  if budget.left<=0 then break end
+  if budget.left<=0 then budget.invalid=true;break end
   local kt=type(key)
   if (kt=="string" and string.len(key)<=160) or
      (kt=="number" and key==math.floor(key) and key>=1 and key<=256) then
    budget.left=budget.left-1
    local result=Clone(item,depth+1,budget)
    if result~=nil then copy[key]=result end
+  else
+   budget.invalid=true
   end
  end
  return copy
 end
 local function Copy(value)
- return Clone(value,1,{left=3200})
+ local budget={left=3200,invalid=false}
+ local result=Clone(value,1,budget)
+ if budget.invalid then return nil end
+ return result
 end
 local function Capture()
  local d=FieldKitDB
@@ -81,12 +96,17 @@ local function Capture()
   local key=list[i];local value=d[key]
   if type(value)=="boolean" or type(value)=="number" or type(value)=="string" then
    local copy=Copy(value)
-   if copy~=nil then snap.values[key]=copy
-   else snap.nilValues[key]=true end
-  else snap.nilValues[key]=true end
+   if copy==nil then return nil end
+   snap.values[key]=copy
+  elseif value==nil then snap.nilValues[key]=true
+  else return nil end
  end
  for i=1,table.getn(tableKeys) do
-  local key=tableKeys[i];snap.tables[key]=Copy(d[key] or {}) or {}
+  local key=tableKeys[i]
+  if d[key]~=nil and type(d[key])~="table" then return nil end
+  local copied=Copy(d[key] or {})
+  if copied==nil then return nil end
+  snap.tables[key]=copied
  end
  return snap
 end
