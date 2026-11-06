@@ -10,11 +10,11 @@
 ## Automated verification before publication
 
 - [ ] Latest candidate CI is green; inspect test and packaging jobs.
-- [ ] Profile regression tests pass, including dock position and collapsed states.
+- [x] Profile regression tests pass, including dock position and collapsed states (CI #652).
 - [ ] Lua syntax and compatibility checks pass on packaged sources.
 - [ ] Validate fresh installation and migration from stable v0.4.2 using copies of SavedVariables.
-- [ ] Verify no lost keys in profile preference capture (combat text, gryphons, money).
-- [ ] Review FR/EN labels and any hardcoded new dock text.
+- [x] Verify known preference keys in profile capture (combat text, gryphons, money); broader migration with a real v0.4.2 save remains open.
+- [x] New dock and preview labels integrated into FR/EN dictionary (CI #636); final visual review remains open.
 - [ ] Confirm ZIP folder structure, .toc version and manifest, hashes and no development-only files.
 - [ ] Confirm that the release candidate is tested in-game (not just Lua 5.1 CI).
 
