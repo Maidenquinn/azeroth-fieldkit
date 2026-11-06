@@ -1,6 +1,10 @@
-# Azeroth FieldKit 0.5.0-alpha.3 — Live HUD profile switching
+# Azeroth FieldKit 0.5.0-alpha.4 — Live HUD profile switching + header click fix
 
 This is a **review build, not a public release**. It builds on the maintainer-accepted alpha.1/alpha.2 profile managers.
+
+## Alpha.4 header selector check
+
+Alpha.3 passed 8/9 reported in-game checks; the sole unconfirmed/KO item is the three header buttons. The alpha.4 change raises the selector above the draggable window header and gives it a stable top-right anchor. Test all three clicks with the panel open on Home, Interface and Chat; ensure a click changes profile without dragging or moving the settings panel. Empty slot opens the profile manager. On the native client, screenshot the header if buttons still do not appear or clicks are intercepted. The other accepted behaviors are not intentionally changed.
 
 ## One-click access
 
@@ -19,7 +23,7 @@ The live controller stops before applying if a FieldKit drag or layout editing i
 
 ## In-game recipe
 
-1. Back up both the installed addon folder and FieldKit SavedVariables, then install alpha.3. Check `0.5.0-alpha.3` and absence of Lua errors.
+1. Back up both the installed addon folder and FieldKit SavedVariables, then install alpha.4. Check `0.5.0-alpha.4` and absence of Lua errors.
 2. Save clearly different **left/right HUD positions, sizes, grouping, opacity and visibility** in slots 1 and 2.
 3. Open the HUD manager and select **Apply now** on slot 1. The HUD should change **immediately**, without a reload or stuck mouse drag.
 4. Select slot 2 immediately afterward, then select slot 1 again. Check both layouts and grouped Mode/Damage/Lairs movement; test independent mode too.
