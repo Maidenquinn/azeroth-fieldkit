@@ -119,6 +119,10 @@ local function CleanName(name)
  if string.find(name,"[%c]") or string.find(name,"|",1,true) then return nil end
  return name
 end
+local function ValidSnapshotSlot(saved)
+ return type(saved)=="table" and type(saved.values)=="table" and
+  type(saved.tables)=="table"
+end
 function P.Name(number)
  local slot=Slot(number)
  local saved=slot and FieldKitDB and FieldKitDB.interfaceProfiles and
@@ -131,7 +135,7 @@ function P.Rename(number,name)
  P.Init()
  local saved=FieldKitDB.interfaceProfiles[slot]
  local clean=CleanName(name)
- if type(saved)~="table" or not clean then return false end
+ if not ValidSnapshotSlot(saved) or not clean then return false end
  saved.name=clean
  return true
 end
@@ -271,7 +275,7 @@ function P.SaveActive()
  local active=Slot(FieldKitDB.activeHudProfile)
  if not active then return false end
  P.Init()
- if not FieldKitDB.interfaceProfiles[active] then return false end
+ if not ValidSnapshotSlot(FieldKitDB.interfaceProfiles[active]) then return false end
  local old=FieldKitDB.interfaceProfiles[active]
  local updated=Capture()
  if not updated then return false end
