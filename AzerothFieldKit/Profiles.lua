@@ -267,8 +267,8 @@ function P.Load(number)
  if not ok then
   -- Restore both live preferences and profile metadata on a failed switch.
   -- The outgoing slot may have been autosaved before the failed apply.
-  local restored=ApplySnapshot(before)
-  if restored then pcall(FieldKit.ApplyHUDProfileLive) end
+  local rollbackOK,restored=pcall(ApplySnapshot,before)
+  if rollbackOK and restored then pcall(FieldKit.ApplyHUDProfileLive) end
   FieldKitDB.activeHudProfile=previous
   return false
  end
@@ -289,7 +289,8 @@ function P.Undo()
    assert(ApplySnapshot(before));assert(FieldKit.ApplyHUDProfileLive())
   end)
   if not ok then
-   ApplySnapshot(current);pcall(FieldKit.ApplyHUDProfileLive)
+   local rollbackOK,restored=pcall(ApplySnapshot,current)
+   if rollbackOK and restored then pcall(FieldKit.ApplyHUDProfileLive) end
    FieldKitDB.activeHudProfile=oldActive
    return false
   end
@@ -310,7 +311,13 @@ function P.ActivatePending()
  if not slot then return false end
  local saved=FieldKitDB.interfaceProfiles[slot]
  if not saved then return false end
- if not ApplySnapshot(saved) then return false end
+ local before=Capture()
+ if not before then return false end
+ local ok,applied=pcall(ApplySnapshot,saved)
+ if not ok or not applied then
+  pcall(ApplySnapshot,before)
+  return false
+ end
  FieldKitDB.activeHudProfile=slot
  return true
 end
