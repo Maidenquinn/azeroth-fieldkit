@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0-alpha.6 — 2026-11-06 (chat palette isolation and reset UX, unpublished)
+
+- Fix profile-specific chat text palettes not updating messages already visible: a profile switch now repaints recoverable native chat history using each profile's saved color/override preferences, without duplicating chat history or erasing untracked messages.
+- Existing background palettes, native chat size, font and position continue using per-slot settings.
+- Reset HUD positions also restores the chat frame's original position and dimensions (measured native baseline, with validated fallback), while preserving font, palette and chat messages.
+- Undo HUD positions now also restores the previous chat width, height and position.
+- Language preference buttons display a visible check mark and retain their active highlight after mouse hover/leave.
+- Add direct mocked native chat color-swap tests, reset/undo and selected-language regression assertions. All existing alpha.5 profile isolation and safety tests remain enabled.
+- **Review candidate, not released:** requires in-game 1→2→1 palette, message preservation and Reset/Undo testing.
+
+
 ## 0.5.0-alpha.5 — 2026-11-06 (complete configuration isolation, unpublished)
 
 - Profile switching now restores native chat, combat text, world markers, meter preferences, accessibility, camera, party UI/sharing and the remaining declared FieldKit visual options, not just HUD cards.
