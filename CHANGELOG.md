@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha.4 — 2026-11-06 (header quick-selector hitbox correction, unpublished)
+
+- Keep the already accepted one-click Home shortcuts, immediate 1/2/3 profile switching, Undo, saved layouts, chat isolation and FR/EN UI from alpha.3.
+- Put the universal profile shortcuts in a dedicated frame layer above the draggable settings-header hit area, preventing pointer-event competition on the Benilla-derived client.
+- Anchor the three selectors as a single stable unit near the header's top-right edge, apart from the title and close button.
+- Regression tests now track frame levels and verify that the selector's buttons sit above the drag header and remain clickable after layout reflow.
+- This addresses the only unverified/KO item in the user alpha.3 recipe, without changing profile application or native HUD drag logic.
+- **Unpublished client review**: verify the header selector's visibility and real mouse clicks before merging.
+
+
 ## 0.5.0-alpha.3 — 2026-11-05 (unpublished live HUD profile switching)
 
 - Three compact profile shortcuts are now available in the FieldKit header on every page, with an active selection indicator. The Home page also offers quick access to all three profiles.
