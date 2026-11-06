@@ -165,10 +165,10 @@ function P.Save(number)
  local slot=Slot(number)
  if not slot or not FieldKitDB then return false end
  P.Init()
+ -- Save-as creates/updates the selected slot and makes it the active
+ -- editing context. Do NOT overwrite the previous slot's stored snapshot.
  FieldKitDB.interfaceProfiles[slot]=Capture()
- if not Slot(FieldKitDB.activeHudProfile) then
-  FieldKitDB.activeHudProfile=slot
- end
+ FieldKitDB.activeHudProfile=slot
  return true
 end
 function P.Load(number)
