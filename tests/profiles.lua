@@ -129,6 +129,20 @@ d.interfaceProfiles[22]={values={},tables={}}
 d.interfaceProfiles[1]="broken"
 P.Init()
 assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]==nil)
+-- A native apply failure must not leave the active slot pointing at
+-- the attempted target, and must restore the live preferences.
+assert(P.Save(1))
+d.chatWidth=555
+assert(P.Save(2))
+local applyLive=FieldKit.ApplyHUDProfileLive
+FieldKit.ApplyHUDProfileLive=function() error("injected native apply failure") end
+local activeBefore=d.activeHudProfile
+local widthBefore=d.chatWidth
+assert(not P.Load(1))
+assert(d.activeHudProfile==activeBefore)
+assert(d.chatWidth==widthBefore)
+FieldKit.ApplyHUDProfileLive=applyLive
+
 -- Final unsaved change must be captured when the game writes SavedVariables.
 assert(P.Save(2))
 d.chatFontSize=18;d.chatBackgroundOpacity=55;d.lowHealthPct=44
