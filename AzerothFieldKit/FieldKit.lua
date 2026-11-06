@@ -2516,6 +2516,22 @@ end
 -- A detached, compact dock keeps folded windows out of the play area.
 -- The original frames retain their saved geometry and can be restored in one click.
 local collapseDock,collapseDockButtons
+local function PlaceCollapseDock()
+ if not collapseDock or not DB then return end
+ DB.pos=DB.pos or {}
+ local saved=DB.pos.FieldKitCollapseDock
+ local x,y=-18,110
+ if type(saved)=="table" then
+  x=tonumber(saved[1]) or x
+  y=tonumber(saved[2]) or y
+ end
+ local width,height=UIParent:GetWidth(),UIParent:GetHeight()
+ x=math.max(-math.max(0,width-164),math.min(0,x))
+ y=math.max(0,math.min(math.max(0,height-collapseDock:GetHeight()),y))
+ collapseDock:ClearAllPoints()
+ collapseDock:SetPoint("BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",x,y)
+end
+
 local function DockEntries()
  local native=FieldKitNativeTools and FieldKitNativeTools.frames or {}
  return {
@@ -2534,8 +2550,32 @@ local function BuildCollapseDock()
  collapseDock=CreateFrame("Frame","FieldKitCollapseDock",UIParent)
  collapseDock:SetFrameStrata("HIGH")
  collapseDock:SetWidth(164);collapseDock:SetHeight(24)
- collapseDock:SetPoint("BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-18,110)
  collapseDockButtons={}
+ collapseDock:SetMovable(1)
+ if collapseDock.SetClampedToScreen then collapseDock:SetClampedToScreen(1) end
+ local grip=CreateFrame("Button",nil,collapseDock)
+ grip:SetWidth(164);grip:SetHeight(21)
+ grip:SetPoint("BOTTOMRIGHT",collapseDock,"TOPRIGHT",0,0)
+ grip:SetFrameLevel(collapseDock:GetFrameLevel()+3)
+ local gripLabel=grip:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+ gripLabel:SetAllPoints(grip)
+ gripLabel:SetText("FieldKit - déplacer le dock")
+ grip:EnableMouse(1)
+ grip:RegisterForDrag("LeftButton")
+ grip:SetScript("OnDragStart",function() collapseDock:StartMoving() end)
+ local function StopDockDrag()
+  collapseDock:StopMovingOrSizing()
+  local right=collapseDock:GetRight()
+  local bottom=collapseDock:GetBottom()
+  if right and bottom then
+   DB.pos=DB.pos or {}
+   DB.pos.FieldKitCollapseDock={right-UIParent:GetRight(),bottom-UIParent:GetBottom()}
+  end
+  PlaceCollapseDock()
+ end
+ grip:SetScript("OnDragStop",StopDockDrag)
+ grip:SetScript("OnMouseUp",StopDockDrag)
+ PlaceCollapseDock()
  for i=1,8 do
   local index=i
   local button=FieldKitTheme.Button(collapseDock,nil,"",0,0,164,23,nil)
@@ -2591,6 +2631,7 @@ RefreshCollapseDock=function()
   end
  end
  collapseDock:SetHeight(math.max(24,count*26))
+ PlaceCollapseDock()
  if count>0 then collapseDock:Show() else collapseDock:Hide() end
  if changed and FieldKitHudStack and FieldKitHudStack.Apply then FieldKitHudStack.Apply() end
 end
@@ -2659,6 +2700,7 @@ function FieldKit.ApplyHUDProfileLive()
  FieldKitHudStack.Apply()
  FieldKitCardLayout.ApplyRight()
  FieldKitTheme.Refresh()
+ PlaceCollapseDock()
  RefreshCollapseDock()
  -- A profile is now a full preference context, not merely a HUD layout.
  -- Apply the same existing handlers used by individual settings controls.
