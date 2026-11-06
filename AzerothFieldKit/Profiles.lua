@@ -22,9 +22,7 @@ local extra={
  "combatTextNames","combatTextCounts","combatTextDirection",
  "combatTextIgnore","combatTextWorld",
  "combatTextGroup","combatTextHealing","combatTextOutgoing",
- "combatTextIncoming","hideGryphons","moneyDetached",
- "combatTextCounts","combatTextCritFont","combatTextHealing",
- "combatTextFont","combatTextOutgoing","combatTextIncoming"
+ "combatTextIncoming"
 }
 local tableKeys={
  "frameAnchors","pos","collapsedWindows","cardSizes","onTopWindows",
