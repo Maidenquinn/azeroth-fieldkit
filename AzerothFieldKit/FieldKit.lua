@@ -2774,7 +2774,7 @@ local function FieldKitEventOther()
 end
 
 frame:SetScript("OnEvent", function()
-	if ( event == "VARIABLES_LOADED" ) then
+	if ( event == "VARIABLES_LOADED" or event=="PLAYER_LOGOUT" ) then
 		FieldKitEventLifecycle()
 	elseif ( not DB ) then
 		return
