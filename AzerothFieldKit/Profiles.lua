@@ -177,12 +177,12 @@ function P.Load(number)
  P.Init()
  if not FieldKitDB.interfaceProfiles[slot] or
   type(FieldKit.ApplyHUDProfileLive)~="function" or FieldKit.layoutEditing then return false end
- if FieldKitDB.activeHudProfile==slot then return true end
+ local sameSlot=FieldKitDB.activeHudProfile==slot
  local before=Capture()
  local previous=FieldKitDB.activeHudProfile
  -- Preserve all edits in the outgoing slot, even when the player never
  -- pressed the explicit Save current HUD button.
- P.SaveActive()
+ if not sameSlot then P.SaveActive() end
  local ok=pcall(function()
   assert(ApplySnapshot(FieldKitDB.interfaceProfiles[slot]))
   assert(FieldKit.ApplyHUDProfileLive())
