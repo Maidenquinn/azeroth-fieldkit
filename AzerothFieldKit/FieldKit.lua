@@ -2674,7 +2674,10 @@ local function FieldKitEventLifecycle()
  if event=="PLAYER_LOGOUT" then
   -- Persist edits to the current profile even if the user never explicitly
   -- pressed Save before quitting or /reload. Do not duplicate game data.
-  if DB and FieldKitProfiles then FieldKitProfiles.SaveActive() end
+  if DB and FieldKitProfiles then
+   if FieldKitProfiles.preview then FieldKitProfiles.CancelPreview() end
+   if not FieldKitProfiles.preview then FieldKitProfiles.SaveActive() end
+  end
   return
  end
 	if ( event == "VARIABLES_LOADED" ) then
