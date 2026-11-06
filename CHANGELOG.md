@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0-alpha.7 — 2026-11-06 (profile naming and quick access, unpublished)
+
+- Add optional display names to the 3 independent FieldKit configuration profile slots (up to 40 bytes, rejecting control characters and color markup separators).
+- Rename slots from the Profiles manager with an inline input box; press Enter to save, Escape to cancel.
+- Show the custom profile name on its manager card and Home quick-switch button. The compact header keeps the numeric 1/2/3 identifiers to avoid obstructing the header.
+- Slash fallback: `/fieldkit profile name 1 Raid FR` (slots 1, 2 or 3).
+- Names are stored as slot metadata and survive Save, SaveActive, switches and reloads. They never replace any profile settings or chat messages, and older unnamed slots remain compatible.
+- Lua behavioral fixtures cover validation, preservation across save and switches, and renaming through the actual UI controls.
+- The accepted alpha.6 native chat isolation, Reset/Undo, language selection and grouped HUD drag are retained unchanged.
+- **Unpublished:** requires native client verification of inline editing, renaming and persistence.
+
+
 ## 0.5.0-alpha.6 — 2026-11-06 (chat palette isolation and reset UX, unpublished)
 
 - Fix profile-specific chat text palettes not updating messages already visible: a profile switch now repaints recoverable native chat history using each profile's saved color/override preferences, without duplicating chat history or erasing untracked messages.

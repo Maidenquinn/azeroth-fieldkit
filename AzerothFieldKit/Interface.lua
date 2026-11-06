@@ -434,6 +434,26 @@ local function BuildProfileManager(page,y)
   card:SetHeight(144);card:SetWidth(600);T.Surface(card,"card")
   local label=T.Label(card,"Profile "..i,14,8,530,27,18,T.gold,true)
   local summary=T.Label(card,"",14,35,530,29,12,T.muted)
+  -- EditBox is created once per slot; Enter confirms, Escape cancels.
+  -- No profile is renamed until the player submits an explicit action.
+  local edit=CreateFrame("EditBox",nil,card,"InputBoxTemplate")
+  edit:SetPoint("TOPLEFT",card,"TOPLEFT",14,-32)
+  edit:SetWidth(250);edit:SetHeight(28)
+  edit:SetAutoFocus(false);edit:SetMaxLetters(40)
+  edit:Hide()
+  local rename=T.Button(card,nil,"Rename",474,80,112,29,function()
+   if not P.Name(idx) and not FieldKitDB.interfaceProfiles[idx] then return end
+   edit:SetText(P.Name(idx) or "")
+   edit:Show();edit:SetFocus()
+  end)
+  edit:SetScript("OnEnterPressed",function()
+   if P.Rename(idx,this:GetText()) then
+    this:ClearFocus();this:Hide();row.Refresh();U.Refresh()
+   end
+  end)
+  edit:SetScript("OnEscapePressed",function()
+   this:ClearFocus();this:Hide()
+  end)
   local save=T.Button(card,nil,"Save current HUD",14,80,155,29,function()
    if FieldKitDB.interfaceProfiles[idx] and row.confirmSave~=idx then
     row.confirmSave=idx;row.confirmDelete=nil
@@ -449,7 +469,7 @@ local function BuildProfileManager(page,y)
    else row.confirmDelete=idx;row.confirmSave=nil end
    row.Refresh()
   end)
-  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del}
+  slots[i]={frame=card,label=label,summary=summary,save=save,loadButton=loadButton,delete=del,rename=rename,edit=edit}
  end
  function row.Refresh()
   local d=FieldKitDB
@@ -465,15 +485,16 @@ local function BuildProfileManager(page,y)
    local anchors=saved and saved.tables and saved.tables.frameAnchors
    local count=0
    if type(anchors)=="table" then for _ in pairs(anchors) do count=count+1 end end
-   FieldKit_Text(item.label,string.format(FieldKit_L("Profile %d"),i))
+   FieldKit_Text(item.label,P.Name(i) or string.format(FieldKit_L("Profile %d"),i))
    if saved then
     FieldKit_Text(item.summary,string.format(FieldKit_L("Saved · %d positions · opacity %d%%"),count,(values and values.cardOpacity) or 100))
    else FieldKit_Text(item.summary,"Empty slot — save your current HUD to start.") end
    FieldKit_Text(item.save,row.confirmSave==i and "Confirm overwrite" or "Save current HUD")
    FieldKit_Text(item.loadButton,active==i and "Active" or "Apply now")
    FieldKit_Text(item.delete,row.confirmDelete==i and "Confirm delete" or "Delete")
-   if saved then item.loadButton:Show();item.delete:Show()
-   else item.loadButton:Hide();item.delete:Hide() end
+   FieldKit_Text(item.rename,"Rename")
+   if saved then item.loadButton:Show();item.delete:Show();item.rename:Show()
+   else item.loadButton:Hide();item.delete:Hide();item.rename:Hide();item.edit:Hide() end
   end
  end
  row.Reflow=function(w)
@@ -482,11 +503,12 @@ local function BuildProfileManager(page,y)
   for i=1,3 do
    local item=slots[i];item.frame:SetWidth(cw);T.Update(item.frame)
    item.label:SetWidth(cw-24);item.summary:SetWidth(cw-24)
-   local bw=(cw-56)/3
-   for j,b in ipairs({item.save,item.loadButton,item.delete}) do
-    b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+14),-80)
+   local bw=(cw-70)/4
+   for j,b in ipairs({item.save,item.loadButton,item.delete,item.rename}) do
+    b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+12),-80)
     b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
    end
+   item.edit:SetWidth(math.min(290,cw-32))
   end
  end
  row.slots=slots;row.cancel=cancel;row.Refresh()
@@ -669,7 +691,9 @@ function U.Refresh()
   for i=1,3 do
    local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
    local active=FieldKitDB.activeHudProfile==i
-   local label=string.format(FieldKit_L(active and "Profile %d · active" or (saved and "Profile %d" or "Profile %d · empty")),i)
+   local label=saved and (FieldKitProfiles.Name(i) or string.format(FieldKit_L("Profile %d"),i)) or
+     string.format(FieldKit_L("Profile %d · empty"),i)
+    if active then label=label.." ✓" end
    FieldKit_Text(U.quickProfileButtons[i],label)
    T.State(U.quickProfileButtons[i],active)
   end

@@ -90,6 +90,33 @@ local function Capture()
  end
  return snap
 end
+-- User-defined names belong to the slot metadata, never to the live
+-- settings snapshot. Reject invalid UTF-8-unaware byte/control input rather
+-- than truncate a multibyte name in the middle of a glyph.
+local function CleanName(name)
+ if type(name)~="string" then return nil end
+ name=string.gsub(name,"^%s+","")
+ name=string.gsub(name,"%s+$","")
+ if string.len(name)<1 or string.len(name)>40 then return nil end
+ if string.find(name,"[%c]") or string.find(name,"|",1,true) then return nil end
+ return name
+end
+function P.Name(number)
+ local slot=Slot(number)
+ local saved=slot and FieldKitDB and FieldKitDB.interfaceProfiles and
+  FieldKitDB.interfaceProfiles[slot]
+ return saved and CleanName(saved.name) or nil
+end
+function P.Rename(number,name)
+ local slot=Slot(number)
+ if not slot or not FieldKitDB then return false end
+ P.Init()
+ local saved=FieldKitDB.interfaceProfiles[slot]
+ local clean=CleanName(name)
+ if not saved or not clean then return false end
+ saved.name=clean
+ return true
+end
 local function Say(message)
  if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
   DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99FieldKit|r: "..message)
@@ -158,7 +185,9 @@ function P.SaveActive()
  if not active then return false end
  P.Init()
  if not FieldKitDB.interfaceProfiles[active] then return false end
- FieldKitDB.interfaceProfiles[active]=Capture()
+ local old=FieldKitDB.interfaceProfiles[active]
+ local updated=Capture();updated.name=old.name
+ FieldKitDB.interfaceProfiles[active]=updated
  return true
 end
 function P.Save(number)
@@ -167,7 +196,9 @@ function P.Save(number)
  P.Init()
  -- Save-as creates/updates the selected slot and makes it the active
  -- editing context. Do NOT overwrite the previous slot's stored snapshot.
- FieldKitDB.interfaceProfiles[slot]=Capture()
+ local old=FieldKitDB.interfaceProfiles[slot]
+ local updated=Capture();updated.name=old and old.name or nil
+ FieldKitDB.interfaceProfiles[slot]=updated
  FieldKitDB.activeHudProfile=slot
  return true
 end
@@ -244,9 +275,10 @@ function P.Delete(number)
 end
 function P.Command(message)
  if not FieldKitDB then return end
- message=string.lower(message or "")
+ message=message or ""
+ local lower=string.lower(message)
  P.Init()
- if message=="list" or message=="" then
+ if lower=="list" or lower=="" then
   local labels={}
   for i=1,3 do
    table.insert(labels,tostring(i)..":"..
@@ -256,7 +288,16 @@ function P.Command(message)
    ". Usage: /fieldkit profile save|load|delete 1-3, undo")
   return
  end
- if message=="undo" then
+ if string.sub(lower,1,5)=="name " then
+  local rest=string.sub(message,6)
+  local n=Slot(string.sub(rest,1,1))
+  local tail=string.sub(rest,3)
+  if string.sub(rest,2,2)~=" " then n=nil end
+  if n and P.Rename(n,tail) then Say("Profile "..n.." renamed.")
+  else Say("Usage: /fieldkit profile name 1-3 short name (max 40 bytes).") end
+  return
+ end
+ if lower=="undo" then
   if P.Undo() then Say("Previous profile restored immediately.")
   else Say("No profile change to undo.") end
   return
@@ -264,7 +305,7 @@ function P.Command(message)
  local op,number
  for _,word in ipairs({"save","load","delete"}) do
   local prefix=word.." "
-  if string.sub(message,1,string.len(prefix))==prefix then
+  if string.sub(lower,1,string.len(prefix))==prefix then
    op=word;number=Slot(string.sub(message,string.len(prefix)+1))
   end
  end

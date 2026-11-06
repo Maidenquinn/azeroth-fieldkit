@@ -12,6 +12,15 @@ assert(not FieldKitDB.interfaceProfiles[1])
 local current=FieldKitDB.cardOpacity
 click(s1.save)
 assert(FieldKitDB.interfaceProfiles[1] and FieldKitDB.interfaceProfiles[1].values.cardOpacity==current)
+assert(s1.rename:IsShown())
+click(s1.rename)
+assert(s1.edit:IsShown())
+s1.edit:SetText("Donjons FR")
+this=s1.edit;s1.edit.scripts.OnEnterPressed()
+assert(FieldKitProfiles.Name(1)=="Donjons FR")
+assert(not s1.edit:IsShown())
+assert(s1.label.text=="Donjons FR")
+
 FieldKitDB.cardOpacity=39
 click(s1.save)
 assert(FieldKitDB.interfaceProfiles[1].values.cardOpacity==current,"existing profile overwritten without confirmation")
@@ -30,6 +39,7 @@ assert(FieldKitDB.interfaceProfiles[1],"first delete click must only ask for con
 click(s1.delete)
 assert(FieldKitDB.interfaceProfiles[1]==nil,"confirmed delete should remove profile")
 click(s1.save)
+assert(FieldKitProfiles.Rename(1,"Donjons FR"))
 FieldKitDB.cardOpacity=76
 click(s1.loadButton)
 U.Refresh()
@@ -48,6 +58,10 @@ assert(FieldKitDB.activeHudProfile==1)
 -- Home quick switches are one click, and empty slots navigate to management.
 U.Select("home")
 assert(U.quickProfileButtons and table.getn(U.quickProfileButtons)==3)
+U.Refresh()
+assert(string.find(U.quickProfileButtons[1].fieldkitLabel.text,"Donjons FR",1,true),
+ "home quick selector must display the custom profile name")
+
 FieldKitDB.cardOpacity=24
 click(U.quickProfileButtons[1])
 assert(FieldKitDB.cardOpacity==88 and FieldKitDB.activeHudProfile==1)

@@ -21,6 +21,14 @@ d.combatProfiles={balanced={combatEvents={crit={enabled=false}}}}
 d.shownStats={hp=true};d.onTopWindows={FieldKitPartyDetailsFrame=true}
 d.known.TestCreature="normal";d.chestsOpened=13
 assert(P.Save(1))
+assert(P.Rename(1,"Raid FR"))
+assert(P.Name(1)=="Raid FR")
+assert(not P.Rename(1,""))
+assert(not P.Rename(1,string.rep("A",41)))
+assert(not P.Rename(1,"Bad|cffffff"))
+assert(not P.Rename(2,"Empty slot"))
+assert(P.SaveActive() and P.Name(1)=="Raid FR")
+
 assert(d.activeHudProfile==1)
 assert(d.interfaceProfiles[1].values.chatWidth==530)
 assert(d.interfaceProfiles[1].tables.chatAnchor.x==220)
@@ -42,10 +50,14 @@ d.combatProfiles={balanced={combatEvents={crit={enabled=true}}}}
 d.shownStats={gold=true};d.onTopWindows={}
 d.known.TestCreature="boss";d.chestsOpened=100
 assert(P.Save(2) and d.activeHudProfile==2)
+assert(P.Rename(2,"Exploration"))
+assert(P.Name(1)=="Raid FR" and P.Name(2)=="Exploration")
+
 assert(d.interfaceProfiles[1].values.chatWidth==530,"Saving another slot overwrote slot 1")
 assert(d.interfaceProfiles[2].values.chatWidth==670)
 assert(d.interfaceProfiles[2].values.chatStyle==false)
 assert(P.Load(1),"switch to slot 1 must apply in-game")
+assert(P.Name(1)=="Raid FR" and P.Name(2)=="Exploration")
 assert(d.activeHudProfile==1 and d.chatWidth==530 and d.chatHeight==170)
 assert(d.chatFontFace==2 and d.chatFontSize==15 and d.chatBackgroundColor==3)
 assert(d.chatAnchor.x==220 and d.chatStyle and not d.chatOverrideText)
@@ -109,7 +121,7 @@ local oldSlot={values={cardOpacity=51},tables={pos={FieldKitStatsFrame={33,44}},
 d.interfaceProfiles[3]=oldSlot
 local currentChat=d.chatWidth
 P.Init()
-assert(d.interfaceProfiles[3].schema==2)
+assert(d.interfaceProfiles[3].schema==2 and P.Name(3)==nil)
 assert(d.interfaceProfiles[3].values.chatWidth==currentChat)
 assert(d.interfaceProfiles[3].values.cardOpacity==51)
 assert(d.interfaceProfiles[3].tables.pos.FieldKitStatsFrame[1]==33)
