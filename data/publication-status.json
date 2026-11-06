@@ -6,7 +6,7 @@
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
   "inGameTestByAgent": false,
-  "githubPrerelease": true,
+  "githubPrerelease": false,
   "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true
