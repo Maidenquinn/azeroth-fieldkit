@@ -15,6 +15,12 @@ for i=1,3 do
  assert(slot.edit:GetParent()==slot.editor)
  assert(slot.editor:GetPoint()=="TOPLEFT")
  assert(slot.editor:GetWidth()>slot.edit:GetWidth())
+ local _,parent,_,hintX,hintY=slot.hint:GetPoint()
+ assert(parent==slot.frame and hintY==-42)
+ local _,_,_,editorX=slot.editor:GetPoint()
+ assert(hintX>=editorX+slot.editor:GetWidth()+20,
+ "rename hint must not overlap the editor border")
+
  for j=1,3 do
   if i~=j then assert(slot.editor~=row.slots[j].editor) end
  end
@@ -112,6 +118,18 @@ assert(U.quickProfileButtons and table.getn(U.quickProfileButtons)==3)
 U.Refresh()
 assert(string.find(U.quickProfileButtons[1].fieldkitLabel.text,"Donjons FR",1,true),
  "home quick selector must display the custom profile name")
+assert(U.headerProfileButtons[1].fieldkitLabel.text=="Donjons FR",
+ "header must display the saved custom name, not only slot number")
+assert(U.headerProfileButtons[2].fieldkitLabel.text~="2",
+ "header slot 2 should use its saved name or a full localized fallback")
+for i=1,3 do
+ local b=U.headerProfileButtons[i]
+ local _,parent,_,x,y=b:GetPoint()
+ assert(parent==U.headerProfileLayer and y==-5)
+ assert(b.fieldkitLabel:GetWidth()<=b:GetWidth())
+ assert(b:GetWidth()>=50,"header buttons must remain readable")
+end
+
 
 FieldKitDB.cardOpacity=24
 click(U.quickProfileButtons[1])

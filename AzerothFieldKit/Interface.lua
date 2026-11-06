@@ -535,12 +535,15 @@ local function BuildProfileManager(page,y)
     b:ClearAllPoints();b:SetPoint("TOPLEFT",item.frame,"TOPLEFT",14+(j-1)*(bw+12),-80)
     b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-18);T.Update(b)
    end
-   local editW=math.min(295,cw*.52)
+   -- Reserve actual space between editor shell and hint. Native glyph
+   -- rendering can overrun a Frame edge even when nominal anchors differ.
+   local editW=math.min(250,cw*.42)
    item.editor:SetWidth(editW+20);item.edit:SetWidth(editW)
    T.Update(item.editor)
+   local hintX=14+editW+20+28
    item.hint:ClearAllPoints()
-   item.hint:SetPoint("TOPLEFT",item.frame,"TOPLEFT",26+editW,-38)
-   item.hint:SetWidth(math.max(110,cw-editW-44))
+   item.hint:SetPoint("TOPLEFT",item.frame,"TOPLEFT",hintX,-42)
+   item.hint:SetWidth(math.max(110,cw-hintX-18))
    local actionW=math.min(148,(cw-42)/2)
    item.commit:SetWidth(actionW);item.abort:SetWidth(actionW)
    item.abort:ClearAllPoints()
@@ -728,7 +731,12 @@ function U.Refresh()
   for i=1,3 do
    local b=U.headerProfileButtons[i]
    local saved=FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[i]
-   FieldKit_Text(b,saved and tostring(i) or "—")
+   -- Show user names here too; the compact header remains responsive.
+   -- FontStrings are width-constrained so long names never cover neighbours.
+   local label=saved and (FieldKitProfiles.Name(i) or
+    string.format(FieldKit_L("Profile %d"),i)) or
+    string.format(FieldKit_L("Profile %d · empty"),i)
+   FieldKit_Text(b,label)
    T.State(b,FieldKitDB.activeHudProfile==i)
   end
  end
@@ -822,9 +830,25 @@ function U.Reflow()
  U.title:SetWidth(w-220);U.subtitle:SetWidth(w-230)
  -- Always anchor the whole selector as one unit away from the title,
  -- close button and panel header's drag hit area.
+ -- Fit three named buttons inside a single fixed-width header band.
+ -- Avoid the window close icon, title and native draggable header region.
+ local selectorWidth=math.min(386,math.max(218,w*.40))
+ U.headerProfileLayer:SetWidth(selectorWidth)
  U.headerProfileLayer:ClearAllPoints()
  U.headerProfileLayer:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-34,-72)
- for i=1,3 do T.Update(U.headerProfileButtons[i]) end
+ local labelWidth=36
+ local gap=7
+ local buttonWidth=(selectorWidth-labelWidth-gap*3-6)/3
+ U.headerProfiles:SetWidth(labelWidth)
+ for i=1,3 do
+  local b=U.headerProfileButtons[i]
+  b:ClearAllPoints()
+  b:SetPoint("TOPLEFT",U.headerProfileLayer,"TOPLEFT",
+   labelWidth+gap+(i-1)*(buttonWidth+gap),-5)
+  b:SetWidth(buttonWidth)
+  b.fieldkitLabel:SetWidth(buttonWidth-12)
+  T.Update(b)
+ end
  U.status:ClearAllPoints();U.status:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-(h-78));U.contentWidth=content;U.status:SetWidth(U.reloadNeeded and content-166 or content)
  local y=h-44
  -- C10.4: reserve the close button first; distribute footer actions within
@@ -952,14 +976,14 @@ function U.Build(sections,context)
  -- capture frame. Otherwise native Benilla 1.12 can route clicks to the
  -- header's drag handler and make buttons appear inert.
  U.headerProfileLayer=CreateFrame("Frame",nil,frame)
- U.headerProfileLayer:SetWidth(242);U.headerProfileLayer:SetHeight(35)
+ U.headerProfileLayer:SetWidth(386);U.headerProfileLayer:SetHeight(35)
  U.headerProfileLayer:SetFrameLevel(header:GetFrameLevel()+12)
  U.headerProfileLayer:EnableMouse(false)
  U.headerProfiles=T.Label(U.headerProfileLayer,"PROF",0,6,38,23,12,T.muted)
  U.headerProfileButtons={}
  for i=1,3 do
   local slot=i
-  local button=T.Button(U.headerProfileLayer,nil,tostring(i),40+(i-1)*63,5,52,27,function()
+  local button=T.Button(U.headerProfileLayer,nil,tostring(i),40+(i-1)*110,5,104,27,function()
    if FieldKitDB.interfaceProfiles and FieldKitDB.interfaceProfiles[slot] then
     FieldKitProfiles.Load(slot);U.Refresh()
    else U.Select("profiles") end
