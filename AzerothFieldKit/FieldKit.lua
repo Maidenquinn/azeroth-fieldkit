@@ -2551,7 +2551,7 @@ RefreshCollapseDock=function()
  local count=0
  for i=1,6 do
   local f=frames[i]
-  local active=states[i] and f and f:IsShown()
+  local active=states[i] and f and (f:IsShown() or f.fieldkitDockHidden)
   if active then
    count=count+1
    collapseDockButtons[i]:ClearAllPoints()
