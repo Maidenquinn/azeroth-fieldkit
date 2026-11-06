@@ -12,7 +12,7 @@ local extra={
  "meterDetach_damage","meterDetach_healing","meterDetach_boss",
  "meterDetach_taken","meterDetach_party","meterDetach_kills",
  "meterViewKey","loadoutTab","statsCollapsed","gearCollapsed",
- "combatProfileActive","moneyDockRepair",
+ "combatProfileActive",
  "combatText","combatTextFontSize","combatTextCritSize",
  "combatTextFont","combatTextCritFont","combatTextOutline",
  "combatTextOpacity","combatTextMax","combatTextSpacing",
