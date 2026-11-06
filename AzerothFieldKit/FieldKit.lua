@@ -1281,6 +1281,7 @@ end
 
 
 -- Collapse or expand a stats/equipment panel while retaining its saved position.
+local RefreshCollapseDock
 local function ApplyCompactPanel(f, key, expandedHeight)
     if not f then return end
     local collapsed = DB[key]
@@ -1310,7 +1311,7 @@ local function AddCompactButton(f, key, refresh)
     b:SetPoint("TOPRIGHT", f, "TOPRIGHT", -2, -2)
     FieldKit_Text(b,DB[key] and "+" or "-")
     b:SetFrameLevel(f:GetFrameLevel() + 10)
-    b:SetScript("OnClick", function() DB[key] = not DB[key]; refresh() end)
+    b:SetScript("OnClick", function() DB[key] = not DB[key]; refresh(); if RefreshCollapseDock then RefreshCollapseDock() end end)
     f.mashCollapseButton = b
 end
 
@@ -1832,6 +1833,7 @@ local function CreateBarWindow(name, title, rows)
    FieldKitCardLayout.Rows(f,f.fieldkitNaturalHeight or (28+ROW_HEIGHT*math.max(f.mashVisibleRows or 0,1)),f.mashVisibleRows or 0,f.fieldkitRowKind or "bar",false)
 		end
 		FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight()
+  if RefreshCollapseDock then RefreshCollapseDock() end
 	end)
 	f.mashCollapseButton = collapse
 	f.rows = {}
@@ -2512,6 +2514,63 @@ local function UpdateGryphons()
 end
 
 
+-- A detached, compact dock keeps folded windows out of the play area.
+-- The original frames retain their saved geometry and can be restored in one click.
+local collapseDock,collapseDockButtons
+local function BuildCollapseDock()
+ if collapseDock then return end
+ collapseDock=CreateFrame("Frame","FieldKitCollapseDock",UIParent)
+ collapseDock:SetFrameStrata("HIGH")
+ collapseDock:SetWidth(164);collapseDock:SetHeight(24)
+ collapseDock:SetPoint("BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-18,110)
+ collapseDockButtons={}
+ local labels={"Mode de jeu","Dégâts","Dégâts subis","Antres","Statistiques","Accessoires / Sorts"}
+ for i=1,6 do
+  local index=i
+  local button=FieldKitTheme.Button(collapseDock,nil,labels[i],0,0,164,23,nil)
+  button:ClearAllPoints()
+  button:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,0)
+  button:SetScript("OnClick",function()
+   if index==1 and DB.collapsedWindows then DB.collapsedWindows.FieldKitRunModeFrame=nil
+   elseif index==2 or index==3 or index==4 then
+    local f=index==2 and meterFrame or index==3 and takenFrame or lairFrame
+    if f and f.mashCollapseButton then f.mashCollapseButton:Click() end
+   elseif index==5 then DB.statsCollapsed=false;UpdateStatsFrame()
+   elseif index==6 then DB.gearCollapsed=false;UpdateGearFrame() end
+   if RefreshCollapseDock then RefreshCollapseDock() end
+  end)
+  collapseDockButtons[i]=button
+ end
+end
+RefreshCollapseDock=function()
+ if not DB then return end
+ BuildCollapseDock()
+ local frames={nil,meterFrame,takenFrame,lairFrame,statsFrame,gearFrame}
+ local states={false,meterFrame and meterFrame.mashCollapsed,takenFrame and takenFrame.mashCollapsed,
+  lairFrame and lairFrame.mashCollapsed,DB.statsCollapsed,DB.gearCollapsed}
+ local count=0
+ for i=1,6 do
+  local f=frames[i]
+  local active=states[i] and f and f:IsShown()
+  if active then
+   count=count+1
+   collapseDockButtons[i]:ClearAllPoints()
+   collapseDockButtons[i]:SetPoint("BOTTOMRIGHT",collapseDock,"BOTTOMRIGHT",0,(count-1)*26)
+   collapseDockButtons[i]:Show()
+   f:Hide()
+   f.fieldkitDockHidden=true
+  else
+   collapseDockButtons[i]:Hide()
+   if f and f.fieldkitDockHidden then
+    f.fieldkitDockHidden=nil
+    f:Show()
+   end
+  end
+ end
+ collapseDock:SetHeight(math.max(24,count*26))
+ if count>0 then collapseDock:Show() else collapseDock:Hide() end
+end
+
 local settingsActions={
  SetFilter=SetFilter,
  UpdateTargetHealth=UpdateTargetHealth,
@@ -2572,6 +2631,7 @@ function FieldKit.ApplyHUDProfileLive()
  FieldKitHudStack.Apply()
  FieldKitCardLayout.ApplyRight()
  FieldKitTheme.Refresh()
+ RefreshCollapseDock()
  -- A profile is now a full preference context, not merely a HUD layout.
  -- Apply the same existing handlers used by individual settings controls.
  settingsActions.UpdateTargetHealth()
