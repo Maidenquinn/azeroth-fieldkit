@@ -2019,7 +2019,7 @@ local function UpdateMeterFrames(force)
  end
 end
 
-local UpdateChestPins, UpdateLairFrame, CreateLairFrame
+local UpdateChestPins, UpdateLairFrame, CreateLairFrame, lairFrame
 do
 
 
@@ -2031,7 +2031,6 @@ end
 
 local LAIR_ROWS = 10
 local LAIR_DIST_COLORS = { { 0.2, 1.0, 0.2 }, { 1.0, 1.0, 0.2 }, { 1.0, 0.55, 0.1 }, { 1.0, 0.2, 0.2 } }
-local lairFrame
 
 -- Format a non-negative whole-second lair return countdown as minutes:seconds.
 local function FormatClock(s)
@@ -2562,7 +2561,7 @@ RefreshCollapseDock=function()
    collapseDockButtons[i]:Hide()
    if f and f.fieldkitDockHidden then
     f.fieldkitDockHidden=nil
-    f:Show()
+    if (i==5 and DB.statsFrame) or (i==6 and DB.gearFrame) or (i>=2 and i<=4) then f:Show() end
    end
   end
  end
