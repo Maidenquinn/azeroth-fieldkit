@@ -3,6 +3,7 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["In use: "]="En cours : ",
  ["Current"]="Actif",
  ["Current profile: "]="Profil actif : ",
  ["Save name"]="Enregistrer le nom",

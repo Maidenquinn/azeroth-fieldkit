@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0-alpha.12 — 2026-11-06 (active profile visual polish, unpublished)
+
+- Clearly mark the currently active named profile with a persistent **gold border and subtle bronze background** in the top-right PROF selector and in its manager card.
+- Retain the small localized active indicator on the manager card; inactive profile cards have no gold selection border.
+- Set the header button's persistent selected state explicitly, preventing mouse-leave hover transitions from removing its active look.
+- Replace the plain green Home status text with a compact, themed status strip labeled "In use: <name>" / "En cours : <nom>" under Quick profiles.
+- The active visuals switch instantly using the existing profile ID, without changing saved configuration or native chat rendering.
+- Extend mocked UI checks for active/inactive states, mouse leave, and the Home status surface.
+- No changes to chat, profile storage, instant switching, renaming, native HUD drag or gameplay data.
+- **Unpublished test candidate**, subject to native-client visual recipe.
+
+
 ## 0.5.0-alpha.11 — 2026-11-06 (explicit current profile indicators, unpublished)
 
 - The persistent PROF selector now displays a visible check mark before the current profile name, in addition to its selected-button styling; the indicator updates instantly when switching.
