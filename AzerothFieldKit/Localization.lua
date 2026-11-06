@@ -3,6 +3,8 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["✓ English"]="✓ Anglais",
+ ["✓ Français"]="✓ Français",
  ["Profiles"]="Profils",
  ["Save all FieldKit preferences per profile, including chat. Game stats and message history stay shared."]="Chaque profil conserve tous les réglages FieldKit, y compris le chat. Les statistiques de partie et l'historique des messages restent partagés.",
  ["Active profile: %d"]="Profil actif : %d",
