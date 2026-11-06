@@ -117,3 +117,12 @@ d.interfaceProfiles[22]={values={},tables={}}
 d.interfaceProfiles[1]="broken"
 P.Init()
 assert(d.interfaceProfiles[22]==nil and d.interfaceProfiles[1]==nil)
+-- Final unsaved change must be captured when the game writes SavedVariables.
+assert(P.Save(2))
+d.chatFontSize=18;d.chatBackgroundOpacity=55;d.lowHealthPct=44
+fire(FieldKitFrame,"PLAYER_LOGOUT")
+assert(d.interfaceProfiles[2].values.chatFontSize==18)
+assert(d.interfaceProfiles[2].values.chatBackgroundOpacity==55)
+assert(d.interfaceProfiles[2].values.lowHealthPct==44)
+assert(d.known.TestCreature=="boss" and d.chestsOpened==100)
+
