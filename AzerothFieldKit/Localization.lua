@@ -3,6 +3,19 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Preview HUD"]="Prévisualiser le HUD",
+ ["Apply profile"]="Appliquer le profil",
+ ["Restore previous"]="Restaurer le précédent",
+ ["Close"]="Fermer",
+ ["FieldKit - drag dock"]="FieldKit - déplacer le dock",
+ ["Game mode"]="Mode de jeu",
+ ["Damage"]="Dégâts",
+ ["Damage taken"]="Dégâts subis",
+ ["Lairs"]="Antres",
+ ["Statistics"]="Statistiques",
+ ["Accessories / Spells"]="Accessoires / Sorts",
+ ["Effects"]="Effets",
+ ["Run reminders"]="Rappels de partie",
  ["In use: "]="En cours : ",
  ["Current"]="Actif",
  ["Current profile: "]="Profil actif : ",
