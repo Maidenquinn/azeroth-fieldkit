@@ -137,6 +137,16 @@ FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
 assert(pcall(P.Init))
 FieldKit.Number=originalNumber
 
+-- An outgoing active slot missing from the store must fail closed rather
+-- than discarding its unsaved changes during a profile switch.
+assert(P.Save(1))
+assert(P.Save(2))
+d.interfaceProfiles[2]=nil
+local retainedWidth=d.chatWidth
+assert(not P.Load(1))
+assert(d.activeHudProfile==2 and d.chatWidth==retainedWidth)
+assert(P.Save(2))
+
 -- A native apply failure must not leave the active slot pointing at
 -- the attempted target, and must restore the live preferences.
 assert(P.Save(1))
