@@ -168,6 +168,10 @@ local originalNumber=FieldKit.Number
 FieldKit.Number=function() error("unexpected snapshot on migrated Init") end
 assert(pcall(P.Init))
 FieldKit.Number=originalNumber
+-- Explicitly simulate manual recovery of the damaged slot before the
+-- remaining independent corruption/rollback test scenarios.
+assert(d.interfaceProfiles[1]=="broken")
+d.interfaceProfiles[1]=nil
 
 -- Corrupted incoming snapshots must be rejected before any live setting
 -- is changed, including when a valid field precedes the corrupted table.
