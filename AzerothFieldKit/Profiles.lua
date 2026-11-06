@@ -191,7 +191,9 @@ function P.SaveActive()
  P.Init()
  if not FieldKitDB.interfaceProfiles[active] then return false end
  local old=FieldKitDB.interfaceProfiles[active]
- local updated=Capture();updated.name=old.name
+ local updated=Capture()
+ if not updated then return false end
+ updated.name=old.name
  FieldKitDB.interfaceProfiles[active]=updated
  return true
 end
@@ -202,7 +204,9 @@ function P.Save(number)
  -- Save-as creates/updates the selected slot and makes it the active
  -- editing context. Do NOT overwrite the previous slot's stored snapshot.
  local old=FieldKitDB.interfaceProfiles[slot]
- local updated=Capture();updated.name=old and old.name or nil
+ local updated=Capture()
+ if not updated then return false end
+ updated.name=old and old.name or nil
  FieldKitDB.interfaceProfiles[slot]=updated
  FieldKitDB.activeHudProfile=slot
  return true
@@ -215,10 +219,12 @@ function P.Load(number)
   type(FieldKit.ApplyHUDProfileLive)~="function" or FieldKit.layoutEditing then return false end
  local sameSlot=FieldKitDB.activeHudProfile==slot
  local before=Capture()
+ if not before then return false end
  local previous=FieldKitDB.activeHudProfile
  -- Preserve all edits in the outgoing slot, even when the player never
  -- pressed the explicit Save current HUD button.
- if not sameSlot then P.SaveActive() end
+ -- Never proceed if autosave fails: otherwise the outgoing edits can be lost.
+ if not sameSlot and Slot(previous) and not P.SaveActive() then return false end
  local ok=pcall(function()
   assert(ApplySnapshot(FieldKitDB.interfaceProfiles[slot]))
   assert(FieldKit.ApplyHUDProfileLive())
@@ -241,8 +247,9 @@ function P.Undo()
  if P.undo then
   local before=P.undo
   local current=Capture()
+  if not current then return false end
   local oldActive=FieldKitDB.activeHudProfile
-  P.SaveActive()
+  if Slot(oldActive) and not P.SaveActive() then return false end
   local ok=pcall(function()
    assert(ApplySnapshot(before));assert(FieldKit.ApplyHUDProfileLive())
   end)
