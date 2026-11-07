@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.14",
+  "candidate": "0.6.0-alpha.15",
   "runtimeModules": 47,
   "textureCount": 245,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5187,
-      "sha256": "d02aeccbf650dd724367d21e922573e2a9a3306b0f9f90bbf211a213511de289",
+      "sha256": "751bc6931b0650d248dabe895edb535f8869a8d282964f67ba8c030787086ff0",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -2764,8 +2764,8 @@
       "literalEvents": []
     },
     "ThemeMinimap.lua": {
-      "bytes": 6537,
-      "sha256": "63c9c6c19ad58715f67692f1ae7f9672da4b956884989a53926ec73fbe6fd674",
+      "bytes": 6601,
+      "sha256": "f4326e278a16b7fa18728cfac8aeedad0f2a8d5c9bd1cd904141badafa9258b5",
       "namedFunctions": [
         {
           "name": "M.Rotate",
@@ -2777,15 +2777,15 @@
         },
         {
           "name": "M.Apply",
-          "line": 37
+          "line": 38
         },
         {
           "name": "StartMapDrag",
-          "line": 50
+          "line": 51
         },
         {
           "name": "FinishMapDrag",
-          "line": 55
+          "line": 56
         }
       ],
       "literalEvents": []
@@ -2897,14 +2897,14 @@
       "literalEvents": []
     },
     "ReferenceArt.lua": {
-      "bytes": 11141,
-      "sha256": "7231ff353beae327899ff0ae8455356e456c155e5d1e6088ac5b9fcd17fa8ee8",
+      "bytes": 11385,
+      "sha256": "b042e0777110f3a4519ccfadbf57bb4dcbb2e68ca9896f58f066775074605edf",
       "namedFunctions": [],
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 52152,
-      "sha256": "b4263c62fdfea67672047ff5425b23c66021101aa668a9e2f8a0585a51b15c60",
+      "bytes": 56003,
+      "sha256": "df918788c8c806659e7df52f3c95638e36d213a2e58f0b08db242996bce34b96",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2967,48 +2967,56 @@
           "line": 172
         },
         {
+          "name": "R.MapRim",
+          "line": 302
+        },
+        {
           "name": "R.Map",
-          "line": 298
+          "line": 323
         },
         {
           "name": "Finish",
-          "line": 310
+          "line": 339
         },
         {
           "name": "Row",
-          "line": 340
+          "line": 369
+        },
+        {
+          "name": "R.DamageTabs",
+          "line": 375
         },
         {
           "name": "R.Window",
-          "line": 345
+          "line": 390
         },
         {
           "name": "R.CardTabs",
-          "line": 352
+          "line": 399
         },
         {
           "name": "R.MaskBuffs",
-          "line": 368
+          "line": 422
         },
         {
           "name": "R.LairList",
-          "line": 379
+          "line": 433
         },
         {
           "name": "Tint",
-          "line": 382
+          "line": 436
         },
         {
           "name": "R.Panels",
-          "line": 409
+          "line": 463
         },
         {
           "name": "R.Settings",
-          "line": 528
+          "line": 591
         },
         {
           "name": "R.Buffs",
-          "line": 543
+          "line": 606
         }
       ],
       "literalEvents": []
@@ -5127,7 +5135,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.14",
+    "version": "0.6.0-alpha.15",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5138,7 +5146,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
+    "inGameTestScope": "Alpha15: Lua 5.0.3/5.1 synthetic regression for map opening fill and rim, header tabs, portrait socket, lair columns, empty damage state and tab stability; NOT observed natively. Previous scope - Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

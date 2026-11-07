@@ -145,7 +145,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   assert(not H.micro:IsShown(),"Native menus must be collapsed by default")
   if FieldKitReferenceHUD.active then
    local d=FieldKitReferenceHUD.layout
-   assert(Minimap:GetWidth()==d.map[3] and Minimap:GetHeight()==d.map[3])
+   do local hole=d.mapHole or {0,0,d.map[3],d.map[3]};local side=math.max(hole[3],hole[4]);assert(Minimap:GetWidth()==side and Minimap:GetHeight()==side,"Map covers its measured opening, still square")end
    assert(H.counterRoot.mouseEnabled==false,"Invisible count canvas must never intercept gameplay input")
   else
    local p=M.root:GetPoint();assert(p)
@@ -241,7 +241,7 @@ C.Open("Stats")
 local chrome=T.Button(UIParent,nil,"Test",0,0,200,30,function() end)
 T.State(chrome,true);assert(not chrome.fieldkitSkin.selected:IsShown(),"No side stripe on selected controls")
 local row=R.frames.Lairs.rows[1];if row.lamp then assert(not row.lamp:IsShown(),"Elwynn empty state must not inherit Naxx lamps") end
-assert(Minimap:GetWidth()==252 and ActionButton1:GetWidth()==R.layout.actions[3]-8)
+assert(Minimap:GetWidth()==math.max(R.layout.mapHole[3],R.layout.mapHole[4]) and ActionButton1:GetWidth()==R.layout.actions[3]-8)
 C.Set("zoneThemes",false)
 print("Review feedback: persistent summaries, readable detail rows, clean selection and inset actions passed")
 
@@ -294,7 +294,7 @@ FieldKitDB.meterFrame=true;FieldKitDB.lairFrame=true;FieldKitDB.statsFrame=true;
 for _,kind in ipairs({"Damage","Lairs","Stats","Effects"}) do
  local f=R.frames[kind];assert(f.cleanBody:IsShown());assert(not f.footerPatch or not f.footerPatch:IsShown());assert(not f.emptySocket or not f.emptySocket:IsShown())
 end
-assert(Minimap:GetWidth()==252)
+assert(Minimap:GetWidth()==math.max(R.layout.mapHole[3],R.layout.mapHole[4]))
 for _,tab in ipairs(R.tabs) do assert(tab.fieldkitArtOnly);for _,part in ipairs(tab.fieldkitSkin.parts) do assert(not part.texture:IsShown()) end end
 C.Set("zoneThemes",false)
 print("Clean card materials, flat meter tabs and bounded square minimap passed")
@@ -435,3 +435,45 @@ end
 AZS_UNITS,AZS_RUN.ph=oldUnits,oldPhase
 C.Set("zoneThemes",false)
 print("Portrait layering, damage navigation, tab marks and boss/guardian card passed (synthetic)")
+
+-- alpha.15: map fills its opening (rim redrawn above), header tabs, portrait socket, lair names, empty damage state, tab hit areas.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ for _,variant in ipairs({"complete","minimal","alternative"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemes",true);C.Refresh(true)
+  local d=R.layout;local M=FieldKitThemeMinimap
+  if d.mapHole then
+   local side=math.max(d.mapHole[3],d.mapHole[4]);assert(Minimap:GetWidth()==side and Minimap:GetHeight()==side,zone.."/"..variant..": square map covers the opening")
+   assert(M.rim and M.rim:IsShown() and not M.rim.mouseEnabled and M.rim:GetFrameLevel()>Minimap:GetFrameLevel(),zone.."/"..variant..": art rim redrawn above the map, never intercepting clicks")
+   local any=false;for _,t in ipairs(M.rimTex) do if t:IsShown() then any=true end end;assert(any,zone.."/"..variant..": rim strip drawn")
+  end
+  if d.portraitHole then
+   local side=math.max(d.portraitHole[3],d.portraitHole[4])+2;assert(R.portrait:GetWidth()==side and R.portrait:GetHeight()==side and R.portraitBack:GetWidth()==side,zone.."/"..variant..": portrait covers the whole socket undistorted")
+  end
+ end
+ C.Set("zoneThemeVariant","complete");C.Refresh(true)
+ -- header tabs
+ local acc=R.frames.Accessories;local a=R.layout.rects.Accessories
+ assert(not acc.title:IsShown() and acc.cardTabs[1]:IsShown() and acc.cardTabs[2]:IsShown(),zone..": equipment title replaced by header tabs")
+ local _,_,_,x1,y1=acc.cardTabs[1]:GetPoint();local _,_,_,x2,y2=acc.cardTabs[2]:GetPoint()
+ assert(y1==y2 and -y1<=12 and acc.cardTabs[1]:GetHeight()>=32 and x1+acc.cardTabs[1]:GetWidth()==x2 and x2+acc.cardTabs[2]:GetWidth()<=a[3]-30,zone..": header tabs are contiguous, in the header and clear of the collapse button")
+ local _,_,_,_,ry=acc.rows[1]:GetPoint();assert(-ry<=56,zone..": content starts in the recovered space")
+ -- Lair names get the width that is left
+ local lairs={};for i=1,4 do table.insert(lairs,{name="Anub'Rekhan the Very Long Named Guardian "..i,state=(i==1 and "awake" or "empty"),left=(i>1 and 60 or nil),x=i,y=0}) end
+ local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
+ C.Refresh(true);local panel=R.frames.Lairs;local rowW=zone=="naxx" and a[3]*0+R.layout.rects.Lairs[3]-77 or R.layout.rects.Lairs[3]-66
+ for i=1,4 do local r=panel.rows[i];assert(r:IsShown() and r.label:GetWidth()+r.value:GetWidth()<=rowW,zone..": lair columns do not overlap");assert(r.label:GetWidth()>rowW*.4,zone..": name receives the available width") ;assert(r.label.referenceFullText and string.find(r.label.referenceFullText,"Anub"),zone..": full lair name kept for hover") end
+ FieldKitNative.Read=oldRead
+ -- Damage: empty state centred in the content area; six tabs reachable; layout not re-applied every refresh
+ local dm=R.frames.Damage;local dr=R.layout.rects.Damage
+ for k=1,6 do local b=R.tabs[k];assert(b:IsShown() and b:GetHeight()>=24 and b:GetWidth()>=80,zone..": damage tab hit area "..k) end
+ local seenLevel=R.tabs[1]:GetFrameLevel();local key=R.tabs[1].layoutKey;C.Refresh(true);assert(R.tabs[1].layoutKey==key and R.tabs[1]:GetFrameLevel()==seenLevel,zone..": tab layout is stable across refreshes")
+ local r1=dm.rows[1];local _,_,_,rx,ry=r1:GetPoint();local top=zone=="naxx" and 146 or 98;local bottom=zone=="naxx" and dr[4]-30 or dr[4]-52
+ if r1.label:GetText()==FieldKit_L("No combat data") then
+  assert(rx==24 and -ry==top and r1:GetHeight()==bottom-top and r1.label:GetWidth()==dr[3]-48,zone..": empty state spans the content area (centred)")
+ end
+ FieldKitDB.language="en";C.Refresh(true);assert(R.frames.Accessories.cardTabs[1].fieldkitLabel:GetText()=="Equipment" and R.frames.Accessories.cardTabs[2].fieldkitLabel:GetText()=="Spells",zone..": English header tabs")
+ FieldKitDB.language="fr";C.Refresh(true);assert(R.frames.Accessories.cardTabs[1].fieldkitLabel:GetText()=="Équipement" and R.frames.Accessories.cardTabs[2].fieldkitLabel:GetText()=="Sorts",zone..": French header tabs")
+end
+C.Set("zoneThemes",false)
+assert(FieldKitThemeMinimap.rim==nil or not FieldKitThemeMinimap.rim:IsShown(),"rim hidden when the theme is off")
+print("Map fill and rim, portrait socket, header tabs, lair columns, empty damage state and tab stability passed (synthetic)")

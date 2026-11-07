@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha.15 - 2026-11-07 (map fill, header tabs, portrait socket, unreleased)
+
+- Minimap: measured art openings (`mapHole` in layouts.json, exported by build_reference_skins.py) are not square; the native map stays square (no stretching) but now covers the whole opening, and the art strip around the opening is redrawn above it (non-interactive) to mask any overflow. Applies to every layout that has a map frame.
+- Equipment/Spells: tabs live in the card header in place of the title; the row below the header is gone and content starts higher; the page indicator moves to the card foot. Tab areas are contiguous.
+- Player portrait: `portraitHole` measured from the art; one undistorted square covers the whole socket opening so no transparent strip remains.
+- Lairs: value column is measured, the guardian name gets all remaining width; shortened names keep their full text for hover.
+- Damage: empty state centred in the content area; tabs are laid out only when their layout changes (re-levelling every refresh can cancel a click in progress); tab hit areas are contiguous 25 px rows.
+
 ## 0.6.0-alpha.14 - 2026-11-07 (visual corrections, unpublished)
 
 - Equipment / Spells tabs: a thin rule under every tab and the gold underline on the active one only; full "Equipement" / "Sorts" labels.

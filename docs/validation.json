@@ -1,7 +1,7 @@
 {
-  "version": "0.6.0-alpha.14",
+  "version": "0.6.0-alpha.15",
   "lua51": true,
-  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)\nElement sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)\nReview feedback: persistent summaries, readable detail rows, clean selection and inset actions passed\nComplete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed\nEndless unnamed boss countdown and fixed equipment typography passed\nEmpty combat state, consistent tab surfaces and measured Elwynn action sockets passed\nClean card materials, flat meter tabs and bounded square minimap passed\nLocked HUD readers remain movable and persistent; localized taken sources and single target surface passed\nEquipment/Spells tabs, bounded effects and lairs, native buff restoration passed (synthetic)\nPortrait layering, damage navigation, tab marks and boss/guardian card passed (synthetic)",
+  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)\nElement sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)\nReview feedback: persistent summaries, readable detail rows, clean selection and inset actions passed\nComplete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed\nEndless unnamed boss countdown and fixed equipment typography passed\nEmpty combat state, consistent tab surfaces and measured Elwynn action sockets passed\nClean card materials, flat meter tabs and bounded square minimap passed\nLocked HUD readers remain movable and persistent; localized taken sources and single target surface passed\nEquipment/Spells tabs, bounded effects and lairs, native buff restoration passed (synthetic)\nPortrait layering, damage navigation, tab marks and boss/guardian card passed (synthetic)\nMap fill and rim, portrait socket, header tabs, lair columns, empty damage state and tab stability passed (synthetic)",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -18,7 +18,7 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.14",
+    "version": "0.6.0-alpha.15",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -29,13 +29,13 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
+    "inGameTestScope": "Alpha15: Lua 5.0.3/5.1 synthetic regression for map opening fill and rim, header tabs, portrait socket, lair columns, empty damage state and tab stability; NOT observed natively. Previous scope - Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
   },
   "files": {
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "d02aeccbf650dd724367d21e922573e2a9a3306b0f9f90bbf211a213511de289"
+      "sha256": "751bc6931b0650d248dabe895edb535f8869a8d282964f67ba8c030787086ff0"
     },
     "Diagnostics.lua": {
       "maxUpvalues": 2,
@@ -240,7 +240,7 @@
     "ThemeMinimap.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "63c9c6c19ad58715f67692f1ae7f9672da4b956884989a53926ec73fbe6fd674"
+      "sha256": "f4326e278a16b7fa18728cfac8aeedad0f2a8d5c9bd1cd904141badafa9258b5"
     },
     "ThemeHUD.lua": {
       "maxUpvalues": 4,
@@ -255,12 +255,12 @@
     "ReferenceArt.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "7231ff353beae327899ff0ae8455356e456c155e5d1e6088ac5b9fcd17fa8ee8"
+      "sha256": "b042e0777110f3a4519ccfadbf57bb4dcbb2e68ca9896f58f066775074605edf"
     },
     "ReferenceHUD.lua": {
       "maxUpvalues": 8,
-      "functions": 62,
-      "sha256": "b4263c62fdfea67672047ff5425b23c66021101aa668a9e2f8a0585a51b15c60"
+      "functions": 64,
+      "sha256": "df918788c8c806659e7df52f3c95638e36d213a2e58f0b08db242996bce34b96"
     },
     "ZoneThemes.lua": {
       "maxUpvalues": 17,

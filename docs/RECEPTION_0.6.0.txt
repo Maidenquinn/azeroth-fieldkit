@@ -136,6 +136,11 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.15 - CARTE, ONGLETS EN-TETE, PORTRAIT
+Minimap : remplit l'ouverture du cadre (carre non etire, rebord redessine). Equipement/Sorts : onglets
+dans l'en-tete. Portrait : couvre tout le socle. Antres : noms plus larges. Degats : etat vide centre,
+premier clic sur les six onglets. A recetter en jeu, Elwynn et Naxx Complete.
+
 ALPHA.14 - CORRECTIONS VISUELLES
 Portrait joueur sous le rebord du cadre ; Degats : 6 categories sur 2 rangees (aussi Naxx) ;
 onglets Equipement/Sorts : filet + souligne actif ; carte boss/gardien 340x66 centree, etiquette coloree.

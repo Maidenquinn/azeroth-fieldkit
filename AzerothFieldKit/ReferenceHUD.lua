@@ -214,9 +214,12 @@ function R.Update(variant,zone)
  if d.portrait then
   local a=d.portrait;local p=d.rects.vitality
   R.portraitFrame:SetFrameLevel(math.max(0,H.healthRoot:GetFrameLevel()-1));R.portraitFrame:Show()
-  local grow=R.key=="naxx_alternative" and 1 or 1.1;local size=a[3]*grow;local shift=(size-a[3])/2
-  R.portraitBack:ClearAllPoints();R.portraitBack:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",a[1]-p[1]-shift,p[2]-a[2]+shift);R.portraitBack:SetWidth(size);R.portraitBack:SetHeight(size);R.portraitBack:Show()
-  R.portrait:ClearAllPoints();R.portrait:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",a[1]-p[1]-shift,p[2]-a[2]+shift);R.portrait:SetWidth(size);R.portrait:SetHeight(size)
+  -- One undistorted square that covers the whole measured socket opening (not the nominal 88 px box):
+  -- the art rim above masks the overflow, so no transparent strip remains and the face is never stretched.
+  local hole=d.portraitHole or {a[1],a[2],a[3],a[3]};local size=math.max(hole[3],hole[4])+2
+  local px,py=hole[1]+hole[3]/2-size/2,hole[2]+hole[4]/2-size/2
+  R.portraitBack:ClearAllPoints();R.portraitBack:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",px-p[1],p[2]-py);R.portraitBack:SetWidth(size);R.portraitBack:SetHeight(size);R.portraitBack:Show()
+  R.portrait:ClearAllPoints();R.portrait:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",px-p[1],p[2]-py);R.portrait:SetWidth(size);R.portrait:SetHeight(size)
   if R.portraitKey~=key then
    local ok=false;if type(SetPortraitTexture)=="function" then ok=pcall(SetPortraitTexture,R.portrait,"player") end
    if not ok then R.portrait:SetTexture("Interface\\Icons\\INV_Helmet_74") end
@@ -295,11 +298,37 @@ function R.Update(variant,zone)
  for _,label in ipairs(R.counts) do R.Fit(label,nil,10) end
  for _,b in ipairs(H.buttons) do if b:IsShown() then R.Fit(b.fieldkitLabel,nil,10) end end
 end
+-- Re-draw only the art tiles' strip around the map opening on a non-interactive frame above the native map.
+function R.MapRim(M,hole)
+ local rects=R.layout.rects;local name=rects.mapArt and "mapArt" or "identity";local comp=rects.mapArt and M.root or H.identity
+ local origin=rects[name];local tiles=R.layout.tiles[name]
+ if not comp or not origin or not tiles then if M.rim then M.rim:Hide() end;return end
+ if not M.rim then M.rim=CreateFrame("Frame",nil,comp);M.rimTex={} end
+ M.rim:SetParent(comp);M.rim:EnableMouse(false);M.rim:ClearAllPoints();M.rim:SetPoint("TOPLEFT",comp,"TOPLEFT",0,0);M.rim:SetWidth(origin[3]);M.rim:SetHeight(origin[4])
+ M.rim:SetFrameLevel(Minimap:GetFrameLevel()+2)
+ local margin=10;local zl,zt=hole[1]-margin-origin[1],hole[2]-margin-origin[2];local zr,zb=zl+hole[3]+2*margin,zt+hole[4]+2*margin
+ local used=0
+ for _,tile in ipairs(tiles) do
+  local x0,y0=math.max(tile[2],zl),math.max(tile[3],zt);local x1,y1=math.min(tile[2]+tile[4],zr),math.min(tile[3]+tile[5],zb)
+  if x1>x0 and y1>y0 then
+   used=used+1;local t=M.rimTex[used]
+   if not t then t=M.rim:CreateTexture(nil,"ARTWORK");M.rimTex[used]=t end
+   t:SetTexture(T.media.."ReferenceHUD\\"..tile[1]);t:SetTexCoord((x0-tile[2])/tile[6],(x1-tile[2])/tile[6],(y0-tile[3])/tile[7],(y1-tile[3])/tile[7])
+   t:ClearAllPoints();t:SetPoint("TOPLEFT",M.rim,"TOPLEFT",x0,-y0);t:SetWidth(x1-x0);t:SetHeight(y1-y0);t:Show()
+  end
+ end
+ for i=used+1,table.getn(M.rimTex) do M.rimTex[i]:Hide() end
+ M.rim:Show()
+end
 function R.Map()
  local M=FieldKitThemeMinimap;local a=R.layout.map
  if R.layout.rects.mapArt then R.Geometry(M.root,R.layout.rects.mapArt) else R.Child(M.root,H.identity,{a[1],a[2],a[3],a[3]}) end;Blank(M.root);R.Art(M.root,"mapArt")
  local p=M.root.referenceRect
- Minimap:ClearAllPoints();Minimap:SetPoint("TOPLEFT",M.root,"TOPLEFT",a[1]-p[1],p[2]-a[2]);Minimap:SetWidth(a[3]);Minimap:SetHeight(a[3]);local owner=R.layout.rects.mapArt and M.root or H.identity;local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())..":"..tostring(owner:GetEffectiveScale());if M.screenStamp~=stamp then Minimap:Hide();Minimap:Show();M.screenStamp=stamp end
+ -- The native map stays square (no stretching): it covers the whole opening of the frame art, and the
+ -- art's own rim is redrawn above it (R.MapRim) so any overflow is masked instead of leaving black bands.
+ local hole=R.layout.mapHole or {a[1],a[2],a[3],a[3]};local side=math.max(hole[3],hole[4])
+ local hx,hy=hole[1]+hole[3]/2-side/2,hole[2]+hole[4]/2-side/2
+ Minimap:ClearAllPoints();Minimap:SetPoint("TOPLEFT",M.root,"TOPLEFT",hx-p[1],p[2]-hy);Minimap:SetWidth(side);Minimap:SetHeight(side);R.MapRim(M,hole);local owner=R.layout.rects.mapArt and M.root or H.identity;local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())..":"..tostring(owner:GetEffectiveScale());if M.screenStamp~=stamp then Minimap:Hide();Minimap:Show();M.screenStamp=stamp end
  local queue=getglobal("MiniMapBattlefieldFrame");if queue and R.queueClick then FieldKitZoneThemes.Mask(queue,true) end
  local world=getglobal("MiniMapWorldMapButton");if world and R.worldClick then FieldKitZoneThemes.Mask(world,true) end
  local clock=getglobal("GameTimeFrame");if clock then FieldKitZoneThemes.Mask(clock,true) end
@@ -341,17 +370,37 @@ local function Row(f,i,x,y,w,h)
  local r=f.rows[i];r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:SetAlpha(1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h);r:Show();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
  r.label:ClearAllPoints();r.label:SetPoint("TOPLEFT",r,"TOPLEFT",0,0);r.label:SetWidth(w-96);r.label:SetHeight(h);r.value:ClearAllPoints();r.value:SetPoint("TOPRIGHT",r,"TOPRIGHT",0,0);r.value:SetWidth(94);r.value:SetHeight(h);return r
 end
+-- Damage categories: 3x2 grid of contiguous hit areas. Layout is applied only when it changes: re-levelling or
+-- re-anchoring a button on every refresh can cancel a click that is in progress in this client.
+function R.DamageTabs(f,a,zone,index)
+ local tabW=(a[3]-48)/3;local top=zone=="naxx" and 92 or 46
+ for i,b in ipairs(R.tabs) do
+  local key=table.concat({a[3],zone,index==i and 1 or 0,tostring(FieldKitDB.language),tostring(f:GetFrameLevel())},":")
+  if b.layoutKey~=key then
+   b.layoutKey=key;local col,row=math.mod(i-1,3),math.floor((i-1)/3)
+   b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+col*tabW,-(top+row*25));b:SetWidth(tabW);b:SetHeight(25)
+   b.fieldkitLabel:SetWidth(tabW-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b)
+   if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",3,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-3,1) end
+   T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end
+  end
+  b:Show()
+ end
+end
 -- Scrolling window over a list that can outgrow its fixed art card; the wheel moves it, a pager shows position.
 function R.Window(f,kind,total,capacity)
  R.scroll=R.scroll or {}
  local top=math.max(0,total-capacity);local offset=math.min(top,math.max(0,R.scroll[kind] or 0));R.scroll[kind]=offset
+ f.pager:ClearAllPoints()
+ if kind=="Accessories" then f.pager:SetPoint("BOTTOMRIGHT",f,"BOTTOMRIGHT",-26,16) else f.pager:SetPoint("TOPRIGHT",f,"TOPRIGHT",-34,-18) end
  if total>capacity then f.pager:SetText((offset+1).."-"..math.min(total,offset+capacity).." / "..total);f.pager:Show() else f.pager:Hide() end
  return offset
 end
 -- Flat text tabs inside a card (same language as the meter tabs: gold underline on the active one).
 function R.CardTabs(f,a,active,keys,pick)
  f.cardTabs=f.cardTabs or {}
- local width=(a[3]-48)/table.getn(keys)
+ -- Tabs live in the card header (where the title was): from x=62 to the collapse button, full header height.
+ local left,top,height=62,9,36
+ local width=(a[3]-left-34)/table.getn(keys)
  for i,key in ipairs(keys) do
   local b=f.cardTabs[i]
   if not b then
@@ -360,9 +409,14 @@ function R.CardTabs(f,a,active,keys,pick)
    b.underline=b:CreateTexture(nil,"OVERLAY");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",0,0);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",0,0)
   end
   T.Solid(b.rule,{1,.82,.12},.3);b.rule:Show()
-  FieldKit_Text(b,key);b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+(i-1)*width,-44);b:SetWidth(width-3);b:SetHeight(26)
-  b.fieldkitLabel:SetWidth(width-7);T.Font(b.fieldkitLabel,15,active==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=active==i;Blank(b)
-  T.Solid(b.underline,{1,.82,.12});if active==i then b.underline:Show() else b.underline:Hide() end;b:Show()
+  local stamp=table.concat({a[3],active==i and 1 or 0,tostring(FieldKitDB.language),tostring(f:GetFrameLevel())},":")
+  if b.layoutKey~=stamp then
+   b.layoutKey=stamp
+   FieldKit_Text(b,key);b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",left+(i-1)*width,-top);b:SetWidth(width);b:SetHeight(height)
+   b.fieldkitLabel:SetWidth(width-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,18,active==i and {1,.82,.12} or R.body,true);R.Fit(b.fieldkitLabel,18,12);b.fieldkitSelected=active==i;Blank(b)
+   T.Solid(b.underline,{1,.82,.12});if active==i then b.underline:Show() else b.underline:Hide() end
+  end
+  b:Show()
  end
 end
 function R.MaskBuffs(want)
@@ -444,7 +498,7 @@ function R.Panels(variant,zone)
      f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
      f.title:SetWidth(a[3]-100);f.more:Hide()
     else T.Font(f.total,16,R.color,true) end
-    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();local col,row=math.mod(i-1,3),math.floor((i-1)/3);local tabW=(a[3]-48)/3;local tabTop=zone=="naxx" and 92 or 46;b:SetPoint("TOPLEFT",f,"TOPLEFT",24+col*tabW,-(tabTop+row*25));b:SetWidth(tabW-4);b:SetHeight(24);b.fieldkitLabel:SetWidth(tabW-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b);if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1) end;T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end;b:Show() end
+    R.DamageTabs(f,a,zone,index)
     for i=1,4 do local r=Row(f,i,82,(zone=="naxx" and 146 or 98)+(i-1)*(zone=="naxx" and 46 or 33),a[3]-100,29);local e=lines[i];if not e and i>1 then r:Hide() end
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
@@ -452,6 +506,12 @@ function R.Panels(variant,zone)
       if not r.trough then r.trough=r:CreateTexture(nil,"BACKGROUND") end
       r.trough:ClearAllPoints();r.trough:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.trough:SetWidth(a[3]-160);r.trough:SetHeight(8);T.Solid(r.trough,{.12,.14,.08});r.trough:Show()
       r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-45,0);r.icon:SetTexture(e.icon or FieldKitLoadout.Icon(e.name));r.icon:Show();r.bar:ClearAllPoints();r.bar:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.bar:SetWidth(a[3]-160);r.bar:SetMinMaxValues(0,1);r.bar:SetValue(0);r.bar:SetValue(math.max(0,math.min(1,e.share or 0)));r.bar:SetStatusBarColor(zone=="elwynn" and .65 or .1,zone=="elwynn" and .55 or .75,zone=="elwynn" and .18 or .85);r.bar:Show() end
+    end
+    if not lines[1] then
+     -- Empty state: centred in the content area between the tab rows and the card foot, not in the whole frame.
+     local top=zone=="naxx" and 146 or 98;local bottom=zone=="naxx" and a[4]-30 or a[4]-52
+     local r=Row(f,1,24,top,a[3]-48,bottom-top);r.label:SetWidth(a[3]-48);r.label:SetHeight(bottom-top);r.label:SetJustifyH("CENTER");r.label:SetJustifyV("MIDDLE")
+     r.label:SetText(FieldKit_L("No combat data"));r.value:SetText("");r.value:SetWidth(0)
     end
    elseif kind=="Lairs" then
     FieldKit_Text(f.more,"View list");f.more.fieldkitLabel:SetText(FieldKit_L("View list").." →");local lairs=FieldKitNative.Read("AZS_GetLairs");local active=0;for _,e in ipairs(type(lairs)=="table" and lairs or {}) do if e.state=="awake" then active=active+1 end end
@@ -463,8 +523,11 @@ function R.Panels(variant,zone)
      for i=1,math.min(capacity,total-offset) do
       local e=list[offset+i]
       local r=zone=="naxx" and Row(f,i,52,53+(i-1)*31,a[3]-77,28) or Row(f,i,40,44+(i-1)*21,a[3]-66,20)
-      local vw=math.min(170,math.max(90,a[3]*.45));r.value:SetWidth(vw);r.label:SetWidth(a[3]-vw-96);r.label:SetJustifyH("LEFT");r.value:SetJustifyH("RIGHT")
-      r.label:SetText(e.name);r.value:SetText(e.state..(e.dist~="" and ("  "..e.dist) or ""))
+      -- Value column = measured width of state/delay/distance; the name gets everything that is left.
+      local rowW=zone=="naxx" and a[3]-77 or a[3]-66
+      r.label:SetJustifyH("LEFT");r.value:SetJustifyH("RIGHT");r.label:SetText(e.name);r.value:SetText(e.state..(e.dist~="" and ("  "..e.dist) or ""))
+      local want=(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+8
+      local vw=math.min(rowW*.55,math.max(60,want));r.value:SetWidth(vw);r.label:SetWidth(rowW-vw-10)
       r.fontSize=zone=="naxx" and 16 or 14;r.fontMin=11;r.labelTint=e.tint;r.valueTint=e.tint
      end
     elseif zone=="naxx" then
@@ -472,20 +535,20 @@ function R.Panels(variant,zone)
      for i=1,4 do local r=Row(f,i,52,53+(i-1)*31,a[3]-77,28);r.label:SetWidth(a[3]-138);r.label:SetJustifyH("LEFT");r.label:SetText(i==1 and FieldKit_L("No active lair") or "");r.value:SetWidth(53);r.value:SetText("") end
     else local r=Row(f,1,30,52,a[3]-60,28);r.label:SetWidth(a[3]-60);r.label:SetJustifyH("CENTER");r.label:SetText(type(lairs)~="table" and "?" or FieldKit_L("No active lair"));r.value:SetText("");r.value:SetWidth(0) end
    elseif kind=="Accessories" then
-    FieldKit_Text(f.more,"Equipment / spells");f.more:Hide();f.title:SetWidth(a[3]-175)
+    FieldKit_Text(f.more,"Equipment / spells");f.more:Hide();f.title:Hide()
     local tab=FieldKitDB.loadoutTab==2 and 2 or 1
     R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end)
     if tab==1 then
      local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
-     for i=1,5 do local r=Row(f,i,72,76+(i-1)*31,a[3]-94,28);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
+     for i=1,5 do local r=Row(f,i,72,54+(i-1)*34,a[3]-94,30);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
       local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(texture);r.icon:Show() end
       r.fontSize=16;r.fontMin=16
      end
     else
      local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset=R.Window(f,"Accessories",total,5)
-     if total==0 then local r=Row(f,1,72,76,a[3]-94,28);r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
+     if total==0 then local r=Row(f,1,72,54,a[3]-94,30);r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
      for i=1,math.min(5,total-offset) do
-      local e=spells[offset+i];local r=Row(f,i,72,76+(i-1)*31,a[3]-94,28);r.entry=e
+      local e=spells[offset+i];local r=Row(f,i,72,54+(i-1)*34,a[3]-94,30);r.entry=e
       r.label:SetText(e.name or "?");r.value:SetText(e.rank or "");r.value:SetWidth(78);r.label:SetWidth(a[3]-98-82)
       local icon=FieldKitLoadout.Icon(e.name);if icon then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(icon);r.icon:Show() end
       r.fontSize=16;r.fontMin=12;local cr,cg,cb=FieldKitLoadout.RankColor(e.rankValue);r.valueTint={cr,cg,cb}

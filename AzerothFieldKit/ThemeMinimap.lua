@@ -31,6 +31,7 @@ function M.Restore()
  M.hidden={};M.active=false;M.before=nil
  if M.dragHandle then M.dragHandle:Hide() end
  for _,proxy in pairs(M.launcherProxies or {}) do proxy:Hide() end
+ if M.rim then M.rim:Hide() end
  if M.root then M.root:Hide() end
  if M.zoomOut then M.zoomOut:Hide();M.zoomIn:Hide() end
 end
@@ -81,6 +82,7 @@ function M.Apply(variant)
   for i=1,table.getn(borderNames) do local f=getglobal(borderNames[i]);if f and f.SetAlpha then M.hidden[f]=f:GetAlpha();f:SetAlpha(0) end end
  end
  if FieldKitReferenceHUD and FieldKitReferenceHUD.active then return FieldKitReferenceHUD.Map() end
+ if M.rim then M.rim:Hide() end
  local size=math.min(230,math.max(160,UIParent:GetWidth()*.13))
  local zone=FieldKitTheme.zone
  if not M.root.azsMoving then M.root:SetWidth(size+16);M.root:SetHeight(size+16) end
