@@ -156,3 +156,66 @@ C.Set("zoneThemeMinimap",false);assert(not M.active);C.Set("zoneThemeMinimap",tr
 C.Set("zoneThemes",false);assert(not H.healthRoot:IsShown() and not H.xpRoot:IsShown() and not H.health:IsShown() and not H.xp:IsShown(),"Native cached gauges must be explicitly hidden on stop")
 for _,f in pairs(H.summaries or {}) do assert(not f:IsShown()) end
 print("Six concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)")
+
+-- Independent sizes must survive a layout/profile roundtrip without scaling
+-- unrelated controls, tearing a combined map frame, or moving a dragged anchor.
+C.Set("zoneThemeMode","naxx");C.Set("zoneThemeVariant","minimal");C.Set("zoneThemes",true)
+local R=FieldKitReferenceHUD
+local setHeaderWidth=H.header.SetWidth
+H.header.SetWidth=function(self,width) assert(width==R.layout.rects.header[3],"Reference refresh must not first install fallback geometry");setHeaderWidth(self,width) end
+C.Refresh();H.header.SetWidth=setHeaderWidth
+ActionButton1:SetAlpha(0);C.Refresh();assert(ActionButton1:GetAlpha()==1,"Rejouer must not leave owned native actions transparent")
+FieldKitDB.zoneThemePositions[C.currentLayout]=nil
+C.SetElementScale("FieldKitThemeDock",65)
+assert(H.dock:GetScale()==.65 and H.header:GetScale()==1)
+assert(H.healthRoot:GetParent()==H.dock and H.healthRoot:GetScale()==1)
+assert(H.xpRoot:GetParent()==H.dock and H.counterRoot:GetParent()==H.dock)
+C.SetElementScale("FieldKitThemeMap",75);assert(M.root:GetScale()==.75 and M.zoomIn:GetParent()==M.root)
+H.dock:SetPoint("BOTTOM",UIParent,"BOTTOM",100,80);assert(C.Remember(H.dock))
+C.SetElementScale("FieldKitThemeDock",50)
+local pos=FieldKitDB.zoneThemePositions[C.currentLayout].FieldKitThemeDock
+assert(math.abs(pos[3]-130)<.0001 and math.abs(pos[4]-104)<.0001)
+FieldKitProfiles.Save(1)
+C.Set("zoneThemeVariant","complete");assert(C.ElementScale("FieldKitThemeDock")==1)
+C.Set("zoneThemeMode","elwynn");assert(C.ElementScale("FieldKitThemeDock")==1)
+C.SetElementScale("FieldKitThemeIdentity",70)
+assert(M.root:GetParent()==H.identity and M.root:GetScale()==1,"The map inside the identity artwork must inherit that frame's size")
+assert(FieldKitProfiles.Load(1));assert(C.ElementScale("FieldKitThemeDock")==.5 and C.ElementScale("FieldKitThemeMap")==.75)
+local normalized=C.NormalizeScales({junk={FieldKitThemeDock=70},[C.currentLayout]={UIParent=20,FieldKitThemeDock=1000,FieldKitThemeHeader=0/0}})
+assert(normalized.junk==nil and normalized[C.currentLayout].UIParent==nil and normalized[C.currentLayout].FieldKitThemeDock==130 and normalized[C.currentLayout].FieldKitThemeHeader==nil)
+local before=table.getn(objects);for i=1,30 do C.SetElementScale("FieldKitThemeDock",50+math.mod(i,17)*5) end;assert(table.getn(objects)==before)
+local probe=T.Label(UIParent,nil,0,0,85,24,17,T.text)
+local setFont=probe.SetFont;local fontWrites=0
+probe.SetFont=function(self,path,size,flags) fontWrites=fontWrites+1;return setFont(self,path,size,flags) end
+local probeText="Équipement particulièrement long"
+probe:SetText(probeText);R.Fit(probe,17,12);local initialWrites=fontWrites
+for i=1,20 do probe:SetText(probeText);T.Font(probe,17,T.text);R.Fit(probe,17,12) end
+assert(fontWrites==initialWrites,"Unchanged fitted labels must not rebuild their font every refresh")
+assert(probe.referenceFullText==probeText and probe:GetStringWidth()<=probe:GetWidth())
+
+-- Stress the actual six renderers with long localized names and large native
+-- counters. Assert bounded text and disjoint columns, not a screenshot score.
+local long="Équipement extraordinaire de Généralissime Mograine à très longue désignation"
+local read=FieldKitMeterLedger.Read
+FieldKitMeterLedger.Read=function() local lines={};for i=1,4 do lines[i]={name=long,share=.25,icon="Interface\\Icons\\Spell_Frost_FrostBolt02"} end;return lines,123456789012,987654321,true end
+FieldKitLoadout.items[2]={name=long,bonuses={}}
+AZS_RUN.kills=123456789012;AZS_RUN.gold=987654321012;AZS_RUN.chest=999999999
+for _,zone in ipairs({"elwynn","naxx"}) do for _,variant in ipairs({"minimal","complete","alternative"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemes",true)
+ for i=table.getn(R.layout.navButtons)+1,7 do assert(not H.buttons[i].fieldkitLabel:IsShown(),"A hidden nav button must not leave a reparented label visible") end
+ for _,label in ipairs(R.counts) do assert(label:GetStringWidth()<=label:GetWidth(),zone..variant.." counter overflow");assert(label.referenceFullText and string.len(label.referenceFullText)>0) end
+ if variant=="complete" then
+  for kind,f in pairs(R.frames) do if f:IsShown() then
+   assert(f.title:GetStringWidth()<=f.title:GetWidth())
+   for _,r in ipairs(f.rows) do if r:IsShown() then
+    assert(r.label:GetStringWidth()<=r.label:GetWidth());assert(r.value:GetStringWidth()<=r.value:GetWidth())
+    assert(r.label:GetWidth()+r.value:GetWidth()<=r:GetWidth()+1,zone..kind.." Summary columns overlap: "..r.label:GetWidth().."+"..r.value:GetWidth()..">"..r:GetWidth())
+   end end
+  end end
+  assert(R.frames.Accessories.rows[1].entry.name==long,"Fitting must retain full source data")
+ end
+end end
+FieldKitMeterLedger.Read=read
+C.Set("zoneThemes",false)
+assert(next(C.bossBefore)==nil)
+print("Element sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)")

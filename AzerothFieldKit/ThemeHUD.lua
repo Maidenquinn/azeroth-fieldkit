@@ -210,8 +210,34 @@ end
 local function Place(frame,p,r,rp,x,y)
  FieldKitZoneThemes.Place(frame,p,r,rp,x,y)
 end
+-- Reference compositions own their geometry. Running the fallback layout first
+-- on every 5 Hz update made Benilla briefly reuse its old button clipping boxes
+-- and left labels from a previous variant visible beside the new navigation.
+function H.ReferenceValues()
+ local cur,max=FieldKit.Number(UnitHealth("player")),FieldKit.Number(UnitHealthMax("player"))
+ H.name:SetText((UnitName("player") or "?").." · "..tostring(UnitLevel("player") or "?"))
+ if cur and max and max>0 then H.health:SetMinMaxValues(0,max);H.health:SetValue(cur);H.hp:SetText(FieldKit_FormatHealth(cur,max,FieldKitDB.playerHealthMode)) else H.hp:SetText("?") end
+ local run=type(AZS_RUN)=="table" and AZS_RUN or {};local names={bloodrage="Rage",seal_fate="Combo points",soul_fire="Soul shards",lightwell="Lightwell"}
+ local power,pm=FieldKit.Number(run.pv),FieldKit.Number(run.pm)
+ if not names[run.proc] or not pm or pm<=0 then power=type(UnitMana)=="function" and FieldKit.Number(UnitMana("player"));pm=type(UnitManaMax)=="function" and FieldKit.Number(UnitManaMax("player")) end
+ if power and pm and pm>0 then H.resource:SetMinMaxValues(0,pm);H.resource:SetValue(power);H.resource:Show();H.resourceText:SetText(FieldKit_L(names[run.proc] or ({[0]="Mana",[1]="Rage",[2]="Focus",[3]="Energy"})[type(UnitPowerType)=="function" and UnitPowerType("player")] or "Resource").." "..power.." / "..pm) else H.resource:Hide();H.resourceText:SetText("") end
+ local xp,xpn=FieldKit.Number(UnitXP("player")),FieldKit.Number(UnitXPMax("player"))
+ if xp and xpn and xpn>0 then H.xp:SetMinMaxValues(0,xpn);H.xp:SetValue(xp);H.xpText:SetText("XP · "..math.floor(xp/xpn*100).."%");H.xpDetail="XP "..xp.." / "..xpn.." · "..math.max(0,xpn-xp).." "..FieldKit_L("remaining") else H.xp:SetValue(0);H.xpText:SetText("XP · ?");H.xpDetail=FieldKit_L("Native data unavailable") end
+ local nativeZone=type(AZS_ZONE)=="table" and AZS_ZONE.zname;local key=type(AZS_ZONE)=="table" and AZS_ZONE.zone
+ if type(nativeZone)~="string" or nativeZone=="" then nativeZone=FieldKitZoneRegistry[key or ""] and FieldKit_L(FieldKitZoneRegistry[key].name) or FieldKit_L("Zone not provided") end
+ H.zone:SetText(FieldKitNative.Text(nativeZone));H.clock:SetText(FieldKitNative.Clock(FieldKitNative.Time()));local boss=FieldKitNativeTools.NextBoss();H.next:SetText(boss and boss.name.." · "..FieldKitNative.Clock(boss.left) or FieldKit_L("No upcoming boss"))
+ for _,slot in ipairs(slots) do local b=getglobal("ActionButton"..slot);H.Save(b)
+  -- Native Rejouer/reload can recreate the build while our persisted native
+  -- visibility override is active. Its transient alpha must not become the
+  -- restored alpha when the user's original build was visible.
+  if b and H.saved[b] and H.saved[b].alpha==0 and FieldKitDB.zoneThemeNativeBefore and FieldKitDB.zoneThemeNativeBefore.build==true then H.saved[b].alpha=1 end
+ end
+ for _,name in ipairs({"FieldKitCompactBar","FieldKitMoneyFrame","MainMenuBar","PlayerFrame","FieldKitPlayerBar"}) do FieldKitZoneThemes.Mask(getglobal(name),true) end
+ local boss=getglobal("FieldKitBossFrame1");if boss then FieldKitZoneThemes.Place(boss,"TOP",UIParent,"TOP",0,-90/FieldKitZoneThemes.ElementScale("FieldKitThemeBosses"),true) end
+end
 function H.Update(variant,zone)
  H.Create();H.CompositionCreate()
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.Has(zone,variant) then H.ReferenceValues();return end
  local c=FieldKitZoneThemes;local sw=UIParent:GetWidth();local scale=math.min(1,sw/1600)
  for _,f in ipairs({H.dock,H.nav,H.header,H.identity,H.healthRoot,H.counterRoot,H.utility,H.schedule,H.micro}) do if not f.azsMoving then f:SetScale(scale) end end
  H.dock:SetWidth(500);H.dock:SetHeight(88)

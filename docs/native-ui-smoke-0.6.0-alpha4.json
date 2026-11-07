@@ -1,0 +1,84 @@
+{
+  "version": "0.6.0-alpha.4",
+  "date": "2026-11-07",
+  "gameVersion": "0.142.0",
+  "gameExeSha256": "069c800761120073cd0038322e3418f2a97454b510117d509aae07f1028aaf2f",
+  "renderer": "Unmodified Sky native window captures; no montage or synthetic gameplay data used as in-game evidence",
+  "scope": "Six reference layouts inspected in real zone scenes across alpha4 iterations. Final Elwynn combat with six acquired spells and racial, live proc resource, XP and counters. Native level choices retain priority. Independent dock 65% and combined map/identity 70% inspected together. Native options restored and test game closed. Captures span corrections; only the declared scope is certified.",
+  "proofDirectory": "H:\\Users\\kevin\\Desktop\\AzerothFieldKit_0.6.0_Concepts\\09_Implementation\\Tests_En_Jeu\\Audit_Alpha4",
+  "notCertified": [
+    "Numerical pixel fidelity or 100% conformity",
+    "Naxxramas boss encounter",
+    "Coop",
+    "Every capture matching final package bytes",
+    "Freshness of the boss in the intermediate Alternative capture after Rejouer"
+  ],
+  "temporaryGameSettings": {
+    "clickToMove": {
+      "before": false,
+      "after": false
+    },
+    "storeLevels": {
+      "before": false,
+      "after": false
+    }
+  },
+  "finalGameState": "Closed after test run, Auto / Minimaliste selected; Elwynn Complete dock/map test scales restored to 100%.",
+  "screenshots": {
+    "01_Naxx_Complete_Combat.png": {
+      "sha256": "b8d7aad5ee24368ea2514b4f78741843cf47a62edcd1a82ccd92d6906b9b085b",
+      "bytes": 292589,
+      "scope": "Contrôle natif en combat, total/rate séparés et noms des antres ; avant dernier ajustement du footer statistiques et centrage lampes."
+    },
+    "02_Naxx_Alternative_Combat.png": {
+      "sha256": "3525b7abbb5382f48a0aefc5d8cc7e7f2637ca6e7a576d4f59e070b4f6cec91e",
+      "bytes": 224388,
+      "scope": "Natif alpha4 : XP détachée, PV à gauche et dock asymétrique ; valeurs réelles."
+    },
+    "03_Naxx_Minimaliste_Combat.png": {
+      "sha256": "a42bdb85c66d2214ac857274bb8bd0084a4e56fc9dcb1a8831bc8446f71ca85b",
+      "bytes": 226056,
+      "scope": "Natif alpha4 : retour après changement pendant un choix, valeurs de combat et compteurs réels."
+    },
+    "04_Reglage_Taille_Elwynn.png": {
+      "sha256": "79ca1628f047999282eb4599e92748ff6df4058ecbb61d082bf28b0f983c67f4",
+      "bytes": 255194,
+      "scope": "Réglage natif par élément : Sorts et personnages à 65 %, sans changement des autres blocs."
+    },
+    "05_Elwynn_Complete_Combat.png": {
+      "sha256": "b7847ff9a1b58cb91b27ef872061a111572ca80f0724bcfc43a42f09037d5eee",
+      "bytes": 351130,
+      "scope": "Natif alpha4 : en-têtes, colonnes, accès rapides sans libellés résiduels ; vrai combat et compteurs."
+    },
+    "06_Elwynn_Alternative.png": {
+      "sha256": "a5fcc63b7561ca1f6d0f44d5c077c50388cb6c3f84a69972f466d9947398189b",
+      "bytes": 329125,
+      "scope": "Natif alpha4 Alternative : barre XP en haut, navigation supérieure et carte basse. Capture après transition/rechargement ; ne certifie pas la fraîcheur du boss lors de Rejouer."
+    },
+    "07_Choix_Natif_Prioritaire.png": {
+      "sha256": "99f8125ae7eb0e8637add3f3bb1dc473e136fac0c6216e2526887921e7ba9d65",
+      "bytes": 189799,
+      "scope": "Natif : choix de niveau au-dessus de tout le HUD, y compris des vrais boutons passés en couche HIGH."
+    },
+    "08_Elwynn_Minimaliste_Sorts_Reels.png": {
+      "sha256": "5f5ce34826a64ec19340410d6ad517b85fde719089e17cae223df71ad0bf042f",
+      "bytes": 344770,
+      "scope": "Combat réel Elwynn, six sorts acquis et racial, PV/ressource/XP et compteurs natifs. Libellés longs accessibles au survol, largeur bornée."
+    },
+    "09_Preferences_Natives_Restaurees.png": {
+      "sha256": "c75304f8e7bbc88119b026e9af47ee8a62f7d97e0fb328f1e07d1963ab9d2bb3",
+      "bytes": 136688,
+      "scope": "Cliquer pour se déplacer et Garder les niveaux désactivés, comme avant les essais."
+    },
+    "10_Elwynn_Minimaliste_Final.png": {
+      "sha256": "9260c91ac302b459a36d9596e19cdd0d575ec718379e9aa579ae1f1a9ab97a0d",
+      "bytes": 343489,
+      "scope": "Version finale chargée : Mode complet, compteurs complets à 3 chiffres, six vrais sorts et racial, Rage 75.61 native."
+    },
+    "11_Elwynn_Complete_Dock65_Carte70.png": {
+      "sha256": "2a0838e4ed00ea4e7952231bc9a903afc7666cf2741f16a3fdd26e5dd0857fb1",
+      "bytes": 350557,
+      "scope": "Dock et personnages 65 %, carte/zone/mode 70 %, autres composants 100 %. Découpes isolées, sept icônes réelles, aucune bande du panneau Effets sur le dock."
+    }
+  }
+}

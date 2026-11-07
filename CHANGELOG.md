@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha.4 — 2026-11-07 (layout audit, unpublished)
+
+- Per-element sizes (50–130%) scoped to zone, composition and HUD profile; integral art groups resize together. Map zoom and detached XP labels follow their component.
+- Fit final live text to its frame, preserve full names on hover/readers, separate effects columns and damage totals, and align Naxx statistics above their footer.
+- Mechanically exclude adjacent panels from action-bar texture crops, preventing orphan panel fragments after resizing.
+- Stress fixtures cover all six renderers with long localized names, large values, profile roundtrips and bounded allocations.
+- Keep reference geometry stable between updates; restore native action visibility after Rejouer and prevent leftover navigation labels after variant switches. Native evidence: docs/native-ui-smoke-0.6.0-alpha4.json.
+
 ## 0.6.0-alpha.3 — 2026-11-07 (local visual pilot, unpublished)
 
 - Rebuild all six Elwynn/Naxxramas layouts from the approved reference compositions: independently tiled empty artwork, native seven action buttons, real square minimap, live HP/resource/XP and counters.

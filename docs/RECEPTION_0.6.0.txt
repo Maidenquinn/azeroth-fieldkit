@@ -1,4 +1,4 @@
-AZEROTH FIELDKIT 0.6.0-alpha.3 — PILOTE ELWYNN / NAXXRAMAS
+AZEROTH FIELDKIT 0.6.0-alpha.4 — PILOTE ELWYNN / NAXXRAMAS
 7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
 
 La version est installée dans le client habituel. Le code stable reste inchangé.
@@ -11,6 +11,18 @@ habillages transparents découpés par composant, sept vrais boutons de sorts,
 vraie carte carrée, PV/ressource/XP et compteurs indépendants des illustrations.
 Les réglages, tableaux secondaires et infobulles reprennent le thème sélectionné.
 Les valeurs des vignettes sont des exemples ; les valeurs du HUD sont natives.
+
+TAILLE ET POSITION
+Interface > Style et thèmes, descendre à « Taille de chaque élément ».
+Choisir un bloc avec les flèches puis régler sa taille de 50 à 130 %.
+« Taille d’origine » remet uniquement ce bloc à 100 %. Les autres blocs restent
+à leur taille. Les tailles sont séparées par zone, variante et profil.
+Le curseur « Échelle du HUD » reste disponible pour un réglage d’ensemble.
+Les sorts/personnages/PV intégrés restent groupés quand le décor est commun.
+Dans Elwynn Complète et Naxx Alternative, carte/zone/mode partagent un cadre :
+ils se redimensionnent ensemble. Les autres cartes sont indépendantes.
+Cible et cadres de boss ont aussi leur réglage. Déverrouiller les fenêtres
+pour déplacer les composants, puis verrouiller après ajustement.
 
 ACCES AUX DONNEES
 - PV : survol = détails et améliorations ; clic = interaction joueur native.
@@ -50,7 +62,14 @@ changement de variante, chat, fin de partie native. Fenêtres thématiques,
 carte carrée et transitions rechargées au fil des corrections.
 Tests Lua 5.0.3 et 5.1 : 47 modules, profils, conservation du chat, propriété des
 cadres, priorité des cartes, lecteurs, valeurs inconnues et pools réutilisés.
-Les preuves PNG sont dans Tests_En_Jeu/Reference_Alpha3. Le JSON associé précise
+Révision alpha.4 : tailles par composant, dock réduit à 65 %, six sorts acquis
+et racial en combat Elwynn, ressource réelle, choix natifs prioritaires et
+inspection des six compositions. Textes bornés, colonnes séparées et cadres
+adjacents retirés des découpes du dock. Les deux options natives activées pour
+les essais (déplacement au clic et niveaux stockés) sont revenues à leur état
+initial désactivé.
+Les preuves PNG sont dans Tests_En_Jeu/Audit_Alpha4, en complément de
+Tests_En_Jeu/Reference_Alpha3. Les JSON associés précisent
 la portée de chaque capture ; les captures intermédiaires ne certifient pas
 chacune le dernier octet du paquet.
 
@@ -67,7 +86,8 @@ Le rendu est rapproché des maquettes mais aucun score de fidélité de 100 % n�
 mesuré. Les illustrations dérivées restent des interprétations assistées par IA,
 pas des modèles officiels extraits. Les noms/icônes/rangs réels dépendent de la
 partie. En phase prête, le texte natif « Bougez pour commencer » peut encore
-passer devant la fenêtre des réglages ; il disparaît une fois la partie lancée.
+passer devant la fenêtre des réglages ; contrainte native acceptée par le
+mainteneur, il disparaît une fois la partie lancée.
 Les combats de boss Naxxramas et la coop n’ont pas été validés ici.
 La police ou la taille du chat reste native si sa modification risquerait de
 perdre des messages non récupérables. Les extensions non identifiées conservent

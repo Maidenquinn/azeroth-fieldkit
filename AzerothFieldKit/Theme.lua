@@ -44,9 +44,14 @@ function T.Refresh()
 end
 
 -- Keep headings and body type consistent; the native face is a safe fallback.
-function T.Font(label,size,color,heading)
- local path=T.media..(heading and "AzerothSerif.ttf" or "AzerothSans.ttf")
- local ok,result=pcall(label.SetFont,label,path,size or 14,"")
+function T.Font(label,size,color,heading,face)
+ local path=T.media..(face or (heading and "AzerothSerif.ttf" or "AzerothSans.ttf"))
+ size=size or 14
+ local fit=label.fieldkitFit
+ if fit and fit.path==path and fit.baseSize==size and fit.width==label:GetWidth() and fit.height==label:GetHeight() and (label:GetText()==fit.full or label:GetText()==fit.display) then size=fit.renderSize end
+ local oldPath,oldSize,oldFlags;if label.GetFont then oldPath,oldSize,oldFlags=label:GetFont() end
+ local ok,result=true,true
+ if oldPath~=path or oldSize~=size or (oldFlags or "")~="" then ok,result=pcall(label.SetFont,label,path,size,"") end
  if not ok or result==false then label:SetFont(heading and "Fonts\\FRIZQT__.TTF" or "Fonts\\ARIALN.TTF",size or 14,"") end
  color=color or T.text;label:SetTextColor(color[1],color[2],color[3])
  if not label.fieldkitFontRecord then

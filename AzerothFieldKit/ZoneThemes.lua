@@ -13,7 +13,59 @@ for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do tabl
 for _,zone in ipairs({"elwynn","naxx"}) do for _,variant in ipairs({"minimal","complete","alternative"}) do table.insert(C.layoutKeys,zone..":"..variant..":reference") end end
 for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do table.insert(C.positionNames,"FieldKitReferencePanel"..kind) end
 table.insert(C.positionNames,"FieldKitReferenceChat")
+table.insert(C.positionNames,"FieldKitReferenceXP")
+table.insert(C.positionNames,"FieldKitThemeUtility")
 for _,name in ipairs(FieldKitCardLayout.names) do table.insert(C.positionNames,name) end
+-- Sizes are scoped exactly like positions: one zone, composition and profile.
+C.elementNames={FieldKitThemeDock="Action bar",FieldKitThemeIdentity="Zone / mode",FieldKitThemeHeader="Timeline",FieldKitThemeVitality="Health / resource",FieldKitThemeNavigation="Quick access",FieldKitThemeMap="Square minimap",FieldKitReferenceChat="Chat",FieldKitReferenceXP="Experience",FieldKitThemeUtility="FieldKit",FieldKitThemeTargetFrame="Target",FieldKitReferencePanelDamage="Damage",FieldKitReferencePanelLairs="Lairs",FieldKitReferencePanelAccessories="Equipment",FieldKitReferencePanelStats="Statistics",FieldKitReferencePanelEffects="Effects"}
+function C.NormalizeScales(value)
+ local out={};if type(value)~="table" then return out end
+ for _,key in ipairs(C.layoutKeys) do if type(value[key])=="table" then
+  local layout={};out[key]=layout
+  for name in pairs(C.elementNames) do local n=FieldKit.Number(value[key][name]);if n then layout[name]=math.floor(math.max(50,math.min(130,n))+.5) end end
+ end end
+ return out
+end
+function C.ElementScale(name)
+ local all=FieldKitDB.zoneThemeElementScales;local layout=type(all)=="table" and all[C.currentLayout or ""]
+ return FieldKit.Number(type(layout)=="table" and layout[name],100,50,130)/100
+end
+function C.SetElementScale(name,value)
+ if not C.active or not C.elementNames[name] or not C.currentLayout then return end
+ local old=C.ElementScale(name);local n=math.floor(FieldKit.Number(value,100,50,130)/5+.5)*5
+ local all=FieldKitDB.zoneThemeElementScales;if type(all)~="table" then all={};FieldKitDB.zoneThemeElementScales=all end
+ all[C.currentLayout]=all[C.currentLayout] or {};all[C.currentLayout][name]=n
+ -- Saved SetPoint offsets are in the scaled frame's units. Keep its anchor
+ -- on the same screen pixel when the scale changes, including dragged frames.
+ local positions=FieldKitDB.zoneThemePositions[C.currentLayout];local a=positions and positions[name]
+ if a then a[3]=a[3]*old/(n/100);a[4]=a[4]*old/(n/100) end
+ if name=="FieldKitThemeBosses" and positions then for i=1,4 do local a=positions["FieldKitBossFrame"..i];if a then a[3]=a[3]*old/(n/100);a[4]=a[4]*old/(n/100) end end end
+ C.Refresh(true)
+end
+function C.Elements()
+ local R=FieldKitReferenceHUD;local d=R and R.active and R.layout;local out={}
+ if not d then return out end
+ local function Add(name,label) table.insert(out,{name=name,label=label or C.elementNames[name]}) end
+ Add("FieldKitThemeDock",d.integratedVitals and "Actions, health and ornaments" or "Actions and ornaments")
+ Add("FieldKitThemeIdentity",not d.rects.mapArt and "Map, zone and mode" or nil);Add("FieldKitThemeHeader")
+ if not d.integratedVitals then Add("FieldKitThemeVitality") end
+ if d.rects.mapArt then Add("FieldKitThemeMap") end
+ if d.rects.nav then Add("FieldKitThemeNavigation") end
+ Add("FieldKitReferenceChat")
+ if d.rects.xpArt then Add("FieldKitReferenceXP") end
+ if d.utilityRect or d.rects.utility then Add("FieldKitThemeUtility") end
+ for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if d.rects[kind] then Add("FieldKitReferencePanel"..kind) end end
+ Add("FieldKitThemeTargetFrame");Add("FieldKitThemeBosses","Tracked bosses")
+ return out
+end
+C.elementNames.FieldKitThemeBosses="Tracked bosses"
+function C.BossScales(restore)
+ C.bossBefore=C.bossBefore or {}
+ if restore then for f,scale in pairs(C.bossBefore) do f:SetScale(scale) end;C.bossBefore={};return end
+ for i=1,4 do for _,suffix in ipairs({"","Compact"}) do local f=getglobal("FieldKitBossFrame"..i..suffix)
+  if f then if not C.bossBefore[f] then C.bossBefore[f]=f:GetScale() end;f:SetScale(C.ElementScale("FieldKitThemeBosses")) end
+ end end
+end
 function C.NormalizePositions(value)
  local out={};if type(value)~="table" then return out end
  for _,key in ipairs(C.layoutKeys) do
@@ -78,6 +130,7 @@ function C.Resolve()
  if key=="elwynn" or key=="naxx" then return key end
 end
 function C.Suspend()
+ C.BossScales(true)
  C.nativeMeterOpen=nil;C.NativeRestore()
  if FieldKitReferenceHUD then FieldKitReferenceHUD.Stop() end
  if not C.active then return end
@@ -142,7 +195,7 @@ function C.Refresh(force)
   C.statusLabel:SetText(FieldKit_L(FieldKitDB.zoneThemes and "Enabled" or "Disabled").." · "..FieldKit_L(FieldKitDB.zoneThemeMode).." · "..FieldKit_L(FieldKitDB.zoneThemeVariant).."\n"..FieldKit_L("Square minimap")..": "..FieldKit_L(FieldKitDB.zoneThemeMinimap and "Enabled" or "Disabled").." · "..FieldKit_L("Character ornaments")..": "..FieldKit_L(FieldKitDB.zoneThemeArt and "Enabled" or "Disabled"))
  end
  local zone=C.Resolve()
- if not zone then C.Suspend();T.SetZone("classic");return end
+ if not zone then C.Suspend();T.SetZone("classic");if C.RefreshElementUI then C.RefreshElementUI() end;return end
  if FieldKit.layoutEditing or (FieldKitPreview and FieldKitPreview.mode) then C.Suspend();T.SetZone(zone);return end
  local variant=FieldKitDB.zoneThemeVariant
  C.currentLayout=zone..":"..variant..(FieldKitReferenceHUD.Has(zone,variant) and ":reference" or "")
@@ -151,6 +204,7 @@ function C.Refresh(force)
   C.Suspend();C.active=true;C.signature=signature;C.revision=C.revision+1;C.placed={}
  end
  C.active=true;T.SetZone(zone)
+ C.BossScales(false)
  -- Yield completely to native choice cards. No writes to card priority or game data.
  if FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen() then
   FieldKitThemeTarget.Stop();FieldKitReferenceHUD.Stop();C.NativeReplace()
@@ -182,6 +236,7 @@ function C.Refresh(force)
   end
  end
  if FieldKitReferenceHUD.active then FieldKitReferenceHUD.Panels(variant,zone) else H.Summaries(variant,zone) end
+ if C.RefreshElementUI then C.RefreshElementUI() end
  for _,name in ipairs(hidden) do C.Mask(getglobal(name),true) end
  -- Keep native target, boss, group, alerts and chat behaviors intact.
  if FieldKitScreenLayers then FieldKitScreenLayers.ApplyChoice() end
@@ -239,7 +294,7 @@ function C.Command(msg)
  end
 end
 function FieldKitThemeUI(parent,offset)
- local page=CreateFrame("Frame",nil,parent);page:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-offset);page:SetHeight(610)
+ local page=CreateFrame("Frame",nil,parent);page:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-offset);page:SetHeight(835)
  local note=T.Label(page,"One theme for HUD, windows and tooltips.",0,0,950,30,18,T.text)
  C.ui={};C.previewCards={}
  local function Button(key,value,label,x,y,w,h)
@@ -277,6 +332,33 @@ function FieldKitThemeUI(parent,offset)
   if C.currentLayout then FieldKitDB.zoneThemePositions[C.currentLayout]=nil;C.revision=C.revision+1;C.placed={};C.Refresh(true) end
  end)
  local profiles=T.Button(page,nil,"Manage profiles",330,535,260,32,function() FieldKitUI.Select("profiles") end)
+ local elementTitle=T.Label(page,"Size by element",0,590,810,28,20,T.text,true)
+ local selected=T.Button(page,nil,"",48,630,520,34,function() C.CycleElement(1) end)
+ local previous=T.Button(page,nil,"<",0,630,38,34,function() C.CycleElement(-1) end)
+ local following=T.Button(page,nil,">",578,630,38,34,function() C.CycleElement(1) end)
+ local elementValue=T.Label(page,nil,0,679,810,26,17,T.text)
+ local elementSlider=CreateFrame("Slider","FieldKitThemeElementScale",page,"OptionsSliderTemplate");elementSlider:SetPoint("TOPLEFT",page,"TOPLEFT",8,-718);elementSlider:SetWidth(540);elementSlider:SetHeight(18);elementSlider:SetMinMaxValues(50,130);elementSlider:SetValueStep(5);T.Control(elementSlider,"slider")
+ for _,suffix in ipairs({"Low","High","Text"}) do local part=getglobal("FieldKitThemeElementScale"..suffix);if part then part:Hide() end end
+ elementSlider:SetScript("OnValueChanged",function() if not C.elementSliderRefresh and C.selectedElement then C.SetElementScale(C.selectedElement,this:GetValue()) end end)
+ local elementReset=T.Button(page,nil,"Reset element size",575,706,235,34,function() if C.selectedElement then C.SetElementScale(C.selectedElement,100) end end)
+ local sizeNote=T.Label(page,"Each size is saved for this zone, layout and profile. Shared frames resize together. Unlock windows to move them.",0,757,810,64,15,T.muted)
+ function C.CycleElement(delta)
+  local elements=C.Elements();local index=1
+  for i,e in ipairs(elements) do if e.name==C.selectedElement then index=i end end
+  if table.getn(elements)>0 then index=math.mod(index-1+delta+table.getn(elements),table.getn(elements))+1;C.selectedElement=elements[index].name end
+  C.RefreshElementUI()
+ end
+ function C.RefreshElementUI()
+  local elements=C.Elements();local found
+  for _,e in ipairs(elements) do if e.name==C.selectedElement then found=e end end
+  found=found or elements[1];C.selectedElement=found and found.name
+  selected.fieldkitLabel:SetText(found and FieldKit_L(found.label) or FieldKit_L("Enable themes to resize elements"))
+  local value=found and math.floor(C.ElementScale(found.name)*100+.5) or 100
+  elementValue:SetText(FieldKit_L("Element scale").." : "..value.." %  (50–130 %)")
+  C.elementSliderRefresh=true;elementSlider:SetValue(value);C.elementSliderRefresh=false
+  for _,f in ipairs({selected,previous,following,elementReset}) do T.Update(f) end
+ end
+ C.RefreshElementUI()
  page.Reflow=function(w)
   page:SetWidth(w);note:SetWidth(w);C.statusLabel:SetWidth(w)
   for i,item in ipairs(sliders) do local half=(w-26)/2;item.title:ClearAllPoints();item.title:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26),-384);item.title:SetWidth(half);item.slider:ClearAllPoints();item.slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26)+8,-424);item.slider:SetWidth(half-16);T.Update(item.slider) end
@@ -285,7 +367,10 @@ function FieldKitThemeUI(parent,offset)
    b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),-45);b:SetWidth(bw);b.preview:SetWidth(bw-16);b.preview:SetHeight(122);b.fieldkitLabel:SetWidth(bw-30);b.hint:SetWidth(bw-24);b.badge:ClearAllPoints();b.badge:SetPoint("TOPRIGHT",b,"TOPRIGHT",-10,-18);T.Update(b)
   end
   for _,group in ipairs({modes,{enabled,map,art}}) do for i,b in ipairs(group) do local _,_,_,_,y=b:GetPoint(1);b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),y);b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-20);T.Update(b) end end
+  elementTitle:SetWidth(w);elementValue:SetWidth(w);sizeNote:SetWidth(w)
+  selected:SetWidth(w-96);selected.fieldkitLabel:SetWidth(w-120);following:ClearAllPoints();following:SetPoint("TOPLEFT",page,"TOPLEFT",w-38,-630)
+  elementSlider:SetWidth(w-278);elementReset:ClearAllPoints();elementReset:SetPoint("TOPRIGHT",page,"TOPRIGHT",0,-706);elementReset:SetWidth(235)
  end
  table.insert(parent.flow,{frame=page,y=offset})
- return offset+610
+ return offset+835
 end

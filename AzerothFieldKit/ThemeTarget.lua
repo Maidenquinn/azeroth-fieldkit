@@ -48,11 +48,11 @@ function C.Update(variant)
    if boss and boss:IsShown() and boss.name and boss.name:GetText()==UnitName("target") then matchedBoss=boss end
   end
  end
- local f=C.frame;if not f.azsMoving then f:SetScale(math.min(1,UIParent:GetWidth()/1300)) end
+ local f=C.frame;if not f.azsMoving then f:SetScale(math.min(1,UIParent:GetWidth()/1300)*FieldKitZoneThemes.ElementScale("FieldKitThemeTargetFrame")) end
  local mapLeft=(T.zone=="elwynn" and variant=="complete") or (T.zone=="naxx" and variant=="alternative")
  if FieldKitReferenceHUD and FieldKitReferenceHUD.active then
   local boss=getglobal("FieldKitBossFrame1Compact") or getglobal("FieldKitBossFrame1");local y=(boss and boss:IsShown() and boss:GetAlpha()>0) and -195 or -96
-  FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,y,true)
+  FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,y/(f:GetScale() or 1),true)
  elseif mapLeft or variant=="alternative" then FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,-86)
  else FieldKitZoneThemes.Place(f,"TOPLEFT",UIParent,"TOPLEFT",22,-92) end
  C.name:SetText(FieldKitNative.Text(UnitName("target")))
@@ -60,6 +60,7 @@ function C.Update(variant)
  local names={elite="Elite",rareelite="Rare elite",rare="Rare",worldboss="Boss",normal="Target"}
  C.kind:SetText(FieldKit_L(names[classification] or "Target").." · "..tostring(level and level>0 and level or "??").." · "..FieldKit_L("Hover for native details"))
  C.bar:SetMinMaxValues(0,max);C.bar:SetValue(hp);C.hp:SetText(FieldKit_FormatHealth(hp,max,FieldKitDB.targetHealthMode))
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then FieldKitReferenceHUD.Fit(C.name,14,11);FieldKitReferenceHUD.Fit(C.kind,11,10);FieldKitReferenceHUD.Fit(C.hp,11,10) end
  H.Save(native);H.Anchor(native,"TOPLEFT",f,"BOTTOMLEFT",0,-4)
  native:SetFrameStrata("DIALOG")
  local over=type(MouseIsOver)=="function" and (MouseIsOver(f) or (matchedBoss and MouseIsOver(matchedBoss)) or (C.details and native:GetAlpha()>0 and MouseIsOver(native)))

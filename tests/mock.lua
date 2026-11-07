@@ -141,6 +141,9 @@ function methods:SetFontObject() end
 function methods:SetMaxLetters(n) self.maxLetters=n end
 function methods:ClearFocus() end
 function methods:SetFont(path,size,outline) self.fontPath=path;self.fontSize=size;self.fontOutline=outline;return true end
+function methods:GetFont() return self.fontPath or "Fonts\\ARIALN.TTF",self.fontSize or 14,self.fontOutline or "" end
+function methods:SetScale(value) self.scale=value end
+function methods:GetScale() return self.scale or 1 end
 function methods:SetTextColor(r,g,b) self.color={r,g,b} end
 
 function methods:GetFrameLevel() return self.frameLevel or 1 end

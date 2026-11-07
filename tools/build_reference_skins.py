@@ -36,14 +36,25 @@ for key,layout in layouts.items():
     digest=hashlib.sha256(path.read_bytes()).hexdigest()
     for component,rect in layout['rects'].items():
         x,y,w,h=rect;parts=[]
+        region=im.crop((x,y,x+w,y+h))
+        # Dock rectangles include the characters' outstretched silhouettes.
+        # They also intersect a few pixels of neighbouring independent panels.
+        # Remove those foreign rectangles from this component so resizing it
+        # cannot carry an orphan strip of the equipment/effects/chat panel.
+        if component=='dock':
+            for other,foreign in layout['rects'].items():
+                if other not in ('Damage','Lairs','Accessories','Stats','Effects','chat','nav'):continue
+                fx,fy,fw,fh=foreign
+                left,top,right,bottom=max(x,fx),max(y,fy),min(x+w,fx+fw),min(y+h,fy+fh)
+                if right>left and bottom>top:region.paste((0,0,0,0),(left-x,top-y,right-x,bottom-y))
         for dy in range(0,h,512):
             for dx in range(0,w,512):
                 iw,ih=min(512,w-dx),min(512,h-dy)
                 tile=Image.new('RGBA',(pot(iw),pot(ih)),(0,0,0,0))
-                tile.paste(im.crop((x+dx,y+dy,x+dx+iw,y+dy+ih)),(0,0))
+                tile.paste(region.crop((dx,dy,dx+iw,dy+ih)),(0,0))
                 name=f'{key}_{component}_{len(parts)+1}'+('_v3.tga' if key in ('naxx_minimal','naxx_alternative','elwynn_alternative') else '.tga')
                 target=out/name;tile.save(target);generated_paths.add(target.name)
-                media['files']['media/ReferenceHUD/'+name]={'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'bytes':target.stat().st_size,'source':'Information-free artwork extracted with image tool from approved concept; encoded without resampling or repainting. All text, live bars, map and action icons are native components.','sourcePngSha256':digest}
+                media['files']['media/ReferenceHUD/'+name]={'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'bytes':target.stat().st_size,'source':'Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.','sourcePngSha256':digest}
                 parts.append([name,dx,dy,iw,ih,tile.width,tile.height])
         record['tiles'][component]=parts
     art[key]=record

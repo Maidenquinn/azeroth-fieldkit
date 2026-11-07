@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-alpha.3",
+  "version": "0.6.0-alpha.4",
   "maintainerAcceptedForPublication": false,
   "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -10,5 +10,5 @@
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true,
-  "inGameTestScope": "Native 0.142.0: all six layouts inspected in their real Elwynn/Naxxramas scenes; real Elwynn combat through Lardeur, chest choice, level choices and theme switching; Naxxramas combat, choice-time theme switch, chat and native death screen. Synthetic Lua 5.0.3/5.1 restoration/data-route regressions. No native Naxx boss or coop acceptance; no measured 100% pixel fidelity claim."
+  "inGameTestScope": "Native 0.142.0: six Elwynn/Naxx reference layouts inspected across alpha3/alpha4 iterations; alpha4 real Elwynn combat with six acquired spells plus racial and changing proc resource, native choice priority, independent dock 65% and map/identity 70% visual check, temporary native preferences restored. All six renderers stress-tested with long text and large counters; Lua 5.0.3/5.1 profile/ownership/scale regressions. No native Naxx boss, coop, or numerical 100% fidelity certification. Intermediate captures are scoped individually in docs/native-ui-smoke-0.6.0-alpha4.json."
 }
