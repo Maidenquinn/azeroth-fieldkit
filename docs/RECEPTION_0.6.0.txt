@@ -136,6 +136,11 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.11 - AURAS DE CIBLE
+La cible thematisee affiche sous sa carte les vrais debuffs (bordure selon le type)
+et buffs, avec stacks et infobulle native au survol. A recetter : cible avec
+buffs/debuffs, menu clic droit de cible, barre d'incantation sous les icones.
+
 ALPHA.10 - CIBLE ET LECTEURS DETAILLES
 Les fenetres de detail se deplacent par leur titre, meme si le HUD est verrouille.
 Position conservee par theme, variante et profil. Le bouton Retour suit la fenetre.

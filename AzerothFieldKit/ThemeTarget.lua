@@ -24,8 +24,50 @@ function C.Create()
  f:SetScript("OnLeave",function() if GameTooltip then GameTooltip:Hide() end end)
  FieldKitZoneThemes.Bind(f)
 end
+local AURA_SIZE,AURA_STEP,AURA_COLUMNS,AURA_MAX=22,24,12,16
+local DISPEL={Magic={.2,.5,1},Curse={.7,.2,.9},Poison={.2,.8,.2},Disease={.6,.4,.1}}
+local function AuraButton(parent,kind,index)
+ local b=CreateFrame("Button",nil,parent);b:SetWidth(AURA_SIZE);b:SetHeight(AURA_SIZE)
+ b.kind=kind;b.index=index
+ b.border=b:CreateTexture(nil,"BACKGROUND");b.border:SetAllPoints(b);T.Solid(b.border,{.1,.1,.1})
+ b.icon=b:CreateTexture(nil,"ARTWORK");b.icon:SetPoint("TOPLEFT",b,"TOPLEFT",2,-2);b.icon:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-2,2)
+ b.count=b:CreateFontString(nil,"OVERLAY","GameFontNormal");b.count:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",0,1);T.Font(b.count,10,T.text)
+ b:SetScript("OnEnter",function()
+  local method=this.kind=="debuff" and "SetUnitDebuff" or "SetUnitBuff"
+  if GameTooltip and type(GameTooltip[method])=="function" then GameTooltip:SetOwner(this,"ANCHOR_BOTTOMRIGHT");GameTooltip[method](GameTooltip,"target",this.index);GameTooltip:Show() end
+ end)
+ b:SetScript("OnLeave",function() if GameTooltip then GameTooltip:Hide() end end)
+ return b
+end
+-- Real native auras: debuffs first row, buffs second. Returns rows used (0-2).
+function C.UpdateAuras()
+ local f=C.frame;if not f then return 0 end
+ f.auras=f.auras or {buff={},debuff={}}
+ local rows=0
+ local order={"debuff","buff"}
+ for o=1,2 do
+  local kind=order[o];local reader=kind=="debuff" and UnitDebuff or UnitBuff;local list=f.auras[kind];local used=0
+  if type(reader)=="function" then
+   for i=1,AURA_MAX do
+    local texture,count,dispel=reader("target",i)
+    if not texture then break end
+    local b=list[i]
+    if not b then b=AuraButton(f,kind,i);list[i]=b end
+    b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"BOTTOMLEFT",(i-1)*AURA_STEP+2,-(4+rows*AURA_STEP))
+    b.icon:SetTexture(texture)
+    if kind=="debuff" then local c=DISPEL[dispel] or {.75,.1,.1};T.Solid(b.border,c) else T.Solid(b.border,{.1,.1,.1}) end
+    if count and count>1 then b.count:SetText(count) else b.count:SetText("") end
+    b:Show();used=i
+   end
+  end
+  for i=used+1,table.getn(list) do list[i]:Hide() end
+  if used>0 then rows=rows+1 end
+ end
+ return rows
+end
 function C.Stop()
  if C.frame then C.frame:Hide() end
+ if C.frame and C.frame.auras then for _,list in pairs(C.frame.auras) do for i=1,table.getn(list) do list[i]:Hide() end end end
  C.details=false
  local native=getglobal("TargetFrame");local saved=native and H.saved[native]
  if saved then
@@ -65,9 +107,12 @@ function C.Update(variant)
  C.bar:SetMinMaxValues(0,max);C.bar:SetValue(hp);C.hp:SetText(FieldKit_FormatHealth(hp,max,FieldKitDB.targetHealthMode))
  if FieldKitReferenceHUD and FieldKitReferenceHUD.active then FieldKitReferenceHUD.Fit(C.name,18,13);FieldKitReferenceHUD.Fit(C.kind,12,11);FieldKitReferenceHUD.Fit(C.hp,12,11) end
  H.Save(native);native:SetParent(H.Hidden());native:SetAlpha(0)
+ local rows=C.UpdateAuras() -- children of the hidden summary stay hidden when the boss card is selected
+ if matchedBoss then rows=0 end
  local cast=getglobal("TargetFrameSpellBar")
  if cast and (cast:GetParent()==UIParent or cast:GetParent()==native or cast:GetParent()==f or cast:GetParent()==C.castOwner) then
-  local owner=matchedBoss or f;H.Save(cast);cast:SetParent(owner);C.castOwner=owner;H.Anchor(cast,"TOP",owner,"BOTTOM",0,-6,true);cast:SetWidth(280)
+  local owner=matchedBoss or f;H.Save(cast);cast:SetParent(owner);C.castOwner=owner
+  H.Anchor(cast,"TOP",owner,"BOTTOM",0,-(6+rows*AURA_STEP),true);cast:SetWidth(280)
  end
  if matchedBoss then f:Hide() else f:Show() end;T.Update(f)
 end

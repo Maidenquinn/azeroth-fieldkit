@@ -78,6 +78,18 @@ C.Refresh();assert(FieldKitThemeTarget.frame:IsShown() and TargetFrame:GetParent
 click(FieldKitThemeTarget.frame);assert(targetClicks==1)
 FieldKitThemeTarget.frame._mouseIsOver=true;this=FieldKitThemeTarget.frame;this.scripts.OnEnter()
 C.Refresh();assert(TargetFrame:GetParent()==H.storage,"Hover must not create a second native target frame")
+-- Native auras must stay reachable on the themed target (the native frame is hidden).
+local oldBuff,oldDebuff=UnitBuff,UnitDebuff
+UnitBuff=function(unit,i) if i<=2 then return "Interface\Icons\Spell_Nature_Regeneration",(i==2 and 3 or 1) end end
+UnitDebuff=function(unit,i) if i==1 then return "Interface\Icons\Spell_Shadow_CurseOfTounges",2,"Curse" end end
+C.Refresh();local auras=FieldKitThemeTarget.frame.auras
+assert(auras.buff[2] and auras.buff[2]:IsShown() and auras.debuff[1]:IsShown() and not (auras.buff[3] and auras.buff[3]:IsShown()),"real buffs/debuffs must show")
+local tipUnit;GameTooltip.SetUnitBuff=function(self,u,i) tipUnit=u..i end;GameTooltip.SetOwner=function() end;GameTooltip.Show=function() end
+this=auras.buff[2];auras.buff[2].scripts.OnEnter();assert(tipUnit=="target2","aura tooltip must read the native buff")
+UnitBuff=function() return nil end;UnitDebuff=function() return nil end
+C.Refresh();assert(not auras.buff[1]:IsShown() and not auras.debuff[1]:IsShown(),"auras must clear when none remain")
+UnitBuff,UnitDebuff=oldBuff,oldDebuff
+
 FieldKitThemeTarget.frame._mouseIsOver=false;NOW=NOW+1;C.Refresh();assert(TargetFrame:GetParent()==H.storage)
 -- Selecting the displayed boss removes the duplicate target summary while
 -- keeping its native cast on the visible boss and restoring ownership afterward.

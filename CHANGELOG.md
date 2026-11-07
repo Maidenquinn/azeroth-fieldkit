@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0-alpha.11 - 2026-11-07 (target auras restored, unpublished)
+
+- The themed target hid the native frame without replacing its auras. It now shows the real native debuffs (dispel-colored border) and buffs as icon rows under the card, with stack counts and native aura tooltips on hover; the cast bar sits below them. Hidden while the selected boss card already shows the target.
+
 ## 0.6.0-alpha.10 - 2026-11-07 (target and detail readers, unpublished)
 
 - Refine target padding and typography, use green health for friendly/self targets and retain native clicks. Hover uses a unit tooltip without a duplicate target frame.
