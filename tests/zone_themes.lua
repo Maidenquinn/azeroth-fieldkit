@@ -259,3 +259,20 @@ for _,row in ipairs(R.frames.Accessories.rows) do if row:IsShown() then local _,
 assert(not string.find(R.frames.Damage.total:GetText(),"%? /s"))
 C.Set("zoneThemes",false)
 print("Endless unnamed boss countdown and fixed equipment typography passed")
+
+-- Empty meter has no live sockets/tracks; six tabs use the same owned surface.
+C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+local savedRead=FieldKitMeterLedger.Read
+FieldKitMeterLedger.Read=function() return {},0,nil,true end
+C.Refresh()
+assert(R.frames.Damage.liveBody:IsShown() and R.frames.Damage.liveGrain:IsShown())
+for _,row in ipairs(R.frames.Damage.rows) do assert(not row.icon:IsShown() and not row.bar:IsShown());assert(not row.trough or not row.trough:IsShown()) end
+for _,tab in ipairs(R.tabs) do assert(not tab.fieldkitArtOnly and tab.fieldkitSkin) end
+local xs={579,662,745,828,911,994,1077}
+for i,slot in ipairs({1,2,3,4,5,6,12}) do
+ local b=getglobal("ActionButton"..slot);local _,_,_,x,y=b:GetPoint()
+ assert(x==xs[i]-R.layout.rects.dock[1] and y==R.layout.rects.dock[2]-795)
+ assert(b:GetWidth()==66 and b:GetHeight()==66)
+end
+FieldKitMeterLedger.Read=savedRead;C.Set("zoneThemes",false)
+print("Empty combat state, consistent tab surfaces and measured Elwynn action sockets passed")

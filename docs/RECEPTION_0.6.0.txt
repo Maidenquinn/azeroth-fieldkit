@@ -1,4 +1,4 @@
-AZEROTH FIELDKIT 0.6.0-alpha.7 — PILOTE ELWYNN / NAXXRAMAS
+AZEROTH FIELDKIT 0.6.0-alpha.8 — PILOTE ELWYNN / NAXXRAMAS
 7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
 
 La version est installée dans le client habituel. Le code stable reste inchangé.
@@ -122,3 +122,9 @@ commande de la carte, du cadre et des icônes ensemble. Placement et verrouillag
 rétablis. Le glisser réel à la souris reste à recetter : le test automatisé
 n’a pas confirmé son déplacement. Pas de validation native après-victoire
 ou du DPS en combat pour cette révision.
+
+ALPHA.8 — ETAT VIDE ET ALIGNEMENT
+Compteur vide : suppression des emplacements et jauges illustratifs ; seuls
+les vrais sorts du compteur reçoivent une icône et une barre. Les six onglets
+utilisent le même habillage. Elwynn Complète : espacement des sept sorts mesuré
+sur le décor, 83 pixels entre centres, intérieur de 66 pixels à y=795.

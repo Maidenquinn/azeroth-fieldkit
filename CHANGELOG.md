@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0-alpha.8 — 2026-11-07 (empty meter and measured sockets, unpublished)
+
+- Cover illustrative meter sockets/tracks and the baked first-tab rim with owned textured material. Only real entries receive live icons and gauges; all six tabs share the same surface.
+- Elwynn Complete native actions use measured 83-pixel socket spacing and 66-pixel interiors at y=795, replacing the previous 80-pixel step.
+
 ## 0.6.0-alpha.7 — 2026-11-07 (native cache and endless corrections, unpublished)
 
 - Accept native endless boss countdowns without a disclosed name; no inferred schedule.

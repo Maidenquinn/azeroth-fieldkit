@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.7",
+  "candidate": "0.6.0-alpha.8",
   "runtimeModules": 47,
   "textureCount": 243,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5186,
-      "sha256": "88278a8733010ab631a452fa6217e5216511a5ff27eb2b564c4b00b06a8a6162",
+      "sha256": "286f5471ea8e79528f64aa47f9c5de2a5ed14d8d3c652c0e4fda3ca55b544980",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -2882,13 +2882,13 @@
     },
     "ReferenceArt.lua": {
       "bytes": 11141,
-      "sha256": "e3351675a2d03a07b60467cb76d5d930ca8193b1b0dcd4463c7b352f904ed656",
+      "sha256": "3c6ecb635ff1b4858f3fafc351774eabc64d5185bb4899d11a3c21954b4d9027",
       "namedFunctions": [],
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 44371,
-      "sha256": "818108a617044c5e147ddf16cac3f45c6a34dccf1ccfb3b9711845edec17a070",
+      "bytes": 45475,
+      "sha256": "7418e256940430b2f5233c3a4f85553a783077b87c2503b6fbe5d8dd55ab4565",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2964,11 +2964,11 @@
         },
         {
           "name": "R.Settings",
-          "line": 414
+          "line": 425
         },
         {
           "name": "R.Buffs",
-          "line": 429
+          "line": 440
         }
       ],
       "literalEvents": []
@@ -5059,7 +5059,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.7",
+    "version": "0.6.0-alpha.8",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5070,7 +5070,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha7: native Elwynn Complete inspected after restart; controlled programmatic group move keeps terrain/art/addon proxies together, initial position and lock restored. Mouse drag not confirmed by automation. Lua 5.0.3/5.1: unnamed endless boss countdown, fixed equipment fonts and existing six-layout regressions. No native post-victory fight or fresh combat DPS validation."
+    "inGameTestScope": "Alpha8: Lua 5.0.3/5.1 empty meter with no live icon/track, six consistent tab surfaces, measured Elwynn Complete seven action socket interiors and existing regressions. Native ready-phase inspection after reload; no new combat acceptance or full six-zone visual validation."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,
