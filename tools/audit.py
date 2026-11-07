@@ -57,8 +57,10 @@ for p in sorted(root.rglob('*'),key=lambda p:p.relative_to(root).as_posix()):
  if p.suffix=='.tga':
   raw=p.read_bytes();width,height=struct.unpack_from('<HH',raw,12)
   allowed_sizes=((128,128),(256,256))
-  if relative in ('media/ZoneThemes/elwynnOrnaments512.tga','media/ZoneThemes/naxxOrnaments512.tga'):
+  if relative in ('media/ZoneThemes/elwynnOrnaments512.tga','media/ZoneThemes/naxxOrnaments512.tga','media/ZoneThemes/elwynnDock512.tga','media/ZoneThemes/naxxDock512.tga'):
    allowed_sizes=allowed_sizes+((512,256),)
+  if relative in ('media/ZoneThemes/elwynnFrame512.tga','media/ZoneThemes/naxxFrame512.tga'):
+   allowed_sizes=allowed_sizes+((512,512),)
   if relative.startswith('media/ChroniclePremium/'):
    allowed_sizes=allowed_sizes+((310,55),(512,128))
   assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height) in allowed_sizes,(relative,width,height)

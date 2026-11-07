@@ -104,3 +104,30 @@ C.Set("zoneThemes",false)
 local malformed=C.NormalizePositions({bad={UIParent={"TOP","TOP",1,1}},["naxx:minimal"]={UIParent={"TOP","TOP",1,1},FieldKitThemeDock={"TOP","TOP",1,2,junk={3}}}})
 assert(malformed.bad==nil and malformed["naxx:minimal"].UIParent==nil and malformed["naxx:minimal"].FieldKitThemeDock.junk==nil)
 print("Zone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)")
+
+-- Regression: six concept geometries keep one independent live HP source,
+-- close the secondary popup, preserve all details and never reuse hidden HP.
+AZS_ZONE.zone="elwynn";Minimap:SetParent(UIParent)
+for _,zone in ipairs({"elwynn","naxx"}) do
+ for _,variant in ipairs({"minimal","complete","alternative"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemes",true)
+  assert(H.healthRoot:IsShown() and H.health:IsShown() and H.hp:GetText()~="")
+  assert(H.health:GetParent()==H.player and H.player:GetParent()==H.healthRoot)
+  assert(FieldKitPlayerBar:GetParent()==H.storage)
+  assert(H.xpRoot:IsShown() and H.xp:IsShown())
+  assert(H.dock:GetHeight()==88 and H.dock:GetWidth()==500)
+  assert(not H.micro:IsShown(),"Native menus must be collapsed by default")
+  local p,r,rp,x,y=M.root:GetPoint()
+  if (zone=="elwynn" and variant=="complete") or (zone=="naxx" and variant=="alternative") then assert(p=="TOPLEFT")
+  elseif zone=="elwynn" and variant=="alternative" then assert(p=="BOTTOMRIGHT",zone..variant..tostring(p)) else assert(p=="TOPRIGHT",zone..variant..tostring(p)) end
+  if variant=="alternative" then assert(H.xpRoot:GetWidth()==UIParent:GetWidth()-40);local hp=H.header:GetPoint();assert(hp==(zone=="elwynn" and "TOPLEFT" or "TOPRIGHT")) end
+  C.Open("Stats");assert(FieldKitStatsFrame:GetAlpha()>0 and H.back:IsShown());click(H.back);assert(not H.back:IsShown())
+  phase="choosing";C.Refresh();assert(not H.healthRoot:IsShown());phase="playing";C.Refresh();assert(H.healthRoot:IsShown() and H.health:IsShown())
+ end
+end
+C.Set("zoneThemeArt",false);assert(not H.sculpture:IsShown() and not H.dock.fieldkitArtOnly)
+C.Set("zoneThemeArt",true);assert(H.sculpture:IsShown() and H.dock.fieldkitArtOnly)
+C.Set("zoneThemeMinimap",false);assert(not M.active);C.Set("zoneThemeMinimap",true);assert(M.active)
+C.Set("zoneThemes",false);assert(not H.healthRoot:IsShown() and not H.xpRoot:IsShown())
+for _,f in pairs(H.summaries) do assert(not f:IsShown()) end
+print("Six concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)")

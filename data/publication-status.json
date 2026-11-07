@@ -1,14 +1,14 @@
 {
-  "version": "0.6.0-alpha.1",
+  "version": "0.6.0-alpha.2",
   "maintainerAcceptedForPublication": false,
   "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
   "inGameTestByAgent": true,
-  "githubPrerelease": true,
+  "githubPrerelease": false,
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
-  "maintainerInGameTestingReported": false,
-  "inGameTestScope": "Limited native UI smoke tests on Azeroth Survivors 0.141.1 (df40f5d86): layouts, square map, theme controls, details and classic restoration. No native combat/card-choice/boss/coop acceptance. See docs/RECEPTION_0.6.0.txt."
+  "maintainerInGameTestingReported": true,
+  "inGameTestScope": "Visual revision: native UI rendering, sculpted transparent docks, independent player HP, theme settings, minimap and layout switching on the installed client. Manual Naxx skin inspected in an Elwynn ready-phase scene; not a native Naxx combat acceptance. New synthetic six-layout regressions cover choice restoration and all detail routes. No combat/boss/coop acceptance."
 }

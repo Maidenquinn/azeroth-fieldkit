@@ -25,7 +25,7 @@ end
 
 -- Display preferences affect only our material layers, never frame/text alpha.
 function T.Style(frame)
- if T.zone~="classic" then return 2 end
+ if T.zone~="classic" then return 3 end
  if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
  return FieldKitDB and FieldKitDB.cardStyle==2 and 2 or 1
 end
@@ -63,7 +63,7 @@ function T.Update(frame)
  if skin.width==w and skin.height==h and skin.style==style then return end
  skin.width=w;skin.height=h;skin.style=style
  skin.base:SetWidth(w);skin.base:SetHeight(h);skin.grain:SetWidth(w);skin.grain:SetHeight(h)
- local c=math.min(skin.kind=="window" and 18 or (skin.kind=="card" and 10 or 6),w/3,h/3)
+ local c=math.min(skin.kind=="window" and 24 or (skin.kind=="card" and 16 or 8),w/3,h/3)
  local xs,ys={0,c,w-c},{0,c,h-c}
  if style==2 then
   -- Four one-pixel solid edges; remaining ornate slices stay hidden.
@@ -92,6 +92,7 @@ function T.Surface(frame,kind,hud)
  local color=kind=="card" and T.panel or T.background
  skin.base=frame:CreateTexture(nil,"BACKGROUND");skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
  T.Solid(skin.base,color);skin.base:SetAlpha(1)
+ skin.selected=frame:CreateTexture(nil,"OVERLAY");skin.selected:SetPoint("TOPLEFT",frame,"TOPLEFT",3,-3);skin.selected:SetWidth(3);skin.selected:SetPoint("BOTTOMLEFT",frame,"BOTTOMLEFT",3,3);T.Solid(skin.selected,T.gold);skin.selected:Hide()
  skin.grain=frame:CreateTexture(nil,"BACKGROUND");skin.grain:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
  skin.grain:SetTexture(T.media.."ChronicleGrain.tga");skin.grain:SetAlpha(.16)
  local cuts={0,.07,.93,1}
@@ -107,6 +108,7 @@ end
 -- Selection/hover only changes the fixed material, never allocates another layer.
 function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
+ if frame.fieldkitArtOnly then skin.base:SetAlpha(0);skin.grain:SetAlpha(0);skin.selected:Hide();for _,part in ipairs(skin.parts) do part.texture:Hide() end;return end
  local alpha=(frame.fieldkitNavigation and not active) and 0 or 1
  local opacity=skin.kind=="button" and 1 or T.Opacity(frame)
  T.Solid(skin.base,skin.kind=="card" and T.panel or T.background)
@@ -121,12 +123,15 @@ function T.State(frame,active)
    t.fieldkitPlate=nil
   else
    if skin.kind=="window" and i==5 then t:Hide() else t:Show() end
-   local asset=T.media.."ChroniclePlate"..plate..".tga"
+   local asset=T.Style(frame)==3 and (T.media.."ZoneThemes\\"..T.zone.."Frame512.tga") or (T.media.."ChroniclePlate"..plate..".tga")
    if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end
-   if T.zone=="naxx" then t:SetVertexColor(.52,.85,1) elseif T.zone=="elwynn" then t:SetVertexColor(.85,1,.62) else t:SetVertexColor(1,1,1) end
+   local part=skin.parts[i];local cuts=T.Style(frame)==3 and {0,.12,.88,1} or {0,.07,.93,1}
+   t:SetTexCoord(cuts[part.x],cuts[part.x+1],cuts[part.y],cuts[part.y+1])
+   t:SetVertexColor(1,1,1)
    t:SetAlpha(alpha*(i==5 and opacity or 1))
   end
  end
+ T.Solid(skin.selected,T.gold);if active then skin.selected:Show() else skin.selected:Hide() end
  frame.fieldkitActive=active and true or false
 end
 

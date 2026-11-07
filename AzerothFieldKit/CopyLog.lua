@@ -336,7 +336,7 @@ local function Hook(index)
  frame.AddMessage=function(self,text,r,g,b,id)
   if not replaying then
    Capture(index,text)
-   if FieldKitDB and (FieldKitDB.chatStyle or styleWasEnabled) and type(text)=="string" then
+   if FieldKitDB and (FieldKitDB.chatStyle or FieldKitDB.zoneThemes or styleWasEnabled) and type(text)=="string" then
     if table.getn(displayHistory)>=DISPLAY_LIMIT then table.remove(displayHistory,1) end
     table.insert(displayHistory,{text=text,r=r,g=g,b=b,id=id})
    end
@@ -356,6 +356,31 @@ end
 -- journal is not the opt-in chat-copy history, and is never persisted.
 function FieldKit.ClearChatRenderHistory()
  displayHistory={}
+end
+
+-- Some native clients clear scrolling text on resize. Never compact an
+-- existing chat unless its entire displayed history can be restored.
+function FieldKit.ResizeChatPreservingHistory(width,height)
+ local f=NativeChat()
+ if not f then return false end
+ if f:GetWidth()==width and f:GetHeight()==height then return true end
+ if not f.GetNumMessages then return false end
+ local count=f:GetNumMessages()
+ if type(count)~="number" then return false end
+ if count>0 and count~=table.getn(displayHistory) then
+  if type(f.GetMessageInfo)~="function" then return false end
+  local snapshot={}
+  for i=1,count do
+   local ok,text,r,g,b,id=pcall(f.GetMessageInfo,f,i)
+   if not ok or type(text)~="string" then return false end
+   table.insert(snapshot,{text=text,r=r,g=g,b=b,id=id})
+  end
+  displayHistory=snapshot
+ end
+ if f:GetWidth()~=width then f:SetWidth(width) end
+ if f:GetHeight()~=height then f:SetHeight(height) end
+ if count>0 and f:GetNumMessages()<count then FieldKit.RestoreDisplayedChat() end
+ return true
 end
 
 -- Rebuild only when a native layout setter demonstrably discards lines.

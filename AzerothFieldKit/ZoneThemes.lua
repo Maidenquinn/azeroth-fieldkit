@@ -8,7 +8,8 @@ local routes={Damage={"FieldKitMeterFrame","meterFrame"},Lairs={"FieldKitLairFra
  Stats={"FieldKitStatsFrame","statsFrame"},Timeline={"FieldKitBossTimelineFrame","bossTimeline"},Reminders={"FieldKitEncounterFrame","nextBossCard"}}
 local hidden={"FieldKitModeFrame","FieldKitCollapseDock","FieldKitMicroMenu"}
 C.layoutKeys={"elwynn:minimal","elwynn:complete","elwynn:alternative","naxx:minimal","naxx:complete","naxx:alternative"}
-C.positionNames={"FieldKitThemeDock","FieldKitThemeNavigation","FieldKitThemeHeader","FieldKitThemeMap","FieldKitThemeTargetFrame","FieldKitPlayerBar","FieldKitPlayerBuffs","FieldKitBossFrame1"}
+C.positionNames={"FieldKitThemeIdentity","FieldKitThemeVitality","FieldKitThemeExperience","FieldKitThemeCounters","FieldKitThemeSchedule","FieldKitThemeDock","FieldKitThemeNavigation","FieldKitThemeHeader","FieldKitThemeMap","FieldKitThemeTargetFrame","FieldKitPlayerBar","FieldKitPlayerBuffs","FieldKitBossFrame1"}
+for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do table.insert(C.positionNames,"FieldKitThemeSummary"..kind) end
 for _,name in ipairs(FieldKitCardLayout.names) do table.insert(C.positionNames,name) end
 function C.NormalizePositions(value)
  local out={};if type(value)~="table" then return out end
@@ -135,29 +136,33 @@ function C.Refresh(force)
  -- Yield completely to native choice cards. No writes to card priority or game data.
  if FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen() then
   FieldKitThemeTarget.Stop()
-  if H.dock then H.dock:Hide();H.header:Hide();H.nav:Hide();H.HideTip() end
+  for _,f in pairs(H.summaries or {}) do f:Hide() end
+  for _,f in ipairs({H.dock,H.header,H.nav,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.utility,H.micro,H.schedule,H.back}) do f:Hide() end;H.pinned=false;H.HideTip()
   return
  end
  H.Update(variant,zone);FieldKitThemeTarget.Update(variant)
  C.NativeReplace()
  if FieldKitDB.zoneThemeMinimap then FieldKitThemeMinimap.Apply(variant) else FieldKitThemeMinimap.Restore() end
- local leftY=variant=="complete" and -420 or -180
- local rightY=-95
+ H.back:Hide()
+ local leftY=(variant=="complete" and zone=="elwynn") and -350 or -112
+ local rightY=(zone=="naxx" and variant~="alternative") and -312 or -116
  for _,kind in ipairs({"Damage","Lairs","Effects","Accessories","Stats","Timeline","Reminders"}) do
   local r=routes[kind];local frame=getglobal(r[1])
-  local visible=(variant=="complete" and kind~="Timeline" and kind~="Reminders") or C.open[kind]
+  local visible=C.open[kind]
   C.Mask(frame,not visible)
   if frame and visible then
    if kind=="Stats" then FieldKitCardLayout.Rows(frame,frame.fieldkitNaturalHeight or frame:GetHeight(),frame.fieldkitRowCount or table.getn(frame.rows),"stats",FieldKitDB.statsCollapsed);T.Update(frame) end
-   local right=kind=="Accessories" or kind=="Stats" or variant=="alternative"
+   local right=kind=="Accessories" or kind=="Stats" or (kind=="Effects" and zone=="naxx") or variant=="alternative"
    local y=right and rightY or leftY;local previous=C.placed[frame]
    if not previous or previous.y~=y or previous.height~=frame:GetHeight() then
     C.Place(frame,right and "TOPRIGHT" or "TOPLEFT",UIParent,right and "TOPRIGHT" or "TOPLEFT",right and -20 or 20,y,true)
    end
    if right then rightY=rightY-frame:GetHeight()-14 else leftY=leftY-frame:GetHeight()-14 end
    local record=previous or {};record.y=y;record.height=frame:GetHeight();C.placed[frame]=record
+   H.back:ClearAllPoints();H.back:SetPoint("BOTTOMRIGHT",frame,"TOPRIGHT",0,4);H.back:Show();T.Update(H.back)
   end
  end
+ H.Summaries(variant,zone)
  for _,name in ipairs(hidden) do C.Mask(getglobal(name),true) end
  -- Keep native target, boss, group, alerts and chat behaviors intact.
  if FieldKitScreenLayers then FieldKitScreenLayers.ApplyChoice() end

@@ -3,6 +3,8 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Back to HUD"]="Retour au HUD",
+ ["Full details"]="Détails complets",
  ["Preview HUD"]="Prévisualiser le HUD",
  ["Apply profile"]="Appliquer le profil",
  ["Restore previous"]="Restaurer le précédent",

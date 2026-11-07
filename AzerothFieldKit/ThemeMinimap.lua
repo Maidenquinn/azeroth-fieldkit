@@ -22,6 +22,7 @@ function M.Restore()
   if Minimap.SetMaskTexture then pcall(Minimap.SetMaskTexture,Minimap,old.mask) end
  end
  for f,alpha in pairs(M.hidden) do if f:GetAlpha()==0 then f:SetAlpha(alpha) end end
+ for _,name in ipairs({"GameTimeFrame","MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.RestoreOne(f) end end
  M.hidden={};M.active=false;M.before=nil
  if M.root then M.root:Hide() end
 end
@@ -56,13 +57,15 @@ function M.Apply(variant)
   local ok,result=pcall(Minimap.SetMaskTexture,Minimap,"Interface\\Buttons\\WHITE8X8")
   if not ok or result==false then M.reason="Square mask rejected";M.before=nil;return false end
   M.active=true;M.reason=nil
+  for _,name in ipairs({"MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.Save(f);f:SetParent(FieldKitThemeHUD.Hidden()) end end
   Minimap:SetParent(M.root)
   for i=1,table.getn(borderNames) do local f=getglobal(borderNames[i]);if f and f.SetAlpha then M.hidden[f]=f:GetAlpha();f:SetAlpha(0) end end
  end
- local size=math.min(206,math.max(140,UIParent:GetWidth()*.13))
- if not M.root.azsMoving then M.root:SetWidth(size+8);M.root:SetHeight(size+8) end
- if variant=="complete" then FieldKitZoneThemes.Place(M.root,"TOPLEFT",UIParent,"TOPLEFT",20,-182)
- elseif variant=="alternative" then FieldKitZoneThemes.Place(M.root,"BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-20,58)
+ local size=math.min(230,math.max(160,UIParent:GetWidth()*.13))
+ local zone=FieldKitTheme.zone
+ if not M.root.azsMoving then M.root:SetWidth(size+16);M.root:SetHeight(size+16) end
+ if (variant=="complete" and zone=="elwynn") or (variant=="alternative" and zone=="naxx") then FieldKitZoneThemes.Place(M.root,"TOPLEFT",UIParent,"TOPLEFT",20,-18)
+ elseif variant=="alternative" then FieldKitZoneThemes.Place(M.root,"BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-20,66)
  else FieldKitZoneThemes.Place(M.root,"TOPRIGHT",UIParent,"TOPRIGHT",-20,-38) end
  Minimap:ClearAllPoints();Minimap:SetPoint("CENTER",M.root,"CENTER",0,0);Minimap:SetWidth(size);Minimap:SetHeight(size)
  local clock=getglobal("GameTimeFrame")

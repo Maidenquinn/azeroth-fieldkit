@@ -1,8 +1,9 @@
 # Attribution and provenance
 
-## Zone-theme pilot (0.6.0-alpha.1)
+## Zone-theme pilot (0.6.0-alpha.2)
 
-The two `media/ZoneThemes/*Ornaments512.tga` atlases are newly generated,
+The `media/ZoneThemes/*Ornaments512.tga`, `*Dock512.tga` and
+`*Frame512.tga` textures are newly generated,
 AI-assisted ornamental interpretations of Mr. Smite / Edwin VanCleef and
 Sapphiron / Kel'Thuzad. They are not official Blizzard renders or extracted
 models. Original game character identities and inherited asset notices remain

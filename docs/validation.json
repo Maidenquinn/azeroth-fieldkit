@@ -1,7 +1,7 @@
 {
-  "version": "0.6.0-alpha.1",
+  "version": "0.6.0-alpha.2",
   "lua51": true,
-  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)",
+  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -18,24 +18,24 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.1",
+    "version": "0.6.0-alpha.2",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
     "inGameTestByAgent": true,
-    "githubPrerelease": true,
+    "githubPrerelease": false,
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
-    "maintainerInGameTestingReported": false,
-    "inGameTestScope": "Limited native UI smoke tests on Azeroth Survivors 0.141.1 (df40f5d86): layouts, square map, theme controls, details and classic restoration. No native combat/card-choice/boss/coop acceptance. See docs/RECEPTION_0.6.0.txt."
+    "maintainerInGameTestingReported": true,
+    "inGameTestScope": "Visual revision: native UI rendering, sculpted transparent docks, independent player HP, theme settings, minimap and layout switching on the installed client. Manual Naxx skin inspected in an Elwynn ready-phase scene; not a native Naxx combat acceptance. New synthetic six-layout regressions cover choice restoration and all detail routes. No combat/boss/coop acceptance."
   },
   "files": {
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "2b85b1b20c85f6184fce31442cc0595862b4bd55082d4f583c767d09f89e2ec6"
+      "sha256": "e069c42861f343b0c6d4d415ab48b77453316801843da860516d1215b5a92a18"
     },
     "Diagnostics.lua": {
       "maxUpvalues": 2,
@@ -60,7 +60,7 @@
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "c0bc164c2f71f0c945f8ad6eb2def98230821fb8a4a8c933abc1f2355c1dece1"
+      "sha256": "cdd399cbb3b7484e64dce4578f3fd1a9ef7d1821851c443d3f94546d3ae20e97"
     },
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
@@ -70,7 +70,7 @@
     "Theme.lua": {
       "maxUpvalues": 1,
       "functions": 18,
-      "sha256": "02eeb2f001b0bab41045b51cd0559a5a3de54a60281d7244817435afd3af1936"
+      "sha256": "6c944898e2e1e06d09d99c4332f7c8838c143ac56d990d963526fe2e1c3854e2"
     },
     "ZoneThemeRegistry.lua": {
       "maxUpvalues": 0,
@@ -155,7 +155,7 @@
     "ScreenLayers.lua": {
       "maxUpvalues": 3,
       "functions": 7,
-      "sha256": "ebae04751b551343dbd2e4e6051a4d3337b832fd4ab4e8c7de84e793a0695e5d"
+      "sha256": "20c04ebcdcf062fb04a34480ddeddd976829c383c13c7a82d2ebe071b8d91428"
     },
     "NativeTools.lua": {
       "maxUpvalues": 3,
@@ -234,28 +234,28 @@
     },
     "CopyLog.lua": {
       "maxUpvalues": 17,
-      "functions": 33,
-      "sha256": "3b0eeaf9f77f5e09003ae6fdb2ee7fe1869becd33f673233b3c73d9f9907bfcc"
+      "functions": 34,
+      "sha256": "6d1680b769d86d8da4ea28025bc496192be88429f9a508d4b723652905e57624"
     },
     "ThemeMinimap.lua": {
       "maxUpvalues": 2,
       "functions": 5,
-      "sha256": "4016cf2ab4eb0a0dcf74287d2a094059b54b59b02e587e37cdbc254978858a67"
+      "sha256": "cbc7f3be61745a7441053abd654b495bb44cee7ec5d3fc8ceb3ea23c70574c14"
     },
     "ThemeHUD.lua": {
       "maxUpvalues": 4,
-      "functions": 26,
-      "sha256": "991737e76947bcf28e996ec5385141164513c8a33be9789bbcc99963ef48d611"
+      "functions": 37,
+      "sha256": "2a5274da307f0cdc129f68d8944f5bbd397519fa42abf161df3a7dc56ef3e0a5"
     },
     "ThemeTarget.lua": {
       "maxUpvalues": 3,
       "functions": 7,
-      "sha256": "e7b31dd72bf42bff43a07948982147d41b3ca34576c33e628cda6325efb8ed04"
+      "sha256": "04f53afb580019d7ac2660d705b9758715f056bfb238ea9566cb043a607fe52f"
     },
     "ZoneThemes.lua": {
       "maxUpvalues": 7,
       "functions": 26,
-      "sha256": "a43b011f6c8ef9939fa80f5e0464c32c4165d9da12fb0862cb9e123003f4837b"
+      "sha256": "f249c4bf8cf4ef7aaa3c64490873ed828dadc17df2c4ca3337263af653614c25"
     }
   }
 }

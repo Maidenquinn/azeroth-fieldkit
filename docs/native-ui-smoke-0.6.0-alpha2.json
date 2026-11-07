@@ -1,0 +1,26 @@
+{
+  "version": "0.6.0-alpha.2",
+  "date": "2026-11-07",
+  "gameExeSha256": "069c800761120073cd0038322e3418f2a97454b510117d509aae07f1028aaf2f",
+  "world": "Elwynn",
+  "phase": "ready",
+  "renderer": "native Azeroth Survivors client; unmodified Sky window screenshots",
+  "scope": "Six layouts rendered; independent HP/XP, native map, settings skins, full stats and return button checked. Naxx is a manual skin in the Elwynn scene. No native combat, Naxx encounter, boss, co-op or card-choice acceptance.",
+  "knownLimitations": [
+    "Illustrations are generated interpretations, not extracted official models.",
+    "Native start prompt can overlay addon settings.",
+    "Visuals approximate the approved compositions; no claim of pixel-perfect reproduction.",
+    "Old manually saved placements may need the scoped reset in Style.",
+    "Compact chat is refused when existing native messages cannot be preserved."
+  ],
+  "screenshots": {
+    "Elwynn_Alternative.jpg": "25ca099cd6078d3b32da263e8332602fd3a3ba16fbf312256841ba9102bfc725",
+    "Elwynn_Complete.jpg": "5659394c2e7eddeb547b6d427834340ec4cd3e67b15ab87b5f23bddd019f1fdb",
+    "Elwynn_Minimaliste.jpg": "826cb9d1ee96c5ade2d4c25ff8b4e3421c719cc99e33d054507956d872c08786",
+    "Elwynn_Stats_details_avec_retour.jpg": "a9ef5fdf27435d8fccfb4ad422e99b65149f589d353ee4645f266ae13a01706d",
+    "Elwynn_Stats_details_complets.jpg": "6b40b76dd2665aa9d5ed8b6e18f35e4e010022e5b682b2453c76b8cf8ff5e562",
+    "Naxxramas_Alternative_skin_sur_Elwynn.jpg": "df438f3da7328ade53d7900c60c01a013807c35360f9358cafe10d68f101d8fb",
+    "Naxxramas_Complete_skin_sur_Elwynn.jpg": "3cf53f4d314b75fa8fd9dd978104c8958dd30697e0c0739d9b21ca162a891b16",
+    "Naxxramas_Minimaliste_skin_sur_Elwynn.jpg": "aefd31d9458fb1a4b469e4de1e089f4087aa16497e2ff3cbaff9c8c5627f81ec"
+  }
+}

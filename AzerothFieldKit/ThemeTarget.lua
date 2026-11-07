@@ -43,7 +43,9 @@ function C.Update(variant)
  if not hp or not max or max<=0 then C.reason="Native data unavailable";C.Stop();return end
  C.Create();C.reason=nil
  local f=C.frame;if not f.azsMoving then f:SetScale(math.min(1,UIParent:GetWidth()/1300)) end
- FieldKitZoneThemes.Place(f,"TOPLEFT",UIParent,"TOPLEFT",20,variant=="alternative" and -175 or -78)
+ local mapLeft=(T.zone=="elwynn" and variant=="complete") or (T.zone=="naxx" and variant=="alternative")
+ if mapLeft or variant=="alternative" then FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,-86)
+ else FieldKitZoneThemes.Place(f,"TOPLEFT",UIParent,"TOPLEFT",22,-92) end
  C.name:SetText(FieldKitNative.Text(UnitName("target")))
  local level=UnitLevel("target");local classification=type(UnitClassification)=="function" and UnitClassification("target")
  local names={elite="Elite",rareelite="Rare elite",rare="Rare",worldboss="Boss",normal="Target"}

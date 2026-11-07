@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.1",
+  "candidate": "0.6.0-alpha.2",
   "runtimeModules": 45,
-  "textureCount": 136,
+  "textureCount": 140,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 5167,
-      "sha256": "2b85b1b20c85f6184fce31442cc0595862b4bd55082d4f583c767d09f89e2ec6",
+      "sha256": "e069c42861f343b0c6d4d415ab48b77453316801843da860516d1215b5a92a18",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -246,36 +246,36 @@
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 47823,
-      "sha256": "c0bc164c2f71f0c945f8ad6eb2def98230821fb8a4a8c933abc1f2355c1dece1",
+      "bytes": 47896,
+      "sha256": "cdd399cbb3b7484e64dce4578f3fd1a9ef7d1821851c443d3f94546d3ae20e97",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
-          "line": 676
+          "line": 678
         },
         {
           "name": "FieldKit_L",
-          "line": 680
+          "line": 682
         },
         {
           "name": "FieldKit_Text",
-          "line": 687
+          "line": 689
         },
         {
           "name": "FieldKit_RefreshLanguage",
-          "line": 692
-        },
-        {
-          "name": "FieldKit_SetLanguage",
           "line": 694
         },
         {
+          "name": "FieldKit_SetLanguage",
+          "line": 696
+        },
+        {
           "name": "FieldKit_CreateLanguageOption",
-          "line": 701
+          "line": 703
         },
         {
           "name": "Refresh",
-          "line": 709
+          "line": 711
         }
       ],
       "literalEvents": []
@@ -287,8 +287,8 @@
       "literalEvents": []
     },
     "Theme.lua": {
-      "bytes": 8476,
-      "sha256": "02eeb2f001b0bab41045b51cd0559a5a3de54a60281d7244817435afd3af1936",
+      "bytes": 9109,
+      "sha256": "6c944898e2e1e06d09d99c4332f7c8838c143ac56d990d963526fe2e1c3854e2",
       "namedFunctions": [
         {
           "name": "T.Solid",
@@ -324,27 +324,27 @@
         },
         {
           "name": "T.State",
-          "line": 108
+          "line": 109
         },
         {
           "name": "T.PaintControl",
-          "line": 134
+          "line": 139
         },
         {
           "name": "T.Control",
-          "line": 143
+          "line": 148
         },
         {
           "name": "T.Button",
-          "line": 150
+          "line": 155
         },
         {
           "name": "T.Glyph",
-          "line": 166
+          "line": 171
         },
         {
           "name": "T.Label",
-          "line": 173
+          "line": 178
         }
       ],
       "literalEvents": []
@@ -1202,8 +1202,8 @@
       "literalEvents": []
     },
     "ScreenLayers.lua": {
-      "bytes": 3985,
-      "sha256": "ebae04751b551343dbd2e4e6051a4d3337b832fd4ab4e8c7de84e793a0695e5d",
+      "bytes": 4320,
+      "sha256": "20c04ebcdcf062fb04a34480ddeddd976829c383c13c7a82d2ebe071b8d91428",
       "namedFunctions": [
         {
           "name": "ChoiceNames",
@@ -2657,8 +2657,8 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 21260,
-      "sha256": "3b0eeaf9f77f5e09003ae6fdb2ee7fe1869becd33f673233b3c73d9f9907bfcc",
+      "bytes": 22307,
+      "sha256": "6d1680b769d86d8da4ea28025bc496192be88429f9a508d4b723652905e57624",
       "namedFunctions": [
         {
           "name": "NativeChat",
@@ -2725,31 +2725,35 @@
           "line": 357
         },
         {
-          "name": "FieldKit.RestoreDisplayedChat",
+          "name": "FieldKit.ResizeChatPreservingHistory",
           "line": 363
         },
         {
+          "name": "FieldKit.RestoreDisplayedChat",
+          "line": 388
+        },
+        {
           "name": "FieldKit.RecolorDisplayedChat",
-          "line": 381
+          "line": 406
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 417
+          "line": 442
         },
         {
           "name": "OpenCopy",
-          "line": 441
+          "line": 466
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 479
+          "line": 504
         }
       ],
       "literalEvents": []
     },
     "ThemeMinimap.lua": {
-      "bytes": 4167,
-      "sha256": "4016cf2ab4eb0a0dcf74287d2a094059b54b59b02e587e37cdbc254978858a67",
+      "bytes": 4583,
+      "sha256": "cbc7f3be61745a7441053abd654b495bb44cee7ec5d3fc8ceb3ea23c70574c14",
       "namedFunctions": [
         {
           "name": "M.Rotate",
@@ -2761,14 +2765,14 @@
         },
         {
           "name": "M.Apply",
-          "line": 28
+          "line": 29
         }
       ],
       "literalEvents": []
     },
     "ThemeHUD.lua": {
-      "bytes": 15462,
-      "sha256": "991737e76947bcf28e996ec5385141164513c8a33be9789bbcc99963ef48d611",
+      "bytes": 27810,
+      "sha256": "2a5274da307f0cdc129f68d8944f5bbd397519fa42abf161df3a7dc56ef3e0a5",
       "namedFunctions": [
         {
           "name": "H.Points",
@@ -2792,42 +2796,58 @@
         },
         {
           "name": "H.Restore",
-          "line": 48
+          "line": 49
         },
         {
           "name": "H.Tip",
-          "line": 53
+          "line": 55
         },
         {
           "name": "H.HideTip",
-          "line": 74
+          "line": 76
         },
         {
           "name": "H.ModeTip",
-          "line": 75
+          "line": 77
         },
         {
           "name": "Open",
-          "line": 91
+          "line": 93
         },
         {
           "name": "NavButton",
-          "line": 92
+          "line": 94
         },
         {
           "name": "H.Create",
-          "line": 96
+          "line": 98
+        },
+        {
+          "name": "H.CompositionCreate",
+          "line": 161
+        },
+        {
+          "name": "Root",
+          "line": 163
+        },
+        {
+          "name": "Place",
+          "line": 206
         },
         {
           "name": "H.Update",
-          "line": 155
+          "line": 209
+        },
+        {
+          "name": "H.Summaries",
+          "line": 303
         }
       ],
       "literalEvents": []
     },
     "ThemeTarget.lua": {
-      "bytes": 4054,
-      "sha256": "e7b31dd72bf42bff43a07948982147d41b3ca34576c33e628cda6325efb8ed04",
+      "bytes": 4231,
+      "sha256": "04f53afb580019d7ac2660d705b9758715f056bfb238ea9566cb043a607fe52f",
       "namedFunctions": [
         {
           "name": "C.Create",
@@ -2845,80 +2865,80 @@
       "literalEvents": []
     },
     "ZoneThemes.lua": {
-      "bytes": 12809,
-      "sha256": "a43b011f6c8ef9939fa80f5e0464c32c4165d9da12fb0862cb9e123003f4837b",
+      "bytes": 13417,
+      "sha256": "f249c4bf8cf4ef7aaa3c64490873ed828dadc17df2c4ca3337263af653614c25",
       "namedFunctions": [
         {
           "name": "C.NormalizePositions",
-          "line": 13
+          "line": 14
         },
         {
           "name": "C.Position",
-          "line": 27
+          "line": 28
         },
         {
           "name": "C.Place",
-          "line": 33
+          "line": 34
         },
         {
           "name": "C.Remember",
-          "line": 39
+          "line": 40
         },
         {
           "name": "C.Finish",
-          "line": 55
+          "line": 56
         },
         {
           "name": "C.Bind",
-          "line": 59
+          "line": 60
         },
         {
           "name": "C.Resolve",
-          "line": 70
+          "line": 71
         },
         {
           "name": "C.Suspend",
-          "line": 76
+          "line": 77
         },
         {
           "name": "C.NativeRestore",
-          "line": 86
+          "line": 87
         },
         {
           "name": "C.NativeReplace",
-          "line": 94
+          "line": 95
         },
         {
           "name": "C.Mask",
-          "line": 110
+          "line": 111
         },
         {
           "name": "C.Refresh",
-          "line": 116
+          "line": 117
         },
         {
           "name": "C.Tick",
-          "line": 165
+          "line": 170
         },
         {
           "name": "C.Set",
-          "line": 173
+          "line": 178
         },
         {
           "name": "C.Open",
-          "line": 180
+          "line": 185
         },
         {
           "name": "C.Command",
-          "line": 196
+          "line": 201
         },
         {
           "name": "FieldKitThemeUI",
-          "line": 212
+          "line": 217
         },
         {
           "name": "Button",
-          "line": 217
+          "line": 222
         }
       ],
       "literalEvents": []
@@ -3596,9 +3616,29 @@
       "sha256": "874c12802d23330379d313749f2c9c2ec3ae9934967210ea08769faee5189a42"
     },
     {
+      "path": "media/ZoneThemes/elwynnDock512.tga",
+      "bytes": 524332,
+      "sha256": "010e06afb52e6e2dfbe433360e836a6e310e5873c2ab8dfc6c1cab5f56d1d478"
+    },
+    {
+      "path": "media/ZoneThemes/elwynnFrame512.tga",
+      "bytes": 1048620,
+      "sha256": "3b21f5dd7329c259b2fa41e5b7f7043acf6fdc99a488f0bb7030629396b91e0f"
+    },
+    {
       "path": "media/ZoneThemes/elwynnOrnaments512.tga",
       "bytes": 524332,
       "sha256": "7d57b8ae6f6f5014300d5d546b2c956d03e4e51146a8e244f2a989147e0bcc3e"
+    },
+    {
+      "path": "media/ZoneThemes/naxxDock512.tga",
+      "bytes": 524332,
+      "sha256": "c4d9890ed54c110aea19012a05ab6dad68bd6dcd38d6171ac67db9f6d2274365"
+    },
+    {
+      "path": "media/ZoneThemes/naxxFrame512.tga",
+      "bytes": 1048620,
+      "sha256": "5ea0106e01c37fabdffffa686d0708c929726391e40b1590d93f0a879a5c9fd4"
     },
     {
       "path": "media/ZoneThemes/naxxOrnaments512.tga",
@@ -3718,23 +3758,47 @@
       "bytes": 524332,
       "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
       "sourcePngSha256": "ace5064fb783d268a39e8a3bda377ce3d28d3b851e3e421dd94bfc585e32403c"
+    },
+    "media/ZoneThemes/elwynnFrame512.tga": {
+      "sha256": "3b21f5dd7329c259b2fa41e5b7f7043acf6fdc99a488f0bb7030629396b91e0f",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "786c887da18055f833209943f79d1895d1c967e8d53045c689e65ad494363779"
+    },
+    "media/ZoneThemes/naxxFrame512.tga": {
+      "sha256": "5ea0106e01c37fabdffffa686d0708c929726391e40b1590d93f0a879a5c9fd4",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "950662bfe3ef4689a8e83c7c5a3d530606a9d8439c49ebcef0bf7fc86ac61346"
+    },
+    "media/ZoneThemes/elwynnDock512.tga": {
+      "sha256": "010e06afb52e6e2dfbe433360e836a6e310e5873c2ab8dfc6c1cab5f56d1d478",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "86b7c81351a75ffe8131f51b880d8d2b7c6a99acdeac51c36187b7600cf69115"
+    },
+    "media/ZoneThemes/naxxDock512.tga": {
+      "sha256": "c4d9890ed54c110aea19012a05ab6dad68bd6dcd38d6171ac67db9f6d2274365",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "af7c6a12761a96e44dceb0b1571a120f6e6db3f851920633ed04ae850e727d60"
     }
   },
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.1",
+    "version": "0.6.0-alpha.2",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
     "inGameTestByAgent": true,
-    "githubPrerelease": true,
+    "githubPrerelease": false,
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
-    "maintainerInGameTestingReported": false,
-    "inGameTestScope": "Limited native UI smoke tests on Azeroth Survivors 0.141.1 (df40f5d86): layouts, square map, theme controls, details and classic restoration. No native combat/card-choice/boss/coop acceptance. See docs/RECEPTION_0.6.0.txt."
+    "maintainerInGameTestingReported": true,
+    "inGameTestScope": "Visual revision: native UI rendering, sculpted transparent docks, independent player HP, theme settings, minimap and layout switching on the installed client. Manual Naxx skin inspected in an Elwynn ready-phase scene; not a native Naxx combat acceptance. New synthetic six-layout regressions cover choice restoration and all detail routes. No combat/boss/coop acceptance."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

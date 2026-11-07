@@ -1,5 +1,5 @@
 {
-  "design": "Chroniques d’Azeroth; maintained Azeroth Stats visual system",
+  "design": "Chroniques d\u2019Azeroth; maintained Azeroth Stats visual system",
   "source": "maintainer-provided installed Azeroth Stats media, 2026-10-27",
   "fonts": "Noto OFL derivatives; included OFL-NotoSans.txt applies to both Latin faces",
   "files": {
@@ -114,6 +114,30 @@
       "bytes": 524332,
       "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
       "sourcePngSha256": "ace5064fb783d268a39e8a3bda377ce3d28d3b851e3e421dd94bfc585e32403c"
+    },
+    "media/ZoneThemes/elwynnFrame512.tga": {
+      "sha256": "3b21f5dd7329c259b2fa41e5b7f7043acf6fdc99a488f0bb7030629396b91e0f",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "786c887da18055f833209943f79d1895d1c967e8d53045c689e65ad494363779"
+    },
+    "media/ZoneThemes/naxxFrame512.tga": {
+      "sha256": "5ea0106e01c37fabdffffa686d0708c929726391e40b1590d93f0a879a5c9fd4",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "950662bfe3ef4689a8e83c7c5a3d530606a9d8439c49ebcef0bf7fc86ac61346"
+    },
+    "media/ZoneThemes/elwynnDock512.tga": {
+      "sha256": "010e06afb52e6e2dfbe433360e836a6e310e5873c2ab8dfc6c1cab5f56d1d478",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "86b7c81351a75ffe8131f51b880d8d2b7c6a99acdeac51c36187b7600cf69115"
+    },
+    "media/ZoneThemes/naxxDock512.tga": {
+      "sha256": "c4d9890ed54c110aea19012a05ab6dad68bd6dcd38d6171ac67db9f6d2274365",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "af7c6a12761a96e44dceb0b1571a120f6e6db3f851920633ed04ae850e727d60"
     }
   }
 }

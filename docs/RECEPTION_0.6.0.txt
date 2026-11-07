@@ -1,4 +1,17 @@
-AZEROTH FIELDKIT 0.6.0-alpha.1 — RECETTE ELWYNN / NAXXRAMAS
+CORRECTIF VISUEL DU 7 NOVEMBRE 2026
+Cette alpha.2 remplace le prototype visuel plat de l’alpha.1 : socles sculptés
+avec bustes intégrés, acier givré ou cuir vert/laiton, groupes HUD séparés,
+PV live indépendants du cadre masqué, trois compositions par zone et chat compact.
+Les synthèses de Complète ouvrent les tableaux intégraux par Détails complets.
+Elles montrent une sélection ; le bouton ouvre la totalité des valeurs.
+Le bouton Retour au HUD ferme la vue détaillée et réaffiche les synthèses.
+Le chat conserve sa taille précédente si son historique ne peut pas être restauré.
+Le nom de zone et le décor restent ceux de la vraie partie, même en thème manuel.
+Le texte natif « Bougez pour commencer » peut encore passer devant les réglages.
+Contrôles de rendu en phase prête : ils ne valent pas recette complète de combat.
+Les illustrations restent des interprétations, pas des modèles officiels extraits.
+
+AZEROTH FIELDKIT 0.6.0-alpha.2 — RECETTE ELWYNN / NAXXRAMAS
 Branche locale : codex/v0.6.0-elwynn-naxx-hud
 Base : 0.5.0, commit 524a8a69a4c999da134b56304d31e3bd03d5dd19
 
@@ -21,20 +34,24 @@ OU RETROUVER LES INFORMATIONS
 
 - PV, bouclier et ressource : bloc du joueur. Survol des PV pour les détails ;
   clic gauche/droit relayé au cadre joueur natif. Niveau affiché une seule fois.
-- XP : rail sous les sorts. Survol = valeur exacte / maximum / reste ; clic =
+- XP : rail sous les sorts en Minimaliste et Naxx Complète ; au-dessus des
+  sorts en Elwynn Complète ; pleine largeur en haut (Elwynn Alternative) ou
+  en bas (Naxx Alternative). Survol = valeur exacte / maximum / reste ; clic =
   épinglage. Le bouton Fermer libère une infobulle épinglée.
 - Difficulté : survol/clic de la puce Héroïque dans le bandeau. Multiplicateurs,
   affixes et autres difficultés restent accessibles. Les valeurs inconnues sont
   indiquées comme inconnues, jamais remplacées par des chiffres de maquette.
 - Horloge : clic pour la chronologie. Prochain boss : clic pour les rappels.
-- Dégâts / Antres / Accessoires / Effets / Statistiques : boutons dédiés.
+- Dégâts / Antres / Accessoires / Effets : raccourcis visibles. Statistiques,
+  Journal et menus natifs : bouton FIELDKIT + en bas à gauche.
   Ils ouvrent les vues FieldKit existantes, y compris leurs onglets, classements,
   tableaux détaillés et survols. Les préférences d'affichage restent respectées.
 - Journal : ouvre Azeroth Stats s'il est installé. L'historique de carrière
   appartient à Stats ; FieldKit ne fabrique pas un historique de remplacement.
 - Cible : carte compacte native ; survol pour retrouver le cadre cible complet,
   ses auras, son portrait et les interactions natives. Incantations conservées.
-- Personnage / Sorts / Talents / Quêtes / Social / Menu : raccourcis natifs.
+- Personnage / Sorts / Talents / Quêtes / Social / Menu : raccourcis natifs
+  dans FIELDKIT +, repliés par défaut.
 - Chat, alertes, groupe, réanimation et choix de cartes conservent leurs parcours.
   Les panneaux FieldKit cèdent la priorité aux choix natifs.
 
@@ -113,3 +130,10 @@ parties d'essai. Les réglages de FieldKit ont été modifiés par ses propres
 contrôles pendant les essais et sauvegardés normalement par le client.
 
 Cette alpha attend ta recette ; elle n'est ni fusionnée ni publiée sur GitHub.
+
+CORRECTION DES POSITIONS HERITEES
+Si un bloc reste au milieu de l’écran après une ancienne manipulation :
+/fieldkit themes > Réinitialiser ce placement. Seule la composition active
+est réinitialisée ; les positions des autres compositions restent conservées.
+Le placement Naxxramas Complète du poste de test a été réinitialisé après
+sauvegarde du fichier de préférences dans Backups/Visual_Alpha2.

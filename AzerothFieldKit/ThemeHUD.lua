@@ -37,7 +37,8 @@ function H.RestoreOne(f)
   if r.strata and f.SetFrameStrata then f:SetFrameStrata(r.strata) end
   if r.level and f.SetFrameLevel then f:SetFrameLevel(r.level) end;f:ClearAllPoints()
   for i=1,table.getn(r.points) do local a=r.points[i];f:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
-  f:SetWidth(r.width);f:SetHeight(r.height);f:SetAlpha(r.alpha)
+  if f==getglobal("ChatFrame1") and FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(r.width,r.height)
+  else if f:GetWidth()~=r.width then f:SetWidth(r.width) end;if f:GetHeight()~=r.height then f:SetHeight(r.height) end end;f:SetAlpha(r.alpha)
   if f.SetScale then f:SetScale(r.scale) end
   if r.mouse~=nil then f:EnableMouse(r.mouse) end
  -- Benilla keeps a native visibility cache after leaving a hidden parent.
@@ -48,7 +49,8 @@ end
 function H.Restore()
  for f in pairs(H.saved) do H.RestoreOne(f) end
  H.saved={};H.pinned=false
- for _,f in ipairs({H.dock,H.nav,H.header,H.tip,H.micro}) do if f then f:Hide() end end
+ for _,f in pairs(H.summaries or {}) do f:Hide() end
+ for _,f in ipairs({H.dock,H.nav,H.header,H.tip,H.micro,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.utility,H.schedule,H.back}) do if f then f:Hide() end end
 end
 function H.Tip(owner,title,lines,pinned)
  if H.pinned and not pinned then return end
@@ -139,6 +141,7 @@ function H.Create()
  H.mode:SetScript("OnEnter",function() H.ModeTip(this,false) end);H.mode:SetScript("OnLeave",H.HideTip)
  local micro=CreateFrame("Frame","FieldKitThemeMicro",nav);H.micro=micro;micro:SetWidth(700);micro:SetHeight(25)
  micro:SetPoint("BOTTOM",nav,"TOP",0,4)
+ H.microButtons={}
  local names={"CharacterMicroButton","SpellbookMicroButton","TalentMicroButton","QuestLogMicroButton","SocialsMicroButton","MainMenuMicroButton"}
  local labels={"Character","Spells","Talents","Quests","Social","Game menu"}
  for i=1,table.getn(names) do
@@ -148,84 +151,200 @@ function H.Create()
    local b=T.Button(micro,nil,FieldKit_L(labels[i]),(i-1)*108,0,104,22,function()
     local previous=this;this=source;local ok=pcall(callback);this=previous;return ok
    end)
+   table.insert(H.microButtons,b)
   end
  end
  for _,frame in ipairs({H.dock,H.nav,H.header}) do FieldKitZoneThemes.Bind(frame) end
 end
-function H.Update(variant,zone)
- H.Create()
- H.xp:SetStatusBarColor(T.gold[1],T.gold[2],T.gold[3])
- local sw,sh=UIParent:GetWidth(),UIParent:GetHeight();local scale=math.min(1,sw/1300)
- if not H.dock.azsMoving then H.dock:SetScale(scale) end
- if not H.nav.azsMoving then H.nav:SetScale(scale) end
- if not H.header.azsMoving then H.header:SetScale(scale) end
- local dock=H.dock;if not dock.azsMoving then dock:SetHeight(190) end
- if variant=="alternative" then FieldKitZoneThemes.Place(dock,"BOTTOMLEFT",UIParent,"BOTTOMLEFT",180,80)
- else FieldKitZoneThemes.Place(dock,"BOTTOM",UIParent,"BOTTOM",0,80) end
- if variant=="alternative" then FieldKitZoneThemes.Place(H.nav,"TOPRIGHT",UIParent,"TOPRIGHT",-18,-20) else FieldKitZoneThemes.Place(H.nav,"BOTTOM",UIParent,"BOTTOM",0,12) end
- for i=1,7 do H.buttons[i]:ClearAllPoints();H.buttons[i]:SetPoint("TOPLEFT",H.nav,"TOPLEFT",(i-1)*99,0) end
- H.micro:ClearAllPoints()
- if variant=="alternative" then H.micro:SetPoint("TOP",H.nav,"BOTTOM",0,-4) else H.micro:SetPoint("BOTTOM",H.nav,"TOP",0,4) end
- if variant=="alternative" then FieldKitZoneThemes.Place(H.header,"TOPLEFT",UIParent,"TOPLEFT",20,-96) else FieldKitZoneThemes.Place(H.header,"TOP",UIParent,"TOP",0,-18) end
- local nativeZone=type(AZS_ZONE)=="table" and AZS_ZONE.zname
- if type(nativeZone)~="string" or nativeZone=="" then
-  local key=type(AZS_ZONE)=="table" and AZS_ZONE.zone
-  nativeZone=FieldKitZoneRegistry[key or ""] and FieldKit_L(FieldKitZoneRegistry[key].name) or FieldKit_L("Zone not provided")
+-- The approved concepts have separate identity, chronology, vitality and action
+-- groups. Every group below is live UI; no number is painted into an image.
+function H.CompositionCreate()
+ if H.identity then return end
+ local function Root(name,w,h)
+  local f=CreateFrame("Frame",name,UIParent);f:SetWidth(w);f:SetHeight(h);f:SetFrameStrata("MEDIUM");T.Surface(f,"card",true);FieldKitZoneThemes.Bind(f);return f
  end
- H.zone:SetText(FieldKitNative.Text(nativeZone))
- local phase=type(AZS_GetPhase)=="function" and AZS_GetPhase()
- local time=FieldKitNative.Time();H.clock:SetText(time and FieldKitNative.Clock(time) or "—")
- local nextBoss=FieldKitNativeTools.NextBoss();H.next:SetText(nextBoss and (nextBoss.name.." · "..FieldKitNative.Clock(nextBoss.left)) or FieldKit_L("No upcoming boss"))
- local rank=FieldKit.GetHeroicLevel()
- FieldKit_Text(H.mode,(FieldKit.GetHeroicLabel() or FieldKit_L("Mode not provided")).." · ?")
- local level=UnitLevel("player");H.name:SetText((UnitName("player") or "?").." · "..tostring(level or "?"))
- if not FieldKitDB.playerBar then H.name:SetText(UnitName("player") or "?");H.player:Hide() else H.player:Show() end
- local health=getglobal("FieldKitPlayerBar")
- if health and FieldKitDB.playerBar then FieldKitZoneThemes.Place(health,"TOP",dock,"TOP",0,-29);health:SetParent(dock);health:SetFrameStrata("MEDIUM");health:SetFrameLevel(dock:GetFrameLevel()+2);health:SetWidth(420);health:SetHeight(20);health:SetScale(1)
-  if health.healthText then H.Anchor(health.healthText,"CENTER",health,"CENTER",0,0) end end
- local boss=getglobal("FieldKitBossFrame1");if boss then FieldKitZoneThemes.Place(boss,"TOPLEFT",UIParent,"TOP",-155,variant=="alternative" and -175 or -114) end
- local buffs=getglobal("FieldKitPlayerBuffs")
- if buffs then FieldKitZoneThemes.Place(buffs,"BOTTOM",dock,"TOP",0,3) end
+ H.identity=Root("FieldKitThemeIdentity",270,64)
+ H.zone:SetParent(H.identity);H.zone:ClearAllPoints();H.zone:SetPoint("TOPLEFT",H.identity,"TOPLEFT",14,-6);H.zone:SetWidth(244);H.zone:SetHeight(25);T.Font(H.zone,19,T.text,true)
+ H.mode:SetParent(H.identity);H.mode:ClearAllPoints();H.mode:SetPoint("BOTTOMLEFT",H.identity,"BOTTOMLEFT",10,6);H.mode:SetWidth(250);T.Update(H.mode)
+ H.healthRoot=Root("FieldKitThemeVitality",460,76);H.healthRoot.fieldkitArtOnly=true
+ H.namePlate=CreateFrame("Frame",nil,H.healthRoot);H.namePlate:SetWidth(220);H.namePlate:SetHeight(26);H.namePlate:SetPoint("TOP",H.healthRoot,"TOP",0,0);T.Surface(H.namePlate,"card",true)
+ H.name:SetParent(H.namePlate);H.name:ClearAllPoints();H.name:SetPoint("CENTER",H.namePlate,"CENTER",0,0);H.name:SetWidth(200);H.name:SetJustifyH("CENTER")
+ H.player:SetParent(H.healthRoot);H.player:ClearAllPoints();H.player:SetPoint("TOP",H.healthRoot,"TOP",0,-27);H.player:SetWidth(430);H.player:SetHeight(23)
+ T.Surface(H.player,"card",true)
+ H.health=CreateFrame("StatusBar",nil,H.player);H.health:SetPoint("TOPLEFT",H.player,"TOPLEFT",6,-4);H.health:SetPoint("BOTTOMRIGHT",H.player,"BOTTOMRIGHT",-6,4);H.health:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");H.health:SetStatusBarColor(.12,.76,.18)
+ local bg=H.health:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints(H.health);T.Solid(bg,{.015,.04,.02})
+ H.hp=T.Label(H.health,"",0,0,430,23,14,T.text);H.hp:SetJustifyH("CENTER")
+ H.shield=H.health:CreateTexture(nil,"OVERLAY");H.shield:SetPoint("TOPLEFT",H.health,"TOPLEFT",0,0);H.shield:SetHeight(23);T.Solid(H.shield,{.45,.8,1},.5)
+ H.resource:SetParent(H.healthRoot);H.resource:ClearAllPoints();H.resource:SetPoint("TOP",H.healthRoot,"TOP",0,-54);H.resource:SetWidth(408);H.resource:SetHeight(14)
+ H.xpRoot=Root("FieldKitThemeExperience",560,25)
+ H.xp:SetParent(H.xpRoot);H.xp:ClearAllPoints();H.xp:SetPoint("TOPLEFT",H.xpRoot,"TOPLEFT",8,-6);H.xp:SetPoint("BOTTOMRIGHT",H.xpRoot,"BOTTOMRIGHT",-8,6);H.xp:SetHeight(13);H.xp:SetStatusBarColor(.55,.12,.86)
+ H.xpText:SetParent(H.xp);H.xpText:ClearAllPoints();H.xpText:SetPoint("CENTER",H.xp,"CENTER",0,0);H.xpText:SetWidth(540);H.xpText:SetHeight(20);H.xpText:SetJustifyH("CENTER");T.Font(H.xpText,12,T.text)
+ H.counterRoot=Root("FieldKitThemeCounters",480,29)
+ H.counters:SetParent(H.counterRoot);H.counters:ClearAllPoints();H.counters:SetPoint("CENTER",H.counterRoot,"CENTER",0,0);H.counters:SetWidth(456);H.counters:SetJustifyH("CENTER")
+ H.header:SetWidth(630);H.header:SetHeight(42)
+ H.timeline:ClearAllPoints();H.timeline:SetPoint("TOPLEFT",H.header,"TOPLEFT",10,-7);H.timeline:SetWidth(190);H.timeline:SetHeight(28)
+ H.reminders:ClearAllPoints();H.reminders:SetPoint("TOPRIGHT",H.header,"TOPRIGHT",-10,-7);H.reminders:SetWidth(400);H.reminders:SetHeight(28)
+ H.clock:SetWidth(170);H.next:SetWidth(380);T.Font(H.clock,16,T.text,true);T.Font(H.next,15,T.text,true)
+ H.utility=T.Button(UIParent,"FieldKitThemeUtility","FIELDKIT  +",0,0,130,34,nil)
+ -- SetShown is not part of the 11200 contract.
+ H.utility.callback=function() if H.micro:IsShown() then H.micro:Hide() else H.micro:Show() end end
+ H.utility:SetFrameStrata("HIGH")
+ H.back=T.Button(UIParent,"FieldKitThemeBack","Back to HUD",0,0,160,27,function() FieldKitZoneThemes.open={};FieldKitZoneThemes.Refresh(true) end);H.back:SetFrameStrata("DIALOG");H.back:Hide()
+ H.micro:SetParent(UIParent);H.micro:SetFrameStrata("DIALOG");H.micro:SetWidth(240);H.micro:SetHeight(290);T.Surface(H.micro,"window")
+ local children=H.microButtons;local row=0
+ for _,b in ipairs(children) do if b.fieldkitLabel then b:ClearAllPoints();b:SetPoint("TOPLEFT",H.micro,"TOPLEFT",12,-12-row*30);b:SetWidth(216);b.fieldkitLabel:SetWidth(196);T.Update(b);row=row+1 end end
+ T.Button(H.micro,nil,"Statistics",12,12+row*30,216,27,function() H.micro:Hide();Open("Stats") end);row=row+1
+ T.Button(H.micro,nil,"Journal",12,12+row*30,216,27,function() H.micro:Hide();Open("Journal") end);row=row+1
+ T.Button(H.micro,nil,"FieldKit",12,12+row*30,216,27,function() H.micro:Hide();Open("FieldKit") end)
+ H.micro:Hide()
+ H.schedule=Root("FieldKitThemeSchedule",180,260);H.steps={}
+ for i=1,5 do H.steps[i]=T.Button(H.schedule,nil,"",10,12+(i-1)*47,160,39,function() Open("Timeline") end) end
+ H.sculpture=H.dock:CreateTexture(nil,"BACKGROUND")
+ H.actionRims={}
+ for i=1,7 do local f=CreateFrame("Frame",nil,H.dock);f:SetFrameStrata("MEDIUM");f:SetWidth(62);f:SetHeight(62);T.Surface(f,"card",true);H.actionRims[i]=f end
+end
+local function Place(frame,p,r,rp,x,y)
+ FieldKitZoneThemes.Place(frame,p,r,rp,x,y)
+end
+function H.Update(variant,zone)
+ H.Create();H.CompositionCreate()
+ local c=FieldKitZoneThemes;local sw=UIParent:GetWidth();local scale=math.min(1,sw/1600)
+ for _,f in ipairs({H.dock,H.nav,H.header,H.identity,H.healthRoot,H.counterRoot,H.utility,H.schedule,H.micro}) do if not f.azsMoving then f:SetScale(scale) end end
+ H.dock:SetWidth(500);H.dock:SetHeight(88)
+ local alternative=variant=="alternative";local complete=variant=="complete"
+ if alternative and zone=="elwynn" then Place(H.dock,"BOTTOMLEFT",UIParent,"BOTTOMLEFT",300,70)
+ elseif alternative then Place(H.dock,"BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-230,82)
+ else Place(H.dock,"BOTTOM",UIParent,"BOTTOM",0,68) end
  for i=1,7 do
+  local x=16+(i-1)*67;local rim=H.actionRims[i];rim:ClearAllPoints();rim:SetPoint("TOPLEFT",H.dock,"TOPLEFT",x,-10)
   local button=getglobal("ActionButton"..slots[i])
-  if button then
-   H.Save(button);button:SetParent(dock);button:ClearAllPoints();button:SetPoint("TOPLEFT",dock,"TOPLEFT",84+(i-1)*62,-78)
-   button:SetWidth(56);button:SetHeight(56)
+  if button then H.Save(button);button:SetParent(H.dock);button:ClearAllPoints();button:SetPoint("TOPLEFT",H.dock,"TOPLEFT",x+5,-15);button:SetWidth(52);button:SetHeight(52);button:SetFrameLevel(H.dock:GetFrameLevel()+4) end
+ end
+ if complete and zone=="elwynn" then Place(H.healthRoot,"TOPRIGHT",UIParent,"TOPRIGHT",-22,-20)
+ elseif alternative and zone=="naxx" then Place(H.healthRoot,"BOTTOMLEFT",UIParent,"BOTTOMLEFT",28,85)
+ else Place(H.healthRoot,"BOTTOM",H.dock,"TOP",0,5) end
+ local level=UnitLevel("player");H.name:SetText((UnitName("player") or "?").." · "..tostring(level or "?"))
+ local cur,max=FieldKit.Number(UnitHealth("player")),FieldKit.Number(UnitHealthMax("player"))
+ if cur and max and max>0 then H.health:SetMinMaxValues(0,max);H.health:SetValue(cur);H.hp:SetText(FieldKit_FormatHealth(cur,max,FieldKitDB.playerHealthMode)) else H.hp:SetText("?") end
+ local shield=FieldKitDB.playerShield and type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.sh) or 0
+ if shield and shield>0 and max and max>0 then H.shield:SetWidth(430*math.min(shield/max,1));H.shield:Show() else H.shield:Hide() end
+ local run=type(AZS_RUN)=="table" and AZS_RUN or {};local proc=run.proc
+ local names={bloodrage="Rage",seal_fate="Combo points",soul_fire="Soul shards",lightwell="Lightwell"}
+ local power=FieldKit.Number(run.pv);local pm=FieldKit.Number(run.pm)
+ if not names[proc] or not pm or pm<=0 then power=type(UnitMana)=="function" and FieldKit.Number(UnitMana("player"));pm=type(UnitManaMax)=="function" and FieldKit.Number(UnitManaMax("player")) end
+ if power and pm and pm>0 then H.resource:SetMinMaxValues(0,pm);H.resource:SetValue(power);H.resource:Show();H.resourceText:SetText(FieldKit_L(names[proc] or ({[0]="Mana",[1]="Rage",[2]="Focus",[3]="Energy"})[type(UnitPowerType)=="function" and UnitPowerType("player")] or "Resource").." "..power.." / "..pm) else H.resource:Hide();H.resourceText:SetText("") end
+ H.xpRoot:SetScale(alternative and 1 or scale);H.xpRoot:SetWidth(alternative and sw-40 or 560)
+ if alternative then Place(H.xpRoot,zone=="elwynn" and "TOP" or "BOTTOM",UIParent,zone=="elwynn" and "TOP" or "BOTTOM",0,zone=="elwynn" and -6 or 14)
+ elseif complete and zone=="elwynn" then Place(H.xpRoot,"BOTTOM",H.dock,"TOP",0,8)
+ else Place(H.xpRoot,"TOP",H.dock,"BOTTOM",0,-2) end
+ local xp,xpn=FieldKit.Number(UnitXP("player")),FieldKit.Number(UnitXPMax("player"))
+ if xp and xpn and xpn>0 then H.xp:SetMinMaxValues(0,xpn);H.xp:SetValue(xp);H.xpText:SetText("XP · "..math.floor(xp/xpn*100).."%");H.xpDetail="XP "..xp.." / "..xpn.." · "..math.max(0,xpn-xp).." "..FieldKit_L("remaining") else H.xp:SetValue(0);H.xpText:SetText("XP · ?");H.xpDetail=FieldKit_L("Native data unavailable") end
+ if alternative and zone=="naxx" then Place(H.counterRoot,"BOTTOM",H.dock,"TOP",0,5)
+ elseif complete and zone=="naxx" then Place(H.counterRoot,"BOTTOM",H.healthRoot,"TOP",0,4)
+ elseif complete then Place(H.counterRoot,"TOP",H.dock,"BOTTOM",0,-3)
+ else Place(H.counterRoot,"TOP",alternative and H.dock or H.xpRoot,"BOTTOM",0,-3) end
+ H.counters:SetText(FieldKit_L("Kills").." "..tostring(FieldKit.Number(run.kills) or "?").."   ·   "..FieldKit_L("Gold").." "..tostring(FieldKit.Number(run.gold) or "?").."   ·   "..FieldKit_L("Cache price").." "..tostring(FieldKit.Number(run.chest) or "?"))
+ local mapCaption=(complete and zone=="elwynn") or (alternative and zone=="naxx")
+ Place(H.identity,"TOPLEFT",UIParent,"TOPLEFT",22,mapCaption and -272 or (alternative and -42 or -18))
+ local nativeZone=type(AZS_ZONE)=="table" and AZS_ZONE.zname;local key=type(AZS_ZONE)=="table" and AZS_ZONE.zone
+ if type(nativeZone)~="string" or nativeZone=="" then nativeZone=FieldKitZoneRegistry[key or ""] and FieldKit_L(FieldKitZoneRegistry[key].name) or FieldKit_L("Zone not provided") end
+ H.zone:SetText(FieldKitNative.Text(nativeZone));FieldKit_Text(H.mode,(FieldKit.GetHeroicLabel() or FieldKit_L("Mode not provided")).."   ·   "..FieldKit_L("Game mode"))
+ local time=FieldKitNative.Time();H.clock:SetText(FieldKitNative.Clock(time));local nextBoss=FieldKitNativeTools.NextBoss();H.next:SetText(nextBoss and nextBoss.name.." · "..FieldKitNative.Clock(nextBoss.left) or FieldKit_L("No upcoming boss"))
+ H.header:SetWidth(alternative and 360 or 630)
+ if alternative and zone=="elwynn" then Place(H.header,"TOPLEFT",UIParent,"TOPLEFT",22,-130)
+ elseif alternative then Place(H.header,"TOPRIGHT",UIParent,"TOPRIGHT",-24,-110) else Place(H.header,"TOP",UIParent,"TOP",0,-16) end
+ H.header:SetWidth(alternative and 360 or 630);H.timeline:SetWidth(alternative and 100 or 190);H.reminders:SetWidth(alternative and 240 or 400);H.clock:SetWidth(alternative and 90 or 170);H.next:SetWidth(alternative and 220 or 380)
+ H.timeline:ClearAllPoints();H.timeline:SetPoint("TOPLEFT",H.header,"TOPLEFT",10,-7);H.reminders:ClearAllPoints();H.reminders:SetPoint("TOPRIGHT",H.header,"TOPRIGHT",-10,-7);T.Update(H.timeline);T.Update(H.reminders)
+ H.schedule:Hide()
+ if alternative then
+  if zone=="elwynn" then Place(H.schedule,"TOPLEFT",UIParent,"TOPLEFT",22,-180)
+  else Place(H.schedule,"TOPRIGHT",UIParent,"TOPRIGHT",-24,-165) end
+  local upcoming=FieldKitNative.Read("AZS_GetUpcomingBosses") or {}
+  local skip=nextBoss and upcoming[1] and upcoming[1].name==nextBoss.name and 1 or 0
+  for i=1,5 do local e=upcoming[i+skip];local b=H.steps[i];if type(e)=="table" then b.fieldkitLabel:SetText(tostring(e.index or (i+skip)).."  "..FieldKitNative.Text(e.name).."\n    "..FieldKitNative.Clock(e.left or (e.at and time and math.max(0,e.at-time))));b:Show() else b:Hide() end end
+  if table.getn(upcoming)>skip then H.schedule:Show() end
+ end
+ if H.artZone~=zone then H.artZone=zone;H.artAccepted=H.sculpture:SetTexture(T.media.."ZoneThemes\\"..zone.."Dock512.tga") end
+ H.left:Hide();H.right:Hide()
+ H.sculpture:ClearAllPoints();H.sculpture:SetPoint("TOPLEFT",H.dock,"TOPLEFT",zone=="elwynn" and -170 or -200,zone=="elwynn" and 246 or 255);H.sculpture:SetWidth(zone=="elwynn" and 840 or 900);H.sculpture:SetHeight(zone=="elwynn" and 420 or 450)
+ if FieldKitDB.zoneThemeArt then H.sculpture:Show() else H.sculpture:Hide() end
+ H.dock.fieldkitArtOnly=FieldKitDB.zoneThemeArt;H.xpRoot.fieldkitArtOnly=FieldKitDB.zoneThemeArt and not alternative
+ T.State(H.dock,false);T.State(H.healthRoot,false);T.State(H.xpRoot,false)
+ -- Secondary native menus remain one click away, rather than a second permanent row.
+ H.utility:ClearAllPoints();H.utility:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",18,20)
+ H.micro:ClearAllPoints();H.micro:SetPoint("BOTTOMLEFT",H.utility,"TOPLEFT",0,6)
+ H.nav:SetWidth(alternative and zone=="elwynn" and 700 or 440);H.nav:SetHeight(alternative and zone=="naxx" and 220 or 30)
+ if alternative and zone=="naxx" then Place(H.nav,"TOPLEFT",UIParent,"TOPLEFT",22,-350)
+ elseif alternative then Place(H.nav,"TOPRIGHT",UIParent,"TOPRIGHT",-20,-45)
+ else Place(H.nav,"BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-18,48) end
+ for i=1,7 do local b=H.buttons[i];local show=i<=4 or alternative and zone=="elwynn";b:ClearAllPoints()
+  if alternative and zone=="naxx" then b:SetPoint("TOPLEFT",H.nav,"TOPLEFT",0,-(i-1)*48);b:SetWidth(160)
+  else b:SetPoint("TOPLEFT",H.nav,"TOPLEFT",(i-1)*(alternative and 96 or 110),0);b:SetWidth(alternative and 92 or 106) end
+  b.fieldkitLabel:SetWidth(b:GetWidth()-20);T.Update(b);if show then b:Show() else b:Hide() end
+ end
+ -- Compact the existing scrollable chat; all history and copy remain native.
+ local chat=getglobal("ChatFrame1")
+ if chat then
+  H.Anchor(chat,"BOTTOMLEFT",UIParent,"BOTTOMLEFT",54,64)
+  if FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(320,66) end
+  if alternative and zone=="elwynn" then H.Anchor(chat,"BOTTOMRIGHT",UIParent,"BOTTOMRIGHT",-64,342,true)
+  elseif alternative then H.Anchor(chat,"BOTTOMLEFT",UIParent,"BOTTOMLEFT",54,206,true) end
+ end
+ local health=getglobal("FieldKitPlayerBar")
+ for _,name in ipairs({"FieldKitCompactBar","FieldKitMoneyFrame","MainMenuBar","PlayerFrame","FieldKitPlayerBar"}) do local f=getglobal(name);if f then c.Mask(f,true) end end
+ local buffs=getglobal("FieldKitPlayerBuffs");if buffs then Place(buffs,"BOTTOM",H.healthRoot,"TOP",0,4) end
+ local boss=getglobal("FieldKitBossFrame1");if boss then Place(boss,"TOP",UIParent,"TOP",0,-90) end
+ for _,f in ipairs({H.dock,H.header,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.nav,H.utility}) do f:Show();T.Update(f) end
+end
+
+-- Compact, readable summaries project the existing view models; full tables,
+-- gear tooltips and every category remain available through their detail route.
+local summaryDefs={{"Damage","FieldKitMeterFrame","meterFrame"},{"Lairs","FieldKitLairFrame","lairFrame"},{"Accessories","FieldKitGearFrame","gearFrame"},{"Stats","FieldKitStatsFrame","statsFrame"},{"Effects","FieldKitEffectsFrame","effectsFrame"}}
+function H.Summaries(variant,zone)
+ H.summaries=H.summaries or {}
+ local detail=false;for _,def in ipairs(summaryDefs) do if FieldKitZoneThemes.open[def[1]] then detail=true end end
+ local left=(zone=="elwynn" and -354 or -110);local right=(zone=="naxx" and -312 or -116)
+ for _,def in ipairs(summaryDefs) do
+  local kind,source,pref=def[1],getglobal(def[2]),def[3]
+  local f=H.summaries[kind]
+  if not f then
+   f=CreateFrame("Frame","FieldKitThemeSummary"..kind,UIParent);H.summaries[kind]=f
+   f:SetWidth(310);f:SetFrameStrata("MEDIUM");T.Surface(f,"card",true);FieldKitZoneThemes.Bind(f)
+   f.title=T.Label(f,kind,16,9,266,24,16,T.gold,true)
+   f.rows={}
+   for i=1,5 do
+    local row={};f.rows[i]=row
+    row.label=T.Label(f,"",16,40+(i-1)*31,160,26,13,T.text)
+    row.value=T.Label(f,"",178,40+(i-1)*31,114,26,13,T.gold);row.value:SetJustifyH("RIGHT")
+   end
+   local route=kind
+   f.more=T.Button(f,nil,"Full details",14,0,282,25,function() Open(route) end)
+  end
+  f:Hide()
+  if variant=="complete" and not detail and source and FieldKitDB[pref] and not FieldKitZoneThemes.open[kind] then
+   local count=0
+   local rows=source.fieldkitLayoutRows or source.rows or source.slots or {}
+   FieldKit_Text(f.title,kind=="Accessories" and FieldKitDB.loadoutTab==2 and "Spells" or kind)
+   if kind=="Damage" then local view,index=FieldKitMeterSuite.View();rows=FieldKitMeterLedger.Read(view) or {};FieldKit_Text(f.title,FieldKitMeterLedger.labels[index] or kind) end
+   for _,entry in ipairs(rows) do
+    local label=entry.label
+    if kind=="Damage" and count<4 then
+     count=count+1;local r=f.rows[count];r.label:SetText(entry.name or "?");r.value:SetText(entry.dps and string.format("%.0f %s",entry.dps,FieldKit_L("dps")) or (entry.dmg and tostring(entry.dmg) or "?"));r.label:Show();r.value:Show()
+    elseif label and label:IsShown() and (not entry.IsShown or entry:IsShown()) and count<5 then
+     count=count+1;local r=f.rows[count];r.label:SetText(label:GetText() or "?")
+     local value=entry.value and entry.value:GetText() or ""
+     if entry.dist then value=value.."  "..(entry.dist:GetText() or "") end
+     r.value:SetText(value);r.label:Show();r.value:Show()
+    end
+   end
+   if count==0 then count=1;f.rows[1].label:SetText(FieldKit_L("No data yet"));f.rows[1].value:SetText("");f.rows[1].label:Show();f.rows[1].value:Show() end
+   for i=count+1,5 do f.rows[i].label:Hide();f.rows[i].value:Hide() end
+   local height=80+count*31;f:SetHeight(height)
+   f.more:ClearAllPoints();f.more:SetPoint("BOTTOMLEFT",f,"BOTTOMLEFT",14,12)
+   local onRight=kind=="Accessories" or kind=="Stats" or kind=="Effects"
+   FieldKitZoneThemes.Place(f,onRight and "TOPRIGHT" or "TOPLEFT",UIParent,onRight and "TOPRIGHT" or "TOPLEFT",onRight and -22 or 22,onRight and right or left,true)
+   if onRight then right=right-height-12 else left=left-height-12 end
+   f:SetScale(math.min(1,UIParent:GetWidth()/1600));f:Show();T.Update(f)
   end
  end
- local cur,max=FieldKit.Number(UnitXP("player")),FieldKit.Number(UnitXPMax("player"))
- if max and max>0 and cur then
-  H.xp:SetMinMaxValues(0,max);H.xp:SetValue(cur);H.xpText:SetText("XP · "..math.floor(cur/max*100).."%")
-  H.xpDetail="XP "..cur.." / "..max.." · "..math.max(0,max-cur).." "..FieldKit_L("remaining")
- else H.xp:SetValue(0);H.xpText:SetText("XP · ?");H.xpDetail=FieldKit_L("Native data unavailable") end
- local proc=type(AZS_RUN)=="table" and AZS_RUN.proc
- local mana=type(UnitMana)=="function" and FieldKit.Number(UnitMana("player"))
- local manaMax=type(UnitManaMax)=="function" and FieldKit.Number(UnitManaMax("player"))
- local procNames={bloodrage="Rage",seal_fate="Combo points",soul_fire="Soul shards",lightwell="Lightwell"}
- if phase and procNames[proc] then mana=FieldKit.Number(AZS_RUN.pv);manaMax=FieldKit.Number(AZS_RUN.pm) end
- if mana and manaMax and manaMax>0 then
-  H.resource:SetMinMaxValues(0,manaMax);H.resource:SetValue(mana);H.resource:Show()
-  local kind=type(UnitPowerType)=="function" and UnitPowerType("player")
-  local names={[0]="Mana",[1]="Rage",[2]="Focus",[3]="Energy"}
-  H.resourceText:SetText(FieldKit_L(procNames[proc] or names[kind] or "Resource").." "..mana.." / "..manaMax)
- else H.resource:Hide();H.resourceText:SetText("") end
- local run=type(AZS_RUN)=="table" and AZS_RUN or {}
- if phase then
-  H.counters:SetText(FieldKit_L("Kills").." "..tostring(FieldKit.Number(run.kills) or "?").." · "..FieldKit_L("Gold").." "..tostring(FieldKit.Number(run.gold) or "?").." · "..FieldKit_L("Cache price").." "..tostring(FieldKit.Number(run.chest) or "?"))
- else H.counters:SetText(FieldKit_L("No active run data")) end
- if H.artZone~=zone then
- H.artZone=zone
- H.artAccepted=H.left:SetTexture(T.media.."ZoneThemes\\"..zone.."Ornaments512.tga");H.left:SetTexCoord(0,.5,0,1)
- H.right:SetTexture(T.media.."ZoneThemes\\"..zone.."Ornaments512.tga");H.right:SetTexCoord(.5,1,0,1)
- end
- for _,t in ipairs({H.left,H.right}) do
-  t:SetWidth(175);t:SetHeight(175)
-  if FieldKitDB.zoneThemeArt then t:Show() else t:Hide() end
- end
- for _,name in ipairs({"FieldKitCompactBar","FieldKitMoneyFrame","MainMenuBar","PlayerFrame"}) do
-  local f=getglobal(name)
-  if f and (name~="PlayerFrame" or (health and FieldKitDB.playerBar)) then H.Save(f);f:SetParent(H.Hidden());f:SetAlpha(0) end
- end
- dock:Show();H.header:Show();H.nav:Show();H.micro:Show()
- T.Update(dock);T.Update(H.header)
 end

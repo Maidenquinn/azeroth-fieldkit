@@ -71,3 +71,15 @@ assert(d.chatAnchor==nil and d.chatWidth==280 and d.chatHeight==100)
 assert(d.chatTextColor==3 and d.chatOverrideText==true)
 assert(table.getn(visible)==3)
 
+
+-- Zone compaction must preserve native messages even when setters clear them.
+local countBefore=table.getn(visible)
+assert(FieldKit.ResizeChatPreservingHistory(320,66))
+assert(table.getn(visible)==countBefore and visible[countBefore].text=="after switching")
+local info=ChatFrame1.GetMessageInfo
+ChatFrame1.GetMessageInfo=nil
+FieldKit.ClearChatRenderHistory()
+local widthBefore=ChatFrame1:GetWidth()
+assert(not FieldKit.ResizeChatPreservingHistory(321,67))
+assert(ChatFrame1:GetWidth()==widthBefore and table.getn(visible)==countBefore)
+ChatFrame1.GetMessageInfo=info
