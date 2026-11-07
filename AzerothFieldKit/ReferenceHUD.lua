@@ -212,7 +212,8 @@ function R.Update(variant,zone)
  for i=1,7 do
   local a=d.actions;local b=getglobal("ActionButton"..slots[i]);if b then
    local redraw=b:GetParent()~=H.dock or b.referenceKey~=key or b.referenceSerial~=FieldKitNative.serial;local shown=b:IsShown()
-   b:SetParent(H.dock);b:SetAlpha(1);b:SetFrameStrata("HIGH");b:SetScale(1);b:ClearAllPoints();b:SetWidth(a[3]);b:SetHeight(a[3]);b:SetPoint("TOPLEFT",H.dock,"TOPLEFT",a[1]-d.rects.dock[1]+(i-1)*a[4],d.rects.dock[2]-a[2]);b:SetFrameLevel(H.dock:GetFrameLevel()+8)
+   b:SetParent(H.dock);b:SetAlpha(1);b:SetFrameStrata("HIGH");b:SetScale(1);b:ClearAllPoints();b:SetWidth(a[3]-8);b:SetHeight(a[3]-8);b:SetPoint("TOPLEFT",H.dock,"TOPLEFT",a[1]-d.rects.dock[1]+(i-1)*a[4]+4,d.rects.dock[2]-a[2]-4);
+   local icon=getglobal("ActionButton"..slots[i].."Icon");if icon then H.Save(icon);icon:ClearAllPoints();icon:SetAllPoints(b) end;b:SetFrameLevel(H.dock:GetFrameLevel()+8)
    if redraw and shown then b:Hide();b:Show() end;b.referenceKey=key;b.referenceSerial=FieldKitNative.serial
    -- The approved socket supplies the border; the native 32px normal texture
    -- otherwise leaves a second small square over the enlarged spell icon.
@@ -250,13 +251,6 @@ function R.Update(variant,zone)
   local b=H.buttons[i];local route=a[1]
   Button(b,H.nav,{a[2],a[3],a[4],a[5]});Label(b.fieldkitLabel,b,{a[2],a[3],a[4],a[5]},variant=="minimal" and 15 or 17,true,"CENTER","NotoSerif-Regular.ttf");FieldKit_Text(b,route=="Accessories" and (a[4]<90 and "Equip" or "Equipment") or route);b:RegisterForClicks("LeftButtonUp","RightButtonUp");b.callback=function() if route=="FieldKit" and arg1=="RightButton" then if H.micro:IsShown() then H.micro:Hide() else H.micro:Show() end else FieldKitZoneThemes.Open(route) end end
  end
- for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton","MiniMapTrackingFrame"}) do
-  local f=getglobal(name)
-  if f then
-   H.Save(f);local changed=f:GetParent()~=H.micro;local shown=f:IsShown();f:SetParent(H.micro);f:ClearAllPoints();f:SetPoint("TOPLEFT",H.micro,"TOPLEFT",116+(i-1)*28,-373);f:SetFrameLevel(H.micro:GetFrameLevel()+5)
-   if changed and shown then f:Hide();f:Show() end
-  end
- end
  H.micro:SetParent(R.canvas);H.micro:SetFrameStrata("DIALOG");H.micro:SetFrameLevel(90);if H.micro.GetChildren then for _,child in ipairs({H.micro:GetChildren()}) do child:SetFrameLevel(95) end end;H.micro:SetWidth(240);H.micro:SetHeight(420);T.Update(H.micro);H.micro:SetScale(1);H.micro:ClearAllPoints();if d.rects.nav and d.rects.nav[2]>d.size[2]/2 then H.micro:SetPoint("BOTTOMRIGHT",H.nav,"TOPRIGHT",0,8)
  elseif d.rects.nav then H.micro:SetPoint("TOPRIGHT",H.nav,"BOTTOMRIGHT",0,-8)
  else H.micro:SetPoint("TOPLEFT",H.mode,"BOTTOMLEFT",0,-8) end
@@ -269,14 +263,14 @@ function R.Update(variant,zone)
   for i,key in ipairs({"Chat","Copy","Settings"}) do R.chatActions[i]=T.Button(R.chat,nil,key,0,0,90,28,callbacks[i]);Blank(R.chatActions[i]) end
   R.chatEntry=T.Button(R.chat,nil,"",0,0,300,35,callbacks[1]);Blank(R.chatEntry)
  end
- R.Geometry(R.chat,d.rects.chat);R.Art(R.chat,"chat");R.chat:Show()
+ R.Geometry(R.chat,d.rects.chat);R.Art(R.chat,"none");R.chat.fieldkitArtOnly=nil;T.Surface(R.chat,"card",true);T.State(R.chat,false);R.chat:Show()
  for i,b in ipairs(R.chatActions) do if zone=="naxx" and variant=="complete" then b:SetFrameLevel(R.chat:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",R.chat,"TOPLEFT",14+(i-1)*98,-3);b:SetWidth(90);b.fieldkitLabel:SetWidth(80);T.Font(b.fieldkitLabel,14,R.body);b:Show() else b:Hide() end end
  if zone=="naxx" and variant=="complete" then R.chatEntry:SetFrameLevel(R.chat:GetFrameLevel()+15);R.chatEntry:ClearAllPoints();R.chatEntry:SetPoint("BOTTOMLEFT",R.chat,"BOTTOMLEFT",14,20);R.chatEntry:SetWidth(d.rects.chat[3]-30);R.chatEntry:Show() else R.chatEntry:Hide() end
  if d.rate then Label(R.rate,R.chat,d.rate,18,true) end
  if zone=="naxx" and variant=="alternative" then R.Child(R.counts[1],R.chat,d.counts[1]);R.Child(R.counterButtons[1],R.chat,d.counts[1]) end
  local chat=getglobal("ChatFrame1")
  if chat and d.chatText then
-  H.Save(chat);local a=d.chatText;chat:SetParent(R.chat);if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(T.media.."AzerothSans.ttf",12,"") end
+  H.Save(chat);local a=d.chatText;if zone=="elwynn" then a={d.rects.chat[1]+14,d.rects.chat[2]+9,d.rects.chat[3]-28,d.rects.chat[4]-18} end;chat:SetParent(R.chat);if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(T.media.."AzerothSans.ttf",12,"") end
   if FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(a[3],a[4]) end
   chat:ClearAllPoints();chat:SetPoint("TOPLEFT",R.chat,"TOPLEFT",a[1]-d.rects.chat[1],d.rects.chat[2]-a[2])
  end
@@ -295,6 +289,9 @@ function R.Map()
  local world=getglobal("MiniMapWorldMapButton");if world and R.worldClick then FieldKitZoneThemes.Mask(world,true) end
  local clock=getglobal("GameTimeFrame");if clock then FieldKitZoneThemes.Mask(clock,true) end
  M.root:Show()
+ for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton","MiniMapTrackingFrame"}) do
+  local f=getglobal(name);if f then H.Save(f);local changed=f:GetParent()~=M.root;local shown=f:IsShown();f:SetParent(M.root);f:SetAlpha(1);f:SetScale(1);f:ClearAllPoints();f:SetPoint("TOPRIGHT",Minimap,"TOPRIGHT",0,-(i-1)*32);f:SetFrameStrata("HIGH");f:SetFrameLevel(M.root:GetFrameLevel()+30);if changed and shown then f:Hide();f:Show() end end
+ end
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
   local x,y=a[1]+a[3]-29,a[2]+a[3]-(i==1 and 28 or 60)
@@ -306,14 +303,14 @@ function R.Map()
  return true
 end
 local function Row(f,i,x,y,w,h)
- local r=f.rows[i];r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:SetAlpha(1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h);r:Show();r.icon:Hide();r.bar:Hide();r.entry=nil
+ local r=f.rows[i];r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:SetAlpha(1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h);r:Show();r.icon:Hide();r.bar:Hide();if r.lamp then r.lamp:Hide() end;r.entry=nil
  r.label:ClearAllPoints();r.label:SetPoint("TOPLEFT",r,"TOPLEFT",0,0);r.label:SetWidth(w-96);r.label:SetHeight(h);r.value:ClearAllPoints();r.value:SetPoint("TOPRIGHT",r,"TOPRIGHT",0,0);r.value:SetWidth(94);r.value:SetHeight(h);return r
 end
 function R.Panels(variant,zone)
  for _,f in pairs(H.summaries or {}) do f:Hide() end
  local detail=false;for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if FieldKitZoneThemes.open[kind] then detail=true end end
  for _,f in pairs(R.frames) do f:Hide() end
- if variant~="complete" or detail then return end
+ if variant~="complete" then return end
  local d=R.layout
  if not FieldKitNative.Active() and (not R.readyAt or GetTime()>R.readyAt or R.readySerial~=FieldKitNative.serial) then
   R.readyItems={};R.readyAt=GetTime()+5;R.readySerial=FieldKitNative.serial
@@ -324,9 +321,10 @@ function R.Panels(variant,zone)
   local f=R.frames[kind];local a=d.rects[kind]
   if a and FieldKitDB[prefs[kind]] and not (kind=="Damage" and FieldKitZoneThemes.nativeMeterOpen) then
    R.Geometry(f,a);R.Art(f,kind);f:Show()
-   f.title:ClearAllPoints();f.title:SetPoint("TOPLEFT",f,"TOPLEFT",kind=="Stats" and 65 or 65,-10);f.title:SetWidth(a[3]-78);f.title:SetHeight(30)
+   if not f.bodyWash then f.bodyWash=f:CreateTexture(nil,"BORDER") end;f.bodyWash:ClearAllPoints();f.bodyWash:SetPoint("TOPLEFT",f,"TOPLEFT",12,-44);f.bodyWash:SetWidth(a[3]-24);f.bodyWash:SetHeight(a[4]-56);T.Solid(f.bodyWash,{.025,.045,.035});f.bodyWash:Show()
+   f.title:ClearAllPoints();f.title:SetPoint("TOPLEFT",f,"TOPLEFT",65,-14);f.title:SetWidth(a[3]-78);f.title:SetHeight(30)
    local titles={Damage="DAMAGE",Lairs="LAIRS",Accessories="EQUIPMENT",Stats="BONUSES",Effects="EFFECTS"};FieldKit_Text(f.title,titles[kind])
-   f.more:SetFrameLevel(f:GetFrameLevel()+15);f.more:ClearAllPoints();f.more:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);f.more:SetWidth(a[3]-42);f.more:SetHeight(28);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
+   f.more:Show();f.more:SetFrameLevel(f:GetFrameLevel()+15);f.more:ClearAllPoints();f.more:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);f.more:SetWidth(a[3]-42);f.more:SetHeight(28);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
    f.total:Hide();f.rateLabel:Hide();for _,r in ipairs(f.rows) do r:Hide() end
    if kind=="Damage" then
     FieldKit_Text(f.more,"All spells");local view,index=FieldKitMeterSuite.View();local lines,total,rate,known=FieldKitMeterLedger.Read(view)
@@ -372,7 +370,7 @@ function R.Panels(variant,zone)
    end
    R.Fit(f.title,21,12);if f.total:IsShown() then R.Fit(f.total,zone=="naxx" and 30 or 16,12) end
    for _,r in ipairs(f.rows) do if r:IsShown() then
-    R.Fit(r.label,17,12);R.Fit(r.value,17,12)
+    T.Font(r.label,16,R.body,false);T.Font(r.value,16,R.body,false);R.Fit(r.label,16,12);R.Fit(r.value,16,12)
     r.fullLines={r.label.referenceFullText or "",r.value.referenceFullText or ""}
     r:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) else H.Tip(this,f.title:GetText(),this.fullLines) end end);r:SetScript("OnLeave",H.HideTip)
    end end

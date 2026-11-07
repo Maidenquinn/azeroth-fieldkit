@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.5 — 2026-11-07 (visual feedback, unpublished)
+
+- Remove side selection stripes and decorative header fragments behind text; use readable serif headings and sans-serif data rows.
+- Clear obsolete panel sockets/markers, simplify chat without duplicate speech bubbles, inset native action icons, fill the Elwynn square map and restore known addon launchers beside it.
+- Keep summary panels when opening details, enlarge detailed statistics rows and give tracked bosses an opaque themed frame.
+- Native Elwynn Complete inspected after reload; final small alignment changes require reload. Other layouts covered by Lua regressions, not a fresh six-scene acceptance.
+
 ## 0.6.0-alpha.4 — 2026-11-07 (layout audit, unpublished)
 
 - Per-element sizes (50–130%) scoped to zone, composition and HUD profile; integral art groups resize together. Map zoom and detached XP labels follow their component.

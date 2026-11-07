@@ -219,3 +219,16 @@ FieldKitMeterLedger.Read=read
 C.Set("zoneThemes",false)
 assert(next(C.bossBefore)==nil)
 print("Element sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)")
+
+-- Review feedback: opening a detail must keep summaries, empty state must not
+-- inherit a lair lamp, and selected chrome must never add a cyan side stripe.
+C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+C.Open("Stats");assert(R.frames.Damage:IsShown() and R.frames.Lairs:IsShown(),"A detail must not hide the summary HUD")
+assert(FieldKitStatsFrame:GetHeight()>=32+25*table.getn(FieldKitStatsFrame.rows),"Statistics require readable row spacing")
+C.Open("Stats")
+local chrome=T.Button(UIParent,nil,"Test",0,0,200,30,function() end)
+T.State(chrome,true);assert(not chrome.fieldkitSkin.selected:IsShown(),"No side stripe on selected controls")
+local row=R.frames.Lairs.rows[1];if row.lamp then assert(not row.lamp:IsShown(),"Elwynn empty state must not inherit Naxx lamps") end
+assert(Minimap:GetWidth()==270 and ActionButton1:GetWidth()==R.layout.actions[3]-8)
+C.Set("zoneThemes",false)
+print("Review feedback: persistent summaries, readable detail rows, clean selection and inset actions passed")

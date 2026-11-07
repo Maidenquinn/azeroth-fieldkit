@@ -228,7 +228,7 @@ function C.Refresh(force)
    local right=kind=="Accessories" or kind=="Stats" or (kind=="Effects" and zone=="naxx") or variant=="alternative"
    local y=right and rightY or leftY;local previous=C.placed[frame]
    if not previous or previous.y~=y or previous.height~=frame:GetHeight() then
-    if FieldKitReferenceHUD.active then C.Place(frame,"CENTER",UIParent,"CENTER",0,0,true) else C.Place(frame,right and "TOPRIGHT" or "TOPLEFT",UIParent,right and "TOPRIGHT" or "TOPLEFT",right and -20 or 20,y,true) end
+    if FieldKitReferenceHUD.active then frame:SetFrameStrata("DIALOG");C.Place(frame,"CENTER",UIParent,"CENTER",0,70,true) else C.Place(frame,right and "TOPRIGHT" or "TOPLEFT",UIParent,right and "TOPRIGHT" or "TOPLEFT",right and -20 or 20,y,true) end
    end
    if right then rightY=rightY-frame:GetHeight()-14 else leftY=leftY-frame:GetHeight()-14 end
    local record=previous or {};record.y=y;record.height=frame:GetHeight();C.placed[frame]=record

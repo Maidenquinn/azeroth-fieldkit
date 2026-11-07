@@ -1,4 +1,4 @@
-AZEROTH FIELDKIT 0.6.0-alpha.4 — PILOTE ELWYNN / NAXXRAMAS
+AZEROTH FIELDKIT 0.6.0-alpha.5 — PILOTE ELWYNN / NAXXRAMAS
 7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
 
 La version est installée dans le client habituel. Le code stable reste inchangé.
@@ -92,3 +92,11 @@ Les combats de boss Naxxramas et la coop n’ont pas été validés ici.
 La police ou la taille du chat reste native si sa modification risquerait de
 perdre des messages non récupérables. Les extensions non identifiées conservent
 leur propre interface. Aucune publication ni fusion vers le code stable.
+
+ALPHA.5 — RETOURS VISUELS
+Bandes de sélection retirées, libellés et fonds nettoyés, cases vides des effets
+masquées, chat simplifié sans bulles décoratives, sorts rentrés dans leurs cadres,
+carte Elwynn agrandie et icônes connues des addons replacées au bord de la carte.
+Le détail Bonus conserve les panneaux de synthèse et espace ses lignes.
+Contrôle visuel Elwynn Complète après rechargement. Les derniers ajustements
+d’alignement nécessitent /reload ; pas de nouvelle certification des six scènes.

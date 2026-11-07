@@ -45,7 +45,7 @@ end
 
 -- Keep headings and body type consistent; the native face is a safe fallback.
 function T.Font(label,size,color,heading,face)
- local path=T.media..(face or (heading and "AzerothSerif.ttf" or "AzerothSans.ttf"))
+ local path=T.media..(face or (heading and "NotoSerif-Regular.ttf" or "AzerothSans.ttf"))
  size=size or 14
  local fit=label.fieldkitFit
  if fit and fit.path==path and fit.baseSize==size and fit.width==label:GetWidth() and fit.height==label:GetHeight() and (label:GetText()==fit.full or label:GetText()==fit.display) then size=fit.renderSize end
@@ -131,12 +131,13 @@ function T.State(frame,active)
    local asset=T.Style(frame)==3 and (T.media.."ReferenceHUD\\"..T.zone.."_material_v3.tga") or (T.media.."ChroniclePlate"..plate..".tga")
    if T.Style(frame)==3 and i==5 then T.Solid(t,T.panel);t.fieldkitPlate=nil else if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end end
    local part=skin.parts[i];local cuts=T.Style(frame)==3 and {0,12/512,500/512,1} or {0,.07,.93,1}
-   t:SetTexCoord(cuts[part.x],cuts[part.x+1],cuts[part.y],cuts[part.y+1])
+   local row=part.y;if T.Style(frame)==3 and part.x==2 and part.y==1 then row=3 end
+   t:SetTexCoord(cuts[part.x],cuts[part.x+1],cuts[row],cuts[row+1])
    if T.Style(frame)==3 and i==5 then t:SetVertexColor(T.panel[1],T.panel[2],T.panel[3]) else t:SetVertexColor(1,1,1) end
    t:SetAlpha(alpha*(i==5 and opacity or 1))
   end
  end
- T.Solid(skin.selected,T.gold);if active then skin.selected:Show() else skin.selected:Hide() end
+ T.Solid(skin.selected,T.gold);skin.selected:Hide()
  frame.fieldkitActive=active and true or false
 end
 

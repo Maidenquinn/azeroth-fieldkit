@@ -1,7 +1,7 @@
 {
-  "version": "0.6.0-alpha.4",
+  "version": "0.6.0-alpha.5",
   "lua51": true,
-  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)\nElement sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)",
+  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)\nElement sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)\nReview feedback: persistent summaries, readable detail rows, clean selection and inset actions passed",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -18,7 +18,7 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.4",
+    "version": "0.6.0-alpha.5",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -29,13 +29,13 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Native 0.142.0: six Elwynn/Naxx reference layouts inspected across alpha3/alpha4 iterations; alpha4 real Elwynn combat with six acquired spells plus racial and changing proc resource, native choice priority, independent dock 65% and map/identity 70% visual check, temporary native preferences restored. All six renderers stress-tested with long text and large counters; Lua 5.0.3/5.1 profile/ownership/scale regressions. No native Naxx boss, coop, or numerical 100% fidelity certification. Intermediate captures are scoped individually in docs/native-ui-smoke-0.6.0-alpha4.json."
+    "inGameTestScope": "Alpha5: native Elwynn Complete inspected after reload, showing cleaned panels/chat, no empty effect socket, addon map buttons, inset spells and sans-serif rows. Final small alignment adjustments require reload. Persistent summary/detail, text, profile and ownership regressions tested under Lua 5.0.3/5.1. No fresh native six-layout acceptance, Naxx boss or coop certification."
   },
   "files": {
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "9baf6ba986ae33c6be08e452c1da59e8e42dca6f5ffdca05706920988e423c03"
+      "sha256": "1a940c8e95d3ee76377085bf032bf96315a6efd759589070ae6a3a726ef1c6c0"
     },
     "Diagnostics.lua": {
       "maxUpvalues": 2,
@@ -70,7 +70,7 @@
     "Theme.lua": {
       "maxUpvalues": 1,
       "functions": 18,
-      "sha256": "3cf336f905fda7094241cdd2435e31996a6c37f56a00a0bad87e2e58014f22ba"
+      "sha256": "cd891aa1cab017163fb64bd32fadc33d0daf5ad59e316f5528115e9ef30f2bd3"
     },
     "ZoneThemeRegistry.lua": {
       "maxUpvalues": 0,
@@ -135,7 +135,7 @@
     "CardLayout.lua": {
       "maxUpvalues": 2,
       "functions": 30,
-      "sha256": "cebd9be7495642a7dbe6393a164bec7ce4143cef05ad26ba87b1b13b5224bc25"
+      "sha256": "c7635cf7b515beac989f753c514f1a653b6a413e5d30a9b06d572f44aacc10e1"
     },
     "Coop.lua": {
       "maxUpvalues": 2,
@@ -205,7 +205,7 @@
     "FieldKit.lua": {
       "maxUpvalues": 21,
       "functions": 188,
-      "sha256": "8a07d039e41278bc815779e8f5633a9cdbdc0e2aaeee402cf708744c5bd82124"
+      "sha256": "e3537498c4dc71f0d6a4f240581876584faef6aa3f4a0c92a4506a83e49b124a"
     },
     "WorldPins.lua": {
       "maxUpvalues": 11,
@@ -255,17 +255,17 @@
     "ReferenceArt.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "cccbb26adcc416f9d9ead6db382a7934be34479b93c1d37138c0fe96680c87d1"
+      "sha256": "e3351675a2d03a07b60467cb76d5d930ca8193b1b0dcd4463c7b352f904ed656"
     },
     "ReferenceHUD.lua": {
       "maxUpvalues": 8,
       "functions": 47,
-      "sha256": "f6edbd94242890f21d3e8651a13aa23f4fe20705893bbe79c70c3b6ebba7d039"
+      "sha256": "71ca4f27dd7cb242b6f769fce12149088592e3f7fe61b419a159554f8ea03866"
     },
     "ZoneThemes.lua": {
       "maxUpvalues": 17,
       "functions": 42,
-      "sha256": "00ed9940a2e7f183b7f325561ff66759511b653106b290ef80220c8a9ce087b1"
+      "sha256": "9dce6895366c7afc2cfc2d1bf0035933d06ad067866e1dcf098e43443f11b884"
     }
   }
 }

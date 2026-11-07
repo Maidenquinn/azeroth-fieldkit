@@ -533,6 +533,11 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
   if BossStyle()=="compact" or BossStyle()=="premium" then
    f:SetAlpha(0);compact:Show()
    local premium=BossStyle()=="premium"
+   if ZoneBosses() then
+    compact.fieldkitArtOnly=nil;FieldKitTheme.Surface(compact,"card",true);FieldKitTheme.State(compact,false)
+    compact.name:SetWidth(175);compact.name:SetHeight(18);FieldKitTheme.Font(compact.name,13,FieldKitTheme.text)
+    FieldKitTheme.Font(compact.hp,12,FieldKitTheme.text);FieldKitTheme.Font(compact.tag,10,FieldKitTheme.muted)
+   elseif compact.fieldkitSkin then compact.fieldkitArtOnly=true;FieldKitTheme.State(compact,false) end
    for _,part in ipairs(compact.premiumParts) do part:Hide() end
    compact.premiumOverlay:Hide()
    for _,part in ipairs(compact.premiumRim) do part:Hide() end
