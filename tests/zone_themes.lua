@@ -77,7 +77,7 @@ local targetClicks=0;TargetFrame:SetScript("OnClick",function() assert(this==Tar
 C.Refresh();assert(FieldKitThemeTarget.frame:IsShown() and TargetFrame:GetParent()==H.storage)
 click(FieldKitThemeTarget.frame);assert(targetClicks==1)
 FieldKitThemeTarget.frame._mouseIsOver=true;this=FieldKitThemeTarget.frame;this.scripts.OnEnter()
-C.Refresh();assert(TargetFrame:GetParent()==UIParent)
+C.Refresh();assert(TargetFrame:GetParent()==H.storage,"Hover must not create a second native target frame")
 FieldKitThemeTarget.frame._mouseIsOver=false;NOW=NOW+1;C.Refresh();assert(TargetFrame:GetParent()==H.storage)
 -- Selecting the displayed boss removes the duplicate target summary while
 -- keeping its native cast on the visible boss and restoring ownership afterward.
@@ -286,3 +286,25 @@ assert(Minimap:GetWidth()==252)
 for _,tab in ipairs(R.tabs) do assert(tab.fieldkitArtOnly);for _,part in ipairs(tab.fieldkitSkin.parts) do assert(not part.texture:IsShown()) end end
 C.Set("zoneThemes",false)
 print("Clean card materials, flat meter tabs and bounded square minimap passed")
+
+C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+FieldKitDB.windowsLocked=true
+for _,kind in ipairs({"Damage","Stats","Lairs"}) do
+ C.Open(kind)
+ local f=getglobal(({Damage="FieldKitMeterFrame",Stats="FieldKitStatsFrame",Lairs="FieldKitLairFrame"})[kind])
+ local handle=C.detailHandles[f];assert(handle and handle:IsShown())
+ this=handle;handle:GetScript("OnDragStart")();assert(f.azsMoving,"Detail title remains movable with locked HUD")
+ f:SetPoint("CENTER",UIParent,"CENTER",123,87);handle:GetScript("OnDragStop")();assert(not f.azsMoving)
+ local a=C.Position(f);assert(a and a[3]==123 and a[4]==87)
+ C.Open(kind);C.Open(kind);a=C.Position(f);assert(a and a[3]==123 and a[4]==87,"Reopening preserves the reader position")
+ C.Open(kind)
+end
+local savedTaken=AZS_TAKEN;AZS_TAKEN={{source="mob melee",dmg=42}}
+local oldLang=FieldKitDB.language;FieldKitDB.language="fr"
+local taken=FieldKitMeterLedger.Read("taken");assert(taken[1].displayName==FieldKit_L("Monster melee"))
+AZS_TAKEN=savedTaken;FieldKitDB.language=oldLang
+local oldFriend=UnitIsFriend;UnitIsFriend=function() return true end
+UnitExists=function(unit) return unit=="target" or (exists and exists(unit)) end
+C.Refresh();assert(FieldKitThemeTarget.frame:IsShown() and TargetFrame:GetParent()==H.storage)
+UnitIsFriend=oldFriend;UnitExists=exists;C.Set("zoneThemes",false)
+print("Locked HUD readers remain movable and persistent; localized taken sources and single target surface passed")

@@ -750,3 +750,6 @@ FieldKitLocale.fr["07  PREFERENCES"]="07  Préférences"
 
 FieldKitLocale.fr["Stored levels"]="Niveaux en attente"
 FieldKitLocale.fr["Settings"]="Réglages"
+
+FieldKitLocale.fr["Level"]="Niveau"
+FieldKitLocale.fr["Drag window"]="Déplacer la fenêtre"

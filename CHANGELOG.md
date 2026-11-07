@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.10 - 2026-11-07 (target and detail readers, unpublished)
+
+- Refine target padding and typography, use green health for friendly/self targets and retain native clicks. Hover uses a unit tooltip without a duplicate target frame.
+- Detail-reader headers drag independently of the combat HUD lock; positions persist per theme/layout/profile.
+- Localize damage-taken source labels while preserving native keys.
+
 ## 0.6.0-alpha.9 - 2026-11-07 (card surfaces and minimap bounds, unpublished)
 
 - Replace opaque footer/socket patches and meter wash with an unchanged decoration-free crop of each approved theme material. Preserve authored rims.

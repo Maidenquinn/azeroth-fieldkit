@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.9",
+  "candidate": "0.6.0-alpha.10",
   "runtimeModules": 47,
   "textureCount": 245,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
-      "bytes": 5186,
-      "sha256": "21986588f3025a553de80729a10cdda878ed37cad6f7a27764a5dcba3150e7d0",
+      "bytes": 5187,
+      "sha256": "e468f0d1bb60d6cbbfcf67d5a1131a109d526fdc656e5fd4ebf04af708eb0d70",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -246,8 +246,8 @@
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 49944,
-      "sha256": "b39d7addc4d89cbb1d485a57e9f562b7d174e79ff4ae35d21af49a49ccbab9ed",
+      "bytes": 50038,
+      "sha256": "90ffd0025824f8383c5fd33e632ae6453c1aac0ae4fdffe8a4ea3679fb0e261d",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
@@ -551,8 +551,8 @@
       "literalEvents": []
     },
     "MeterLedger.lua": {
-      "bytes": 26890,
-      "sha256": "125c4ad8edf0ea91348305f0d0b5ca0898347e5a23b5a709c58f3fb44913fa55",
+      "bytes": 26954,
+      "sha256": "f9a2fe0866793ce76a3d4daff035c08913a1f742a084438b17e97f51eb9891d1",
       "namedFunctions": [
         {
           "name": "Text",
@@ -2862,20 +2862,20 @@
       "literalEvents": []
     },
     "ThemeTarget.lua": {
-      "bytes": 5363,
-      "sha256": "8ced04076f7a413d783b2677babfc9cb86d25ec8f633f921e14de22bd72ee8b7",
+      "bytes": 5008,
+      "sha256": "bd85b2dc113561448a46315a81b9b9f9346653563e18f0adf58a983f71d111b6",
       "namedFunctions": [
         {
           "name": "C.Create",
-          "line": 7
+          "line": 6
         },
         {
           "name": "C.Stop",
-          "line": 26
+          "line": 27
         },
         {
           "name": "C.Update",
-          "line": 37
+          "line": 38
         }
       ],
       "literalEvents": []
@@ -2974,8 +2974,8 @@
       "literalEvents": []
     },
     "ZoneThemes.lua": {
-      "bytes": 25204,
-      "sha256": "694bce97b11caec5acf051eef9589ca36b4309660404f06c1f994d44b9e01a54",
+      "bytes": 26502,
+      "sha256": "6cdf7476661432db32c496ef5e2b134da320b3fc66d690929fe2f23a03fadc34",
       "namedFunctions": [
         {
           "name": "C.NormalizeScales",
@@ -3026,64 +3026,72 @@
           "line": 115
         },
         {
+          "name": "C.DetailHandle",
+          "line": 127
+        },
+        {
+          "name": "Start",
+          "line": 137
+        },
+        {
           "name": "C.Resolve",
-          "line": 126
+          "line": 146
         },
         {
           "name": "C.Suspend",
-          "line": 132
+          "line": 152
         },
         {
           "name": "C.NativeRestore",
-          "line": 145
+          "line": 166
         },
         {
           "name": "C.NativeReplace",
-          "line": 153
+          "line": 174
         },
         {
           "name": "C.Mask",
-          "line": 175
+          "line": 196
         },
         {
           "name": "C.Refresh",
-          "line": 181
+          "line": 202
         },
         {
           "name": "C.Tick",
-          "line": 245
+          "line": 267
         },
         {
           "name": "C.Set",
-          "line": 253
+          "line": 275
         },
         {
           "name": "C.ToggleNativeMeter",
-          "line": 260
+          "line": 282
         },
         {
           "name": "C.Open",
-          "line": 264
+          "line": 286
         },
         {
           "name": "C.Command",
-          "line": 280
+          "line": 302
         },
         {
           "name": "FieldKitThemeUI",
-          "line": 296
+          "line": 318
         },
         {
           "name": "Button",
-          "line": 300
+          "line": 322
         },
         {
           "name": "C.CycleElement",
-          "line": 345
+          "line": 367
         },
         {
           "name": "C.RefreshElementUI",
-          "line": 351
+          "line": 373
         }
       ],
       "literalEvents": []
@@ -5079,7 +5087,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.9",
+    "version": "0.6.0-alpha.10",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5090,7 +5098,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha9: Lua 5.0.3/5.1 coverage for clean card materials, flat meter tabs, 252px bounded Elwynn Complete minimap, existing empty meter and action socket regressions. Native visual inspection scope recorded in delivery notes; no full six-layout combat acceptance or physical map drag certification."
+    "inGameTestScope": "Alpha9: Lua 5.0.3/5.1 coverage for clean card materials, flat meter tabs, bounded 252px Elwynn Complete minimap, empty meter and action socket regressions. Native Elwynn Complete ready-phase inspection after reload: terrain contained inside title/footer, flat tabs, uniform Effects body. No full six-layout combat acceptance or physical map drag certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

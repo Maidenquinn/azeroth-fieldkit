@@ -1,5 +1,4 @@
--- The compact target reads native units. Hover reveals the complete original
--- target frame (auras, portrait and native interactions); casting stays native.
+-- One themed target surface; native unit tooltip and click handlers stay available.
 FieldKitThemeTarget={}
 local C=FieldKitThemeTarget
 local H=FieldKitThemeHUD
@@ -7,20 +6,22 @@ local T=FieldKitTheme
 function C.Create()
  if C.frame then return end
  local f=CreateFrame("Button","FieldKitThemeTargetFrame",UIParent);C.frame=f
- f:SetWidth(300);f:SetHeight(75);f:SetFrameStrata("HIGH");T.Surface(f,"card",true)
- C.name=T.Label(f,"",10,4,280,24,14,T.gold,true)
- C.kind=T.Label(f,"",10,50,280,20,11,T.muted)
+ f:SetWidth(320);f:SetHeight(94);f:SetFrameStrata("HIGH");T.Surface(f,"card",true)
+ C.name=T.Label(f,"",18,10,284,26,18,T.gold,true)
+ C.kind=T.Label(f,"",18,66,284,18,12,T.muted)
  C.bar=CreateFrame("StatusBar",nil,f);C.bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
- C.bar:SetStatusBarColor(.75,.2,.24);C.bar:SetPoint("TOPLEFT",f,"TOPLEFT",10,-31);C.bar:SetWidth(280);C.bar:SetHeight(16)
+ C.bar:SetStatusBarColor(.75,.2,.24);C.bar:SetPoint("TOPLEFT",f,"TOPLEFT",18,-42);C.bar:SetWidth(284);C.bar:SetHeight(19)
  local bg=C.bar:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints(C.bar);T.Solid(bg,{.12,.04,.06})
- C.hp=T.Label(C.bar,"",0,0,280,16,11,T.text);C.hp:SetJustifyH("CENTER")
+ C.hp=T.Label(C.bar,"",0,0,284,19,12,T.text);C.hp:SetJustifyH("CENTER")
  f:RegisterForClicks("LeftButtonUp","RightButtonUp")
  f:SetScript("OnClick",function()
   local source=getglobal("TargetFrame");local callback=source and (source:GetScript("OnClick") or source:GetScript("OnMouseUp"))
   if callback then local previous=this;this=source;pcall(callback);this=previous end
  end)
- f:SetScript("OnEnter",function() C.details=true;C.untilTime=GetTime()+.35 end)
- f:SetScript("OnLeave",function() C.untilTime=GetTime()+.25 end)
+ f:SetScript("OnEnter",function()
+  if GameTooltip and type(GameTooltip.SetUnit)=="function" then GameTooltip:SetOwner(this,"ANCHOR_BOTTOMRIGHT");GameTooltip:SetUnit("target");GameTooltip:Show() end
+ end)
+ f:SetScript("OnLeave",function() if GameTooltip then GameTooltip:Hide() end end)
  FieldKitZoneThemes.Bind(f)
 end
 function C.Stop()
@@ -58,18 +59,12 @@ function C.Update(variant)
  C.name:SetText(FieldKitNative.Text(UnitName("target")))
  local level=UnitLevel("target");local classification=type(UnitClassification)=="function" and UnitClassification("target")
  local names={elite="Elite",rareelite="Rare elite",rare="Rare",worldboss="Boss",normal="Target"}
- C.kind:SetText(FieldKit_L(names[classification] or "Target").." · "..tostring(level and level>0 and level or "??").." · "..FieldKit_L("Hover for native details"))
+ C.kind:SetText(FieldKit_L(names[classification] or "Target").." · "..FieldKit_L("Level").." "..tostring(level and level>0 and level or "??"))
+ local friendly=(type(UnitIsUnit)=="function" and UnitIsUnit("player","target")) or (type(UnitIsFriend)=="function" and UnitIsFriend("player","target"))
+ if friendly then C.bar:SetStatusBarColor(.12,.62,.30) else C.bar:SetStatusBarColor(.72,.17,.20) end
  C.bar:SetMinMaxValues(0,max);C.bar:SetValue(hp);C.hp:SetText(FieldKit_FormatHealth(hp,max,FieldKitDB.targetHealthMode))
- if FieldKitReferenceHUD and FieldKitReferenceHUD.active then FieldKitReferenceHUD.Fit(C.name,14,11);FieldKitReferenceHUD.Fit(C.kind,11,10);FieldKitReferenceHUD.Fit(C.hp,11,10) end
- H.Save(native);H.Anchor(native,"TOPLEFT",f,"BOTTOMLEFT",0,-4)
- native:SetFrameStrata("DIALOG")
- local over=type(MouseIsOver)=="function" and (MouseIsOver(f) or (matchedBoss and MouseIsOver(matchedBoss)) or (C.details and native:GetAlpha()>0 and MouseIsOver(native)))
- if matchedBoss and type(MouseIsOver)=="function" and MouseIsOver(matchedBoss) then C.details=true end
- local show=C.details and (over or GetTime()<(C.untilTime or 0))
- local wasStored=native:GetParent()==H.storage
- native:SetParent(show and H.saved[native].parent or H.Hidden());native:SetAlpha(show and H.saved[native].alpha or 0)
- if show and wasStored and native:IsShown() then native:Hide();native:Show() end
- if not show then C.details=false end
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then FieldKitReferenceHUD.Fit(C.name,18,13);FieldKitReferenceHUD.Fit(C.kind,12,11);FieldKitReferenceHUD.Fit(C.hp,12,11) end
+ H.Save(native);native:SetParent(H.Hidden());native:SetAlpha(0)
  local cast=getglobal("TargetFrameSpellBar")
  if cast and (cast:GetParent()==UIParent or cast:GetParent()==native or cast:GetParent()==f or cast:GetParent()==C.castOwner) then
   local owner=matchedBoss or f;H.Save(cast);cast:SetParent(owner);C.castOwner=owner;H.Anchor(cast,"TOP",owner,"BOTTOM",0,-6,true);cast:SetWidth(280)

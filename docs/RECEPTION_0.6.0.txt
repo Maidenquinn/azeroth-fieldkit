@@ -1,4 +1,4 @@
-AZEROTH FIELDKIT 0.6.0-alpha.9 â€” PILOTE ELWYNN / NAXXRAMAS
+AZEROTH FIELDKIT 0.6.0-alpha.10 â€” PILOTE ELWYNN / NAXXRAMAS
 7 novembre 2026 â€” branche codex/v0.6.0-elwynn-naxx-hud
 
 La version est installÃ©e dans le client habituel. Le code stable reste inchangÃ©.
@@ -135,3 +135,9 @@ matériau approuvé des cartes, sans caches opaques autour des textes.
 Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
+
+ALPHA.10 - CIBLE ET LECTEURS DETAILLES
+Les fenetres de detail se deplacent par leur titre, meme si le HUD est verrouille.
+Position conservee par theme, variante et profil. Le bouton Retour suit la fenetre.
+La cible amicale utilise des PV verts. Le survol affiche une infobulle native,
+sans second cadre de cible. Sources de degats subis traduites.

@@ -525,7 +525,7 @@ function L.Read(view)
     local src=row.source or row[1];local dmg=Num(row.dmg or row[2],0)
     if type(src)=="string" and dmg then
      -- Same as AZS Spell Meter: per-source DPS = amount / run clock.
-     table.insert(out,{name=TAKEN_NAMES[src] or Text(src,80) or src,dmg=dmg,dps=dmg/t,source=src,share=nil})
+     table.insert(out,{name=TAKEN_NAMES[src] or Text(src,80) or src,displayName=FieldKit_L(TAKEN_NAMES[src] or Text(src,80) or src),dmg=dmg,dps=dmg/t,source=src,share=nil})
      sum=sum+dmg
     end
    end

@@ -123,6 +123,26 @@ function C.Bind(frame)
  frame:SetScript("OnMouseUp",function() C.Finish(this) end)
  frame:SetScript("OnHide",function() C.Finish(this) end)
 end
+-- Detailed readers are movable even while the combat HUD is locked.
+function C.DetailHandle(frame)
+ C.detailHandles=C.detailHandles or {}
+ local handle=C.detailHandles[frame]
+ if not handle then
+  handle=CreateFrame("Button",frame:GetName().."ThemeDrag",frame);C.detailHandles[frame]=handle
+  handle:SetPoint("BOTTOMLEFT",frame,"TOPLEFT",4,4);handle:SetHeight(26)
+  T.Surface(handle,"button",true);handle.fieldkitLabel=T.Label(handle,"Drag window",8,0,180,26,12,T.muted)
+  handle:SetFrameLevel(frame:GetFrameLevel()+20);handle:EnableMouse(true);handle:RegisterForDrag("LeftButton")
+  frame:SetMovable(true);frame:SetClampedToScreen(true)
+  C.bound=C.bound or {};table.insert(C.bound,frame)
+  local function Start() if C.active then frame.azsMoving=true;frame:StartMoving() end end
+  handle:SetScript("OnMouseDown",Start);handle:SetScript("OnDragStart",Start)
+  handle:SetScript("OnDragStop",function() C.Finish(frame) end)
+  handle:SetScript("OnMouseUp",function() C.Finish(frame) end)
+  handle:SetScript("OnHide",function() C.Finish(frame) end)
+ end
+ handle:SetWidth(math.max(80,frame:GetWidth()-190));handle.fieldkitLabel:SetWidth(handle:GetWidth()-16);T.Update(handle);handle:Show()
+ return handle
+end
 function C.Resolve()
  if not FieldKitDB or not FieldKitDB.zoneThemes then return nil end
  local key=FieldKitDB.zoneThemeMode
@@ -130,6 +150,7 @@ function C.Resolve()
  if key=="elwynn" or key=="naxx" then return key end
 end
 function C.Suspend()
+ for _,handle in pairs(C.detailHandles or {}) do handle:Hide() end
  C.BossScales(true)
  C.nativeMeterOpen=nil;C.NativeRestore()
  if FieldKitReferenceHUD then FieldKitReferenceHUD.Stop() end
@@ -224,6 +245,7 @@ function C.Refresh(force)
   local visible=C.open[kind]
   C.Mask(frame,not visible)
   if frame and visible then
+   C.DetailHandle(frame)
    if kind=="Stats" then FieldKitCardLayout.Rows(frame,frame.fieldkitNaturalHeight or frame:GetHeight(),frame.fieldkitRowCount or table.getn(frame.rows),"stats",FieldKitDB.statsCollapsed);T.Update(frame) end
    local right=kind=="Accessories" or kind=="Stats" or (kind=="Effects" and zone=="naxx") or variant=="alternative"
    local y=right and rightY or leftY;local previous=C.placed[frame]
