@@ -16,15 +16,17 @@ function M.Restore()
  if not M.active then return end
  local old=M.before
  if Minimap and Minimap:GetParent()==M.root then
-  Minimap:SetParent(old.parent);Minimap:ClearAllPoints()
+  local shown=Minimap:IsShown();Minimap:SetParent(old.parent);Minimap:ClearAllPoints()
   for i=1,table.getn(old.points) do local a=old.points[i];Minimap:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
   Minimap:SetWidth(old.width);Minimap:SetHeight(old.height)
   if Minimap.SetMaskTexture then pcall(Minimap.SetMaskTexture,Minimap,old.mask) end
+  if shown then Minimap:Hide();Minimap:Show() end
  end
  for f,alpha in pairs(M.hidden) do if f:GetAlpha()==0 then f:SetAlpha(alpha) end end
  for _,name in ipairs({"GameTimeFrame","MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.RestoreOne(f) end end
  M.hidden={};M.active=false;M.before=nil
  if M.root then M.root:Hide() end
+ if M.zoomOut then M.zoomOut:Hide();M.zoomIn:Hide() end
 end
 function M.Apply(variant)
  if not Minimap or type(Minimap.SetMaskTexture)~="function" then M.reason="Square map unavailable";return false end
@@ -61,6 +63,7 @@ function M.Apply(variant)
   Minimap:SetParent(M.root)
   for i=1,table.getn(borderNames) do local f=getglobal(borderNames[i]);if f and f.SetAlpha then M.hidden[f]=f:GetAlpha();f:SetAlpha(0) end end
  end
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then return FieldKitReferenceHUD.Map() end
  local size=math.min(230,math.max(160,UIParent:GetWidth()*.13))
  local zone=FieldKitTheme.zone
  if not M.root.azsMoving then M.root:SetWidth(size+16);M.root:SetHeight(size+16) end

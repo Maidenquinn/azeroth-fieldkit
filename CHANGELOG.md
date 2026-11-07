@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0-alpha.3 — 2026-11-07 (local visual pilot, unpublished)
+
+- Rebuild all six Elwynn/Naxxramas layouts from the approved reference compositions: independently tiled empty artwork, native seven action buttons, real square minimap, live HP/resource/XP and counters.
+- Apply the matching complete window shell and materials to FieldKit settings and secondary readers; add three concept previews and HUD scale/opacity controls.
+- Preserve full data through existing detail readers, pinned hover panels, native menus, player buffs and stored level choices. Avoid a second compact target panel when the selected target is the already displayed boss.
+- Fix choice-to-theme opacity capture, child frame levels, duplicate native action borders, map controls, menu clipping, long timer/counter labels and destructive repeated chat font setters.
+- Keep the old HUD and all native ownership recoverable; use separate reference-layout position keys. No gameplay data or stable checkout changed.
+- Native client 0.142.0 exercised in real Elwynn combat (Lardeur and chest) and Naxxramas combat/choices, with all six layouts inspected. Naxx boss/coop and numerical pixel fidelity are not certified. See docs/native-ui-smoke-0.6.0-alpha3.json.
+
 ## 0.5.0-rc.1 — 2026-11-06 (release candidate, not published)
 
 - Three independent, named HUD profiles with immediate switching, preview, undo, and quick access from Home and the header.

@@ -209,6 +209,7 @@ function FieldKit.ApplyChatStyle()
   chatFrame=f
  end
  local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then opacity=0 end
  local bg=Clamp(FieldKitDB.chatBackgroundColor,1,1,table.getn(backgrounds))
  if opacity>0 then
   if not chatBackdrop then
@@ -520,4 +521,22 @@ SlashCmdList.FieldKitLOG=function(message)
  if message=="off" then FieldKitDB.chatCopy=false;FieldKit.SyncChat();return end
  if message=="clear" then FieldKit.ClearChat();return end
  OpenCopy()
+end
+
+-- Native SetFont can clear every visible line. Theme changes use the same
+-- complete-history gate as resizing, and never repeat an unchanged setter.
+function FieldKit.ThemeChatFont(path,size,flags)
+ local f=NativeChat();if not f or not f.GetFont or not f.SetFont or not f.GetNumMessages then return false end
+ local old,oldSize,oldFlags=f:GetFont();flags=flags or ""
+ if old==path and oldSize==size and (oldFlags or "")==flags then return true end
+ local count=f:GetNumMessages();if type(count)~="number" then return false end
+ if count>0 and count~=table.getn(displayHistory) then
+  if type(f.GetMessageInfo)~="function" then return false end
+  local snapshot={}
+  for i=1,count do local ok,text,r,g,b,id=pcall(f.GetMessageInfo,f,i);if not ok or type(text)~="string" then return false end;table.insert(snapshot,{text=text,r=r,g=g,b=b,id=id}) end
+  displayHistory=snapshot
+ end
+ local ok=pcall(f.SetFont,f,path,size,flags)
+ if count>0 and f:GetNumMessages()<count then FieldKit.RestoreDisplayedChat() end
+ return ok
 end

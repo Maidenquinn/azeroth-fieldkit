@@ -4,7 +4,7 @@
 FieldKitScreenLayers={registered={},choiceMasked={},choiceOn=false}
 local S=FieldKitScreenLayers
 
-local CHOICE_EXTRA={"FieldKitThemeBack","FieldKitThemeSummaryDamage","FieldKitThemeSummaryLairs","FieldKitThemeSummaryAccessories","FieldKitThemeSummaryStats","FieldKitThemeSummaryEffects","FieldKitThemeIdentity","FieldKitThemeVitality","FieldKitThemeExperience","FieldKitThemeCounters","FieldKitThemeSchedule","FieldKitThemeUtility","FieldKitThemeMicro","FieldKitThemeTargetFrame","FieldKitBossFrame1Compact","FieldKitBossFrame2Compact","FieldKitBossFrame3Compact","FieldKitBossFrame4Compact","FieldKitThemeDock","FieldKitThemeHeader","FieldKitThemeNavigation","FieldKitThemeTooltip","FieldKitThemeMap","FieldKitBossTimelineFrame","FieldKitLeftStack","FieldKitRightStack",
+local CHOICE_EXTRA={"FieldKitReferenceCanvas","FieldKitThemeBack","FieldKitThemeSummaryDamage","FieldKitThemeSummaryLairs","FieldKitThemeSummaryAccessories","FieldKitThemeSummaryStats","FieldKitThemeSummaryEffects","FieldKitThemeIdentity","FieldKitThemeVitality","FieldKitThemeExperience","FieldKitThemeCounters","FieldKitThemeSchedule","FieldKitThemeUtility","FieldKitThemeMicro","FieldKitThemeTargetFrame","FieldKitBossFrame1Compact","FieldKitBossFrame2Compact","FieldKitBossFrame3Compact","FieldKitBossFrame4Compact","FieldKitThemeDock","FieldKitThemeHeader","FieldKitThemeNavigation","FieldKitThemeTooltip","FieldKitThemeMap","FieldKitBossTimelineFrame","FieldKitLeftStack","FieldKitRightStack",
  "FieldKitBossFrame1","FieldKitBossFrame2","FieldKitBossFrame3","FieldKitBossFrame4",
  "FieldKitPlayerBar","FieldKitPlayerBuffs","FieldKitLegacyCritFrame","FieldKitCombatText",
  "FieldKitCompactBar","FieldKitMinimapButton","FieldKitPartyDetailsFrame",

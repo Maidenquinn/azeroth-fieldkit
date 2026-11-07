@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-alpha.2",
+  "version": "0.6.0-alpha.3",
   "maintainerAcceptedForPublication": false,
   "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -10,5 +10,5 @@
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true,
-  "inGameTestScope": "Visual revision: native UI rendering, sculpted transparent docks, independent player HP, theme settings, minimap and layout switching on the installed client. Manual Naxx skin inspected in an Elwynn ready-phase scene; not a native Naxx combat acceptance. New synthetic six-layout regressions cover choice restoration and all detail routes. No combat/boss/coop acceptance."
+  "inGameTestScope": "Native 0.142.0: all six layouts inspected in their real Elwynn/Naxxramas scenes; real Elwynn combat through Lardeur, chest choice, level choices and theme switching; Naxxramas combat, choice-time theme switch, chat and native death screen. Synthetic Lua 5.0.3/5.1 restoration/data-route regressions. No native Naxx boss or coop acceptance; no measured 100% pixel fidelity claim."
 }

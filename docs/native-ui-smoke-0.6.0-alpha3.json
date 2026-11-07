@@ -1,0 +1,79 @@
+{
+  "version": "0.6.0-alpha.3",
+  "date": "2026-11-07",
+  "gameVersion": "0.142.0",
+  "gameExeSha256": "069c800761120073cd0038322e3418f2a97454b510117d509aae07f1028aaf2f",
+  "renderer": "Unmodified Sky native window captures; no montage used as in-game evidence",
+  "scope": "Six layouts inspected in their real Elwynn/Naxx scenes; Elwynn combat through Lardeur and chest, native choices, Naxx combat and switch during choice; independent live gauges and data readers; corrected native map/gauge restoration without reload. Captures span iterations; they do not all certify the final package bytes.",
+  "notCertified": [
+    "Numerical pixel fidelity or 100% conformity",
+    "Naxxramas boss encounter",
+    "Coop",
+    "All third-party addon icon layouts"
+  ],
+  "knownLimitations": [
+    "Native ready-phase start text still overlays settings; gone after starting the run.",
+    "Illustrations derived with image tool, not official extracted models.",
+    "Chat layout/font changes are refused if complete visible history cannot be recovered."
+  ],
+  "temporaryGameSettings": {
+    "clickToMove": {
+      "before": false,
+      "after": false
+    },
+    "storeLevels": {
+      "before": false,
+      "after": false
+    }
+  },
+  "screenshots": {
+    "01_Choix_Niveau_Natif.png": {
+      "sha256": "905416b5d4bc06be08b459ab3f78b44bd1f59c415040138080e9f68b02ed976d",
+      "bytes": 214799
+    },
+    "02_Elwynn_Alternative_Combat.png": {
+      "sha256": "f9319651caef5db0b35f7d50d25920a9ee926a37356af9197115a19d20fe3e45",
+      "bytes": 453956
+    },
+    "03_Elwynn_Complete_Combat.png": {
+      "sha256": "4a8f8fbc1314e9e1d032e43d4f344070bb5ea9abd21440e13c57741528629f4b",
+      "bytes": 450445
+    },
+    "04_Coffre_Natif.png": {
+      "sha256": "3f919e133cf557f05d3a0e4b887c5ceb2cecd6ee0e1d09848caf2b1694695902",
+      "bytes": 154753
+    },
+    "05_Elwynn_Minimaliste_Combat.png": {
+      "sha256": "583624d126b52b1d61391803c92824a5b134516c997e58e8e781e3f079989a27",
+      "bytes": 486191
+    },
+    "06_Naxxramas_Complete_Combat.png": {
+      "sha256": "bb83a88593ac8a6a3cb0a605ac3ba95a5501dfc3d92dfcd2d755f74c43ddfe37",
+      "bytes": 337516
+    },
+    "07_Fin_Native_Naxxramas.png": {
+      "sha256": "929bd1cfc874848bdf1a6dcd944c3f00b0dd6ab612d83765dfd5a03d4b75e4d8",
+      "bytes": 230485
+    },
+    "08_Naxxramas_Alternative.png": {
+      "sha256": "78a63598602f98b95d5a639601e90f3183ba9bf7e27178d3ce83b8b80feaa708",
+      "bytes": 264979
+    },
+    "09_Preferences_Restaurees.png": {
+      "sha256": "a6adef90f3c557ca221ec3ade0c4c08e095f09ab26180fc4a33f10fbd58e1e01",
+      "bytes": 161745
+    },
+    "10_Naxxramas_Minimaliste_Final.png": {
+      "sha256": "50e8665a97957565f3eadf03067cb7d40dfb18228b43bca300ad26d77b8d9173",
+      "bytes": 262997
+    },
+    "11_Naxxramas_Reglages.png": {
+      "sha256": "026d46a0fa70cb05c1799ad12223113079f851299672b8025a26717d94453705",
+      "bytes": 314508
+    },
+    "12_Restauration_Classique_Corrigee.png": {
+      "sha256": "901e52807d24e582c2fb58fcd044fcef9b719611d99bcf9e84e4156caaf03cea",
+      "bytes": 235513
+    }
+  }
+}

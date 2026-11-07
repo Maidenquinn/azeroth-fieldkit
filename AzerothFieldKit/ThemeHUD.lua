@@ -23,7 +23,9 @@ end
 function H.Save(frame)
  if not frame or H.saved[frame] then return end
  local points=H.Points(frame)
- H.saved[frame]={parent=frame:GetParent(),points=points,width=frame:GetWidth(),height=frame:GetHeight(),alpha=frame:GetAlpha(),scale=frame.GetScale and frame:GetScale() or 1,mouse=frame.IsMouseEnabled and frame:IsMouseEnabled(),strata=frame.GetFrameStrata and frame:GetFrameStrata(),level=frame.GetFrameLevel and frame:GetFrameLevel()}
+ local font;if frame.GetFont and frame.SetFont then local ok,path,size,flags=pcall(frame.GetFont,frame);if ok and path then font={path,size,flags} end end
+ local choice=FieldKitScreenLayers and FieldKitScreenLayers.choiceMasked[frame]
+ H.saved[frame]={font=font,parent=frame:GetParent(),points=points,width=frame:GetWidth(),height=frame:GetHeight(),alpha=choice and choice.alpha or frame:GetAlpha(),scale=frame.GetScale and frame:GetScale() or 1,mouse=frame.IsMouseEnabled and frame:IsMouseEnabled(),strata=frame.GetFrameStrata and frame:GetFrameStrata(),level=frame.GetFrameLevel and frame:GetFrameLevel()}
 end
 function H.Anchor(frame,point,relative,rp,x,y,force)
  if not frame or frame.azsMoving or frame.fieldkitHudDragging then return end
@@ -39,6 +41,7 @@ function H.RestoreOne(f)
   for i=1,table.getn(r.points) do local a=r.points[i];f:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
   if f==getglobal("ChatFrame1") and FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(r.width,r.height)
   else if f:GetWidth()~=r.width then f:SetWidth(r.width) end;if f:GetHeight()~=r.height then f:SetHeight(r.height) end end;f:SetAlpha(r.alpha)
+  if r.font and f.SetFont then if f==getglobal("ChatFrame1") and FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(r.font[1],r.font[2],r.font[3]) else pcall(f.SetFont,f,r.font[1],r.font[2],r.font[3]) end end
   if f.SetScale then f:SetScale(r.scale) end
   if r.mouse~=nil then f:EnableMouse(r.mouse) end
  -- Benilla keeps a native visibility cache after leaving a hidden parent.
@@ -77,6 +80,7 @@ function H.HideTip() if H.tip and not H.pinned then H.tip:Hide() end end
 function H.ModeTip(owner,pinned)
  local rank=FieldKit.GetHeroicLevel()
  local lines={FieldKit_L("Difficulty screen values"),rank and rank>0 and (FieldKit_L("Heroic").." "..rank) or (rank==0 and FieldKit_L("Normal") or FieldKit_L("Mode not provided"))}
+ local zone=type(AZS_ZONE)=="table" and AZS_ZONE.zname;if type(zone)=="string" then table.insert(lines,1,FieldKitNative.Text(zone)) end
  local data=FieldKitRunMode.chart[rank or -1]
  if data then for _,line in ipairs(FieldKitRunMode.ChartLines(rank)) do table.insert(lines,line) end end
  for i=0,5 do
@@ -87,7 +91,7 @@ function H.ModeTip(owner,pinned)
   end
  end
  local affixes=FieldKitRunMode.Affixes();if affixes then table.insert(lines,affixes) end
- table.insert(lines,FieldKit_L("Click to pin; click the panel to unpin."))
+ table.insert(lines,FieldKit_L("Click to pin; click the panel to unpin."));table.insert(lines,FieldKit_L("Right click: quick menu and settings."))
  H.Tip(owner,FieldKit_L("Game mode"),lines,pinned)
 end
 local function Open(kind) FieldKitZoneThemes.Open(kind) end

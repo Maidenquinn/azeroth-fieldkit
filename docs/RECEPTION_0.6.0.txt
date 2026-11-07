@@ -1,139 +1,74 @@
-CORRECTIF VISUEL DU 7 NOVEMBRE 2026
-Cette alpha.2 remplace le prototype visuel plat de l’alpha.1 : socles sculptés
-avec bustes intégrés, acier givré ou cuir vert/laiton, groupes HUD séparés,
-PV live indépendants du cadre masqué, trois compositions par zone et chat compact.
-Les synthèses de Complète ouvrent les tableaux intégraux par Détails complets.
-Elles montrent une sélection ; le bouton ouvre la totalité des valeurs.
-Le bouton Retour au HUD ferme la vue détaillée et réaffiche les synthèses.
-Le chat conserve sa taille précédente si son historique ne peut pas être restauré.
-Le nom de zone et le décor restent ceux de la vraie partie, même en thème manuel.
-Le texte natif « Bougez pour commencer » peut encore passer devant les réglages.
-Contrôles de rendu en phase prête : ils ne valent pas recette complète de combat.
-Les illustrations restent des interprétations, pas des modèles officiels extraits.
+AZEROTH FIELDKIT 0.6.0-alpha.3 — PILOTE ELWYNN / NAXXRAMAS
+7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
 
-AZEROTH FIELDKIT 0.6.0-alpha.2 — RECETTE ELWYNN / NAXXRAMAS
-Branche locale : codex/v0.6.0-elwynn-naxx-hud
-Base : 0.5.0, commit 524a8a69a4c999da134b56304d31e3bd03d5dd19
+La version est installée dans le client habituel. Le code stable reste inchangé.
+Ouvrir : /fieldkit themes puis choisir Automatique et une des trois vignettes.
+Les autres zones gardent le HUD classique. La sélection manuelle ne falsifie
+jamais la vraie zone, ses boss ou ses valeurs.
 
-DEMARRE EN 2 MINUTES
+Cette révision reconstruit les six compositions d’après les maquettes validées :
+habillages transparents découpés par composant, sept vrais boutons de sorts,
+vraie carte carrée, PV/ressource/XP et compteurs indépendants des illustrations.
+Les réglages, tableaux secondaires et infobulles reprennent le thème sélectionné.
+Les valeurs des vignettes sont des exemples ; les valeurs du HUD sont natives.
 
-La version pilote est installée dans le client de test. Ouvre le jeu habituel.
-Dans le chat : /fieldkit themes
-Interface > Style > Thèmes de zone : active les thèmes puis Automatique.
-Choisis Minimaliste, Complète ou Alternative. Les changements sont immédiats.
-Automatique sélectionne Elwynn / Naxxramas à partir de la vraie zone du jeu.
-Les autres zones gardent le HUD classique. Un thème manuel change l'habillage,
-jamais le nom de la véritable zone ou ses données.
+ACCES AUX DONNEES
+- PV : survol = détails et améliorations ; clic = interaction joueur native.
+- Ressource, XP et compteurs : survol exact ; clic = épinglage quand proposé.
+- Difficulté / Héroïque : survol ou clic = multiplicateurs, affixes et modes.
+- Horloge : chronologie complète. Prochain boss : rappels complets.
+- Dégâts, Antres, Equipement et Effets : boutons visibles / en-têtes des panneaux.
+  Les synthèses ouvrent les tableaux complets, leurs onglets et leurs survols.
+  Retour au HUD ferme le lecteur détaillé. Les préférences restent respectées.
+- Clic droit sur Difficulté / FieldKit : menu rapide, statistiques, journal,
+  personnage, sorts, talents, quêtes, social, menu natif et extensions connues.
+- Bouton engrenage / emblème du thème : fenêtre FieldKit.
+- Journal appelle Azeroth Stats quand installé. Son historique de carrière reste
+  dans Stats ; aucun historique artificiel n’est créé.
+- Cible : cadre compact et survol du cadre natif complet. Un boss déjà affiché
+  ne reçoit pas une seconde synthèse identique ; son survol retrouve les détails.
+- Niveaux stockés : bouton conditionnel thématique, ou touche native Y ; le
+  bouton natif précédent est restauré à la désactivation des thèmes.
+- Chat : historique natif conservé, mise en forme uniquement quand toutes les
+  lignes peuvent être restaurées. Naxx Complète : Chat / Copier / Réglages et
+  zone de saisie cliquable. Aucun bouton n’envoie un message automatiquement.
 
-ELWYNN : vert forêt / laiton, M. Châtiment à gauche, Edwin VanCleef à droite.
-NAXXRAMAS : bleu nuit / givre, Sapphiron à gauche, Kel'Thuzad à droite.
-Les personnages sont des interprétations illustrées générées ; ce ne sont pas
-des modèles officiels extraits de WoW. Ils se désactivent via Personnages décoratifs.
+PERSONNALISATION ET RETOUR
+Echelle et opacité sont réglables dans Style et thèmes. Les fenêtres se déplacent
+avec /fieldkit unlock. Chaque zone/variante a ses positions indépendantes ; les
+anciens placements sont conservés. Les profils mémorisent le choix du thème.
+Réinitialiser ce placement rétablit seulement la composition active.
+/fieldkit themes off rétablit l’ancien HUD, la carte ronde et les menus natifs.
+/fieldkit themes auto réactive la détection. /reload conserve les réglages.
+Les choix de niveau/coffre gardent toujours la priorité sur FieldKit.
 
-OU RETROUVER LES INFORMATIONS
+CONTROLES EFFECTUES
+Client natif 0.142.0 : six dispositions inspectées dans les vraies scènes des
+deux zones. Elwynn : combat, progression, Lardeur, coffre, choix de niveaux,
+lecteur détaillé des dégâts et retour. Naxxramas : combat, choix natif avec
+changement de variante, chat, fin de partie native. Fenêtres thématiques,
+carte carrée et transitions rechargées au fil des corrections.
+Tests Lua 5.0.3 et 5.1 : 47 modules, profils, conservation du chat, propriété des
+cadres, priorité des cartes, lecteurs, valeurs inconnues et pools réutilisés.
+Les preuves PNG sont dans Tests_En_Jeu/Reference_Alpha3. Le JSON associé précise
+la portée de chaque capture ; les captures intermédiaires ne certifient pas
+chacune le dernier octet du paquet.
 
-- PV, bouclier et ressource : bloc du joueur. Survol des PV pour les détails ;
-  clic gauche/droit relayé au cadre joueur natif. Niveau affiché une seule fois.
-- XP : rail sous les sorts en Minimaliste et Naxx Complète ; au-dessus des
-  sorts en Elwynn Complète ; pleine largeur en haut (Elwynn Alternative) ou
-  en bas (Naxx Alternative). Survol = valeur exacte / maximum / reste ; clic =
-  épinglage. Le bouton Fermer libère une infobulle épinglée.
-- Difficulté : survol/clic de la puce Héroïque dans le bandeau. Multiplicateurs,
-  affixes et autres difficultés restent accessibles. Les valeurs inconnues sont
-  indiquées comme inconnues, jamais remplacées par des chiffres de maquette.
-- Horloge : clic pour la chronologie. Prochain boss : clic pour les rappels.
-- Dégâts / Antres / Accessoires / Effets : raccourcis visibles. Statistiques,
-  Journal et menus natifs : bouton FIELDKIT + en bas à gauche.
-  Ils ouvrent les vues FieldKit existantes, y compris leurs onglets, classements,
-  tableaux détaillés et survols. Les préférences d'affichage restent respectées.
-- Journal : ouvre Azeroth Stats s'il est installé. L'historique de carrière
-  appartient à Stats ; FieldKit ne fabrique pas un historique de remplacement.
-- Cible : carte compacte native ; survol pour retrouver le cadre cible complet,
-  ses auras, son portrait et les interactions natives. Incantations conservées.
-- Personnage / Sorts / Talents / Quêtes / Social / Menu : raccourcis natifs
-  dans FIELDKIT +, repliés par défaut.
-- Chat, alertes, groupe, réanimation et choix de cartes conservent leurs parcours.
-  Les panneaux FieldKit cèdent la priorité aux choix natifs.
+RECETTE COURTE
+1. Comparer chaque vignette au HUD réel, dans la zone correspondante.
+2. Passer un niveau et ouvrir un coffre ; vérifier le retour du HUD.
+3. Survoler PV, XP, ressource, difficulté et compteurs ; ouvrir chaque tableau.
+4. Zoomer la carte ; vérifier les repères et les raccourcis natifs du menu rapide.
+5. Changer de profil/variante, recharger, désactiver puis réactiver les thèmes.
+6. Faire un combat de boss Naxxramas et un essai coop si tu joues à plusieurs.
 
-PLACEMENTS ET PROFILS
-
-Les blocs se déplacent quand les fenêtres sont déverrouillées (/fieldkit unlock).
-Chaque thème et chaque variante possède ses placements ; l'ancien HUD conserve
-les siens. Les profils mémorisent le thème, la variante et ces placements.
-Réinitialiser ce placement rétablit uniquement la disposition thématique active.
-Le mode Aperçus suspend le HUD thématique vivant puis le reprend à la fermeture.
-Le grand chat visible dépend de tes préférences existantes ; son réglage reste
-dans Chat. Son déplacement n'est pas remplacé par les dispositions de thème.
-
-RECETTE A FAIRE EN RENTRANT (une courte partie par zone)
-
-1. Tester les trois variantes, les ornements, puis toutes les pages de réglages.
-2. Se déplacer et combattre : PV, bouclier, ressource, XP et niveau doivent suivre
-   le jeu ; vérifier les 7 boutons, leurs raccourcis, survols et temps de recharge.
-3. Passer un niveau, ouvrir un coffre et choisir une carte : aucun bloc FieldKit
-   ne doit intercepter le choix. Vérifier ensuite le retour du HUD.
-4. Cibler un ennemi, survoler la carte cible ; vérifier auras et incantations.
-   Réveiller un gardien, attendre le premier boss et vérifier sa vie et son statut.
-5. Ouvrir chaque accès aux détails, épingler / fermer une infobulle ; comparer
-   les valeurs et les onglets avec l'ancien FieldKit. Tester aussi les soins,
-   subis, éliminations, effets et accessoires dès qu'ils possèdent des données.
-6. Zoomer la vraie carte carrée, vérifier le déplacement de la flèche et des
-   repères. Refaire si tu utilises la rotation de carte.
-7. Déplacer un bloc, changer de variante, revenir, changer de profil, /reload.
-   Les positions doivent rester propres au profil / thème / variante.
-8. Désactiver les thèmes : portrait natif, sorts, carte ronde et ancien placement
-   doivent revenir. Réactiver puis ouvrir / fermer Aperçus.
-9. Si tu joues en coop : refaire groupe, cible, cartes et réanimation à deux.
-
-VERIFICATIONS DEJA EFFECTUEES — PORTEE EXACTE
-
-Tests automatiques Lua 5.1 et compilation/exécution des fixtures en Lua 5.0.3 :
-45 modules, limite de 32 upvalues, profils et restauration de propriété des
-cadres, mauvais réglages, inconnus, priorité aux cartes, Aperçus, pools bornés,
-géométrie de la carte et navigation. Ce sont des tests synthétiques, pas une
-recette des combats du moteur.
-
-Essais visuels dans Azeroth Survivors 0.141.1 (df40f5d86) : chargement Naxxramas,
-variantes Minimaliste / Alternative et affichage Complet pendant le chantier ;
-vraie zone Elwynn, ses trois dispositions, palette automatique, réglages,
-infobulle XP, ouverture Dégâts en Minimaliste, /reload et retour à la carte ronde,
-au portrait et à la barre de sorts classiques après correction du cache natif.
-Captures conservées dans 09_Implementation/Tests_En_Jeu du dossier Concepts.
-
-Non validés nativement : combats, gains XP, choix de niveau/coffre, cible en
-combat, boss/guardian vivants, rotation des repères, déplacement sauvegardé des
-blocs, coop, performance prolongée et autres résolutions. L'outil n'a pas réussi
-à démarrer le déplacement avec les touches ; le client a bloqué l'essai par
-macro. Aucun contournement n'a été ajouté au code livré.
-
-LIMITES CONNUES
-
-- Avant de bouger, « Bougez pour commencer » est dessiné par le client au-dessus
-  des fenêtres Lua ; le thème ne le supprime pas. Ce n'est pas une donnée du HUD.
-- Les variantes partagent les mêmes données et les composants natifs. La version
-  Complète reste limitée aux panneaux activés dans tes préférences existantes.
-- Un autre addon propriétaire de la carte/cible peut empêcher sa transformation :
-  FieldKit respecte cette propriété au lieu d'écraser les réglages de cet addon.
-- Les illustrations sont des atlas 2D statiques : aucun modèle animé ni code de
-  génération ne tourne dans le jeu. Elles n'ont pas le statut d'assets officiels.
-
-RETOUR ARRIERE
-
-Immédiat : /fieldkit themes off
-Pour revenir au programme précédent : fermer le jeu et remettre le dossier de
-sauvegarde Installed_FieldKit_before_v060 à la place d'AzerothFieldKit dans
-Jeu/benilla-config/AddOns. Ne pas modifier les fichiers SavedVariables ou .sav.
-La sauvegarde est dans Concepts/09_Implementation/Backups.
-Le code stable, le dépôt historique, les sauvegardes de joueur et les autres addons
-n'ont pas été édités directement. Le client peut enregistrer normalement les
-parties d'essai. Les réglages de FieldKit ont été modifiés par ses propres
-contrôles pendant les essais et sauvegardés normalement par le client.
-
-Cette alpha attend ta recette ; elle n'est ni fusionnée ni publiée sur GitHub.
-
-CORRECTION DES POSITIONS HERITEES
-Si un bloc reste au milieu de l’écran après une ancienne manipulation :
-/fieldkit themes > Réinitialiser ce placement. Seule la composition active
-est réinitialisée ; les positions des autres compositions restent conservées.
-Le placement Naxxramas Complète du poste de test a été réinitialisé après
-sauvegarde du fichier de préférences dans Backups/Visual_Alpha2.
+LIMITES EXPLICITES
+Le rendu est rapproché des maquettes mais aucun score de fidélité de 100 % n’est
+mesuré. Les illustrations dérivées restent des interprétations assistées par IA,
+pas des modèles officiels extraits. Les noms/icônes/rangs réels dépendent de la
+partie. En phase prête, le texte natif « Bougez pour commencer » peut encore
+passer devant la fenêtre des réglages ; il disparaît une fois la partie lancée.
+Les combats de boss Naxxramas et la coop n’ont pas été validés ici.
+La police ou la taille du chat reste native si sa modification risquerait de
+perdre des messages non récupérables. Les extensions non identifiées conservent
+leur propre interface. Aucune publication ni fusion vers le code stable.

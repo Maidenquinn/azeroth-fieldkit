@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-alpha.2",
+  "version": "0.6.0-alpha.3",
   "lua51": true,
   "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)",
   "persistence": true,
@@ -18,7 +18,7 @@
   "partySyncLiveTransportConfirmed": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.2",
+    "version": "0.6.0-alpha.3",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -29,13 +29,13 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Visual revision: native UI rendering, sculpted transparent docks, independent player HP, theme settings, minimap and layout switching on the installed client. Manual Naxx skin inspected in an Elwynn ready-phase scene; not a native Naxx combat acceptance. New synthetic six-layout regressions cover choice restoration and all detail routes. No combat/boss/coop acceptance."
+    "inGameTestScope": "Native 0.142.0: all six layouts inspected in their real Elwynn/Naxxramas scenes; real Elwynn combat through Lardeur, chest choice, level choices and theme switching; Naxxramas combat, choice-time theme switch, chat and native death screen. Synthetic Lua 5.0.3/5.1 restoration/data-route regressions. No native Naxx boss or coop acceptance; no measured 100% pixel fidelity claim."
   },
   "files": {
     "Runtime.lua": {
       "maxUpvalues": 1,
       "functions": 11,
-      "sha256": "e069c42861f343b0c6d4d415ab48b77453316801843da860516d1215b5a92a18"
+      "sha256": "79428db82fc44f305e2724466c7b13bb2f5caab0641adfd8312d48d92e52fa78"
     },
     "Diagnostics.lua": {
       "maxUpvalues": 2,
@@ -50,7 +50,7 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "f35ba813ced083b365c4a823e3a808bd33f71c71e78208e78f3c8e5053a7b229"
+      "sha256": "5d663a66f76b700996eabe5b1fd807ad9cd4f554ec1a3f90adce0cd859617ddb"
     },
     "Profiles.lua": {
       "maxUpvalues": 4,
@@ -60,17 +60,17 @@
     "Localization.lua": {
       "maxUpvalues": 2,
       "functions": 9,
-      "sha256": "cdd399cbb3b7484e64dce4578f3fd1a9ef7d1821851c443d3f94546d3ae20e97"
+      "sha256": "b39d7addc4d89cbb1d485a57e9f562b7d174e79ff4ae35d21af49a49ccbab9ed"
     },
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "d9b86cd633a9d39094bc6583e364b1a9977df1ee8846b0bbc785bef61db9ad85"
+      "sha256": "50b9c730c2d796ea2562aece8826b58dbd13be1e6ecacac75eef5c27a9e09738"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
       "functions": 18,
-      "sha256": "6c944898e2e1e06d09d99c4332f7c8838c143ac56d990d963526fe2e1c3854e2"
+      "sha256": "4e347e55351fda12854039ee195ae535bbcd5c6da772e02cff192e27282c4392"
     },
     "ZoneThemeRegistry.lua": {
       "maxUpvalues": 0,
@@ -110,7 +110,7 @@
     "NativeData.lua": {
       "maxUpvalues": 2,
       "functions": 13,
-      "sha256": "ecff13f09a0ff414854ee8fb89321c74e5d530069e0c0d90de29474a94f63261"
+      "sha256": "43c6c6c5e251e8ad7d91b0f68ee10faef1e405e18e4dd50acb38695bf9253289"
     },
     "MeterLedger.lua": {
       "maxUpvalues": 11,
@@ -155,7 +155,7 @@
     "ScreenLayers.lua": {
       "maxUpvalues": 3,
       "functions": 7,
-      "sha256": "20c04ebcdcf062fb04a34480ddeddd976829c383c13c7a82d2ebe071b8d91428"
+      "sha256": "4729cd51700e54769c637aaceab5d3dece4e62fec10970f1a7d64a20b088761a"
     },
     "NativeTools.lua": {
       "maxUpvalues": 3,
@@ -200,7 +200,7 @@
     "Interface.lua": {
       "maxUpvalues": 24,
       "functions": 185,
-      "sha256": "504b4b2c889d57e31111f4e0bb57043d3c2ba346a99f7198bc9e71ad12797c53"
+      "sha256": "5381c438dc80e06bf312777b2a43b204aa7554a21ba5960304b330bffac90832"
     },
     "FieldKit.lua": {
       "maxUpvalues": 21,
@@ -234,28 +234,38 @@
     },
     "CopyLog.lua": {
       "maxUpvalues": 17,
-      "functions": 34,
-      "sha256": "6d1680b769d86d8da4ea28025bc496192be88429f9a508d4b723652905e57624"
+      "functions": 35,
+      "sha256": "83d6a3b6f73b7b632e04039ad6228a520151e51c74e19671e940af10ff000e09"
     },
     "ThemeMinimap.lua": {
       "maxUpvalues": 2,
       "functions": 5,
-      "sha256": "cbc7f3be61745a7441053abd654b495bb44cee7ec5d3fc8ceb3ea23c70574c14"
+      "sha256": "3124a8ffe2e2a7a92b7c27625af6b96eeff9003affec5042f96b46c8f23cdf84"
     },
     "ThemeHUD.lua": {
       "maxUpvalues": 4,
       "functions": 37,
-      "sha256": "2a5274da307f0cdc129f68d8944f5bbd397519fa42abf161df3a7dc56ef3e0a5"
+      "sha256": "829fbe5672f2f68e8e4b80f5ae94d9fbc2a5a43d68fd2714ac934746ae40eac2"
     },
     "ThemeTarget.lua": {
       "maxUpvalues": 3,
       "functions": 7,
-      "sha256": "04f53afb580019d7ac2660d705b9758715f056bfb238ea9566cb043a607fe52f"
+      "sha256": "f1f3355f2a83519083d72f73968f73d62c3e41d1f58af00285f108e98eb61813"
+    },
+    "ReferenceArt.lua": {
+      "maxUpvalues": 0,
+      "functions": 1,
+      "sha256": "cccbb26adcc416f9d9ead6db382a7934be34479b93c1d37138c0fe96680c87d1"
+    },
+    "ReferenceHUD.lua": {
+      "maxUpvalues": 8,
+      "functions": 45,
+      "sha256": "08703bdc1c3385243e424aa254bdb364774eb12c41271090ba108ebd92ac9e67"
     },
     "ZoneThemes.lua": {
-      "maxUpvalues": 7,
-      "functions": 26,
-      "sha256": "f249c4bf8cf4ef7aaa3c64490873ed828dadc17df2c4ca3337263af653614c25"
+      "maxUpvalues": 10,
+      "functions": 29,
+      "sha256": "8526b816052245fc726f8ec43548ea4220941707630874933dc870c948df8b5a"
     }
   }
 }

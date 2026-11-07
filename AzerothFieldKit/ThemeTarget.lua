@@ -32,7 +32,7 @@ function C.Stop()
   else if native:GetAlpha()==0 then native:SetAlpha(saved.alpha) end;H.saved[native]=nil end
  end
  local cast=getglobal("TargetFrameSpellBar")
- if cast and H.saved[cast] and cast:GetParent()==C.frame then H.RestoreOne(cast) end
+ if cast and H.saved[cast] and cast:GetParent()==C.castOwner then H.RestoreOne(cast) end;C.castOwner=nil
 end
 function C.Update(variant)
  local native=getglobal("TargetFrame")
@@ -42,9 +42,18 @@ function C.Update(variant)
  local hp,max=FieldKit.Number(UnitHealth("target")),FieldKit.Number(UnitHealthMax("target"))
  if not hp or not max or max<=0 then C.reason="Native data unavailable";C.Stop();return end
  C.Create();C.reason=nil
+ local matchedBoss
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then
+  for i=1,4 do local boss=getglobal("FieldKitBossFrame"..i.."Compact")
+   if boss and boss:IsShown() and boss.name and boss.name:GetText()==UnitName("target") then matchedBoss=boss end
+  end
+ end
  local f=C.frame;if not f.azsMoving then f:SetScale(math.min(1,UIParent:GetWidth()/1300)) end
  local mapLeft=(T.zone=="elwynn" and variant=="complete") or (T.zone=="naxx" and variant=="alternative")
- if mapLeft or variant=="alternative" then FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,-86)
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then
+  local boss=getglobal("FieldKitBossFrame1Compact") or getglobal("FieldKitBossFrame1");local y=(boss and boss:IsShown() and boss:GetAlpha()>0) and -195 or -96
+  FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,y,true)
+ elseif mapLeft or variant=="alternative" then FieldKitZoneThemes.Place(f,"TOP",UIParent,"TOP",0,-86)
  else FieldKitZoneThemes.Place(f,"TOPLEFT",UIParent,"TOPLEFT",22,-92) end
  C.name:SetText(FieldKitNative.Text(UnitName("target")))
  local level=UnitLevel("target");local classification=type(UnitClassification)=="function" and UnitClassification("target")
@@ -53,15 +62,16 @@ function C.Update(variant)
  C.bar:SetMinMaxValues(0,max);C.bar:SetValue(hp);C.hp:SetText(FieldKit_FormatHealth(hp,max,FieldKitDB.targetHealthMode))
  H.Save(native);H.Anchor(native,"TOPLEFT",f,"BOTTOMLEFT",0,-4)
  native:SetFrameStrata("DIALOG")
- local over=type(MouseIsOver)=="function" and (MouseIsOver(f) or (C.details and native:GetAlpha()>0 and MouseIsOver(native)))
+ local over=type(MouseIsOver)=="function" and (MouseIsOver(f) or (matchedBoss and MouseIsOver(matchedBoss)) or (C.details and native:GetAlpha()>0 and MouseIsOver(native)))
+ if matchedBoss and type(MouseIsOver)=="function" and MouseIsOver(matchedBoss) then C.details=true end
  local show=C.details and (over or GetTime()<(C.untilTime or 0))
  local wasStored=native:GetParent()==H.storage
- native:SetParent(show and H.saved[native].parent or H.Hidden());native:SetAlpha(H.saved[native].alpha)
+ native:SetParent(show and H.saved[native].parent or H.Hidden());native:SetAlpha(show and H.saved[native].alpha or 0)
  if show and wasStored and native:IsShown() then native:Hide();native:Show() end
  if not show then C.details=false end
  local cast=getglobal("TargetFrameSpellBar")
- if cast and (cast:GetParent()==UIParent or cast:GetParent()==native or cast:GetParent()==f) then
-  H.Save(cast);cast:SetParent(f);H.Anchor(cast,"TOP",f,"BOTTOM",0,-6,true);cast:SetWidth(280)
+ if cast and (cast:GetParent()==UIParent or cast:GetParent()==native or cast:GetParent()==f or cast:GetParent()==C.castOwner) then
+  local owner=matchedBoss or f;H.Save(cast);cast:SetParent(owner);C.castOwner=owner;H.Anchor(cast,"TOP",owner,"BOTTOM",0,-6,true);cast:SetWidth(280)
  end
- f:Show();T.Update(f)
+ if matchedBoss then f:Hide() else f:Show() end;T.Update(f)
 end

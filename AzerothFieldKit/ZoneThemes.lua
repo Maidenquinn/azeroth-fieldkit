@@ -10,6 +10,9 @@ local hidden={"FieldKitModeFrame","FieldKitCollapseDock","FieldKitMicroMenu"}
 C.layoutKeys={"elwynn:minimal","elwynn:complete","elwynn:alternative","naxx:minimal","naxx:complete","naxx:alternative"}
 C.positionNames={"FieldKitThemeIdentity","FieldKitThemeVitality","FieldKitThemeExperience","FieldKitThemeCounters","FieldKitThemeSchedule","FieldKitThemeDock","FieldKitThemeNavigation","FieldKitThemeHeader","FieldKitThemeMap","FieldKitThemeTargetFrame","FieldKitPlayerBar","FieldKitPlayerBuffs","FieldKitBossFrame1"}
 for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do table.insert(C.positionNames,"FieldKitThemeSummary"..kind) end
+for _,zone in ipairs({"elwynn","naxx"}) do for _,variant in ipairs({"minimal","complete","alternative"}) do table.insert(C.layoutKeys,zone..":"..variant..":reference") end end
+for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do table.insert(C.positionNames,"FieldKitReferencePanel"..kind) end
+table.insert(C.positionNames,"FieldKitReferenceChat")
 for _,name in ipairs(FieldKitCardLayout.names) do table.insert(C.positionNames,name) end
 function C.NormalizePositions(value)
  local out={};if type(value)~="table" then return out end
@@ -75,19 +78,21 @@ function C.Resolve()
  if key=="elwynn" or key=="naxx" then return key end
 end
 function C.Suspend()
- C.NativeRestore()
+ C.nativeMeterOpen=nil;C.NativeRestore()
+ if FieldKitReferenceHUD then FieldKitReferenceHUD.Stop() end
  if not C.active then return end
- C.active=false;FieldKitThemeTarget.Stop();H.Restore();FieldKitThemeMinimap.Restore()
+ C.active=false;FieldKitThemeTarget.Stop();H.Restore();FieldKitReferenceHUD.Stop();FieldKitThemeMinimap.Restore()
  local stats=getglobal("FieldKitStatsFrame")
  if stats and stats.fieldkitNaturalHeight then FieldKitCardLayout.Rows(stats,stats.fieldkitNaturalHeight,stats.fieldkitRowCount or 0,"stats",FieldKitDB.statsCollapsed);T.Update(stats) end
  C.open={};C.placed={};C.signature=nil
  T.SetZone("classic")
+ if FieldKitUI and FieldKitUI.frame then FieldKitUI.referenceZone=nil;FieldKitUI.Reflow() end
 end
--- Persist only five restoration booleans so a reload cannot forget prior CVars.
+-- Persist only seven restoration booleans so a reload cannot forget prior CVars.
 function C.NativeRestore()
  local saved=FieldKitDB and FieldKitDB.zoneThemeNativeBefore
  if type(saved)~="table" then return end
- for _,key in ipairs({"clock","tally","build","banners","bosses"}) do
+ for _,key in ipairs({"clock","tally","build","banners","bosses","meter","levels"}) do
   if type(saved[key])=="boolean" then FieldKit.SetHudShown(key,saved[key]) end
  end
  FieldKitDB.zoneThemeNativeBefore=nil
@@ -96,13 +101,19 @@ function C.NativeReplace()
  if type(AZS_IsHudShown)~="function" then return end
  if type(FieldKitDB.zoneThemeNativeBefore)~="table" then FieldKitDB.zoneThemeNativeBefore={} end
  local saved=FieldKitDB.zoneThemeNativeBefore
- for _,key in ipairs({"clock","tally","build","bosses"}) do
-  if key~="bosses" or type(AZS_UNITS)=="table" then
+ if saved.banners==nil then local ok,value=pcall(AZS_IsHudShown,"banners");if ok and type(value)=="boolean" then saved.banners=value end end
+ if type(saved.banners)=="boolean" then
+  local editing=FieldKitUI and FieldKitUI.frame and FieldKitUI.frame:IsShown() and not (FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen())
+  local wanted=not editing and saved.banners or false
+  local ok,current=pcall(AZS_IsHudShown,"banners");if ok and current~=wanted then FieldKit.SetHudShown("banners",wanted) end
+ end
+ for _,key in ipairs({"clock","tally","build","bosses","meter","levels"}) do
+  if (key~="bosses" or type(AZS_UNITS)=="table") and (key~="levels" or (type(AZS_GetStoredLevels)=="function" and type(AZS_OpenStoredLevels)=="function")) then
   if saved[key]==nil then
    local ok,value=pcall(AZS_IsHudShown,key)
    if ok and type(value)=="boolean" then saved[key]=value end
   end
-  if type(saved[key])=="boolean" then
+  if type(saved[key])=="boolean" and not (key=="meter" and C.nativeMeterOpen) then
    local ok,current=pcall(AZS_IsHudShown,key);if ok and current==true then FieldKit.SetHudShown(key,false) end
   end
  end
@@ -120,6 +131,13 @@ function C.Refresh(force)
   local selected=item.value=="toggle" and FieldKitDB[item.key]==true or FieldKitDB[item.key]==item.value
   item.frame.fieldkitSelected=selected;T.State(item.frame,selected)
  end end
+ for _,item in ipairs(C.previewCards or {}) do
+  local zone=C.Resolve() or "elwynn";item.button.preview:SetTexture(T.media.."ReferenceHUD\\"..zone.."_"..item.key.."_preview.tga")
+  item.button.badge:SetText(FieldKitDB.zoneThemeVariant==item.key and FieldKit_L("Active") or "")
+ end
+ C.sliderRefresh=true
+ for _,item in ipairs(C.uiSliders or {}) do item.slider:SetValue(FieldKitDB[item.key] or 100);item.title:SetText(FieldKit_L(item.label).." : "..tostring(FieldKitDB[item.key] or 100).." %") end
+ C.sliderRefresh=false
  if C.statusLabel then
   C.statusLabel:SetText(FieldKit_L(FieldKitDB.zoneThemes and "Enabled" or "Disabled").." · "..FieldKit_L(FieldKitDB.zoneThemeMode).." · "..FieldKit_L(FieldKitDB.zoneThemeVariant).."\n"..FieldKit_L("Square minimap")..": "..FieldKit_L(FieldKitDB.zoneThemeMinimap and "Enabled" or "Disabled").." · "..FieldKit_L("Character ornaments")..": "..FieldKit_L(FieldKitDB.zoneThemeArt and "Enabled" or "Disabled"))
  end
@@ -127,7 +145,7 @@ function C.Refresh(force)
  if not zone then C.Suspend();T.SetZone("classic");return end
  if FieldKit.layoutEditing or (FieldKitPreview and FieldKitPreview.mode) then C.Suspend();T.SetZone(zone);return end
  local variant=FieldKitDB.zoneThemeVariant
- C.currentLayout=zone..":"..variant
+ C.currentLayout=zone..":"..variant..(FieldKitReferenceHUD.Has(zone,variant) and ":reference" or "")
  local signature=zone..variant..UIParent:GetWidth()..":"..UIParent:GetHeight()
  if C.signature~=signature then
   C.Suspend();C.active=true;C.signature=signature;C.revision=C.revision+1;C.placed={}
@@ -135,12 +153,13 @@ function C.Refresh(force)
  C.active=true;T.SetZone(zone)
  -- Yield completely to native choice cards. No writes to card priority or game data.
  if FieldKit.IsChoiceScreen and FieldKit.IsChoiceScreen() then
-  FieldKitThemeTarget.Stop()
+  FieldKitThemeTarget.Stop();FieldKitReferenceHUD.Stop();C.NativeReplace()
+  for _,name in ipairs({"MainMenuBar","PlayerFrame","FieldKitPlayerBar","FieldKitCompactBar","FieldKitMoneyFrame"}) do C.Mask(getglobal(name),true) end
   for _,f in pairs(H.summaries or {}) do f:Hide() end
   for _,f in ipairs({H.dock,H.header,H.nav,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.utility,H.micro,H.schedule,H.back}) do f:Hide() end;H.pinned=false;H.HideTip()
   return
  end
- H.Update(variant,zone);FieldKitThemeTarget.Update(variant)
+ H.Update(variant,zone);if FieldKitReferenceHUD.Has(zone,variant) then FieldKitReferenceHUD.Update(variant,zone) else FieldKitReferenceHUD.Stop() end;FieldKitThemeTarget.Update(variant)
  C.NativeReplace()
  if FieldKitDB.zoneThemeMinimap then FieldKitThemeMinimap.Apply(variant) else FieldKitThemeMinimap.Restore() end
  H.back:Hide()
@@ -155,17 +174,18 @@ function C.Refresh(force)
    local right=kind=="Accessories" or kind=="Stats" or (kind=="Effects" and zone=="naxx") or variant=="alternative"
    local y=right and rightY or leftY;local previous=C.placed[frame]
    if not previous or previous.y~=y or previous.height~=frame:GetHeight() then
-    C.Place(frame,right and "TOPRIGHT" or "TOPLEFT",UIParent,right and "TOPRIGHT" or "TOPLEFT",right and -20 or 20,y,true)
+    if FieldKitReferenceHUD.active then C.Place(frame,"CENTER",UIParent,"CENTER",0,0,true) else C.Place(frame,right and "TOPRIGHT" or "TOPLEFT",UIParent,right and "TOPRIGHT" or "TOPLEFT",right and -20 or 20,y,true) end
    end
    if right then rightY=rightY-frame:GetHeight()-14 else leftY=leftY-frame:GetHeight()-14 end
    local record=previous or {};record.y=y;record.height=frame:GetHeight();C.placed[frame]=record
    H.back:ClearAllPoints();H.back:SetPoint("BOTTOMRIGHT",frame,"TOPRIGHT",0,4);H.back:Show();T.Update(H.back)
   end
  end
- H.Summaries(variant,zone)
+ if FieldKitReferenceHUD.active then FieldKitReferenceHUD.Panels(variant,zone) else H.Summaries(variant,zone) end
  for _,name in ipairs(hidden) do C.Mask(getglobal(name),true) end
  -- Keep native target, boss, group, alerts and chat behaviors intact.
  if FieldKitScreenLayers then FieldKitScreenLayers.ApplyChoice() end
+ if FieldKitUI and FieldKitUI.frame and FieldKitUI.referenceZone~=zone then FieldKitUI.referenceZone=zone;FieldKitUI.Reflow() end
 end
 function C.Tick()
  if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
@@ -176,11 +196,15 @@ function C.Tick()
  C.deadline=now+.2;C.Refresh()
 end
 function C.Set(key,value)
- local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeArt=true}
+ local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeArt=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
  C.Suspend();FieldKitDB[key]=value
  if FieldKit.ApplyHUDProfileLive then FieldKit.ApplyHUDProfileLive() end
  C.Refresh(true)
+end
+function C.ToggleNativeMeter()
+ C.nativeMeterOpen=not C.nativeMeterOpen
+ FieldKit.SetHudShown("meter",C.nativeMeterOpen);C.Refresh(true)
 end
 function C.Open(kind)
  if kind=="FieldKit" then
@@ -193,7 +217,7 @@ function C.Open(kind)
   return
  end
  local route=routes[kind];if not route then return end
- C.open[kind]=not C.open[kind]
+ local opening=not C.open[kind];if opening and FieldKitReferenceHUD.active then C.open={} end;C.open[kind]=opening
  if C.open[kind] then FieldKitDB[route[2]]=true end
  C.placed={};C.Refresh(true)
  local frame=getglobal(route[1]);if C.open[kind] and frame then frame:Show() end
@@ -215,36 +239,53 @@ function C.Command(msg)
  end
 end
 function FieldKitThemeUI(parent,offset)
- local page=CreateFrame("Frame",nil,parent);page:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-offset);page:SetHeight(380)
- local title=T.Label(page,"Zone themes",0,0,660,28,20,T.gold,true)
- local note=T.Label(page,"Themes apply to the HUD and all FieldKit settings. Saved positions remain intact.",0,38,660,44,13,T.text)
- C.ui={}
- local function Button(key,value,label,x,y,w)
-  local button=T.Button(page,nil,label,x,y,w,30,function()
+ local page=CreateFrame("Frame",nil,parent);page:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-offset);page:SetHeight(610)
+ local note=T.Label(page,"One theme for HUD, windows and tooltips.",0,0,950,30,18,T.text)
+ C.ui={};C.previewCards={}
+ local function Button(key,value,label,x,y,w,h)
+  local button=T.Button(page,nil,label,x,y,w,h or 32,function()
    if value=="toggle" then C.Set(key,not FieldKitDB[key]) else C.Set(key,value) end
   end)
   table.insert(C.ui,{frame=button,key=key,value=value});return button
  end
- Button("zoneThemes","toggle","Enable / disable themes",0,90,300)
- local modes,variants={},{}
- for i,key in ipairs({"auto","elwynn","naxx"}) do modes[i]=Button("zoneThemeMode",key,FieldKit_L(key),(i-1)*210,132,200) end
- for i,key in ipairs(FieldKitZoneVariants) do variants[i]=Button("zoneThemeVariant",key,FieldKit_L(key),(i-1)*210,174,200) end
- Button("zoneThemeMinimap","toggle","Square minimap",0,216,240)
- Button("zoneThemeArt","toggle","Character ornaments",252,216,240)
- C.statusLabel=T.Label(page,nil,0,258,660,64,13,T.muted)
- page.Reflow=function(w)
-  page:SetWidth(w);title:SetWidth(w);note:SetWidth(w);C.statusLabel:SetWidth(w)
-  for _,group in ipairs({modes,variants}) do
-   local bw=(w-20)/3
-   for i,b in ipairs(group) do
-    local point,relative,rp,x,y=b:GetPoint(1);b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+10),y)
-    b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-20);T.Update(b)
-   end
-  end
+ local variants={}
+ for i,key in ipairs(FieldKitZoneVariants) do
+  local b=Button("zoneThemeVariant",key,FieldKit_L(key),(i-1)*270,45,260,224);variants[i]=b
+  b.fieldkitLabel:ClearAllPoints();b.fieldkitLabel:SetPoint("TOPLEFT",b,"TOPLEFT",16,-8);b.fieldkitLabel:SetWidth(220);b.fieldkitLabel:SetHeight(32);T.Font(b.fieldkitLabel,23,T.text,true)
+  b.preview=b:CreateTexture(nil,"ARTWORK");b.preview:SetPoint("TOPLEFT",b,"TOPLEFT",8,-49);b.preview:SetWidth(244);b.preview:SetHeight(122)
+  b.hint=T.Label(b,({"Essentials within reach.","Detailed tracking and quick access.","Reorganized map and actions."})[i],12,179,236,34,15,T.text)
+  b.badge=T.Label(b,nil,164,12,78,25,14,T.gold,true);C.previewCards[i]={button=b,key=key}
  end
- table.insert(parent.flow,{frame=page,y=offset})
- T.Button(page,nil,"Reset theme positions",0,326,300,30,function()
+ local modes={}
+ for i,key in ipairs({"auto","elwynn","naxx"}) do modes[i]=Button("zoneThemeMode",key,FieldKit_L(key),(i-1)*270,286,260) end
+ local enabled=Button("zoneThemes","toggle","Enable / disable themes",0,334,260)
+ local map=Button("zoneThemeMinimap","toggle","Square minimap",274,334,260)
+ local art=Button("zoneThemeArt","toggle","Character ornaments",548,334,260)
+ local sliders={}
+ for i,key in ipairs({"zoneThemeScale","cardOpacity"}) do
+  local title=T.Label(page,nil,(i-1)*420,384,400,26,18,T.text,true)
+  local slider=CreateFrame("Slider","FieldKitThemeSlider"..key,page,"OptionsSliderTemplate");slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*420+8,-424);slider:SetWidth(390);slider:SetHeight(18);slider:SetMinMaxValues(i==1 and 75 or 30,i==1 and 110 or 100);slider:SetValueStep(5);T.Control(slider,"slider")
+  for _,suffix in ipairs({"Low","High","Text"}) do local part=getglobal("FieldKitThemeSlider"..key..suffix);if part then part:Hide() end end
+  slider:SetValue(FieldKitDB[key] or 100);local pref=key;local label=i==1 and "HUD scale" or "Panel opacity"
+  title:SetText(FieldKit_L(label).." : "..tostring(FieldKitDB[key] or 100).." %")
+  slider:SetScript("OnValueChanged",function() if not C.sliderRefresh then local value=math.floor((this:GetValue() or 100)/5+.5)*5;title:SetText(FieldKit_L(label).." : "..value.." %");C.Set(pref,value) end end)
+  sliders[i]={slider=slider,title=title,key=key,label=label}
+ end
+ C.uiSliders=sliders
+ C.statusLabel=T.Label(page,nil,0,467,950,48,14,T.muted)
+ local reset=T.Button(page,nil,"Reset theme positions",0,535,310,32,function()
   if C.currentLayout then FieldKitDB.zoneThemePositions[C.currentLayout]=nil;C.revision=C.revision+1;C.placed={};C.Refresh(true) end
  end)
- return offset+380
+ local profiles=T.Button(page,nil,"Manage profiles",330,535,260,32,function() FieldKitUI.Select("profiles") end)
+ page.Reflow=function(w)
+  page:SetWidth(w);note:SetWidth(w);C.statusLabel:SetWidth(w)
+  for i,item in ipairs(sliders) do local half=(w-26)/2;item.title:ClearAllPoints();item.title:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26),-384);item.title:SetWidth(half);item.slider:ClearAllPoints();item.slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26)+8,-424);item.slider:SetWidth(half-16);T.Update(item.slider) end
+  local bw=(w-26)/3
+  for i,b in ipairs(variants) do
+   b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),-45);b:SetWidth(bw);b.preview:SetWidth(bw-16);b.preview:SetHeight(122);b.fieldkitLabel:SetWidth(bw-30);b.hint:SetWidth(bw-24);b.badge:ClearAllPoints();b.badge:SetPoint("TOPRIGHT",b,"TOPRIGHT",-10,-18);T.Update(b)
+  end
+  for _,group in ipairs({modes,{enabled,map,art}}) do for i,b in ipairs(group) do local _,_,_,_,y=b:GetPoint(1);b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),y);b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-20);T.Update(b) end end
+ end
+ table.insert(parent.flow,{frame=page,y=offset})
+ return offset+610
 end

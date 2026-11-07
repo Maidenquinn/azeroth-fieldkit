@@ -2,7 +2,7 @@
 -- A run boundary invalidates retained snapshots until a fresh table/stamp/packet.
 FieldKitNative={generation={},barriers={},serial=0}
 local N=FieldKitNative
-local reads={["AZS_GetPhase"]=true,["AZS_GetRunTime"]=true,["AZS_GetTotems"]=true,["AZS_GetSummonGroups"]=true,
+local reads={["AZS_GetLairs"]=true,["AZS_GetPhase"]=true,["AZS_GetRunTime"]=true,["AZS_GetTotems"]=true,["AZS_GetSummonGroups"]=true,
  ["AZS_GetTimers"]=true,["AZS_GetRevive"]=true,["AZS_GetUpcomingBosses"]=true,["AZS_GetStoredLevels"]=true,
  ["AZS_GetFlaggedLair"]=true,["AZS_GetMeter"]=true,["AZS_GetHealing"]=true,["AZS_GetBossMeter"]=true,
  ["AZS_GetLocalTime"]=true,["AZS_GetCombatTextEvents"]=true}

@@ -896,10 +896,11 @@ end
 function U.Reflow()
  if not U.frame then return end
  local sw,sh=UIParent:GetWidth(),UIParent:GetHeight()
- local w,h=math.max(740,math.min(1000,sw-24)),math.max(560,math.min(760,sh-24))
+ local themed=T.zone~="classic"
+ local w,h=math.max(740,math.min(themed and 1260 or 1000,sw-24)),math.max(560,math.min(themed and 780 or 760,sh-24))
  U.screenWidth=sw;U.screenHeight=sh;U.frame:SetWidth(w);U.frame:SetHeight(h)
- U.frame:SetScale(math.min(1,(sw-16)/w,(sh-16)/h));T.Update(U.frame)
- local sidebar=w<900 and 174 or 204;local x=sidebar+36;local content=w-x-34
+ U.frame:SetScale(math.min(1,(sw-48)/w,(sh-48)/h)/(themed and (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1) or 1));T.Update(U.frame)
+ local sidebar=themed and math.floor(w*.218) or (w<900 and 174 or 204);local x=sidebar+36;local content=w-x-34
  if U.navigation then
   U.navigation:SetWidth(sidebar+6)
   U.navigation:SetHeight(math.max(180,h-236))
@@ -911,7 +912,7 @@ function U.Reflow()
  -- close button and panel header's drag hit area.
  -- Fit three named buttons inside a single fixed-width header band.
  -- Avoid the window close icon, title and native draggable header region.
- local selectorWidth=math.min(386,math.max(218,w*.40))
+ local selectorWidth=math.min(themed and 470 or 386,math.max(218,w*.40))
  U.headerProfileLayer:SetWidth(selectorWidth)
  U.headerProfileLayer:ClearAllPoints()
  U.headerProfileLayer:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-34,-72)
@@ -954,7 +955,7 @@ function U.Reflow()
   local page=U.pages[i];local scroll=page.scroll
   scroll:ClearAllPoints();scroll:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-132)
   scroll:SetWidth(content);scroll:SetHeight(h-232);page:SetWidth(content-10);page:SetHeight(math.max(page.contentHeight,h-232))
-  page.heading:SetWidth(content-14)
+  page.heading:SetWidth(content-14);T.Font(page.heading,themed and 30 or 26,T.text,true)
   for j=1,table.getn(page.flow) do page.flow[j].frame.Reflow(content-16) end
   if page.windowTabs then
    local tw=(content-22)/4
@@ -990,6 +991,8 @@ function U.Reflow()
     end
   end
  end
+ if U.LayoutNavigation then U.LayoutNavigation() end
+ if FieldKitReferenceHUD then FieldKitReferenceHUD.Settings(U) end
  U.CloseMenus()
 end
 
@@ -1121,14 +1124,14 @@ function U.Build(sections,context)
    end
    local header=group.header
    header:ClearAllPoints();header:SetPoint("TOPLEFT",navBody,"TOPLEFT",8,-y)
-   header:SetWidth(180);header:SetHeight(30)
-   T.State(header,U.navOpen==group.name)
-   y=y+33
+   local navWidth=U.navigationBody:GetWidth()-16;header:SetWidth(navWidth);header.fieldkitLabel:SetWidth(navWidth-20);header:SetHeight(36)
+   T.Font(header.fieldkitLabel,T.zone~="classic" and 18 or 13,T.text,T.zone~="classic");T.State(header,U.navOpen==group.name);T.Update(header)
+   y=y+40
    for j=1,table.getn(group.items) do
     local tab=group.items[j]
     if U.navOpen==group.name then
      tab:ClearAllPoints();tab:SetPoint("TOPLEFT",navBody,"TOPLEFT",8,-y)
-     tab:Show();y=y+34
+     tab:SetWidth(U.navigationBody:GetWidth()-16);tab.fieldkitLabel:SetWidth(U.navigationBody:GetWidth()-59);T.Font(tab.fieldkitLabel,T.zone~="classic" and 16 or 13,T.text);T.Update(tab);tab:Show();y=y+36
     else tab:Hide() end
    end
    y=y+4

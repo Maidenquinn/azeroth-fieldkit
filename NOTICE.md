@@ -86,3 +86,18 @@ recorded in data/theme-assets.json and the runtime inventory. AzerothSans.ttf
 and AzerothSerif.ttf are renamed Noto Sans / Noto Serif Bold derivatives; the
 SIL OFL notice in media/OFL-NotoSans.txt applies to both. No font download or
 asset generation runs in the game. Existing Malk/game-data notices still apply.
+
+## Reference skins (0.6.0 pilot)
+
+The maintainer-approved Elwynn and Naxxramas concept images are preserved under
+`design/reference-skins/approved`. Empty transparent artwork shells were derived
+using the image tool, with further image-tool edits removing static XP fills.
+Prompts are recorded in `design/reference-skins/provenance.json`; measured regions
+and the mechanical RGBA-to-TGA exporter are included. These are AI-assisted
+interpretations of Warcraft characters and materials, not official extracted
+Blizzard models or UI assets. Runtime text, action icons, maps and gauges use
+independent live components. Preview thumbnails alone contain example values.
+
+NotoSerif-Regular.ttf is an unmodified Noto Serif font under SIL OFL 1.1, covered
+by the included OFL-NotoSans.txt (same upstream license text). Its source and
+SHA-256 are recorded in data/theme-assets.json. Prior credits remain applicable.

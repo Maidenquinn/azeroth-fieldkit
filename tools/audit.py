@@ -61,6 +61,8 @@ for p in sorted(root.rglob('*'),key=lambda p:p.relative_to(root).as_posix()):
    allowed_sizes=allowed_sizes+((512,256),)
   if relative in ('media/ZoneThemes/elwynnFrame512.tga','media/ZoneThemes/naxxFrame512.tga'):
    allowed_sizes=allowed_sizes+((512,512),)
+  if relative.startswith('media/ReferenceHUD/'):
+   allowed_sizes=tuple((w,h) for w in (1,2,4,8,16,32,64,128,256,512) for h in (1,2,4,8,16,32,64,128,256,512))
   if relative.startswith('media/ChroniclePremium/'):
    allowed_sizes=allowed_sizes+((310,55),(512,128))
   assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height) in allowed_sizes,(relative,width,height)

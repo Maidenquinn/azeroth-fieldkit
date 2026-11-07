@@ -63,7 +63,7 @@ function T.Update(frame)
  if skin.width==w and skin.height==h and skin.style==style then return end
  skin.width=w;skin.height=h;skin.style=style
  skin.base:SetWidth(w);skin.base:SetHeight(h);skin.grain:SetWidth(w);skin.grain:SetHeight(h)
- local c=math.min(skin.kind=="window" and 24 or (skin.kind=="card" and 16 or 8),w/3,h/3)
+ local c=math.min(T.Style(frame)==3 and 12 or (skin.kind=="window" and 24 or (skin.kind=="card" and 16 or 8)),w/3,h/3)
  local xs,ys={0,c,w-c},{0,c,h-c}
  if style==2 then
   -- Four one-pixel solid edges; remaining ornate slices stay hidden.
@@ -123,11 +123,11 @@ function T.State(frame,active)
    t.fieldkitPlate=nil
   else
    if skin.kind=="window" and i==5 then t:Hide() else t:Show() end
-   local asset=T.Style(frame)==3 and (T.media.."ZoneThemes\\"..T.zone.."Frame512.tga") or (T.media.."ChroniclePlate"..plate..".tga")
-   if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end
-   local part=skin.parts[i];local cuts=T.Style(frame)==3 and {0,.12,.88,1} or {0,.07,.93,1}
+   local asset=T.Style(frame)==3 and (T.media.."ReferenceHUD\\"..T.zone.."_material_v3.tga") or (T.media.."ChroniclePlate"..plate..".tga")
+   if T.Style(frame)==3 and i==5 then T.Solid(t,T.panel);t.fieldkitPlate=nil else if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end end
+   local part=skin.parts[i];local cuts=T.Style(frame)==3 and {0,12/512,500/512,1} or {0,.07,.93,1}
    t:SetTexCoord(cuts[part.x],cuts[part.x+1],cuts[part.y],cuts[part.y+1])
-   t:SetVertexColor(1,1,1)
+   if T.Style(frame)==3 and i==5 then t:SetVertexColor(T.panel[1],T.panel[2],T.panel[3]) else t:SetVertexColor(1,1,1) end
    t:SetAlpha(alpha*(i==5 and opacity or 1))
   end
  end
@@ -138,9 +138,9 @@ end
 -- Retain legacy widget input/checked/value behavior; only its material changes.
 function T.PaintControl(control)
  if control.kind=="slider" and control.frame.SetThumbTexture then
-  control.frame:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  control.frame:SetThumbTexture(T.zone~="classic" and (T.media.."ReferenceHUD\\"..T.zone.."_thumb_v3.tga") or "Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
   if control.frame.GetThumbTexture then
-   local thumb=control.frame:GetThumbTexture();if thumb then thumb:SetVertexColor(T.gold[1],T.gold[2],T.gold[3]) end
+   local thumb=control.frame:GetThumbTexture();if thumb then thumb:SetVertexColor(1,1,1);if T.zone~="classic" then thumb:SetWidth(26);thumb:SetHeight(26) end end
   end
  end
  T.State(control.frame,false)
