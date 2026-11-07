@@ -136,6 +136,14 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.13 - ONGLETS, EFFETS, ANTRES
+Carte Equipement : onglets Equipement / Sorts dans la meme carte (clic = changement immediat).
+Listes longues : molette sur la carte, indicateur "a-b / total".
+Effets : icone, nom, stacks, duree ; clic droit annule le buff ; icones natives masquees
+seulement tant que la carte les affiche, restaurees sinon.
+Antres : jusqu a 4 gardiens visibles, etat en couleur, delai et distance.
+A recetter : Elwynn et Naxx Complete ; autres variantes : verifier que les buffs natifs reviennent.
+
 ALPHA.12 - SORTS, EFFETS, ANTRES
 Carte Equipement : bouton "Sorts" -> lecteur natif sur l'onglet Sorts (1 clic).
 Effets : vrais buffs du joueur (nom, icone, stacks, duree) ; reglage "Suivre les buffs actifs".

@@ -321,30 +321,74 @@ C.Refresh();assert(FieldKitThemeTarget.frame:IsShown() and TargetFrame:GetParent
 UnitIsFriend=oldFriend;UnitExists=exists;C.Set("zoneThemes",false)
 print("Locked HUD readers remain movable and persistent; localized taken sources and single target surface passed")
 
--- Restored accesses: Spells tab, real lair rows (never silently dropped) and real effects.
+-- alpha.13: in-card Equipment/Spells tabs, bounded scrolling lists, four guardians, buffs with native icon restoration.
+local function Inside(f,zone,label)
+ local a=R.layout.rects[label];local h=a[4]
+ for _,r in ipairs(f.rows) do if r:IsShown() then
+  local _,_,_,x,y=r:GetPoint();assert(-y+r:GetHeight()<=h-10,zone..": "..label.." row leaves the card ("..tostring(-y+r:GetHeight()).." > "..tostring(h-10)..")")
+  assert(x+r:GetWidth()<=a[3]-8,zone..": "..label.." row crosses the right border")
+ end end
+ local last=nil
+ for _,r in ipairs(f.rows) do if r:IsShown() then local _,_,_,_,y=r:GetPoint();if last then assert(-y>=last,zone..": "..label.." rows overlap") end;last=-y+r:GetHeight() end end
+end
 for _,zone in ipairs({"elwynn","naxx"}) do
  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ -- Tabs
+ local oldItems,oldSpells=FieldKitLoadout.items,FieldKitLoadout.spells
+ FieldKitLoadout.items={[2]={name="Amulet of Test",bonuses={}}}
+ FieldKitLoadout.spells={}
+ for i=1,8 do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={"+1%"},upgrades={}}) end
  FieldKitDB.loadoutTab=1;C.Refresh(true)
- local acc=R.frames.Accessories;assert(acc.spells and acc.spells:IsShown(),zone..": Spells access on the Equipment card")
- click(acc.spells);assert(FieldKitDB.loadoutTab==2 and C.open.Accessories,zone..": Spells opens the native reader on its Spells tab")
- click(acc.spells);assert(FieldKitDB.loadoutTab==2 and C.open.Accessories,zone..": Spells stays open and selected")
- C.Open("Accessories");FieldKitDB.loadoutTab=1
- local oldLairs=AZS_GetLairs;local lairs={}
- for i=1,6 do table.insert(lairs,{name="Guardian "..i,state=(i==1 and "awake" or (i==2 and "asleep" or "empty")),left=(i>2 and 30*i or nil),x=i*10,y=0}) end
- AZS_GetLairs=function() return lairs end
- local list=R.LairList(lairs);assert(table.getn(list)==6 and list[2].state==FieldKit_L("asleep") and list[3].state==FieldKit_L("back in ").."1:30")
- local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
- C.Refresh(true);local panel=R.frames.Lairs;local capacity=zone=="naxx" and 4 or 3
- assert(panel.rows[1].label:GetText()=="Guardian 1" and panel.rows[capacity]:IsShown(),zone..": lair rows listed")
- assert(string.find(panel.rows[capacity].label:GetText(),tostring(6-(capacity-1))),zone..": lair overflow is counted")
- FieldKitNative.Read=oldRead
- AZS_GetLairs=oldLairs
+ local acc=R.frames.Accessories;assert(acc.cardTabs and acc.cardTabs[1]:IsShown() and acc.cardTabs[2]:IsShown(),zone..": two tabs inside the card")
+ assert(acc.rows[1].label:GetText()=="Amulet of Test" and not C.open.Accessories,zone..": equipment tab content")
+ click(acc.cardTabs[2]);assert(FieldKitDB.loadoutTab==2 and not C.open.Accessories,zone..": Spells replaces the content of the same card")
+ assert(acc:IsShown() and acc.rows[1].label:GetText()=="Spell 1" and acc.rows[1].value:GetText()=="Rank 1" and acc.rows[1].entry.name=="Spell 1",zone..": spells listed with ranks and tooltip entries")
+ assert(acc.pager:IsShown() and acc.pager:GetText()=="1-5 / 8",zone..": spells beyond the card scroll with a pager")
+ Inside(acc,zone,"Accessories")
+ this=acc;arg1=-1;acc.scripts.OnMouseWheel();assert(R.scroll.Accessories==1 and acc.rows[1].label:GetText()=="Spell 2",zone..": wheel scrolls the list")
+
+ arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[5].label:GetText()=="Spell 8" and acc.pager:GetText()=="4-8 / 8",zone..": scrolling is clamped")
+ click(acc.cardTabs[1]);assert(FieldKitDB.loadoutTab==1 and acc.rows[1].label:GetText()=="Amulet of Test" and not acc.pager:IsShown(),zone..": back to Equipment")
+ FieldKitLoadout.items,FieldKitLoadout.spells=oldItems,oldSpells
+ -- Effects: 0,1,2,4,many
  local effects=FieldKitNativeTools.frames[1];local oldRows=effects.lastRows
- effects.lastRows={{label="Power Word: Fortitude",value="2x · 1:15",icon="Interface\Icons\Spell_Holy_WordFortitude"},{label="Totem",value="1"},{label="Third",value=""}}
- C.Refresh(true);local e=R.frames.Effects;assert(e:IsShown() and e.rows[1].label:GetText()=="Power Word: Fortitude" and e.rows[1].icon:IsShown(),zone..": real effects listed")
- assert(e.rows[2]:IsShown() and string.find(e.rows[2].label:GetText(),"2"),zone..": overflow is counted, not dropped")
- effects.lastRows={};C.Refresh(true);assert(e.rows[1].label:GetText()==FieldKit_L("No active effect") and not e.rows[2]:IsShown(),zone..": exact empty effects state")
- effects.lastRows=oldRows
+ local oldFrame=BuffFrame;BuffFrame=CreateFrame("Frame","BuffFrame",UIParent);BuffFrame:Show()
+ for _,count in ipairs({0,1,2,4,12}) do
+  effects.lastRows={}
+  for i=1,count do table.insert(effects.lastRows,{label="A very long effect name number "..i.." that must be fitted",value="3x · 12:34",icon="Interface\Icons\X",buffIndex=i}) end
+  C.Refresh(true);local e=R.frames.Effects;Inside(e,zone,"Effects")
+  if count==0 then assert(e.rows[1].label:GetText()==FieldKit_L("No active effect") and not e.rows[2]:IsShown() and not e.pager:IsShown() and BuffFrame:GetParent()==UIParent,zone..": exact empty effects state keeps native buffs")
+  else
+   assert(e.rows[1].buffIndex==1 and e.rows[1].icon:IsShown(),zone..": real buff row")
+   assert(e.rows[2]:IsShown()==(count>=2),zone..": buff row count "..count)
+   assert(e.pager:IsShown()==(count>2),zone..": pager only when the list exceeds the card")
+   assert(BuffFrame:GetParent()==H.storage,zone..": duplicate native buff icons masked while the card lists them")
+  end
+ end
+ this=R.frames.Effects;arg1=-1;R.frames.Effects.scripts.OnMouseWheel();assert(R.frames.Effects.rows[1].buffIndex==2,zone..": effects scroll")
+ R.scroll.Effects=0
+ C.Set("zoneThemeVariant","minimal");assert(BuffFrame:GetParent()==UIParent,zone..": native buffs restored when the card is not displayed")
+ C.Set("zoneThemeVariant","complete");effects.lastRows={{label="Buff",value="",icon="Interface\Icons\X",buffIndex=1}};C.Refresh(true);assert(BuffFrame:GetParent()==H.storage,zone..": masked again when the card returns")
+ C.Set("zoneThemes",false);assert(BuffFrame:GetParent()==UIParent,zone..": native buffs restored when the theme is off")
+ BuffFrame=oldFrame;effects.lastRows=oldRows
+ C.Set("zoneThemes",true)
+ -- Lairs: 0..4 guardians and more than four
+ local oldRead=FieldKitNative.Read;local lairs={}
+ FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
+ for _,count in ipairs({0,1,2,3,4,6}) do
+  lairs={}
+  for i=1,count do table.insert(lairs,{name="Guardian "..i,state=(i==1 and "awake" or (i==2 and "asleep" or "empty")),left=(i>2 and 30*i or nil),x=i*10,y=0}) end
+  C.Refresh(true);local panel=R.frames.Lairs;Inside(panel,zone,"Lairs")
+  if count==0 then assert(panel.rows[1].label:GetText()==FieldKit_L("No active lair") or panel.rows[1].label:GetText()=="?",zone..": empty lair state")
+  else
+   local shown=0;for _,r in ipairs(panel.rows) do if r:IsShown() then shown=shown+1 end end
+   assert(shown==math.min(4,count),zone..": all guardians up to four are visible ("..count..")")
+   assert(panel.rows[1].label:GetText()=="Guardian 1" and not string.find(panel.rows[math.min(4,count)].label:GetText(),"+"),zone..": no +N placeholder")
+   for _,r in ipairs(panel.rows) do assert(not r.lamp or not r.lamp:IsShown(),zone..": no raw status squares") end
+   assert(panel.pager:IsShown()==(count>4),zone..": pager only beyond four")
+  end
+ end
+ R.scroll.Lairs=0;FieldKitNative.Read=oldRead
 end
 C.Set("zoneThemes",false)
-print("Spells access, lair guardians and real effects panels passed (synthetic)")
+print("Equipment/Spells tabs, bounded effects and lairs, native buff restoration passed (synthetic)")

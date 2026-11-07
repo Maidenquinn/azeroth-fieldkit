@@ -84,7 +84,7 @@ function T.Buffs(rows)
    local value=""
    if count and count>1 then value=tostring(count).."x" end
    if remaining and remaining>0 then value=(value~="" and (value.." · ") or "")..N.Clock(remaining) end
-   table.insert(rows,{label=(name and name~="") and N.Text(name) or FieldKit_L("Effect"),value=value,icon=N.Text(texture,240)})
+   table.insert(rows,{label=(name and name~="") and N.Text(name) or FieldKit_L("Effect"),value=value,icon=N.Text(texture,240),buffIndex=index})
   end
  end
  return true

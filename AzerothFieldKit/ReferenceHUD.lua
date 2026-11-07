@@ -35,7 +35,7 @@ function R.Create()
    row.bar:SetFrameLevel(row:GetFrameLevel()+1)
    row:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) end end)
    row:SetScript("OnLeave",function() GameTooltip:Hide() end)
-   local route=kind;row:SetScript("OnClick",function() FieldKitZoneThemes.Open(route) end)
+   local route=kind;row:RegisterForClicks("LeftButtonUp","RightButtonUp");row:SetScript("OnClick",function() if this.buffIndex and arg1=="RightButton" and type(CancelPlayerBuff)=="function" then CancelPlayerBuff(this.buffIndex) else FieldKitZoneThemes.Open(route) end end)
   end
   local route=kind
   f:EnableMouse(true)
@@ -47,6 +47,10 @@ function R.Create()
    local native=getglobal(({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[route]);if native and native.mashCollapseButton then native.mashCollapseButton:Click();FieldKitZoneThemes.Refresh(true) end
   end)
   f.more=T.Button(f,nil,"",0,0,300,28,function() FieldKitZoneThemes.Open(route) end);Blank(f.more)
+  f.pager=T.Label(f,nil,0,0,96,20,13,R.body);f.pager:ClearAllPoints();f.pager:SetPoint("TOPRIGHT",f,"TOPRIGHT",-34,-18);f.pager:SetJustifyH("RIGHT");f.pager:Hide()
+  f.referenceKind=kind;f:EnableMouseWheel(true)
+  local function Wheel() local p=this.referenceKind and this or this:GetParent();R.scroll=R.scroll or {};R.scroll[p.referenceKind]=(R.scroll[p.referenceKind] or 0)-(arg1 or 0);FieldKitZoneThemes.Refresh(true) end
+  f:SetScript("OnMouseWheel",Wheel);for _,row in ipairs(f.rows) do row:EnableMouseWheel(true);row:SetScript("OnMouseWheel",Wheel) end
  end
  R.counts={};R.counterButtons={};R.countIcons={}
  for i=1,3 do
@@ -328,37 +332,67 @@ function R.Map()
  return true
 end
 local function Row(f,i,x,y,w,h)
- local r=f.rows[i];r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:SetAlpha(1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h);r:Show();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
+ local r=f.rows[i];r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:SetAlpha(1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h);r:Show();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
  r.label:ClearAllPoints();r.label:SetPoint("TOPLEFT",r,"TOPLEFT",0,0);r.label:SetWidth(w-96);r.label:SetHeight(h);r.value:ClearAllPoints();r.value:SetPoint("TOPRIGHT",r,"TOPRIGHT",0,0);r.value:SetWidth(94);r.value:SetHeight(h);return r
 end
--- Spells tab of the native equipment reader, reachable in one click from the Equipment card.
-function R.OpenSpells()
- FieldKitDB.loadoutTab=2
- if FieldKitZoneThemes.open.Accessories then
-  if FieldKitLoadout.refresh then FieldKitLoadout.refresh() end;FieldKitZoneThemes.Refresh(true)
- else FieldKitZoneThemes.Open("Accessories") end
+-- Scrolling window over a list that can outgrow its fixed art card; the wheel moves it, a pager shows position.
+function R.Window(f,kind,total,capacity)
+ R.scroll=R.scroll or {}
+ local top=math.max(0,total-capacity);local offset=math.min(top,math.max(0,R.scroll[kind] or 0));R.scroll[kind]=offset
+ if total>capacity then f.pager:SetText((offset+1).."-"..math.min(total,offset+capacity).." / "..total);f.pager:Show() else f.pager:Hide() end
+ return offset
+end
+-- Flat text tabs inside a card (same language as the meter tabs: gold underline on the active one).
+function R.CardTabs(f,a,active,keys,pick)
+ f.cardTabs=f.cardTabs or {}
+ local width=(a[3]-48)/table.getn(keys)
+ for i,key in ipairs(keys) do
+  local b=f.cardTabs[i]
+  if not b then
+   local index=i;b=T.Button(f,nil,key,0,0,100,26,function() pick(index) end);f.cardTabs[i]=b
+   b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1)
+  end
+  FieldKit_Text(b,key);b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+(i-1)*width,-44);b:SetWidth(width-3);b:SetHeight(26)
+  b.fieldkitLabel:SetWidth(width-7);T.Font(b.fieldkitLabel,15,active==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=active==i;Blank(b)
+  T.Solid(b.underline,{1,.82,.12});if active==i then b.underline:Show() else b.underline:Hide() end;b:Show()
+ end
+end
+function R.MaskBuffs(want)
+ for _,name in ipairs({"BuffFrame","TemporaryEnchantFrame"}) do
+  local frame=getglobal(name)
+  if frame then
+   if want and frame:GetParent()~=H.storage then FieldKitZoneThemes.Mask(frame,true)
+   elseif not want and R.buffsMasked and frame:GetParent()==H.storage then FieldKitZoneThemes.Mask(frame,false) end
+  end
+ end
+ R.buffsMasked=want and true or nil
 end
 -- Guardians as the native lair reader orders them: nearest first, with state/delay and distance.
 function R.LairList(lairs)
  local list={}
+ local tints={awake={1,.42,.35},asleep={.55,.9,.55},waiting={.86,.73,.42},empty={.62,.62,.62}}
+ local function Tint(state)
+  if state==FieldKit_L("awake") then return tints.awake elseif state==FieldKit_L("asleep") then return tints.asleep
+  elseif string.find(state,FieldKit_L("back in "),1,true)==1 then return tints.waiting end
+  return tints.empty
+ end
  local source=getglobal("FieldKitLairFrame")
  for k=1,(source and source.rows and table.getn(source.rows) or 0) do
   local row=source.rows[k];local text=row.label and row.label:GetText()
   if text and text~="" and row:IsShown() then
    local state=row.value and row.value:GetText() or "";local name=string.gsub(text,"^> ","")
-   local color={.45,.45,.45};if state==FieldKit_L("awake") then color={1,.25,.25} elseif state==FieldKit_L("asleep") then color={.2,1,.2} end
-   table.insert(list,{name=name,state=state,dist=row.dist and row.dist:GetText() or "",color=color})
+   table.insert(list,{name=name,state=state,dist=row.dist and row.dist:GetText() or "",tint=Tint(state)})
   end
  end
  if table.getn(list)==0 and type(lairs)=="table" then
   for _,e in ipairs(lairs) do
    if type(e)=="table" and type(e.name)=="string" then
-    local state,color
-    if e.state=="awake" then state,color=FieldKit_L("awake"),{1,.25,.25}
-    elseif e.state=="asleep" then state,color=FieldKit_L("asleep"),{.2,1,.2}
-    elseif FieldKit.Number(e.left) and e.left>0 then state,color=FieldKit_L("back in ")..FieldKitNative.Clock(e.left),{.45,.45,.45}
-    else state,color=FieldKit_L("empty"),{.45,.45,.45} end
-    table.insert(list,{name=FieldKitNative.Text(e.name),state=state,dist="",color=color})
+    local state
+    if e.state=="awake" then state=FieldKit_L("awake")
+    elseif e.state=="asleep" then state=FieldKit_L("asleep")
+    elseif FieldKit.Number(e.left) and e.left>0 then state=FieldKit_L("back in ")..FieldKitNative.Clock(e.left)
+    else state=FieldKit_L("empty") end
+    table.insert(list,{name=FieldKitNative.Text(e.name),state=state,dist="",tint=Tint(state)})
    end
   end
  end
@@ -368,7 +402,8 @@ function R.Panels(variant,zone)
  for _,f in pairs(H.summaries or {}) do f:Hide() end
  local detail=false;for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if FieldKitZoneThemes.open[kind] then detail=true end end
  for _,f in pairs(R.frames) do f:Hide() end
- if variant~="complete" then return end
+ if variant~="complete" then R.MaskBuffs(false);return end
+ R.effectBuffs=false
  local d=R.layout
  if not FieldKitNative.Active() and (not R.readyAt or GetTime()>R.readyAt or R.readySerial~=FieldKitNative.serial) then
   R.readyItems={};R.readyAt=GetTime()+5;R.readySerial=FieldKitNative.serial
@@ -390,7 +425,7 @@ function R.Panels(variant,zone)
     local t=f.cleanBody;t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_card_body_v9.tga");t:SetTexCoord(0,1,0,1);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",17,-44);t:SetWidth(a[3]-34);t:SetHeight(a[4]-60);t:Show()
    end
    f.more:Show();f.more:SetFrameLevel(f:GetFrameLevel()+15);f.more:ClearAllPoints();f.more:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);f.more:SetWidth(a[3]-42);f.more:SetHeight(28);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
-   if f.emptySocket then f.emptySocket:Hide() end;f.total:Hide();f.rateLabel:Hide();for _,r in ipairs(f.rows) do r:Hide();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end end
+   if f.emptySocket then f.emptySocket:Hide() end;f.total:Hide();f.rateLabel:Hide();f.pager:Hide();if f.cardTabs then for _,b in ipairs(f.cardTabs) do b:Hide() end end;for _,r in ipairs(f.rows) do r:Hide();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end end
    if kind=="Damage" then
     if f.liveBody then f.liveBody:Hide();f.liveGrain:Hide() end
     FieldKit_Text(f.more,"All spells");f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →");local view,index=FieldKitMeterSuite.View();local lines,total,rate,known=FieldKitMeterLedger.Read(view)
@@ -412,33 +447,41 @@ function R.Panels(variant,zone)
     end
    elseif kind=="Lairs" then
     FieldKit_Text(f.more,"View list");f.more.fieldkitLabel:SetText(FieldKit_L("View list").." →");local lairs=FieldKitNative.Read("AZS_GetLairs");local active=0;for _,e in ipairs(type(lairs)=="table" and lairs or {}) do if e.state=="awake" then active=active+1 end end
-    local list=R.LairList(lairs)
-    if table.getn(list)>0 then
-     -- Guardians in native order (nearest first): name, state / return delay, distance. Overflow is counted, never dropped.
-     f.more:Hide();local capacity=zone=="naxx" and 4 or 3;local total=table.getn(list);local shown=total>capacity and capacity-1 or total
-     for i=1,(shown<total and capacity or shown) do
-      local e=list[i];local overflow=i>shown
-      local r=zone=="naxx" and Row(f,i,52,53+(i-1)*31,a[3]-77,28) or Row(f,i,38,47+(i-1)*28,a[3]-64,27)
-      local vw=math.min(150,math.max(80,a[3]*.4));r.value:SetWidth(vw);r.label:SetWidth(a[3]-vw-90);r.label:SetJustifyH("LEFT");r.value:SetJustifyH("RIGHT")
-      if overflow then r.label:SetText(string.format(FieldKit_L("+%d more lairs"),total-shown));r.value:SetText(FieldKit_L("View list").." →")
-      else r.label:SetText(e.name);r.value:SetText(e.state..(e.dist~="" and ("  "..e.dist) or "")) end
-      if not r.lamp then r.lamp=r:CreateTexture(nil,"ARTWORK");r.lamp:SetWidth(9);r.lamp:SetHeight(9) end
-      r.lamp:ClearAllPoints();r.lamp:SetPoint("LEFT",r,"LEFT",-14,0)
-      if overflow then r.lamp:Hide() else T.Solid(r.lamp,e.color);r.lamp:Show() end
+    local list=R.LairList(lairs);local total=table.getn(list);local capacity=4
+    f.title:SetWidth(a[3]-175)
+    if total>0 then
+     -- Every guardian is listed (four rows in both zones); more than four scroll with the wheel, never hidden behind "+N".
+     f.more:Hide();local offset=R.Window(f,"Lairs",total,capacity)
+     for i=1,math.min(capacity,total-offset) do
+      local e=list[offset+i]
+      local r=zone=="naxx" and Row(f,i,52,53+(i-1)*31,a[3]-77,28) or Row(f,i,40,44+(i-1)*21,a[3]-66,20)
+      local vw=math.min(170,math.max(90,a[3]*.45));r.value:SetWidth(vw);r.label:SetWidth(a[3]-vw-96);r.label:SetJustifyH("LEFT");r.value:SetJustifyH("RIGHT")
+      r.label:SetText(e.name);r.value:SetText(e.state..(e.dist~="" and ("  "..e.dist) or ""))
+      r.fontSize=zone=="naxx" and 16 or 14;r.fontMin=11;r.labelTint=e.tint;r.valueTint=e.tint
      end
     elseif zone=="naxx" then
      f.more:Hide()
      for i=1,4 do local r=Row(f,i,52,53+(i-1)*31,a[3]-77,28);r.label:SetWidth(a[3]-138);r.label:SetJustifyH("LEFT");r.label:SetText(i==1 and FieldKit_L("No active lair") or "");r.value:SetWidth(53);r.value:SetText("") end
-    else local r=Row(f,1,30,52,a[3]-60,28);r.label:SetWidth(a[3]-60);r.label:SetJustifyH("CENTER");r.label:SetText(type(lairs)~="table" and "?" or (active==0 and FieldKit_L("No active lair") or tostring(active).." "..FieldKit_L("active lairs")));r.value:SetText("");r.value:SetWidth(0) end
+    else local r=Row(f,1,30,52,a[3]-60,28);r.label:SetWidth(a[3]-60);r.label:SetJustifyH("CENTER");r.label:SetText(type(lairs)~="table" and "?" or FieldKit_L("No active lair"));r.value:SetText("");r.value:SetWidth(0) end
    elseif kind=="Accessories" then
-    FieldKit_Text(f.more,"Equipment / spells");f.more:Hide()
-    if not f.spells then f.spells=T.Button(f,nil,"",0,0,100,22,function() R.OpenSpells() end);Blank(f.spells) end
-    f.spells:SetFrameLevel(f:GetFrameLevel()+30);f.spells:ClearAllPoints();f.spells:SetPoint("TOPRIGHT",f,"TOPRIGHT",-34,-12);f.spells:SetWidth(96);f.spells:SetHeight(26)
-    f.spells.fieldkitLabel:SetText(FieldKit_L("Spells").." →");f.spells.fieldkitLabel:SetWidth(96);f.spells.fieldkitLabel:SetJustifyH("RIGHT");T.Font(f.spells.fieldkitLabel,15,{1,.82,.12},true);f.spells:Show()
-    f.title:SetWidth(a[3]-140)
-    local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
-    for i=1,5 do local r=Row(f,i,72,51+(i-1)*35,a[3]-94,30);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
-     local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(texture);r.icon:Show() end
+    FieldKit_Text(f.more,"Equipment / spells");f.more:Hide();f.title:SetWidth(a[3]-175)
+    local tab=FieldKitDB.loadoutTab==2 and 2 or 1
+    R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end)
+    if tab==1 then
+     local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
+     for i=1,5 do local r=Row(f,i,72,76+(i-1)*31,a[3]-94,28);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
+      local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(texture);r.icon:Show() end
+      r.fontSize=16;r.fontMin=16
+     end
+    else
+     local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset=R.Window(f,"Accessories",total,5)
+     if total==0 then local r=Row(f,1,72,76,a[3]-94,28);r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
+     for i=1,math.min(5,total-offset) do
+      local e=spells[offset+i];local r=Row(f,i,72,76+(i-1)*31,a[3]-94,28);r.entry=e
+      r.label:SetText(e.name or "?");r.value:SetText(e.rank or "");r.value:SetWidth(78);r.label:SetWidth(a[3]-98-82)
+      local icon=FieldKitLoadout.Icon(e.name);if icon then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(icon);r.icon:Show() end
+      r.fontSize=16;r.fontMin=12;local cr,cg,cb=FieldKitLoadout.RankColor(e.rankValue);r.valueTint={cr,cg,cb}
+     end
     end
    elseif kind=="Stats" then
     FieldKit_Text(f.more,"All statistics");f.more.fieldkitLabel:SetText(FieldKit_L("All statistics").." →");local source=getglobal("FieldKitStatsFrame");local labels={"Damage","Haste","Crit Chance","Lifesteal"}
@@ -447,26 +490,30 @@ function R.Panels(variant,zone)
      for _,s in ipairs(source and source.rows or {}) do if s.label:GetText()==FieldKit_L(name) then value=s.value:GetText() or "?" end end;r.value:SetText(value)
     end
    else
-    FieldKit_Text(f.more,"All effects");f.more:Hide()
+    FieldKit_Text(f.more,"All effects");f.more:Hide();f.title:SetWidth(a[3]-175)
     local source=FieldKitNativeTools and FieldKitNativeTools.frames[1];local list=source and source.lastRows or {}
-    local capacity=2;local total=table.getn(list);local shown=total>capacity and capacity-1 or total
-    if total==0 then list={{label=FieldKit_L("No active effect"),value=""}};total=1;shown=1 end
-    for i=1,(shown<total and capacity or shown) do
-     local e=list[i];local overflow=i>shown;local r=Row(f,i,72,46+(i-1)*34,a[3]-99,31)
-     if overflow then r.label:SetText(string.format(FieldKit_L("+%d more effects"),total-shown));r.value:SetText("")
-     else r.label:SetText(e.label or "");r.value:SetText(e.value or "") end
+    local total=table.getn(list);local capacity=2
+    if total==0 then list={{label=FieldKit_L("No active effect"),value=""}};total=1 end
+    local offset=R.Window(f,"Effects",total,capacity)
+    for i=1,math.min(capacity,total-offset) do
+     local e=list[offset+i];local r=Row(f,i,72,44+(i-1)*29,a[3]-99,27)
+     r.label:SetText(e.label or "");r.value:SetText(e.value or "");r.buffIndex=e.buffIndex
+     if e.buffIndex then R.effectBuffs=true end
      local available=a[3]-99;local vw=r.value:GetText()~="" and math.min(110,math.max(60,(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+4)) or 0;r.value:SetWidth(vw);r.label:SetWidth(available-vw-8)
-     if not overflow and e.icon and e.icon~="" then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,0);r.icon:SetTexture(e.icon);r.icon:Show() end
+     if e.icon and e.icon~="" then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,2);r.icon:SetWidth(24);r.icon:SetHeight(24);r.icon:SetTexture(e.icon);r.icon:Show() end
+     r.fontSize=16;r.fontMin=11
     end
    end
    R.Fit(f.title,21,12);if f.total:IsShown() then R.Fit(f.total,zone=="naxx" and 30 or 16,12) end
    for _,r in ipairs(f.rows) do if r:IsShown() then
-    T.Font(r.label,16,R.body,false);T.Font(r.value,16,R.body,false);R.Fit(r.label,16,kind=="Accessories" and 16 or 12);R.Fit(r.value,16,kind=="Accessories" and 16 or 12)
+    local size=r.fontSize or 16;local least=r.fontMin or (kind=="Accessories" and 16 or 12)
+    T.Font(r.label,size,r.labelTint or R.body,false);T.Font(r.value,size,r.valueTint or r.labelTint or R.body,false);R.Fit(r.label,size,least);R.Fit(r.value,size,least)
     r.fullLines={r.label.referenceFullText or "",r.value.referenceFullText or ""}
-    r:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) else H.Tip(this,f.title:GetText(),this.fullLines) end end);r:SetScript("OnLeave",H.HideTip)
+    r:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) elseif this.buffIndex and GameTooltip.SetPlayerBuff then GameTooltip:SetOwner(this,"ANCHOR_LEFT");GameTooltip:SetPlayerBuff(this.buffIndex);GameTooltip:Show() else H.Tip(this,f.title:GetText(),this.fullLines) end end);r:SetScript("OnLeave",function() GameTooltip:Hide();H.HideTip() end)
    end end
   end
  end
+ R.MaskBuffs(R.effectBuffs and R.frames.Effects:IsShown())
 end
 
 -- One settings shell for every existing page; all controls retain their handlers.

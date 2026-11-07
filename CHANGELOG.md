@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.13 - 2026-11-07 (in-card tabs, bounded lists, unpublished)
+
+- Equipment card: real in-card Equipment / Spells tabs (flat gold-underline tabs, same card, no reader, no reload). Spells keep icon, rank and the native tooltip; the "Spells ->" button of alpha.12 is removed.
+- Cards with fixed art no longer overflow: Effects, Lairs and Spells show a scrolling window (mouse wheel) with a "from-to / total" pager and tighter row geometry; a shared Row reset prevents leftover fonts/tints.
+- Effects: each buff shows icon, name, stacks and time; native buff tooltip on hover, right-click cancels the buff. The client BuffFrame / TemporaryEnchantFrame is masked reversibly (existing Mask/Save/Restore) only while the card lists buffs, and restored when the card is hidden, the layout changes or the theme is off.
+- Lairs: up to four guardians are always listed (no "+N" placeholder); raw status squares replaced by tinted state text (awake, asleep, waiting, empty) with delay and distance.
+
 ## 0.6.0-alpha.12 - 2026-11-07 (restored spells, effects and lair detail, unpublished)
 
 - Equipment card: direct "Spells" access opens the native reader on its Spells tab (ranks, stats and tooltips unchanged).

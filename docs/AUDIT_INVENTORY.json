@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.12",
+  "candidate": "0.6.0-alpha.13",
   "runtimeModules": 47,
   "textureCount": 245,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5187,
-      "sha256": "5f387dea1a23846e2657a251b35b01dfaf6639c0420d240da318bad6a1669a31",
+      "sha256": "d25aecf9fbab909f27ccf43a7b496b4e3caff87b3858bb9369cc502f3efee323",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -281,8 +281,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 34935,
-      "sha256": "949e8fdce180aa5d8104ca0007bb9784f26dcf2073b1c5bb01aa113166be504e",
+      "bytes": 34969,
+      "sha256": "178ef8b5ad275a54690748d823dd3772cda088204b049dc6b11314f69da7652a",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -1233,8 +1233,8 @@
       "literalEvents": []
     },
     "NativeTools.lua": {
-      "bytes": 13492,
-      "sha256": "879758ff87bec5474c26de9ffbfe637ed77b645df868b93e35813359cd7716f1",
+      "bytes": 13508,
+      "sha256": "44e5502153e3b2d302443e3ca734d1af722d11182062ee53b5edbea101b9b765",
       "namedFunctions": [
         {
           "name": "Count",
@@ -2899,8 +2899,8 @@
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 47817,
-      "sha256": "3345ed5214f5e99556c44d6f8bb4b1515b260b76e5ac5648daf7dede81840d8b",
+      "bytes": 50985,
+      "sha256": "c3ce453dccf992b21ad3ec2d4af93ed37e8ccaab57a466dae9f7b2e9d418caa9",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2927,68 +2927,84 @@
           "line": 20
         },
         {
+          "name": "Wheel",
+          "line": 52
+        },
+        {
           "name": "R.Geometry",
-          "line": 85
+          "line": 89
         },
         {
           "name": "R.Child",
-          "line": 98
+          "line": 102
         },
         {
           "name": "R.Art",
-          "line": 108
+          "line": 112
         },
         {
           "name": "Label",
-          "line": 124
-        },
-        {
-          "name": "Button",
           "line": 128
         },
         {
+          "name": "Button",
+          "line": 132
+        },
+        {
           "name": "R.Fit",
-          "line": 134
+          "line": 138
         },
         {
           "name": "R.Stop",
-          "line": 157
+          "line": 161
         },
         {
           "name": "R.Update",
-          "line": 165
+          "line": 169
         },
         {
           "name": "R.Map",
-          "line": 288
+          "line": 292
         },
         {
           "name": "Finish",
-          "line": 300
+          "line": 304
         },
         {
           "name": "Row",
-          "line": 330
+          "line": 334
         },
         {
-          "name": "R.OpenSpells",
-          "line": 335
+          "name": "R.Window",
+          "line": 339
+        },
+        {
+          "name": "R.CardTabs",
+          "line": 346
+        },
+        {
+          "name": "R.MaskBuffs",
+          "line": 360
         },
         {
           "name": "R.LairList",
-          "line": 342
+          "line": 371
+        },
+        {
+          "name": "Tint",
+          "line": 374
         },
         {
           "name": "R.Panels",
-          "line": 367
+          "line": 401
         },
         {
           "name": "R.Settings",
-          "line": 473
+          "line": 520
         },
         {
           "name": "R.Buffs",
-          "line": 488
+          "line": 535
         }
       ],
       "literalEvents": []
@@ -5107,7 +5123,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.12",
+    "version": "0.6.0-alpha.13",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5118,7 +5134,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
+    "inGameTestScope": "Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,
