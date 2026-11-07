@@ -247,3 +247,15 @@ Minimap:GetScript("OnDragStop")();assert(not H.identity.azsMoving)
 FieldKitDB.windowsLocked=oldlocked
 C.Set("zoneThemes",false)
 print("Complete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed")
+
+-- An endless boss may have a countdown without disclosing its name.
+local nextBossGetter=AZS_GetUpcomingBosses
+AZS_GetUpcomingBosses=function() return {} end
+AZS_RUN.endl=1;AZS_RUN.nbn="";AZS_RUN.nb=37
+local nextBoss=FieldKitNativeTools.NextBoss();assert(nextBoss and nextBoss.left==37 and nextBoss.name==FieldKit_L("Next boss"))
+AZS_RUN.endl=nil;AZS_RUN.nbn=nil;AZS_RUN.nb=nil;AZS_GetUpcomingBosses=nextBossGetter
+C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+for _,row in ipairs(R.frames.Accessories.rows) do if row:IsShown() then local _,size=row.label:GetFont();assert(size==16,"Equipment labels have a fixed font size") end end
+assert(not string.find(R.frames.Damage.total:GetText(),"%? /s"))
+C.Set("zoneThemes",false)
+print("Endless unnamed boss countdown and fixed equipment typography passed")

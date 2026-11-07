@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.6",
+  "candidate": "0.6.0-alpha.7",
   "runtimeModules": 47,
   "textureCount": 243,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5186,
-      "sha256": "f21f075af7d78fa3a1752b9e36e4e19ac07bf30cf57c1bcef541ef7267842163",
+      "sha256": "88278a8733010ab631a452fa6217e5216511a5ff27eb2b564c4b00b06a8a6162",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -281,8 +281,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 34480,
-      "sha256": "8d5788e058e35432516fbb38ef5028e7c5d4f13de09a6ac2a3aac5dd1fa3ed03",
+      "bytes": 34736,
+      "sha256": "6d6a613303a579420393c26bb6ca817cb82e8aa0bcb35ffa9628fb41e3d75571",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -551,8 +551,8 @@
       "literalEvents": []
     },
     "MeterLedger.lua": {
-      "bytes": 26530,
-      "sha256": "81ec90beb59b31d2f66c21b8ef5059721f871faa7c582eda77a9a576b2e7c81b",
+      "bytes": 26890,
+      "sha256": "125c4ad8edf0ea91348305f0d0b5ca0898347e5a23b5a709c58f3fb44913fa55",
       "namedFunctions": [
         {
           "name": "Text",
@@ -712,19 +712,19 @@
         },
         {
           "name": "L.AppendStats",
-          "line": 596
+          "line": 597
         },
         {
           "name": "L.ShowTip",
-          "line": 621
+          "line": 622
         },
         {
           "name": "TipName",
-          "line": 637
+          "line": 638
         },
         {
           "name": "HookTooltipMethod",
-          "line": 643
+          "line": 644
         }
       ],
       "literalEvents": [
@@ -1233,8 +1233,8 @@
       "literalEvents": []
     },
     "NativeTools.lua": {
-      "bytes": 11764,
-      "sha256": "8d051e1a3d866c8729c547930680741d08baa710a2d7ebe8c1adff4319330e3a",
+      "bytes": 11904,
+      "sha256": "02fd0fa3bb904e9c71c51c68b61f53a6bb5cca5c70eec120895440cbbd8dd7f8",
       "namedFunctions": [
         {
           "name": "Count",
@@ -1262,31 +1262,31 @@
         },
         {
           "name": "T.Reminders",
-          "line": 140
+          "line": 141
         },
         {
           "name": "T.Push",
-          "line": 160
+          "line": 161
         },
         {
           "name": "T.Banner",
-          "line": 166
+          "line": 167
         },
         {
           "name": "T.Subscription",
-          "line": 175
+          "line": 176
         },
         {
           "name": "T.Warnings",
-          "line": 182
+          "line": 183
         },
         {
           "name": "T.Update",
-          "line": 208
+          "line": 209
         },
         {
           "name": "T.Diagnostic",
-          "line": 220
+          "line": 221
         }
       ],
       "literalEvents": []
@@ -2756,8 +2756,8 @@
       "literalEvents": []
     },
     "ThemeMinimap.lua": {
-      "bytes": 6307,
-      "sha256": "0d2796ea575ec4c37cacc8edac9f68e843caeec134c0424d3b98d1fcd364ef66",
+      "bytes": 6537,
+      "sha256": "63c9c6c19ad58715f67692f1ae7f9672da4b956884989a53926ec73fbe6fd674",
       "namedFunctions": [
         {
           "name": "M.Rotate",
@@ -2769,15 +2769,15 @@
         },
         {
           "name": "M.Apply",
-          "line": 34
+          "line": 37
         },
         {
           "name": "StartMapDrag",
-          "line": 47
+          "line": 50
         },
         {
           "name": "FinishMapDrag",
-          "line": 52
+          "line": 55
         }
       ],
       "literalEvents": []
@@ -2887,8 +2887,8 @@
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 41895,
-      "sha256": "a7916b6d4b11568f4e34533eadb04753b1085212e46426bbee5812cf5c16ce9e",
+      "bytes": 44371,
+      "sha256": "818108a617044c5e147ddf16cac3f45c6a34dccf1ccfb3b9711845edec17a070",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2951,20 +2951,24 @@
           "line": 288
         },
         {
+          "name": "Finish",
+          "line": 300
+        },
+        {
           "name": "Row",
-          "line": 310
+          "line": 330
         },
         {
           "name": "R.Panels",
-          "line": 314
+          "line": 334
         },
         {
           "name": "R.Settings",
-          "line": 392
+          "line": 414
         },
         {
           "name": "R.Buffs",
-          "line": 407
+          "line": 429
         }
       ],
       "literalEvents": []
@@ -5055,7 +5059,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.6",
+    "version": "0.6.0-alpha.7",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5066,7 +5070,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha6 changes validated by Lua 5.0.3/5.1 regression fixtures: original card artwork, occupied equipment labels, native collapse dock, grouped map dragging, ownership restoration and existing six-layout tests. Alpha5 native Elwynn inspection retained as historical evidence; alpha6 not yet visually accepted in game."
+    "inGameTestScope": "Alpha7: native Elwynn Complete inspected after restart; controlled programmatic group move keeps terrain/art/addon proxies together, initial position and lock restored. Mouse drag not confirmed by automation. Lua 5.0.3/5.1: unnamed endless boss countdown, fixed equipment fonts and existing six-layout regressions. No native post-victory fight or fresh combat DPS validation."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

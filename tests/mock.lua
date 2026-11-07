@@ -165,3 +165,5 @@ function methods:SetClampedToScreen(v) self.clamped=v and true or false end
 function methods:EnableMouse(v) self.mouseEnabled=v and true or false end
 
 function methods:SetDrawLayer(layer) self.drawLayer=layer end
+
+function methods:GetTop() return self.top or 0 end

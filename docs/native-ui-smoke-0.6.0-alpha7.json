@@ -1,0 +1,9 @@
+{
+  "version": "0.6.0-alpha.7",
+  "gameVersion": "0.142.0",
+  "scope": "Native Elwynn Complete after full client restart. Controlled Lua position change kept terrain, artwork and addon proxies together; initial position and locked state restored. Mouse drag through Sky did not produce a confirmed move, so physical drag acceptance is explicitly pending. No native endless encounter or new combat DPS acceptance.",
+  "screenshots": {
+    "Carte_Groupe_Deplace_Controle.jpg": "6c90d31db1b2657b0b459aed94620958d747197464e373b6bde28a7efd7f37bd",
+    "Etat_Restaure_Apres_Test.jpg": "83c1e8448fcffe726f6bf8d68cb1484003034e3b29c9d1983ecce3f155294e29"
+  }
+}

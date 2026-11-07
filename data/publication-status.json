@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-alpha.6",
+  "version": "0.6.0-alpha.7",
   "maintainerAcceptedForPublication": false,
   "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -10,5 +10,5 @@
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true,
-  "inGameTestScope": "Alpha6 changes validated by Lua 5.0.3/5.1 regression fixtures: original card artwork, occupied equipment labels, native collapse dock, grouped map dragging, ownership restoration and existing six-layout tests. Alpha5 native Elwynn inspection retained as historical evidence; alpha6 not yet visually accepted in game."
+  "inGameTestScope": "Alpha7: native Elwynn Complete inspected after restart; controlled programmatic group move keeps terrain/art/addon proxies together, initial position and lock restored. Mouse drag not confirmed by automation. Lua 5.0.3/5.1: unnamed endless boss countdown, fixed equipment fonts and existing six-layout regressions. No native post-victory fight or fresh combat DPS validation."
 }

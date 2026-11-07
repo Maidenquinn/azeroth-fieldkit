@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.7 — 2026-11-07 (native cache and endless corrections, unpublished)
+
+- Accept native endless boss countdowns without a disclosed name; no inferred schedule.
+- Fixed-size equipment typography, clean sampled footer/effect patches, bounded tab labels, native IconTexture bounds and explicit fraction range refresh.
+- Localized kill labels and omit unavailable rates rather than printing an unknown per-second value. Native boss DPS retains the encounter time base.
+- Rebuild native minimap cached geometry when its artwork owner moves; own launcher proxies preserve original click handlers without circular repositioning scripts.
+
 ## 0.6.0-alpha.6 — 2026-11-07 (complete HUD corrections, unpublished)
 
 - Restore authored panel backgrounds and bottom rims; restrict empty-effect cleanup to its unused socket. Match heading/total colors and fonts, highlight active meter tabs and restore footer arrows.

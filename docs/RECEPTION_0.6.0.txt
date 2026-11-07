@@ -1,4 +1,4 @@
-AZEROTH FIELDKIT 0.6.0-alpha.6 — PILOTE ELWYNN / NAXXRAMAS
+AZEROTH FIELDKIT 0.6.0-alpha.7 — PILOTE ELWYNN / NAXXRAMAS
 7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
 
 La version est installée dans le client habituel. Le code stable reste inchangé.
@@ -109,3 +109,16 @@ cards : réduction vers le dock FieldKit natif en bas à droite ; clic sur son
 bouton pour restaurer. Déplacement de la carte et de son cadre groupé.
 Les scripts de position des icônes connues sont suspendus uniquement pendant
 le thème, puis rétablis. /reload requis pour charger ces corrections.
+
+ALPHA.7
+Compte à rebours natif infini accepté même sans nom de boss. Police équipement
+fixée à 16, libellés longs tronqués avec détails au survol. Icône native des
+sorts corrigée (IconTexture), fractions des barres remises dans 0..1, onglets
+bornés. Taux inconnu omis ; le DPS Boss conserve la durée du combat de boss,
+pas la durée de la partie. Traductions des sorts d’élimination harmonisées.
+Icônes d’addons représentées par des boutons propres au thème qui conservent
+les clics d’origine. Contrôle après redémarrage complet : déplacement par
+commande de la carte, du cadre et des icônes ensemble. Placement et verrouillage
+rétablis. Le glisser réel à la souris reste à recetter : le test automatisé
+n’a pas confirmé son déplacement. Pas de validation native après-victoire
+ou du DPS en combat pour cette révision.

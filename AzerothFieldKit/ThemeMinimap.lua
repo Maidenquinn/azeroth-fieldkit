@@ -17,6 +17,7 @@ function M.Restore()
  local old=M.before
  if old.scripts then for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do Minimap:SetScript(event,old.scripts[event]) end end
  if old.movable~=nil then Minimap:SetMovable(old.movable) end
+ if old.mouse~=nil then Minimap:EnableMouse(old.mouse) end
  for f,callback in pairs(M.launcherUpdates or {}) do f:SetScript("OnUpdate",callback~=false and callback or nil) end;M.launcherUpdates={}
  if Minimap and Minimap:GetParent()==M.root then
   local shown=Minimap:IsShown();Minimap:SetParent(old.parent);Minimap:ClearAllPoints()
@@ -28,6 +29,8 @@ function M.Restore()
  for f,alpha in pairs(M.hidden) do if f:GetAlpha()==0 then f:SetAlpha(alpha) end end
  for _,name in ipairs({"GameTimeFrame","MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.RestoreOne(f) end end
  M.hidden={};M.active=false;M.before=nil
+ if M.dragHandle then M.dragHandle:Hide() end
+ for _,proxy in pairs(M.launcherProxies or {}) do proxy:Hide() end
  if M.root then M.root:Hide() end
  if M.zoomOut then M.zoomOut:Hide();M.zoomIn:Hide() end
 end
@@ -42,7 +45,7 @@ function M.Apply(variant)
   local mask="Textures\\MinimapMask"
   if Minimap.GetMaskTexture then local ok,path=pcall(Minimap.GetMaskTexture,Minimap);if ok and type(path)=="string" then mask=path end end
   local points=FieldKitThemeHUD.Points(Minimap)
-  M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask,scripts={},movable=Minimap.IsMovable and Minimap:IsMovable()}
+  M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask,scripts={},mouse=Minimap.IsMouseEnabled and Minimap:IsMouseEnabled(),movable=Minimap.IsMovable and Minimap:IsMovable()}
   for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do M.before.scripts[event]=Minimap:GetScript(event) end
   local function StartMapDrag()
    if FieldKitDB.windowsLocked then return end

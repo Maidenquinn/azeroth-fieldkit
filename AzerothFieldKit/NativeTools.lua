@@ -125,14 +125,15 @@ function T.NextBoss()
   end
  end
  -- Native endless countdown, when present; never extrapolate a schedule.
- if not chosen and type(AZS_RUN)=="table" and type(AZS_RUN.nbn)=="string" and AZS_RUN.nbn~="" then
+ if not chosen and type(AZS_RUN)=="table" and (FieldKit.Number(AZS_RUN.endl)==1 or (type(AZS_RUN.nbn)=="string" and AZS_RUN.nbn~="")) then
   local left=FieldKit.Number(AZS_RUN.nb,nil,0)
   if left then
+   local bossName=type(AZS_RUN.nbn)=="string" and AZS_RUN.nbn~="" and AZS_RUN.nbn or FieldKit_L("Next boss")
    local stamp=FieldKit.Number(AZS_RUN_UPDATED)
    if N.Read("AZS_GetPhase")=="playing" and stamp then left=math.max(0,left-math.max(0,GetTime()-stamp)) end
-   if not T.endless or T.endless.name~=AZS_RUN.nbn or left>T.endless.left+2 then T.endlessCycle=(T.endlessCycle or 0)+1 end
-   T.endless={name=AZS_RUN.nbn,left=left}
-   chosen={name=N.Text(AZS_RUN.nbn),left=left,key="endless:"..tostring(T.endlessCycle)}
+   if not T.endless or T.endless.name~=bossName or left>T.endless.left+2 then T.endlessCycle=(T.endlessCycle or 0)+1 end
+   T.endless={name=bossName,left=left}
+   chosen={name=N.Text(bossName),left=left,key="endless:"..tostring(T.endlessCycle)}
   end
  end
  return chosen
