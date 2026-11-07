@@ -23,6 +23,7 @@ end
 
 function C.Width(frame,fallback)
  local size=FieldKitDB.cardSizes[frame:GetName()]
+ if FieldKitZoneThemes and FieldKitZoneThemes.active and frame:GetName()=="FieldKitStatsFrame" then return math.max(320,size and size.width or fallback) end
  return math.max(C.MinimumWidth(frame:GetName()),size and size.width or fallback)
 end
 
@@ -106,6 +107,7 @@ function C.Bind(frame)
 end
 
 function C.ApplyRight()
+ if FieldKitZoneThemes and FieldKitZoneThemes.active and not FieldKit.layoutEditing then return end
  if not C.root then return end
  local frames={FieldKitGearFrame,FieldKitStatsFrame}
  if not FieldKitDB.linkRightCards then

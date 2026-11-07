@@ -34,7 +34,7 @@ shared = {
     "schema", "activeHudProfile", "interfaceProfiles", "profilePendingSlot",
     # Technical bookkeeping for native game-owned overlays. These are derived
     # from individual display options, never copied as user preferences.
-    "hudBossesHidden", "hudMeterHidden", "hudTallyHidden", "moneyDockRepair",
+    "zoneThemeNativeBefore", "hudBossesHidden", "hudMeterHidden", "hudTallyHidden", "moneyDockRepair",
 }
 discovered = set()
 for path in ADDON.glob("*.lua"):

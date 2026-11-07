@@ -1,13 +1,14 @@
 {
-  "version": "0.5.0",
-  "maintainerAcceptedForPublication": true,
-  "maintainerAcceptanceDate": "2026-11-06",
+  "version": "0.6.0-alpha.1",
+  "maintainerAcceptedForPublication": false,
+  "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
-  "inGameTestByAgent": false,
-  "githubPrerelease": false,
+  "inGameTestByAgent": true,
+  "githubPrerelease": true,
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
-  "maintainerInGameTestingReported": true
+  "maintainerInGameTestingReported": false,
+  "inGameTestScope": "Limited native UI smoke tests on Azeroth Survivors 0.141.1 (df40f5d86): layouts, square map, theme controls, details and classic restoration. No native combat/card-choice/boss/coop acceptance. See docs/RECEPTION_0.6.0.txt."
 }

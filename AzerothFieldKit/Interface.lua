@@ -124,6 +124,7 @@ function FieldKit.BuildJourneySections(sections,actions)
  }
  for _,item in ipairs(FieldKitCardLayout.Options()) do table.insert(layout,item) end
  local look={
+  {kind="zoneThemes"},
   {kind="note",label="Visual style",tip="Chronicle look for FieldKit cards only. Does not change other addons."},
   {kind="choice",label="Card style",values={"Decorative","Classic"},get=function() return FieldKitDB.cardStyle end,
    set=function(v) FieldKitDB.cardStyle=v;T.Refresh() end},
@@ -208,7 +209,11 @@ function FieldKit.BuildJourneySections(sections,actions)
 end
 
 -- One owned tooltip; no chat/network output for normal configuration changes.
+function U.HideTip()
+ GameTooltip:Hide();if FieldKitThemeHUD then FieldKitThemeHUD.HideTip() end
+end
 function U.Tip(owner,label,detail)
+ if FieldKitZoneThemes and FieldKitZoneThemes.active then FieldKitThemeHUD.Tip(owner,FieldKit_L(label),{FieldKit_L(detail or "")});return end
  GameTooltip:SetOwner(owner,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L(label),1,.85,.55)
  if detail then GameTooltip:AddLine(FieldKit_L(detail),.8,.83,.8,true) end
  GameTooltip:Show()
@@ -271,14 +276,14 @@ end
 -- Live getters are separate from click setters, preventing initialization writes.
 local function Checkbox(page,item,y)
  local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(76)
- local check=CreateFrame("CheckButton",nil,row,"UICheckButtonTemplate");check:SetWidth(24);check:SetHeight(24);check:SetPoint("TOPLEFT",row,"TOPLEFT",0,-2)
+ local check=CreateFrame("CheckButton",nil,row,"UICheckButtonTemplate");check:SetWidth(24);check:SetHeight(24);T.Control(check,"check");check:SetPoint("TOPLEFT",row,"TOPLEFT",0,-2)
  local label=T.Label(row,item.label,30,1,500,24,14)
  local detail=T.Label(row,item.tip,30,29,500,44,12,T.muted)
  local action
  if item.button then action=T.Button(row,nil,item.button.text,0,1,132,26,item.button.onClick) end
  check.item=item;check.Refresh=function() check:SetChecked(item.get() and true or false) end
  check:SetScript("OnClick",function() item.set(this:GetChecked() and true or false);U.Refresh() end)
- check:SetScript("OnEnter",function() U.Tip(this,item.label,item.tip) end);check:SetScript("OnLeave",function() GameTooltip:Hide() end)
+ check:SetScript("OnEnter",function() U.Tip(this,item.label,item.tip) end);check:SetScript("OnLeave",function() U.HideTip() end)
  row.Reflow=function(w)
   row:SetWidth(w);label:SetWidth(w-32-(action and 144 or 0));detail:SetWidth(w-32)
   if action then action:ClearAllPoints();action:SetPoint("TOPRIGHT",row,"TOPRIGHT",0,-1) end
@@ -291,7 +296,7 @@ local function Slider(page,item,y,camera)
  local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(camera and 100 or 78)
  local label=T.Label(row,item.label or "Max camera distance",0,0,500,24,14)
  local name="FieldKitJourneySlider"..(table.getn(U.controls)+1)
- local s=CreateFrame("Slider",name,row,"OptionsSliderTemplate");s:SetPoint("TOPLEFT",row,"TOPLEFT",8,-36);s:SetHeight(18)
+ local s=CreateFrame("Slider",name,row,"OptionsSliderTemplate");T.Control(s,"slider");s:SetPoint("TOPLEFT",row,"TOPLEFT",8,-36);s:SetHeight(18)
  s.item=item;s.label=item.label
  s:SetMinMaxValues(item.min or 15,item.max or 50);s:SetValueStep(item.step or 1)
  s.Refresh=function()
@@ -307,7 +312,7 @@ local function Slider(page,item,y,camera)
  if high then high:SetText(item.max or 50);T.Font(high,11,T.muted) end
  local templateTitle=getglobal(name.."Text");if templateTitle then templateTitle:Hide() end
  local detail=camera and T.Label(row,"Camera changes apply immediately; other settings stay unchanged.",0,69,500,28,12,T.muted)
- row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);s:SetWidth(w-16);if detail then detail:SetWidth(w) end end
+ row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);s:SetWidth(w-16);T.Update(s);if detail then detail:SetWidth(w) end end
  table.insert(U.controls,s);table.insert(page.flow,{frame=row,y=y});return y+(camera and 106 or 84)
 end
 
@@ -733,6 +738,7 @@ function U.BuildPage(section,index)
    row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);detail:SetWidth(w) end
    if item.kind=="syncStatus" then U.syncStatus=detail end
    table.insert(page.flow,{frame=row,y=y});y=y+110
+  elseif item.kind=="zoneThemes" then y=FieldKitThemeUI(page,y)
   elseif item.kind=="combat" then FieldKit_CreateCombatOptions(page);y=570
   elseif item.kind=="worldmarkers" then y=BuildMarkerGallery(page,y)
   elseif item.kind=="profiles" then y=BuildProfileManager(page,y)
@@ -989,6 +995,7 @@ end
 
 -- Hide settings during arrangement so the large panel cannot cover movable frames.
 function U.SetLayoutEditing(enabled,returnToSettings)
+ if enabled and FieldKitZoneThemes then FieldKitZoneThemes.Suspend() end
  FieldKit.layoutEditing=enabled and true or false
  if enabled then
   U.routingLayout=true;U.frame:Hide();U.routingLayout=nil

@@ -1,6 +1,6 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,reviveFrame=false,
+local defaults={zoneThemes=false,zoneThemeMode="auto",zoneThemeVariant="complete",zoneThemeMinimap=true,zoneThemeArt=true,lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,reviveFrame=false,
  nextBossCard=false,nextBossAlert=false,bossTimeline=false,bossTimelineWidth=560,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,partyBannerWarnings=true,
  highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,bossStyle="classic",statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
@@ -26,7 +26,16 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  d.spellsFrame=nil -- retired separate spell window; the existing card now has tabs
  d.loadoutTab=d.loadoutTab==2 and 2 or 1
- d.schema=1;d.language=d.language=="fr" and "fr" or "en"
+ d.schema=1;
+ d.zoneThemePositions=FieldKitZoneThemes.NormalizePositions(d.zoneThemePositions)
+ if type(d.zoneThemeNativeBefore)=="table" then
+  for key,value in pairs(d.zoneThemeNativeBefore) do
+   if (key~="clock" and key~="tally" and key~="build" and key~="banners" and key~="bosses") or type(value)~="boolean" then d.zoneThemeNativeBefore[key]=nil end
+  end
+ else d.zoneThemeNativeBefore=nil end
+ if d.zoneThemeMode~="auto" and d.zoneThemeMode~="elwynn" and d.zoneThemeMode~="naxx" then d.zoneThemeMode="auto" end
+ if d.zoneThemeVariant~="minimal" and d.zoneThemeVariant~="complete" and d.zoneThemeVariant~="alternative" then d.zoneThemeVariant="complete" end
+d.language=d.language=="fr" and "fr" or "en"
  d.cardStyle=math.floor(FieldKit.Number(d.cardStyle,1,1,2))
  d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
  d.meterView=math.floor(FieldKit.Number(d.meterView,1,1,3))

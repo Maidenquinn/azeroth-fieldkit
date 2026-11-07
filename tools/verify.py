@@ -184,6 +184,7 @@ again=runtime(saved);again.execute('fire(FieldKitFrame,"VARIABLES_LOADED");Slash
 again.execute('local p,r,rp,x,y=FieldKitStatsFrame:GetPoint();assert(p=="TOPRIGHT" and r==UIParent and rp=="TOPRIGHT" and x==0 and y==-30)')
 again.execute('assert(FieldKitDB.cardStyle==2 and FieldKitDB.cardOpacity==37 and FieldKitDB.meterValues==2)')
 again.execute('assert(FieldKitDB.language=="fr");assert(FieldKitDB.guardianPins==false);assert(FieldKitDB.targetHealthMode==2);assert(FieldKitDB.combatTextX==-123);assert(FieldKitDB.combatEvents.crit.size=="31");assert(FieldKitDB.chatCopy==false)')
+zone_themes=runtime();zone_themes.execute((base/"tests/zone_themes.lua").read_text(encoding="utf8"))
 # Walk every compiled nested function, even callbacks the mock did not reach.
 compiler=LuaRuntime(encoding=None);prototypes={}
 for name in files:

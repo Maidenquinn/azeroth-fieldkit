@@ -1,7 +1,7 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.5.0", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.6.0-alpha.1", folder = "AzerothFieldKit" }
 
 -- Native level-up/chest choices own the action controls during this phase.
 -- Read the official phase; do not inspect or modify native screen frames.
@@ -64,7 +64,7 @@ end
 -- Callers must keep their corresponding DB.hud*Hidden flag for restoration.
 -- localClock: AS 0.136+ under-minimap clock (for addons that draw their own).
 function FieldKit.SetHudShown(part,shown)
- if part~="bosses" and part~="tally" and part~="meter" and part~="localClock" and part~="clock" then return false end
+ if part~="banners" and part~="build" and part~="bosses" and part~="tally" and part~="meter" and part~="localClock" and part~="clock" then return false end
  if type(shown)~="boolean" or type(AZS_SetHudShown)~="function" then return false end
  return pcall(AZS_SetHudShown,part,shown)
 end

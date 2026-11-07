@@ -14,6 +14,7 @@ local function Rotating()
 end
 -- Use the optional native shape API; no dependency on another UI addon.
 local function Square()
+ if FieldKitThemeMinimap and FieldKitThemeMinimap.active then return true end
  if type(GetMinimapShape)=="function" then
   local ok,s=pcall(GetMinimapShape)
   if ok and s then return s=="SQUARE" end
@@ -53,6 +54,7 @@ local function Place(p,e,px,py,scale,square)
  if not x or not y then return false end
  local east,north=py-y,x-px
  local ox,oy=east*scale,north*scale
+ if FieldKitThemeMinimap and FieldKitThemeMinimap.active then ox,oy=FieldKitThemeMinimap.Rotate(ox,oy);if not ox or not oy then return false end end
  local reach=square and math.max(math.abs(ox),math.abs(oy)) or math.sqrt(ox*ox+oy*oy)
  local edge=Minimap:GetWidth()/2-9
  if edge<=0 then return false end
@@ -92,7 +94,7 @@ function FieldKit_UpdateWorldPins()
  Hide(chests);Hide(guardians)
  if not FieldKitDB or not Minimap or not Minimap:IsShown() or type(AZS_GetPhase)~="function" or not AZS_GetPhase() or type(AZS_RUN)~="table" then return end
  local px,py,spaceId=HeroPose()
- if not px or not py or Rotating() then return end
+ if not px or not py or (Rotating() and not (FieldKitThemeMinimap and FieldKitThemeMinimap.active)) then return end
  local span=yards[Minimap:GetZoom() or 0]
  if not span then return end
  local scale,square=Minimap:GetWidth()/span,Square()

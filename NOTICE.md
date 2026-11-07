@@ -1,5 +1,25 @@
 # Attribution and provenance
 
+## Zone-theme pilot (0.6.0-alpha.1)
+
+The two `media/ZoneThemes/*Ornaments512.tga` atlases are newly generated,
+AI-assisted ornamental interpretations of Mr. Smite / Edwin VanCleef and
+Sapphiron / Kel'Thuzad. They are not official Blizzard renders or extracted
+models. Original game character identities and inherited asset notices remain
+applicable. The optional ornaments can be disabled independently of the HUD.
+PNG input and TGA output hashes are recorded in `data/theme-assets.json`.
+Private reference photographs are not included in the install ZIP.
+
+Design references retained with the maintainer's concept workspace:
+
+- Blizzard WoW Classic Elwynn landscape: https://worldofwarcraft.blizzard.com/en-us/news/23090134
+- Blizzard Hearthstone Edwin illustration (distinct visual universe): https://hearthstone.blizzard.com/en-us/cards/306/
+- Blizzard Naxxramas environment: https://news.blizzard.com/en-gb/article/24229247/wow-anniversary-edition-brave-the-shadow-of-the-necropolis
+- Secondary model reference for Mr. Smite: https://www.wowhead.com/classic/gallery=1309/classic-deadmines-guide
+
+The source URL manifests distinguish official and secondary references. They
+are references, not an assertion of a free redistribution license.
+
 ## Original project
 
 MASH — Malk Azeroth Survivor Helper was created by **Malk**. The original Discord

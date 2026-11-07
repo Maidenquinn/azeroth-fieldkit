@@ -1,0 +1,166 @@
+{
+  "01_Foret_Elwynn": [
+    {
+      "fichier": "01_Assets_Sources/01_Foret_Elwynn/Hurlevent_Blizzard_Classic.jpg",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/OKYJ4GYH227V1565217359339.jpg",
+      "page": "https://worldofwarcraft.blizzard.com/en-us/news/23090134",
+      "classification": "officielle Blizzard WoW Classic",
+      "role": "Référence secondaire d’architecture humaine, pas décor Elwynn",
+      "date": "2026-11-06",
+      "sha256": "6f7d54378adae3a1c4890fe4db649c19ec8e212e07037be7f2ad2ebf7ce0c98b",
+      "droits": "Référence privée. Aucune licence de redistribution présumée."
+    },
+    {
+      "fichier": "01_Assets_Sources/01_Foret_Elwynn/Elwynn_Forest_Blizzard_Classic.jpg",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/3NZ4LNMV3QK61565217358499.jpg",
+      "page": "https://worldofwarcraft.blizzard.com/en-us/news/23090134",
+      "classification": "officielle Blizzard WoW Classic",
+      "role": "Paysage, couleurs et matériaux de la zone",
+      "date": "2026-11-06",
+      "sha256": "ffaf5f63689f8336d39be267c48c787fbf1062eeddadc3e51b2d6633a10117c0",
+      "droits": "Référence privée. Aucune licence de redistribution présumée."
+    },
+    {
+      "fichier": "01_Assets_Sources/01_Foret_Elwynn/Edwin_VanCleef_Blizzard_Hearthstone.png",
+      "url": "https://d15f34w2p8l1cc.cloudfront.net/hearthstone/b69df255504a5d6671071a8634cd8c3b35fe322fc4b2f7891a19fbb34124f48f.png",
+      "page": "https://hearthstone.blizzard.com/en-us/cards/306/",
+      "classification": "officielle Blizzard Hearthstone",
+      "role": "Identité artistique Edwin, univers distinct du modèle Classic",
+      "date": "2026-11-06",
+      "sha256": "b69df255504a5d6671071a8634cd8c3b35fe322fc4b2f7891a19fbb34124f48f",
+      "droits": "Référence privée. Aucune licence de redistribution présumée."
+    },
+    {
+      "fichier": "01_Assets_Sources/01_Foret_Elwynn/References_Secondaires/M_Chatiment_modele_WoW.jpg",
+      "url": "https://wow.zamimg.com/uploads/screenshots/normal/831507-classic-deadmines-guide.jpg",
+      "page": "https://www.wowhead.com/classic/gallery=1309/classic-deadmines-guide",
+      "classification": "secondaire",
+      "role": "Capture communautaire du modèle Blizzard Classic de M. Châtiment",
+      "date": "2026-11-06",
+      "sha256": "f60b832922d82758ae45ff0c8aeddf6fc5ab24d28a8ae4b9b76ec4ff49a77533",
+      "droits": "Référence privée. Aucune licence de redistribution présumée."
+    },
+    {
+      "fichier": "01_Assets_Sources/01_Foret_Elwynn/References_Secondaires/Edwin_VanCleef_modele_WoW.jpg",
+      "url": "https://wow.zamimg.com/uploads/screenshots/normal/397110-edwin-vancleef.jpg",
+      "page": "https://www.wowhead.com/mop-classic/npc=42697/edwin-vancleef",
+      "classification": "secondaire",
+      "role": "Capture communautaire Edwin, version Cataclysm/MoP, ne prouve pas modèle Classic exact",
+      "date": "2026-11-06",
+      "sha256": "9236eedc5aa3ed27b11ef837a821ee9632c08c52abc2111b5732ea2a0a9d900d",
+      "droits": "Référence privée. Aucune licence de redistribution présumée."
+    }
+  ],
+  "13_Naxxramas": [
+    {
+      "id": "naxx_anniversary_00.jpg",
+      "page": "https://news.blizzard.com/en-gb/article/24229247/wow-anniversary-edition-brave-the-shadow-of-the-necropolis",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/ka/KACBVIYAK0OJ1607030380736.jpg",
+      "alt": "WoW Anniversary Edition: Brave the Shadow of the Necropolis",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "ba0ca8ced525b0f32623c1583f7d15e61e86139d4e991ee4c9e901bcc0966d24",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "World of Warcraft"
+    },
+    {
+      "id": "naxx_anniversary_01.jpg",
+      "page": "https://news.blizzard.com/en-gb/article/24229247/wow-anniversary-edition-brave-the-shadow-of-the-necropolis",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/3t/3TZJ0MZDFU4C1606891276802.jpg",
+      "alt": "",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "a32554fb45c4446d9c88a4c1cefeabac49b1cae145a405c5fa6a1eeaf974b64d",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "World of Warcraft"
+    },
+    {
+      "id": "naxx_anniversary_02.jpg",
+      "page": "https://news.blizzard.com/en-gb/article/24229247/wow-anniversary-edition-brave-the-shadow-of-the-necropolis",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/M0GRIQWI7UAJ1660686673646.jpg",
+      "alt": "",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "d0f4665b5eb5a7129321bc09eb8f9bead5a3ae3f973eb679ef83989d1e02f582",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "World of Warcraft"
+    },
+    {
+      "id": "naxx_anniversary_03.jpg",
+      "page": "https://news.blizzard.com/en-gb/article/24229247/wow-anniversary-edition-brave-the-shadow-of-the-necropolis",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/h8/H8ENHERCG5NY1606959280913.jpg",
+      "alt": "",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "3641023ec6d84c4e76623e6ea0b89728470937a56e52910d71418a2d4f92a792",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "World of Warcraft"
+    },
+    {
+      "id": "naxx_anniversary_04.jpg",
+      "page": "https://news.blizzard.com/en-gb/article/24229247/wow-anniversary-edition-brave-the-shadow-of-the-necropolis",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/gr/GRJZ1MWD5KQJ1581463847171.jpg",
+      "alt": "",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "6f2dc70ff31b74457e0c8d468ef4cde82917230ac422b254e6b88d7e7d9313b0",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "World of Warcraft"
+    },
+    {
+      "id": "naxx_classic_00.jpg",
+      "page": "https://news.blizzard.com/en-gb/article/23572632/wow-classic-naxxramas-is-now-live",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/3t/3TZJ0MZDFU4C1606891276802.jpg",
+      "alt": "WoW Classic: Naxxramas is Now Live!",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "a32554fb45c4446d9c88a4c1cefeabac49b1cae145a405c5fa6a1eeaf974b64d",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "World of Warcraft"
+    },
+    {
+      "id": "kelthuzad_hots_00.jpg",
+      "page": "https://news.blizzard.com/en-us/article/20976071/resurrecting-kelthuzad",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/ok/OKL4TFXQYXU01503506882183.jpg",
+      "alt": "Resurrecting Kel’Thuzad",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "822078a8789934d37036817630e13e0f50cec8c1b4f908cc974319fd463c5b32",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "Heroes of the Storm"
+    },
+    {
+      "id": "frostwyrm_hearthstone_00.jpg",
+      "page": "https://hearthstone.blizzard.com/en-gb/news/15233528",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/blog_header/d7/D7PGMMS0A8IW1406756519194.jpg",
+      "alt": "Curse of Naxxramas: Frostwyrm Lair - Now Open!",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "c523c783c271293fbfb3088dbfa460eb7a86a7415aee10c6fae63726a3a3c301",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "Hearthstone"
+    },
+    {
+      "id": "frostwyrm_hearthstone_01.jpg",
+      "page": "https://hearthstone.blizzard.com/en-gb/news/15233528",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/gallery/KSLAVHMNQN4A1406756622761.jpg",
+      "alt": "Naxx_Wing5Cards_HS_Lightbox_CK02_500x250.jpg",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "4f1bcd3d815dd57e81cda246583883bcd119660e074dd90236e77ad2ef7edeb1",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "Hearthstone"
+    },
+    {
+      "id": "frostwyrm_hearthstone_02.jpg",
+      "page": "https://hearthstone.blizzard.com/en-gb/news/15233528",
+      "url": "https://bnetcmsus-a.akamaihd.net/cms/gallery/LNRA9DYKE6IA1406756622753.jpg",
+      "alt": "KelThuzad-BOTH_HS_Lightbox_CK_250x250.jpg",
+      "origine": "Blizzard Entertainment",
+      "date_consultation": "2026-11-06",
+      "sha256": "68c105d134009b09f640b7fc034c466168fb8b31f1d7e8f5dc24a89a35327c29",
+      "usage": "Référence privée de conception. Aucune licence de redistribution libre présumée.",
+      "univers": "Hearthstone"
+    }
+  ]
+}

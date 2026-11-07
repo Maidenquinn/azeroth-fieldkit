@@ -102,6 +102,18 @@
     "media/ChronicleGlyph16.tga": {
       "sha256": "ea117d4d4c7d485b6ba06f9fe445d465d093e1092e874cef95fef62024881141",
       "bytes": 262188
+    },
+    "media/ZoneThemes/elwynnOrnaments512.tga": {
+      "sha256": "7d57b8ae6f6f5014300d5d546b2c956d03e4e51146a8e244f2a989147e0bcc3e",
+      "bytes": 524332,
+      "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
+      "sourcePngSha256": "865100f15c14bdd6fa8a220ee10869024c4c12fe135c08ddd5cff857ae625118"
+    },
+    "media/ZoneThemes/naxxOrnaments512.tga": {
+      "sha256": "333f1400a7d967284d7a4de5e60fe47b71f7f8f63133d90e1c6ad875e20d9a3a",
+      "bytes": 524332,
+      "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
+      "sourcePngSha256": "ace5064fb783d268a39e8a3bda377ce3d28d3b851e3e421dd94bfc585e32403c"
     }
   }
 }

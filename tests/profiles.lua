@@ -129,7 +129,7 @@ local messages={}
 local old=DEFAULT_CHAT_FRAME.AddMessage
 DEFAULT_CHAT_FRAME.AddMessage=function(self,text) table.insert(messages,text) end
 SlashCmdList.FieldKit("profile list")
-assert(string.find(messages[#messages],"2:saved",1,true))
+assert(string.find(messages[table.getn(messages)],"2:saved",1,true))
 SlashCmdList.FieldKit("profile load 1")
 assert(d.activeHudProfile==1)
 SlashCmdList.FieldKit("profile undo")

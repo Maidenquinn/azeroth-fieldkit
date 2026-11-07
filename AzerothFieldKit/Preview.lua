@@ -314,7 +314,7 @@ function P.Stop()
 end
 
 function P.Start(all)
- P.Stop();P.mode="place";P.all=all;P.Refresh()
+ P.Stop();if FieldKitZoneThemes then FieldKitZoneThemes.Suspend() end;P.mode="place";P.all=all;P.Refresh()
 end
 
 function P.Reset()
@@ -331,7 +331,7 @@ end
 -- Closing it never changes a preference or closes the normal settings panel.
 function P.Open(index)
  if FieldKit.layoutEditing then FieldKitUI.SetLayoutEditing(false,true) end
- P.Stop();P.selected=index or P.selected
+ P.Stop();if FieldKitZoneThemes then FieldKitZoneThemes.Suspend() end;P.selected=index or P.selected
  if not P.inspector then
   local f=CreateFrame("Frame","FieldKitPreviewInspector",UIParent);P.inspector=f
   f:SetWidth(440);f:SetHeight(510);f:SetFrameStrata("DIALOG");f:SetFrameLevel(125)

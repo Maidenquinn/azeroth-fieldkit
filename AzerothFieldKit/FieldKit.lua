@@ -168,6 +168,7 @@ local function FinishMoving(frame)
 	if not frame or not frame.azsMoving then return end
 	frame.azsMoving = nil
 	frame:StopMovingOrSizing()
+ if FieldKitZoneThemes and FieldKitZoneThemes.Remember(frame) then return end
 	if FieldKitPositions.Save(frame,frame.fieldkitTopLeftAnchor) then FieldKitPositions.Restore(frame) end
 end
 
@@ -507,8 +508,12 @@ local function CreateBossFrames()
 end
 
 
+-- Zone themes reuse the same bounded native boss model without changing preferences.
+local function ZoneBosses() return FieldKitZoneThemes and FieldKitZoneThemes.active and type(AZS_UNITS)=="table" end
+local function BossStyle() return ZoneBosses() and "compact" or DB.bossStyle end
 -- Hide the native boss section only for the replacement option; restore when disabled.
 local function SyncHudBosses()
+ if ZoneBosses() then return end
 	if ( not HasAPI() or not AZS_SetHudShown ) then
 		return
 	end
@@ -525,9 +530,9 @@ end
 local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
  local compact=f.compact
  if compact then
-  if DB.bossStyle=="compact" or DB.bossStyle=="premium" then
+  if BossStyle()=="compact" or BossStyle()=="premium" then
    f:SetAlpha(0);compact:Show()
-   local premium=DB.bossStyle=="premium"
+   local premium=BossStyle()=="premium"
    for _,part in ipairs(compact.premiumParts) do part:Hide() end
    compact.premiumOverlay:Hide()
    for _,part in ipairs(compact.premiumRim) do part:Hide() end
@@ -685,13 +690,13 @@ local function UpdateBossFrame()
  for bi=2,table.getn(bossFrames) do
   local bf=bossFrames[bi]
   bf:ClearAllPoints()
-  bf:SetPoint("TOP",bossFrames[bi-1],"TOP",0,-((DB.bossStyle=="compact" or DB.bossStyle=="premium") and 58 or BOSS_STACK))
+  bf:SetPoint("TOP",bossFrames[bi-1],"TOP",0,-((BossStyle()=="compact" or BossStyle()=="premium") and 58 or BOSS_STACK))
  end
 	if ( table.getn(bossFrames) == 0 ) then
 		return
 	end
 	local n = 0
-	if ( DB.bossFrame and HasAPI() and type(AZS_UNITS) == "table" ) then
+	if ( (DB.bossFrame or ZoneBosses()) and HasAPI() and type(AZS_UNITS) == "table" ) then
 		local phase = AZS_GetPhase()
 		if ( phase and phase ~= "ready" ) then
 			local awakeIds = AwakeGuardianIds()
@@ -1275,6 +1280,7 @@ local function StatsRow(i)
 	row.label:SetPoint("TOPLEFT", statsFrame, "TOPLEFT", 9, -8 - 13 * ( i - 1 ))
 	row.value = statsFrame:CreateFontString("FieldKitStatsValue"..i, "OVERLAY", "GameFontHighlightSmall")
 	row.value:SetPoint("TOPRIGHT", statsFrame, "TOPRIGHT", -27, -8 - 13 * ( i - 1 ))
+ FieldKitTheme.Font(row.label,11,FieldKitTheme.gold);FieldKitTheme.Font(row.value,11,FieldKitTheme.text)
 	statsFrame.rows[i] = row
 	return row
 end
@@ -1800,7 +1806,7 @@ local function CreateBarWindow(name, title, rows)
  FieldKitTheme.Surface(f,"card",true)
 	f.title = f:CreateFontString(name.."Title", "OVERLAY", "GameFontNormalSmall")
 	f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 9, -7)
-	FieldKit_Text(f.title,title)
+	FieldKit_Text(f.title,title);FieldKitTheme.Font(f.title,12,FieldKitTheme.gold)
 	f.total = f:CreateFontString(name.."Total", "OVERLAY", "GameFontHighlightSmall")
 	f.total:SetPoint("TOPRIGHT", f, "TOPRIGHT", -25, -7)
 	local collapse = FieldKitTheme.Button(f,name.."Collapse","-",0,0,18,17,nil);collapse:ClearAllPoints()
@@ -2048,7 +2054,7 @@ function UpdateLairFrame()
 		return
 	end
 	local lairs = AZS_GetLairs()
-	local nextBoss=DB.lairNextBoss and FieldKitNativeTools.NextBoss()
+	local nextBoss=DB.lairNextBoss and not (FieldKitZoneThemes and FieldKitZoneThemes.active) and FieldKitNativeTools.NextBoss()
  if ( table.getn(lairs) == 0 and not nextBoss ) then
 		lairFrame:Hide()
 		return
@@ -2432,6 +2438,7 @@ end
 
 -- Dock or repair the strip unless the user intentionally detached it.
 function AttachMoneyToBar(force)
+ if FieldKitZoneThemes and FieldKitZoneThemes.active then return end
 	if ( not compactBar or not moneyFrame ) then return end
 	if ( force ) then DB.moneyDetached = nil;DB.frameAnchors.FieldKitMoneyFrame=nil end
 	if ( not DB.moneyDetached and not moneyFrame.azsMoving ) then
@@ -2455,6 +2462,7 @@ end
 
 -- Maintain optional compact anchors and prevent the bar from falling below the viewport.
 function KeepCompactBar()
+ if FieldKitZoneThemes and FieldKitZoneThemes.active then return end
 	if ( not compactBar ) then
 		return
 	end
@@ -2671,6 +2679,7 @@ local settingsActions={
 -- This is deliberately NOT a ReloadUI and never invokes chat styling, party
 -- transport, native action bar rebuilding, camera CVars or game-save changes.
 function FieldKit.ApplyHUDProfileLive()
+ if FieldKitZoneThemes then FieldKitZoneThemes.Suspend() end
  if not DB or FieldKit.layoutEditing then return false end
  if (FieldKitHudStack.root and FieldKitHudStack.root.azsMoving) or
   (FieldKitCardLayout.root and FieldKitCardLayout.root.azsMoving) then return false end
@@ -2731,6 +2740,7 @@ function FieldKit.ApplyHUDProfileLive()
  if FieldKit.RecolorDisplayedChat then FieldKit.RecolorDisplayedChat() end
  FieldKit_SetLanguage(DB.language)
  SetMovablesUnlocked(not DB.windowsLocked)
+ if FieldKitZoneThemes then FieldKitZoneThemes.Refresh(true) end
  if FieldKitUI and FieldKitUI.frame then FieldKitUI.Refresh() end
  return true
 end
@@ -2868,6 +2878,7 @@ local function FieldKitEventLifecycle()
    if FieldKitProfiles.preview then FieldKitProfiles.CancelPreview() end
    if not FieldKitProfiles.preview then FieldKitProfiles.SaveActive() end
   end
+  if FieldKitZoneThemes then FieldKitZoneThemes.NativeRestore() end
   return
  end
 	if ( event == "VARIABLES_LOADED" ) then
@@ -2895,6 +2906,9 @@ local function FieldKitEventLifecycle()
 		CreateCompactBar()
   FieldKit.appliedCompactBar=DB.compactBar==true
 		UpdateGryphons()
+  -- Capture native ownership only after the optional legacy compact bar exists.
+  -- Options/profile refreshes during construction must not snapshot half-built UI.
+  FieldKit.zoneThemeReady=true
 		return
 	end
 	if ( not DB ) then
@@ -3086,6 +3100,7 @@ frame:SetScript("OnUpdate", function()
 		if not choosing then FieldKitHudStack.Apply();FieldKitCardLayout.ApplyRight();FieldKitDiagnostics.Mark("layout") end
 	end
 	if not choosing then FieldKitPartySync.Tick() end
+ if FieldKitZoneThemes then FieldKitZoneThemes.Tick() end
 end)
 
 SLASH_FieldKit1 = "/fieldkit"
@@ -3096,6 +3111,7 @@ SlashCmdList["FieldKit"] = function(msg)
 		return
 	end
 	msg = string.lower(msg or "")
+ if string.sub(msg,1,6)=="themes" then FieldKitZoneThemes.Command(string.sub(msg,8));return end
  if msg=="profile" then FieldKitProfiles.Command("");return end
  if string.sub(msg,1,8)=="profile " then FieldKitProfiles.Command(string.sub(msg,9));return end
  if msg=="diag" then FieldKitDiagnostics.Command("");return end

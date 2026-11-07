@@ -6,9 +6,26 @@ FieldKitTheme={media="Interface\\AddOns\\AzerothFieldKit\\media\\",
  green={.61,.77,.57},red={.91,.40,.37}}
 local T=FieldKitTheme
 T.surfaces={}
+T.fonts={};T.controls={};T.zone="classic"
+function T.Solid(texture,color,alpha)
+ texture:SetTexture("Interface\\Buttons\\WHITE8X8")
+ texture:SetVertexColor(color[1],color[2],color[3],alpha or 1)
+end
+function T.SetZone(zone)
+ if not FieldKitZoneRegistry or not FieldKitZoneRegistry[zone] then zone="classic" end
+ if T.zone==zone then return end
+ T.zone=zone
+ for key,value in pairs(FieldKitZoneRegistry[zone]) do
+  if type(value)=="table" and type(T[key])=="table" then
+   for i=1,3 do T[key][i]=value[i] end
+  end
+ end
+ T.Refresh()
+end
 
 -- Display preferences affect only our material layers, never frame/text alpha.
 function T.Style(frame)
+ if T.zone~="classic" then return 2 end
  if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
  return FieldKitDB and FieldKitDB.cardStyle==2 and 2 or 1
 end
@@ -20,6 +37,10 @@ function T.Refresh()
  for i=1,table.getn(T.surfaces) do
   local frame=T.surfaces[i];T.State(frame,frame.fieldkitActive);T.Update(frame)
  end
+ for i=1,table.getn(T.fonts) do
+  local r=T.fonts[i];r.label:SetTextColor(r.color[1],r.color[2],r.color[3])
+ end
+ for i=1,table.getn(T.controls) do T.PaintControl(T.controls[i]) end
 end
 
 -- Keep headings and body type consistent; the native face is a safe fallback.
@@ -28,6 +49,9 @@ function T.Font(label,size,color,heading)
  local ok,result=pcall(label.SetFont,label,path,size or 14,"")
  if not ok or result==false then label:SetFont(heading and "Fonts\\FRIZQT__.TTF" or "Fonts\\ARIALN.TTF",size or 14,"") end
  color=color or T.text;label:SetTextColor(color[1],color[2],color[3])
+ if not label.fieldkitFontRecord then
+  label.fieldkitFontRecord={label=label,color=color};table.insert(T.fonts,label.fieldkitFontRecord)
+ else label.fieldkitFontRecord.color=color end
 end
 
 -- Explicit dimensions avoid this client's custom-backdrop tiling/stretch quirks.
@@ -67,7 +91,7 @@ function T.Surface(frame,kind,hud)
  table.insert(T.surfaces,frame)
  local color=kind=="card" and T.panel or T.background
  skin.base=frame:CreateTexture(nil,"BACKGROUND");skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
- skin.base:SetTexture(color[1],color[2],color[3]);skin.base:SetAlpha(1)
+ T.Solid(skin.base,color);skin.base:SetAlpha(1)
  skin.grain=frame:CreateTexture(nil,"BACKGROUND");skin.grain:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
  skin.grain:SetTexture(T.media.."ChronicleGrain.tga");skin.grain:SetAlpha(.16)
  local cuts={0,.07,.93,1}
@@ -85,22 +109,41 @@ function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
  local alpha=(frame.fieldkitNavigation and not active) and 0 or 1
  local opacity=skin.kind=="button" and 1 or T.Opacity(frame)
+ T.Solid(skin.base,skin.kind=="card" and T.panel or T.background)
  skin.base:SetAlpha(alpha*opacity);skin.grain:SetAlpha(T.Style(frame)==2 and 0 or .16*alpha*opacity)
  local plate=skin.kind=="window" and 4 or (skin.kind=="card" and 3 or (active and 2 or 1))
  for i=1,table.getn(skin.parts) do
   local t=skin.parts[i].texture
   if T.Style(frame)==2 then
    if i<=4 then
-    t:Show();t:SetTexture(T.bronze[1],T.bronze[2],T.bronze[3]);t:SetAlpha(alpha)
+    t:Show();T.Solid(t,active and T.gold or T.bronze);t:SetAlpha(alpha)
    else t:Hide() end
    t.fieldkitPlate=nil
   else
    if skin.kind=="window" and i==5 then t:Hide() else t:Show() end
-   if t.fieldkitPlate~=plate then t:SetTexture(T.media.."ChroniclePlate"..plate..".tga");t.fieldkitPlate=plate end
+   local asset=T.media.."ChroniclePlate"..plate..".tga"
+   if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end
+   if T.zone=="naxx" then t:SetVertexColor(.52,.85,1) elseif T.zone=="elwynn" then t:SetVertexColor(.85,1,.62) else t:SetVertexColor(1,1,1) end
    t:SetAlpha(alpha*(i==5 and opacity or 1))
   end
  end
  frame.fieldkitActive=active and true or false
+end
+
+-- Retain legacy widget input/checked/value behavior; only its material changes.
+function T.PaintControl(control)
+ if control.kind=="slider" and control.frame.SetThumbTexture then
+  control.frame:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  if control.frame.GetThumbTexture then
+   local thumb=control.frame:GetThumbTexture();if thumb then thumb:SetVertexColor(T.gold[1],T.gold[2],T.gold[3]) end
+  end
+ end
+ T.State(control.frame,false)
+end
+function T.Control(frame,kind)
+ if frame.fieldkitControl then return end
+ frame.fieldkitControl={frame=frame,kind=kind};table.insert(T.controls,frame.fieldkitControl)
+ T.Surface(frame,"button");T.PaintControl(frame.fieldkitControl)
 end
 
 -- Native legacy Button with its own visible label; no red template underneath.

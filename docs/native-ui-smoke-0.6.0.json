@@ -1,0 +1,42 @@
+{
+  "version": "0.6.0-alpha.1",
+  "scope": "Limited native UI smoke tests on Azeroth Survivors 0.141.1 (df40f5d86): layouts, square map, theme controls, details and classic restoration. No native combat/card-choice/boss/coop acceptance. See docs/RECEPTION_0.6.0.txt.",
+  "date": "2026-11-07",
+  "nativeCombatAccepted": false,
+  "gameExeSha256": "47f4da62a0ab17f10ef420c82ea4a6b66ad65be931aae2713bc938e191d72de6",
+  "screenshots": {
+    "Elwynn_Alternative.png": {
+      "sha256": "c3636ac02145ca3a15c1824c2befa18d10ccf1c20ef97b0f8d61f3535113efc0",
+      "bytes": 375290
+    },
+    "Elwynn_Complete.png": {
+      "sha256": "9a92272f393aecff6aa059dd46144ea1d845fb2f7fa876ca8fadbdf897406dbf",
+      "bytes": 363068
+    },
+    "Elwynn_Details_Accessibles.png": {
+      "sha256": "98a9ebe0b0cf1f09ff7da6d28a271a88da5a4788654b8741c9ce7aa4d2614383",
+      "bytes": 366831
+    },
+    "Elwynn_Minimaliste.png": {
+      "sha256": "7b7520e3617d35969b239e0bb8ad6e59b6adb5482178d0c96d4ce77a0a528c79",
+      "bytes": 363044
+    },
+    "Elwynn_Reglages.png": {
+      "sha256": "0cc950cb79f0306a8f92536e4656de9e99a4ccbc94166c727b11c7d08f009366",
+      "bytes": 300822
+    },
+    "Naxxramas_Alternative.png": {
+      "sha256": "e7c2b9edaa6d7c12c8370ed785fa2c0f721fbb05aaa79ce64dc55f57aacd64e2",
+      "bytes": 199474
+    },
+    "Naxxramas_Minimaliste.png": {
+      "sha256": "b2063ff803e17918054fe665a5bd21d0d6c8146e79d5e68cc1b7ccf60ae1a0e2",
+      "bytes": 200062
+    },
+    "Retour_HUD_Classique.png": {
+      "sha256": "1343509e36d4ebbb645702cfdb124743ba51e99eb07fe94a273464cac31d6db0",
+      "bytes": 391072
+    }
+  },
+  "latestSourceDeltaAfterLastNativeTest": "Shutdown-only restoration of native HUD CVars; covered synthetically, not re-observed during native shutdown."
+}
