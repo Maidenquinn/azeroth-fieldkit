@@ -15,6 +15,9 @@ end
 function M.Restore()
  if not M.active then return end
  local old=M.before
+ if old.scripts then for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do Minimap:SetScript(event,old.scripts[event]) end end
+ if old.movable~=nil then Minimap:SetMovable(old.movable) end
+ for f,callback in pairs(M.launcherUpdates or {}) do f:SetScript("OnUpdate",callback~=false and callback or nil) end;M.launcherUpdates={}
  if Minimap and Minimap:GetParent()==M.root then
   local shown=Minimap:IsShown();Minimap:SetParent(old.parent);Minimap:ClearAllPoints()
   for i=1,table.getn(old.points) do local a=old.points[i];Minimap:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
@@ -39,7 +42,18 @@ function M.Apply(variant)
   local mask="Textures\\MinimapMask"
   if Minimap.GetMaskTexture then local ok,path=pcall(Minimap.GetMaskTexture,Minimap);if ok and type(path)=="string" then mask=path end end
   local points=FieldKitThemeHUD.Points(Minimap)
-  M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask}
+  M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask,scripts={},movable=Minimap.IsMovable and Minimap:IsMovable()}
+  for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do M.before.scripts[event]=Minimap:GetScript(event) end
+  local function StartMapDrag()
+   if FieldKitDB.windowsLocked then return end
+   local R=FieldKitReferenceHUD;local target=R and R.active and not R.layout.rects.mapArt and FieldKitThemeHUD.identity or M.root
+   if target then M.dragTarget=target;target.azsMoving=true;target:StartMoving() end
+  end
+  local function FinishMapDrag() if M.dragTarget then FieldKitZoneThemes.Finish(M.dragTarget);M.dragTarget=nil end end
+  Minimap:SetMovable(false);Minimap:RegisterForDrag("LeftButton")
+  Minimap:SetScript("OnDragStart",StartMapDrag);Minimap:SetScript("OnDragStop",FinishMapDrag)
+  Minimap:SetScript("OnMouseDown",function() if arg1=="LeftButton" and not FieldKitDB.windowsLocked then StartMapDrag() elseif M.before.scripts.OnMouseDown then M.before.scripts.OnMouseDown() end end)
+  Minimap:SetScript("OnMouseUp",function() if M.dragTarget then FinishMapDrag() elseif M.before.scripts.OnMouseUp then M.before.scripts.OnMouseUp() end end)
   if not M.root then
    M.root=CreateFrame("Frame","FieldKitThemeMap",UIParent);M.root:SetFrameStrata("MEDIUM")
    FieldKitTheme.Surface(M.root,"card",true);FieldKitZoneThemes.Bind(M.root)

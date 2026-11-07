@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.5",
+  "candidate": "0.6.0-alpha.6",
   "runtimeModules": 47,
   "textureCount": 243,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5186,
-      "sha256": "1a940c8e95d3ee76377085bf032bf96315a6efd759589070ae6a3a726ef1c6c0",
+      "sha256": "f21f075af7d78fa3a1752b9e36e4e19ac07bf30cf57c1bcef541ef7267842163",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -2756,8 +2756,8 @@
       "literalEvents": []
     },
     "ThemeMinimap.lua": {
-      "bytes": 4819,
-      "sha256": "3124a8ffe2e2a7a92b7c27625af6b96eeff9003affec5042f96b46c8f23cdf84",
+      "bytes": 6307,
+      "sha256": "0d2796ea575ec4c37cacc8edac9f68e843caeec134c0424d3b98d1fcd364ef66",
       "namedFunctions": [
         {
           "name": "M.Rotate",
@@ -2769,7 +2769,15 @@
         },
         {
           "name": "M.Apply",
-          "line": 31
+          "line": 34
+        },
+        {
+          "name": "StartMapDrag",
+          "line": 47
+        },
+        {
+          "name": "FinishMapDrag",
+          "line": 52
         }
       ],
       "literalEvents": []
@@ -2879,8 +2887,8 @@
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 39266,
-      "sha256": "71ca4f27dd7cb242b6f769fce12149088592e3f7fe61b419a159554f8ea03866",
+      "bytes": 41895,
+      "sha256": "a7916b6d4b11568f4e34533eadb04753b1085212e46426bbee5812cf5c16ce9e",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2908,62 +2916,62 @@
         },
         {
           "name": "R.Geometry",
-          "line": 82
+          "line": 85
         },
         {
           "name": "R.Child",
-          "line": 95
+          "line": 98
         },
         {
           "name": "R.Art",
-          "line": 105
+          "line": 108
         },
         {
           "name": "Label",
-          "line": 121
+          "line": 124
         },
         {
           "name": "Button",
-          "line": 125
+          "line": 128
         },
         {
           "name": "R.Fit",
-          "line": 131
+          "line": 134
         },
         {
           "name": "R.Stop",
-          "line": 154
+          "line": 157
         },
         {
           "name": "R.Update",
-          "line": 162
+          "line": 165
         },
         {
           "name": "R.Map",
-          "line": 283
+          "line": 288
         },
         {
           "name": "Row",
-          "line": 305
+          "line": 310
         },
         {
           "name": "R.Panels",
-          "line": 309
+          "line": 314
         },
         {
           "name": "R.Settings",
-          "line": 382
+          "line": 392
         },
         {
           "name": "R.Buffs",
-          "line": 397
+          "line": 407
         }
       ],
       "literalEvents": []
     },
     "ZoneThemes.lua": {
-      "bytes": 25227,
-      "sha256": "9dce6895366c7afc2cfc2d1bf0035933d06ad067866e1dcf098e43443f11b884",
+      "bytes": 25204,
+      "sha256": "694bce97b11caec5acf051eef9589ca36b4309660404f06c1f994d44b9e01a54",
       "namedFunctions": [
         {
           "name": "C.NormalizeScales",
@@ -5047,7 +5055,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.5",
+    "version": "0.6.0-alpha.6",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5058,7 +5066,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha5: native Elwynn Complete inspected after reload, showing cleaned panels/chat, no empty effect socket, addon map buttons, inset spells and sans-serif rows. Final small alignment adjustments require reload. Persistent summary/detail, text, profile and ownership regressions tested under Lua 5.0.3/5.1. No fresh native six-layout acceptance, Naxx boss or coop certification."
+    "inGameTestScope": "Alpha6 changes validated by Lua 5.0.3/5.1 regression fixtures: original card artwork, occupied equipment labels, native collapse dock, grouped map dragging, ownership restoration and existing six-layout tests. Alpha5 native Elwynn inspection retained as historical evidence; alpha6 not yet visually accepted in game."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-alpha.5",
+  "version": "0.6.0-alpha.6",
   "maintainerAcceptedForPublication": false,
   "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -10,5 +10,5 @@
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true,
-  "inGameTestScope": "Alpha5: native Elwynn Complete inspected after reload, showing cleaned panels/chat, no empty effect socket, addon map buttons, inset spells and sans-serif rows. Final small alignment adjustments require reload. Persistent summary/detail, text, profile and ownership regressions tested under Lua 5.0.3/5.1. No fresh native six-layout acceptance, Naxx boss or coop certification."
+  "inGameTestScope": "Alpha6 changes validated by Lua 5.0.3/5.1 regression fixtures: original card artwork, occupied equipment labels, native collapse dock, grouped map dragging, ownership restoration and existing six-layout tests. Alpha5 native Elwynn inspection retained as historical evidence; alpha6 not yet visually accepted in game."
 }

@@ -6,7 +6,7 @@ local T=FieldKitTheme
 local routes={Damage={"FieldKitMeterFrame","meterFrame"},Lairs={"FieldKitLairFrame","lairFrame"},
  Accessories={"FieldKitGearFrame","gearFrame"},Effects={"FieldKitEffectsFrame","effectsFrame"},
  Stats={"FieldKitStatsFrame","statsFrame"},Timeline={"FieldKitBossTimelineFrame","bossTimeline"},Reminders={"FieldKitEncounterFrame","nextBossCard"}}
-local hidden={"FieldKitModeFrame","FieldKitCollapseDock","FieldKitMicroMenu"}
+local hidden={"FieldKitModeFrame","FieldKitMicroMenu"}
 C.layoutKeys={"elwynn:minimal","elwynn:complete","elwynn:alternative","naxx:minimal","naxx:complete","naxx:alternative"}
 C.positionNames={"FieldKitThemeIdentity","FieldKitThemeVitality","FieldKitThemeExperience","FieldKitThemeCounters","FieldKitThemeSchedule","FieldKitThemeDock","FieldKitThemeNavigation","FieldKitThemeHeader","FieldKitThemeMap","FieldKitThemeTargetFrame","FieldKitPlayerBar","FieldKitPlayerBuffs","FieldKitBossFrame1"}
 for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do table.insert(C.positionNames,"FieldKitThemeSummary"..kind) end

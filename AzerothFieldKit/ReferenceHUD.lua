@@ -43,6 +43,9 @@ function R.Create()
   f:SetScript("OnMouseDown",function() this.referenceDragged=false end)
   f:SetScript("OnDragStart",function() this.referenceDragged=true;if start then start() end end)
   f:SetScript("OnMouseUp",function() local moved=this.referenceDragged;if finish then finish() end;if not moved then FieldKitZoneThemes.Open(route) end end)
+  f.collapse=T.Button(f,nil,"−",0,0,18,18,function()
+   local native=getglobal(({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[route]);if native and native.mashCollapseButton then native.mashCollapseButton:Click();FieldKitZoneThemes.Refresh(true) end
+  end)
   f.more=T.Button(f,nil,"",0,0,300,28,function() FieldKitZoneThemes.Open(route) end);Blank(f.more)
  end
  R.counts={};R.counterButtons={};R.countIcons={}
@@ -114,7 +117,7 @@ function R.Art(frame,component,layout)
   if a then
    local asset=T.media.."ReferenceHUD\\"..a[1]
    if t.referenceAsset~=asset then t:SetTexture(asset);t.referenceAsset=asset end
-   t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2],-a[3]);t:SetWidth(a[4]);t:SetHeight(a[5]);t:SetTexCoord(0,a[4]/a[6],0,a[5]/a[7]);t:SetAlpha((component=="Damage" or component=="Lairs" or component=="Accessories" or component=="Stats" or component=="Effects" or component=="chat") and FieldKit.Number(FieldKitDB.cardOpacity,100,30,100)/100 or 1);t:Show()
+   t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2],-a[3]);t:SetWidth(a[4]);t:SetHeight(a[5]);if component=="header" and R.key=="elwynn_complete" then local ratio=1+180/R.layout.rects.header[3];t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2]*ratio,-a[3]);t:SetWidth(a[4]*ratio) end;t:SetTexCoord(0,a[4]/a[6],0,a[5]/a[7]);t:SetAlpha((component=="Damage" or component=="Lairs" or component=="Accessories" or component=="Stats" or component=="Effects" or component=="chat") and FieldKit.Number(FieldKitDB.cardOpacity,100,30,100)/100 or 1);t:Show()
   else t:Hide() end
  end
 end
@@ -169,6 +172,7 @@ function R.Update(variant,zone)
   if d.rects[entry[2]] then if entry[2]~="vitality" or not d.integratedVitals then R.Geometry(entry[1],d.rects[entry[2]]) end;Blank(entry[1]);if entry[2]~="vitality" or not d.integratedVitals then R.Art(entry[1],entry[2]) else R.Art(entry[1],"none") end;entry[1]:Show() else entry[1]:Hide() end
  end
  if d.integratedVitals then R.Child(H.healthRoot,H.dock,d.rects.vitality);H.healthRoot:EnableMouse(false) else H.healthRoot:EnableMouse(true) end
+ if key=="elwynn_complete" then local a=d.rects.header;R.Geometry(H.header,{a[1]-90,a[2],a[3]+180,a[4]}) end
  H.sculpture:Hide();H.left:Hide();H.right:Hide();H.namePlate:Hide();H.schedule:Hide()
  for _,rim in ipairs(H.actionRims) do rim:Hide() end
  Label(H.zone,H.identity,d.zone,variant=="complete" and 23 or 20,true,"CENTER")
@@ -177,8 +181,9 @@ function R.Update(variant,zone)
  else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and " · "..FieldKit_L("Mode") or "")) end
  if zone=="elwynn" and variant~="alternative" then local a=d.mode;Label(H.mode.fieldkitLabel,H.mode,{a[1]+3,a[2],a[3]-30,a[4]},14,true,"CENTER","NotoSerif-Regular.ttf") end
  H.mode:SetScript("OnEnter",function() if not H.micro:IsShown() then H.ModeTip(this,false) end end);H.mode:RegisterForClicks("LeftButtonUp","RightButtonUp");H.mode.callback=function() if arg1=="RightButton" then H.pinned=false;H.HideTip(); if H.micro:IsShown() then H.micro:Hide() else H.micro:Show() end else H.ModeTip(H.mode,true) end end
- Button(H.timeline,H.header,d.clock);Label(H.clock,H.timeline,d.clock,25,true)
- Button(H.reminders,H.header,d.next);Label(H.next,H.reminders,d.next,zone=="elwynn" and 18 or (d.nextSize or 23),true)
+ local clockRect=d.clock;local nextRect=d.next;if key=="elwynn_complete" then clockRect={d.clock[1]-45,d.clock[2],d.clock[3]+10,d.clock[4]};nextRect={d.next[1],d.next[2],d.next[3]+85,d.next[4]} end
+ Button(H.timeline,H.header,clockRect);Label(H.clock,H.timeline,clockRect,25,true)
+ Button(H.reminders,H.header,nextRect);Label(H.next,H.reminders,nextRect,zone=="elwynn" and 18 or (d.nextSize or 23),true)
  if zone=="naxx" and variant=="minimal" then
   local b=FieldKitNativeTools.NextBoss();H.clock:SetText(FieldKit_L("Elapsed time").." : "..FieldKitNative.Clock(FieldKitNative.Time()));H.next:SetText(b and FieldKit_L("Next").." : "..b.name.." · "..FieldKitNative.Clock(b.left) or FieldKit_L("No upcoming boss"))
  end
@@ -290,7 +295,7 @@ function R.Map()
  local clock=getglobal("GameTimeFrame");if clock then FieldKitZoneThemes.Mask(clock,true) end
  M.root:Show()
  for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton","MiniMapTrackingFrame"}) do
-  local f=getglobal(name);if f then H.Save(f);local changed=f:GetParent()~=M.root;local shown=f:IsShown();f:SetParent(M.root);f:SetAlpha(1);f:SetScale(1);f:ClearAllPoints();f:SetPoint("TOPRIGHT",Minimap,"TOPRIGHT",0,-(i-1)*32);f:SetFrameStrata("HIGH");f:SetFrameLevel(M.root:GetFrameLevel()+30);if changed and shown then f:Hide();f:Show() end end
+  local f=getglobal(name);if f then H.Save(f);M.launcherUpdates=M.launcherUpdates or {};if M.launcherUpdates[f]==nil then M.launcherUpdates[f]=f:GetScript("OnUpdate") or false end;f:SetScript("OnUpdate",nil);local changed=f:GetParent()~=M.root;local shown=f:IsShown();f:SetParent(M.root);f:SetAlpha(1);f:SetScale(1);f:ClearAllPoints();local left=R.layout.map[1]<R.layout.size[1]/2;f:SetPoint(left and "TOPLEFT" or "TOPRIGHT",M.root,left and "TOPRIGHT" or "TOPLEFT",left and 4 or -4,-8-(i-1)*36);f:SetFrameStrata("HIGH");f:SetFrameLevel(M.root:GetFrameLevel()+30);if changed and shown then f:Hide();f:Show() end end
  end
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
@@ -319,30 +324,32 @@ function R.Panels(variant,zone)
  local prefs={Damage="meterFrame",Lairs="lairFrame",Accessories="gearFrame",Stats="statsFrame",Effects="effectsFrame"}
  for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do
   local f=R.frames[kind];local a=d.rects[kind]
-  if a and FieldKitDB[prefs[kind]] and not (kind=="Damage" and FieldKitZoneThemes.nativeMeterOpen) then
-   R.Geometry(f,a);R.Art(f,kind);f:Show()
-   if not f.bodyWash then f.bodyWash=f:CreateTexture(nil,"BORDER") end;f.bodyWash:ClearAllPoints();f.bodyWash:SetPoint("TOPLEFT",f,"TOPLEFT",12,-44);f.bodyWash:SetWidth(a[3]-24);f.bodyWash:SetHeight(a[4]-56);T.Solid(f.bodyWash,{.025,.045,.035});f.bodyWash:Show()
-   f.title:ClearAllPoints();f.title:SetPoint("TOPLEFT",f,"TOPLEFT",65,-14);f.title:SetWidth(a[3]-78);f.title:SetHeight(30)
+  local nativeName=({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[kind];local folded=(kind=="Stats" and FieldKitDB.statsCollapsed) or (kind=="Accessories" and FieldKitDB.gearCollapsed) or (FieldKitDB.collapsedWindows and FieldKitDB.collapsedWindows[nativeName])
+  if a and FieldKitDB[prefs[kind]] and not folded and not (kind=="Damage" and FieldKitZoneThemes.nativeMeterOpen) then
+   R.Geometry(f,a);R.Art(f,kind);f:Show();f.collapse:ClearAllPoints();f.collapse:SetPoint("TOPRIGHT",f,"TOPRIGHT",-8,-8);f.collapse:SetFrameLevel(f:GetFrameLevel()+25);f.collapse:Show()
+   if f.bodyWash then f.bodyWash:Hide() end
+
+   f.title:ClearAllPoints();f.title:SetPoint("TOPLEFT",f,"TOPLEFT",65,-14);f.title:SetWidth(a[3]-78);f.title:SetHeight(30);T.Font(f.title,21,R.color,true)
    local titles={Damage="DAMAGE",Lairs="LAIRS",Accessories="EQUIPMENT",Stats="BONUSES",Effects="EFFECTS"};FieldKit_Text(f.title,titles[kind])
    f.more:Show();f.more:SetFrameLevel(f:GetFrameLevel()+15);f.more:ClearAllPoints();f.more:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);f.more:SetWidth(a[3]-42);f.more:SetHeight(28);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
-   f.total:Hide();f.rateLabel:Hide();for _,r in ipairs(f.rows) do r:Hide() end
+   if f.emptySocket then f.emptySocket:Hide() end;f.total:Hide();f.rateLabel:Hide();for _,r in ipairs(f.rows) do r:Hide() end
    if kind=="Damage" then
-    FieldKit_Text(f.more,"All spells");local view,index=FieldKitMeterSuite.View();local lines,total,rate,known=FieldKitMeterLedger.Read(view)
+    FieldKit_Text(f.more,"All spells");f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →");local view,index=FieldKitMeterSuite.View();local lines,total,rate,known=FieldKitMeterLedger.Read(view)
     FieldKit_Text(f.title,({"DAMAGE","HEALING","BOSS DAMAGE","DAMAGE TAKEN","PARTY DPS","KILLS"})[index] or "DAMAGE")
-    f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-18,-11);f.total:SetWidth(a[3]-210);f.total:SetHeight(25);f.total:SetJustifyH("RIGHT");f.total:SetText(Short(total).." · "..Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));f.total:Show();f.title:SetWidth(125)
+    f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-11);f.total:SetWidth(a[3]-200);f.total:SetHeight(25);f.total:SetJustifyH("RIGHT");f.total:SetText(Short(total).." · "..Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));f.total:Show();f.title:SetWidth(125)
     if zone=="naxx" then
      f.total:ClearAllPoints();f.total:SetPoint("TOPLEFT",f,"TOPLEFT",29,-53);f.total:SetWidth(155);f.total:SetHeight(34);f.total:SetJustifyH("LEFT");f.total:SetText(Short(total));T.Font(f.total,30,R.body,true)
      f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
      f.title:SetWidth(a[3]-100);f.more:Hide()
-    else T.Font(f.total,16,R.body) end
-    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",18+(i-1)*(a[3]-36)/6,-46);b:SetWidth((a[3]-36)/6);b.fieldkitLabel:SetWidth((a[3]-36)/6);T.Font(b.fieldkitLabel,12,R.color);if zone=="naxx" then b:Hide() else b:Show() end end
+    else T.Font(f.total,16,R.color,true) end
+    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",18+(i-1)*(a[3]-36)/6,-46);b:SetWidth((a[3]-36)/6);b.fieldkitLabel:SetWidth((a[3]-36)/6);T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-2,1) end;T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end;if zone=="naxx" then b:Hide() else b:Show() end end
     for i=1,4 do local r=Row(f,i,82,(zone=="naxx" and 108 or 83)+(i-1)*(zone=="naxx" and 53 or 33),a[3]-100,29);local e=lines[i]
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and e.name or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
      if e then r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-45,0);r.icon:SetTexture(e.icon or FieldKitLoadout.Icon(e.name));r.icon:Show();r.bar:ClearAllPoints();r.bar:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.bar:SetWidth(a[3]-160);r.bar:SetValue(e.share or 0);r.bar:SetStatusBarColor(zone=="elwynn" and .65 or .1,zone=="elwynn" and .55 or .75,zone=="elwynn" and .18 or .85);r.bar:Show() end
     end
    elseif kind=="Lairs" then
-    FieldKit_Text(f.more,"View list");local lairs=FieldKitNative.Read("AZS_GetLairs");local active=0;for _,e in ipairs(type(lairs)=="table" and lairs or {}) do if e.state=="awake" then active=active+1 end end
+    FieldKit_Text(f.more,"View list");f.more.fieldkitLabel:SetText(FieldKit_L("View list").." →");local lairs=FieldKitNative.Read("AZS_GetLairs");local active=0;for _,e in ipairs(type(lairs)=="table" and lairs or {}) do if e.state=="awake" then active=active+1 end end
     if zone=="naxx" then
      f.more:Hide();local source=getglobal("FieldKitLairFrame")
      for i=1,4 do local r=Row(f,i,52,53+(i-1)*31,a[3]-77,28);local e=type(lairs)=="table" and lairs[i];local native=source and source.rows and source.rows[i]
@@ -354,11 +361,11 @@ function R.Panels(variant,zone)
    elseif kind=="Accessories" then
     FieldKit_Text(f.more,"Equipment / spells");f.more:Hide()
     local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
-    for i=1,5 do local r=Row(f,i,72,51+(i-1)*35,a[3]-94,30);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;FieldKit_Text(r.label,names[i]);r.value:SetText(e and (e.name or FieldKit_L("Empty")) or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228)
+    for i=1,5 do local r=Row(f,i,72,51+(i-1)*35,a[3]-94,30);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
      local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(texture);r.icon:Show() end
     end
    elseif kind=="Stats" then
-    FieldKit_Text(f.more,"All statistics");local source=getglobal("FieldKitStatsFrame");local labels={"Damage","Haste","Crit Chance","Lifesteal"}
+    FieldKit_Text(f.more,"All statistics");f.more.fieldkitLabel:SetText(FieldKit_L("All statistics").." →");local source=getglobal("FieldKitStatsFrame");local labels={"Damage","Haste","Crit Chance","Lifesteal"}
     if zone=="naxx" then f.more:Hide() end
     for i,name in ipairs(labels) do local r=Row(f,i,zone=="naxx" and 72 or 31,49+(i-1)*(zone=="naxx" and 27 or 29),a[3]-(zone=="naxx" and 100 or 65),27);FieldKit_Text(r.label,name=="Crit Chance" and "Critique" or name);local value="?"
      for _,s in ipairs(source and source.rows or {}) do if s.label:GetText()==FieldKit_L(name) then value=s.value:GetText() or "?" end end;r.value:SetText(value)
@@ -366,6 +373,9 @@ function R.Panels(variant,zone)
    else
     FieldKit_Text(f.more,"All effects");f.more:Hide();local source=getglobal("FieldKitEffectsFrame");local e=source and source.rows[1];local r=Row(f,1,72,52,a[3]-99,31)
     r.label:SetText(e and e.label:GetText() and e.label:GetText()~="" and e.label:GetText() or FieldKit_L("No active effect"));r.value:SetText(e and e.value:GetText() or "");local available=a[3]-99;local vw=r.value:GetText()~="" and math.min(110,math.max(60,(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+4)) or 0;r.value:SetWidth(vw);r.label:SetWidth(available-vw-8)
+    if not (e and e.icon and e.icon:GetTexture()) then
+     if not f.emptySocket then f.emptySocket=f:CreateTexture(nil,"BORDER") end;local t=f.emptySocket;t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_material_v3.tga");t:SetTexCoord(.35,.65,.35,.65);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",22,-48);t:SetWidth(47);t:SetHeight(45);t:Show()
+    end
     if e and e.icon and e.icon:GetTexture() then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,0);r.icon:SetTexture(e.icon:GetTexture());r.icon:Show() end
    end
    R.Fit(f.title,21,12);if f.total:IsShown() then R.Fit(f.total,zone=="naxx" and 30 or 16,12) end

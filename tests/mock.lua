@@ -7,6 +7,11 @@ objects={}
 local methods={}
 function methods:SetScript(k,v) self.scripts[k]=v end
 function methods:GetScript(k) return self.scripts[k] end
+function methods:Click(button)
+ local previous,previousButton=this,arg1;this=self;arg1=button or "LeftButton"
+ if self.scripts.OnClick then self.scripts.OnClick() end
+ this=previous;arg1=previousButton
+end
 function methods:RegisterEvent(k) self.events[k]=true end
 function methods:GetName() return self._name end
 function methods:GetObjectType() return self.kind end

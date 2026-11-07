@@ -232,3 +232,18 @@ local row=R.frames.Lairs.rows[1];if row.lamp then assert(not row.lamp:IsShown(),
 assert(Minimap:GetWidth()==270 and ActionButton1:GetWidth()==R.layout.actions[3]-8)
 C.Set("zoneThemes",false)
 print("Review feedback: persistent summaries, readable detail rows, clean selection and inset actions passed")
+
+-- Complete cards keep authored backgrounds, collapse through the original dock,
+-- and show an equipped item's real name without duplicating its slot label.
+C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+assert(not R.frames.Damage.bodyWash or not R.frames.Damage.bodyWash:IsShown())
+assert(R.frames.Accessories.rows[1].label.referenceFullText==long and R.frames.Accessories.rows[1].value:GetText()=="")
+click(R.frames.Stats.collapse);assert(FieldKitDB.statsCollapsed and not R.frames.Stats:IsShown());assert(FieldKitCollapseDock:IsShown())
+FieldKitDB.statsCollapsed=false;FieldKit.ApplyHUDProfileLive();C.Refresh();assert(R.frames.Stats:IsShown())
+assert(R.tabs[1].underline:IsShown())
+local oldlocked=FieldKitDB.windowsLocked;FieldKitDB.windowsLocked=false
+local start=Minimap:GetScript("OnDragStart");assert(type(start)=="function");start();assert(H.identity.azsMoving and not M.root.azsMoving)
+Minimap:GetScript("OnDragStop")();assert(not H.identity.azsMoving)
+FieldKitDB.windowsLocked=oldlocked
+C.Set("zoneThemes",false)
+print("Complete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed")

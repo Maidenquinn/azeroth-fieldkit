@@ -1,4 +1,4 @@
-AZEROTH FIELDKIT 0.6.0-alpha.5 — PILOTE ELWYNN / NAXXRAMAS
+AZEROTH FIELDKIT 0.6.0-alpha.6 — PILOTE ELWYNN / NAXXRAMAS
 7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
 
 La version est installée dans le client habituel. Le code stable reste inchangé.
@@ -100,3 +100,12 @@ carte Elwynn agrandie et icônes connues des addons replacées au bord de la car
 Le détail Bonus conserve les panneaux de synthèse et espace ses lignes.
 Contrôle visuel Elwynn Complète après rechargement. Les derniers ajustements
 d’alignement nécessitent /reload ; pas de nouvelle certification des six scènes.
+
+ALPHA.6 — CADRES ET COMPORTEMENTS
+Texture et bordure basse des cards rétablies. Onglet actif souligné, en-têtes
+et total/DPS harmonisés. Banderole Elwynn Complète élargie. Objets équipés :
+le vrai nom remplace le nom du slot. Bouton moins en haut à droite des cinq
+cards : réduction vers le dock FieldKit natif en bas à droite ; clic sur son
+bouton pour restaurer. Déplacement de la carte et de son cadre groupé.
+Les scripts de position des icônes connues sont suspendus uniquement pendant
+le thème, puis rétablis. /reload requis pour charger ces corrections.

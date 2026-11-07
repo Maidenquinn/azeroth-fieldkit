@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.6 — 2026-11-07 (complete HUD corrections, unpublished)
+
+- Restore authored panel backgrounds and bottom rims; restrict empty-effect cleanup to its unused socket. Match heading/total colors and fonts, highlight active meter tabs and restore footer arrows.
+- Widen the Elwynn Complete banner and next-boss field; show equipped item names in place of slot labels.
+- Route minimap dragging to its complete artwork group and pause competing addon launcher update scripts while themed; restore them on exit.
+- Add collapse buttons to the five summary cards, sharing the original settings and bottom-right restoration dock.
+
 ## 0.6.0-alpha.5 — 2026-11-07 (visual feedback, unpublished)
 
 - Remove side selection stripes and decorative header fragments behind text; use readable serif headings and sans-serif data rows.
