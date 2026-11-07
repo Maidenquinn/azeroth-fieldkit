@@ -108,7 +108,8 @@ sauvegarde Installed_FieldKit_before_v060 à la place d'AzerothFieldKit dans
 Jeu/benilla-config/AddOns. Ne pas modifier les fichiers SavedVariables ou .sav.
 La sauvegarde est dans Concepts/09_Implementation/Backups.
 Le code stable, le dépôt historique, les sauvegardes de joueur et les autres addons
-n'ont pas été édités. Les réglages de FieldKit ont été modifiés par ses propres
+n'ont pas été édités directement. Le client peut enregistrer normalement les
+parties d'essai. Les réglages de FieldKit ont été modifiés par ses propres
 contrôles pendant les essais et sauvegardés normalement par le client.
 
 Cette alpha attend ta recette ; elle n'est ni fusionnée ni publiée sur GitHub.
