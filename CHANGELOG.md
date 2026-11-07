@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.17 - 2026-11-07 (clicks, six damage rows, map buttons, unreleased)
+
+- Intermittent tab clicks: the 0.2 s refresh hid and re-showed every card, the Equipment/Spells tabs and every row (Hide on a pressed button drops the click). Cards, tabs and rows now stay shown and are hidden only when they should disappear; buttons, rows, foot and collapse controls are re-levelled/re-anchored only when their layout changes; the minimap zoom buttons no longer Hide/Show on refresh. New `/fieldkit clickdiag` prints presses, releases, clicks and hides per tab for the native recette.
+- Damage: six full rows (Elwynn 98 + 29 per row, Naxxramas 146 + 34), scroll only beyond six, position shown on the foot button (Elwynn) or the pager (Naxxramas). The card is taller (Elwynn +68 px, shifted 6 px; Naxxramas +21 px upward) by cutting the art inside its uniform body and stretching a thin band: no new artwork. Neighbours verified (Lairs, chat, header).
+- Lairs: larger inner margins (Elwynn x=48, right 48, rows from y=47 on a card 8 px taller; Naxxramas x=60, right 50).
+- Map buttons: owner `SetPoint` calls are intercepted per button instance so a ring-style button (CENTER on Minimap, radius 55-100) is placed on the edge of the visible opening in the same call, including every frame of the owner's drag; the owner's raw offsets are always known, so theme-off restores them exactly. Parked originals are recognised by their offsets (this client may return the relative frame as a name). New `/fieldkit mapdiag` lists every Minimap child with parent, alpha, mouse, anchor, ring and parked state.
+
 ## 0.6.0-alpha.16 - 2026-11-07 (drag, sockets, third-party map buttons, unreleased)
 
 - Card drag: the 0.2 s theme refresh hid every card (`R.Panels` / summaries `Hide()`), and the `OnHide` handler of `FieldKitZoneThemes.Bind` ends the drag (`C.Finish`). A card under the mouse is no longer hidden. `C.Remember` also stores the released spot against UIParent when the engine leaves the card anchored to the scaled canvas, so the position is saved and restored.

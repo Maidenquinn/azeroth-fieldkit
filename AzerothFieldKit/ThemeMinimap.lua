@@ -14,54 +14,67 @@ function M.Rotate(x,y)
 end
 -- Third-party launcher buttons stay Minimap children, so their owners (e.g. a button manager that fades or hides
 -- them) keep control of alpha/mouse. FieldKit only moves a duplicate-prone original off screen and remembers its anchors.
+-- GetPoint may return the relative frame as a NAME on this client, so the parked spot is recognised by its offsets.
+local function IsParked(f) local _,_,_,x,y=f:GetPoint();return x==-4000 and y==-4000 end
 function M.Park(f)
  M.parked=M.parked or {}
  if not M.parked[f] then M.parked[f]=FieldKitThemeHUD.Points(f) end
- local _,rel,_,x=f:GetPoint()
- if not (rel==UIParent and x==-4000) then f:ClearAllPoints();f:SetPoint("CENTER",UIParent,"CENTER",-4000,-4000) end
+ if not IsParked(f) then f:ClearAllPoints();f:SetPoint("CENTER",UIParent,"CENTER",-4000,-4000) end
 end
 function M.Unpark()
  for f,points in pairs(M.parked or {}) do
-  local _,rel,_,x=f:GetPoint()
-  if rel==UIParent and x==-4000 then
+  if IsParked(f) then
    f:ClearAllPoints();for i=1,table.getn(points) do local a=points[i];f:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
   end
  end
  M.parked={}
 end
 -- Buttons that follow the common minimap-button convention (one CENTER anchor on the Minimap at a native-sized
--- radius) keep their angle but ride the edge of the visible opening instead of sitting inside the enlarged map.
+-- radius, e.g. cos/sin*80 while dragging) keep their angle but ride the edge of the visible opening. The owner's own
+-- SetPoint calls are intercepted on that button instance, so the correction is applied in the same call (no frame-order
+-- race with the owner's drag OnUpdate) and the owner's raw offsets are always known for an exact restoration.
 local ringProxied={FieldKitMinimapButton=true,AzerothStatsMinimap=true,AzerothOneMinimapButton=true}
+local function Edge(x,y)
+ local half=M.ringHalf;if not half then return nil end
+ local radius=math.sqrt(x*x+y*y)
+ if radius<55 or radius>100 then return nil end
+ local dx,dy=x/radius,y/radius
+ local reach=1/math.max(math.abs(dx)/half[1],math.abs(dy)/half[2])+6
+ return dx*reach,dy*reach
+end
+function M.Wrap(f)
+ if f.fieldkitRingOriginal then return end
+ local original=f.SetPoint;f.fieldkitRingOriginal=original
+ M.wrapped=M.wrapped or {};table.insert(M.wrapped,f)
+ f.SetPoint=function(self,point,rel,relPoint,x,y)
+  if M.active and point=="CENTER" and rel==Minimap and relPoint=="CENTER" and type(x)=="number" and type(y)=="number" then
+   local ax,ay=Edge(x,y)
+   if ax then M.ring[self]={rx=x,ry=y,ax=ax,ay=ay};return original(self,point,rel,relPoint,ax,ay) end
+  end
+  M.ring[self]=nil -- the owner placed it some other way: it is no longer ours to restore
+  return original(self,point,rel,relPoint,x,y)
+ end
+end
 function M.Ring(halfW,halfH)
  M.ring=M.ring or {}
+ local changed=not M.ringHalf or M.ringHalf[1]~=halfW or M.ringHalf[2]~=halfH
+ M.ringHalf={halfW,halfH}
  if not Minimap or not Minimap.GetChildren then return end
  for _,f in ipairs({Minimap:GetChildren()}) do
   local name=f.GetName and f:GetName()
-  if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and not string.find(name,"^FieldKit") then
-   local points=FieldKitThemeHUD.Points(f);local p=points[1];local record=M.ring[f]
-   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and type(p[4])=="number" and type(p[5])=="number" then
-    if record and record.ax==p[4] and record.ay==p[5] then
-     -- already ours
-    else
-     local radius=math.sqrt(p[4]*p[4]+p[5]*p[5])
-     if radius>=55 and radius<=100 then
-      local dx,dy=p[4]/radius,p[5]/radius
-      local reach=1/math.max(math.abs(dx)/halfW,math.abs(dy)/halfH)+6
-      local ax,ay=dx*reach,dy*reach
-      M.ring[f]={rx=p[4],ry=p[5],ax=ax,ay=ay}
-      f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",ax,ay)
-     end
-    end
+  if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and not string.find(name,"^FieldKit") and not f.fieldkitRingOriginal then
+   local points=FieldKitThemeHUD.Points(f);local p=points[1]
+   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5]) then
+    M.Wrap(f);f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",p[4],p[5]) -- goes through the wrapper: edge position, raw remembered
    end
   end
  end
+ if changed then for f,r in pairs(M.ring) do local ax,ay=Edge(r.rx,r.ry);if ax then r.ax,r.ay=ax,ay;f.fieldkitRingOriginal(f,"CENTER",Minimap,"CENTER",ax,ay) end end end
 end
 function M.RingRestore()
- for f,r in pairs(M.ring or {}) do
-  local points=FieldKitThemeHUD.Points(f);local p=points[1]
-  if table.getn(points)==1 and p[4]==r.ax and p[5]==r.ay then f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
- end
- M.ring={}
+ for _,f in ipairs(M.wrapped or {}) do f.SetPoint=nil;f.fieldkitRingOriginal=nil end
+ for f,r in pairs(M.ring or {}) do f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
+ M.ring={};M.wrapped={};M.ringHalf=nil
 end
 function M.Restore()
  if not M.active then return end

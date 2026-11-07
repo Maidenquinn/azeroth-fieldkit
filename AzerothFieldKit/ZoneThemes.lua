@@ -312,6 +312,15 @@ function C.Command(msg)
    local f=getglobal(name)
    if f then local p=f:GetParent();DEFAULT_CHAT_FRAME:AddMessage(name.." parent="..tostring(p and p:GetName()).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown())) end
   end
+ elseif arg=="clickdiag" then
+  for _,d in ipairs(FieldKitReferenceHUD.diagButtons or {}) do DEFAULT_CHAT_FRAME:AddMessage(d.label..": down "..d.down.." up "..d.up.." click "..d.click.." hide "..d.hide) end
+ elseif arg=="mapdiag" then
+  local M=FieldKitThemeMinimap;DEFAULT_CHAT_FRAME:AddMessage("map active="..tostring(M.active).." ring="..tostring(M.ringHalf and M.ringHalf[1]).."x"..tostring(M.ringHalf and M.ringHalf[2]))
+  if Minimap and Minimap.GetChildren then for _,f in ipairs({Minimap:GetChildren()}) do
+   local name=f.GetName and f:GetName()
+   if name then local p,rel,rp,x,y=f:GetPoint();local parked=(x==-4000)
+    DEFAULT_CHAT_FRAME:AddMessage(name.." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown()).." mouse="..tostring(f.IsMouseEnabled and f:IsMouseEnabled())..string.format(" pt=%s %s %s",tostring(p),tostring(x),tostring(y)).." ring="..tostring(M.ring and M.ring[f]~=nil).." parked="..tostring(parked)) end
+  end end
  elseif arg=="off" then C.Set("zoneThemes",false)
  elseif arg=="on" then C.Set("zoneThemes",true)
  elseif arg=="auto" or arg=="elwynn" or arg=="naxx" then C.Set("zoneThemeMode",arg);C.Set("zoneThemes",true)

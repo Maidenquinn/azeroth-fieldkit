@@ -323,7 +323,7 @@ print("Locked HUD readers remain movable and persistent; localized taken sources
 
 -- alpha.13: in-card Equipment/Spells tabs, bounded scrolling lists, four guardians, buffs with native icon restoration.
 local function Inside(f,zone,label)
- local a=R.layout.rects[label];local h=a[4]
+ local a=R.CardRect(label,R.layout);local h=a[4]
  for _,r in ipairs(f.rows) do if r:IsShown() then
   local _,_,_,x,y=r:GetPoint();assert(-y+r:GetHeight()<=h-10,zone..": "..label.." row leaves the card ("..tostring(-y+r:GetHeight()).." > "..tostring(h-10)..")")
   assert(x+r:GetWidth()<=a[3]-8,zone..": "..label.." row crosses the right border")
@@ -396,7 +396,7 @@ print("Equipment/Spells tabs, bounded effects and lairs, native buff restoration
 -- alpha.14: portrait under the art rim, readable two-row damage navigation, centred boss/guardian card.
 for _,zone in ipairs({"elwynn","naxx"}) do
  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
- local d=R.frames.Damage;local a=R.layout.rects.Damage
+ local d=R.frames.Damage;local a=R.CardRect("Damage",R.layout)
  assert(table.getn(R.tabs)==6)
  local seen={}
  for i,b in ipairs(R.tabs) do
@@ -460,11 +460,11 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  -- Lair names get the width that is left
  local lairs={};for i=1,4 do table.insert(lairs,{name="Anub'Rekhan the Very Long Named Guardian "..i,state=(i==1 and "awake" or "empty"),left=(i>1 and 60 or nil),x=i,y=0}) end
  local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
- C.Refresh(true);local panel=R.frames.Lairs;local rowW=zone=="naxx" and a[3]*0+R.layout.rects.Lairs[3]-77 or R.layout.rects.Lairs[3]-66
+ C.Refresh(true);local panel=R.frames.Lairs;local rowW=zone=="naxx" and R.layout.rects.Lairs[3]-110 or R.layout.rects.Lairs[3]-96
  for i=1,4 do local r=panel.rows[i];assert(r:IsShown() and r.label:GetWidth()+r.value:GetWidth()<=rowW,zone..": lair columns do not overlap");assert(r.label:GetWidth()>rowW*.4,zone..": name receives the available width") ;assert(r.label.referenceFullText and string.find(r.label.referenceFullText,"Anub"),zone..": full lair name kept for hover") end
  FieldKitNative.Read=oldRead
  -- Damage: empty state centred in the content area; six tabs reachable; layout not re-applied every refresh
- local dm=R.frames.Damage;local dr=R.layout.rects.Damage
+ local dm=R.frames.Damage;local dr=R.CardRect("Damage",R.layout)
  for k=1,6 do local b=R.tabs[k];assert(b:IsShown() and b:GetHeight()>=24 and b:GetWidth()>=80,zone..": damage tab hit area "..k) end
  local seenLevel=R.tabs[1]:GetFrameLevel();local key=R.tabs[1].layoutKey;C.Refresh(true);assert(R.tabs[1].layoutKey==key and R.tabs[1]:GetFrameLevel()==seenLevel,zone..": tab layout is stable across refreshes")
  local r1=dm.rows[1];local _,_,_,rx,ry=r1:GetPoint();local top=zone=="naxx" and 146 or 98;local bottom=zone=="naxx" and dr[4]-30 or dr[4]-52
@@ -509,17 +509,18 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  GetInventoryItemTexture=oldTex;FieldKitLoadout.items=oldItems
  -- Damage: last row clear of the foot, scrolling, FR and EN
  local oldRead=FieldKitMeterLedger.Read
- for _,count in ipairs({0,1,4,6,12}) do
+ for _,count in ipairs({0,1,4,6,8,12}) do
   for _,lang in ipairs({"fr","en"}) do
    FieldKitDB.language=lang
    FieldKitMeterLedger.Read=function() local lines={};for i=1,count do table.insert(lines,{name="Spell "..i,share=1/i,icon="Interface\Icons\X"}) end return lines,100,10,true end
-   R.scroll.Damage=0;C.Refresh(true);local dm=R.frames.Damage;local dr=R.layout.rects.Damage
-   local capacity=zone=="naxx" and 4 or 3;local shown=0;local lowest=0
-   for _,r in ipairs(dm.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();lowest=math.max(lowest,-y+r:GetHeight()+(count>0 and 9 or 0)) end end
+   R.scroll.Damage=0;C.Refresh(true);local dm=R.frames.Damage;local dr=R.CardRect("Damage",R.layout)
+   local capacity=6;local shown=0;local lowest=0
+   for _,r in ipairs(dm.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();lowest=math.max(lowest,-y+r:GetHeight()) end end
    assert(shown==math.max(1,math.min(capacity,count)),zone..": Damage shows "..count.." spells in "..shown.." rows")
    local limit=zone=="naxx" and dr[4]-12 or dr[4]-48
    assert(lowest<=limit,zone..": Damage last row ("..lowest..") stays above the foot ("..limit..") with "..count.." spells ["..lang.."]")
-   assert(dm.pager:IsShown()==(count>capacity),zone..": Damage pager only when scrolling is needed")
+   if zone=="elwynn" then assert(not dm.pager:IsShown() and (count>capacity)==(string.find(dm.more.fieldkitLabel:GetText(),"/",1,true)~=nil),zone..": scroll position is on the foot button only when scrolling is needed")
+   else assert(dm.pager:IsShown()==(count>capacity),zone..": Damage pager only when scrolling is needed") end
    if zone=="elwynn" then assert(dm.more:IsShown() and dm.more:GetHeight()==28 and dm.more:GetWidth()==dr[3]-42,zone..": All spells button spans its full surface") end
    if count>capacity then this=dm;arg1=-100;dm.scripts.OnMouseWheel();assert(dm.rows[1].label:GetText()=="Spell "..(count-capacity+1),zone..": scrolling reaches the last spell") end
   end
@@ -546,3 +547,73 @@ do
  Minimap.GetChildren=oldChildren
 end
 print("Drag across refreshes (simulated), socket-centred icons, Damage foot clearance and third-party map buttons passed (synthetic)")
+
+-- alpha.17: click stability, taller Damage card, neighbours, repeated theme transitions with third-party map buttons.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ -- 30 alternations per tab group with the 0.2 s refresh running between press and release: nothing may be hidden
+ local acc,dm=R.frames.Accessories,R.frames.Damage
+ local watched={acc,dm,acc.cardTabs[1],acc.cardTabs[2]};for _,b in ipairs(R.tabs) do table.insert(watched,b) end;for _,r in ipairs(acc.rows) do table.insert(watched,r) end;for _,r in ipairs(dm.rows) do table.insert(watched,r) end
+ local hides=0;local lastHidden;local counting=false;for _,f in ipairs(watched) do f.Hide=function(self) if counting and self.shown~=false then hides=hides+1;lastHidden=tostring(self:GetName() or self.kind) end;self.shown=false end end
+ local snap={};for _,d in ipairs(R.diagButtons) do snap[d]={d.down,d.up,d.click} end
+ for n=1,30 do
+  local want=(math.mod(n,2)==1) and 2 or 1
+  local b=acc.cardTabs[want];local before=b.fieldkitDiag.down
+  b.scripts.OnMouseDown();NOW=NOW+.25;counting=true;C.Refresh(true);counting=false;b.scripts.OnMouseUp();click(b)
+  assert(FieldKitDB.loadoutTab==want and acc.cardTabs[want].fieldkitSelected==true,zone..": Equipment/Spells click "..n.." was lost")
+  local view=math.mod(n,6)+1;local t=R.tabs[view]
+  t.scripts.OnMouseDown();NOW=NOW+.25;counting=true;C.Refresh(true);counting=false;t.scripts.OnMouseUp();click(t)
+  local _,index=FieldKitMeterSuite.View();assert(index==view,zone..": Damage category click "..n.." was lost")
+ end
+ assert(hides==0,zone..": refreshes hid "..hides.." visible interactive frames between press and release (last: "..tostring(lastHidden)..")")
+ for _,f in ipairs(watched) do f.Hide=nil end
+ local lost=0;for d,was in pairs(snap) do local downs,clicks=d.down-was[1],d.click-was[3];if downs>0 and downs~=clicks then lost=lost+1 end end;assert(lost==0,zone..": click accounting shows presses without clicks")
+ click(R.tabs[1])
+ -- Damage card: taller, art contiguous, neighbours clear
+ C.Refresh(true);local d0=R.layout.rects.Damage;local a=R.CardRect("Damage",R.layout)
+ assert(a[4]>d0[4] and dm:GetHeight()==a[4],zone..": Damage card is taller")
+ local pieces={};for _,t in ipairs(dm.referenceTiles) do if t:IsShown() then local _,_,_,_,y=t:GetPoint();table.insert(pieces,{-y,t:GetHeight()}) end end
+ table.sort(pieces,function(p,q) return p[1]<q[1] end);local reach=0
+ for _,p in ipairs(pieces) do assert(p[1]==reach,zone..": Damage art has a gap or overlap at "..tostring(p[1]).." (expected "..tostring(reach)..")");reach=p[1]+p[2] end
+ assert(reach==a[4],zone..": stretched art ends exactly at the card bottom")
+ local rects=R.layout.rects;local L=R.CardRect("Lairs",R.layout)
+ if zone=="elwynn" then
+  assert(L[2]+L[4]-7<a[2]+6,"Lairs bottom edge stays above the taller Damage card");assert(a[2]+a[4]-6<=rects.chat[2]+9,"Damage bottom edge stays above the chat")
+ else
+  assert(a[2]+1>rects.header[2]+rects.header[4]-8 or a[2]>rects.header[2]+rects.header[4]-8,"Damage stays below the header");assert(a[2]+a[4]-5<L[2]+2,"Damage bottom edge stays above the Lairs card")
+ end
+ -- Lairs: larger inner margins, four guardians, long names
+ local lairs={};for i=1,4 do table.insert(lairs,{name="Anub'Rekhan the Very Long Named Guardian "..i,state="awake",x=i,y=0}) end
+ local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
+ C.Refresh(true);local panel=R.frames.Lairs;local pr=R.CardRect("Lairs",R.layout)
+ for i=1,4 do local r=panel.rows[i];local _,_,_,x,y=r:GetPoint();assert(r:IsShown() and x>=46 and x+r:GetWidth()<=pr[3]-44,zone..": lair "..i.." keeps side margins ("..x.." / "..(pr[3]-x-r:GetWidth())..")");assert(-y>=46 and -y+r:GetHeight()<=pr[4]-12,zone..": lair "..i.." keeps top/bottom margins") end
+ FieldKitNative.Read=oldRead
+end
+-- Repeated transitions with a drag-style owner: active -> inactive -> active, reload-like re-apply, layout change
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local M=FieldKitThemeMinimap
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap)
+ local parkedOne=CreateFrame("Button","AzerothStatsMinimap",Minimap);parkedOne:SetPoint("CENTER",Minimap,"CENTER",70,20)
+ -- this client may return the relative frame as a name
+ local rawGet=parkedOne.GetPoint;parkedOne.GetPoint=function(self) local p,rel,rp,x,y=rawGet(self);if type(rel)=="table" and rel.GetName then rel=rel:GetName() end;return p,rel,rp,x,y end
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear,parkedOne end
+ local function Owner(angle) local a=math.rad(angle);gear:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80) end
+ local lastAngle=40;Owner(lastAngle)
+ for cycle=1,5 do
+  C.Refresh(true)
+  for step=1,6 do lastAngle=lastAngle+37;Owner(lastAngle) -- the owner places the button on every drag frame
+   local _,_,_,gx,gy=gear:GetPoint();local radius=math.sqrt(gx*gx+gy*gy);assert(radius>85,"cycle "..cycle..": dragged gear is placed at the edge at once, not pulled to the centre ("..radius..")")
+   local want=math.rad(lastAngle);assert(math.abs(math.atan2(gy,gx)-math.atan2(math.sin(want),math.cos(want)))<1e-6,"cycle "..cycle..": angle preserved") end
+  C.Set("zoneThemes",false)
+  local _,_,_,gx,gy=gear:GetPoint();local a=math.rad(lastAngle);assert(math.abs(gx-math.cos(a)*80)<1e-6 and math.abs(gy-math.sin(a)*80)<1e-6,"cycle "..cycle..": exact owner position after theme off")
+  assert(rawget(gear,"SetPoint")==nil,"cycle "..cycle..": button method unwrapped")
+  local _,_,_,px,py=parkedOne:GetPoint();assert(px==70 and py==20,"cycle "..cycle..": parked third-party button restored although the relative frame is returned by name")
+  Owner(lastAngle+11);lastAngle=lastAngle+11 -- repositioned by hand while the theme is off
+  C.Set("zoneThemes",true);C.Refresh(true)
+  local _,_,_,gx2,gy2=gear:GetPoint();assert(gear:IsShown() and math.sqrt(gx2*gx2+gy2*gy2)>85,"cycle "..cycle..": gear present at the edge after reactivation")
+  if cycle==3 then C.Set("zoneThemeVariant","minimal");C.Refresh(true);local _,_,_,mx,my=gear:GetPoint();assert(math.sqrt(mx*mx+my*my)>0,"gear survives a layout change");C.Set("zoneThemeVariant","complete");C.Refresh(true) end
+ end
+ C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
+end
+print("30-alternation click stability, taller Damage card, lair margins and repeated map-button transitions passed (synthetic)")

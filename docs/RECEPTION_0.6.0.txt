@@ -136,6 +136,11 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.17 - CLICS, DEGATS 6 LIGNES, BOUTONS DE MINIMAP
+Onglets Equipement/Sorts et 6 categories Degats : 30 alternances sans clic perdu. Degats : 6 lignes sans molette.
+Antres : marges. Engrenage AzerothHub : deplacable au bord, restaure exactement. Diagnostics : /fieldkit clickdiag, /fieldkit mapdiag.
+A recetter en jeu, Elwynn et Naxx Complete.
+
 ALPHA.16 - GLISSER, SOCKETS, BOUTONS DE MINIMAP
 Glisser une carte : doit etre continu des le premier essai. Icones Equipement/Sorts centrees dans les sockets.
 Degats : derniere ligne au-dessus de "All spells". Minimap : engrenage AzerothHub au bord ; icones masquees
