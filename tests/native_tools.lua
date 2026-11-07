@@ -128,8 +128,20 @@ fire(FieldKitFrame,"CHAT_MSG_ADDON","AZSTOTEMS");update(FieldKitFrame,.3)
 assert(FieldKitEffectsFrame.rows[1].label:GetText()=="First fresh batch")
 -- Optional APIs absent/throwing must not break the old client.
 AZS_GetTotems=nil;AZS_GetSummonGroups=nil;AZS_GetTimers=nil;AZS_GetRevive=nil;AZS_GetUpcomingBosses=function() error("unavailable") end
-update(FieldKitFrame,.3)
+FieldKitDB.effectBuffs=false;update(FieldKitFrame,.3)
 assert(FieldKitEffectsFrame.rows[1].label:GetText()=="Effects API unavailable")
+-- Real player buffs: icon, name from the native tooltip, stacks and time left; none -> exact empty list.
+FieldKitDB.effectBuffs=true
+local oldPB,oldPT,oldTex,oldApp=GetPlayerBuff,GetPlayerBuffTimeLeft,GetPlayerBuffTexture,GetPlayerBuffApplications
+GetPlayerBuff=function(i) if i<2 then return i end return -1 end;GetPlayerBuffTimeLeft=function() return 75 end
+GetPlayerBuffTexture=function() return "Interface\Icons\Spell_Holy_WordFortitude" end;GetPlayerBuffApplications=function(i) return i==1 and 2 or 1 end
+update(FieldKitFrame,.3)
+local eff=FieldKitNativeTools.frames[1].lastRows
+assert(table.getn(eff)==2 and eff[2].value=="2x · 1:15" and eff[1].icon=="Interface\Icons\Spell_Holy_WordFortitude","real buffs must be listed with stacks and time")
+GetPlayerBuff=function() return -1 end
+update(FieldKitFrame,.3)
+assert(table.getn(FieldKitNativeTools.frames[1].lastRows)==0,"no buff and no API -> exact empty state")
+GetPlayerBuff,GetPlayerBuffTimeLeft,GetPlayerBuffTexture,GetPlayerBuffApplications=oldPB,oldPT,oldTex,oldApp
 FieldKit_SetLanguage("fr")
 assert(FieldKit_L("Effects tracker")=="Suivi des effets" and FieldKit_L("Affixes (raw)")=="Affixes (bruts)")
 AZS_RUN.ph=nil;update(FieldKitFrame,.3)

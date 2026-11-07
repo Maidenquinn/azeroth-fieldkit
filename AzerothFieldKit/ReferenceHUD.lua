@@ -331,6 +331,39 @@ local function Row(f,i,x,y,w,h)
  local r=f.rows[i];r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:SetAlpha(1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h);r:Show();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
  r.label:ClearAllPoints();r.label:SetPoint("TOPLEFT",r,"TOPLEFT",0,0);r.label:SetWidth(w-96);r.label:SetHeight(h);r.value:ClearAllPoints();r.value:SetPoint("TOPRIGHT",r,"TOPRIGHT",0,0);r.value:SetWidth(94);r.value:SetHeight(h);return r
 end
+-- Spells tab of the native equipment reader, reachable in one click from the Equipment card.
+function R.OpenSpells()
+ FieldKitDB.loadoutTab=2
+ if FieldKitZoneThemes.open.Accessories then
+  if FieldKitLoadout.refresh then FieldKitLoadout.refresh() end;FieldKitZoneThemes.Refresh(true)
+ else FieldKitZoneThemes.Open("Accessories") end
+end
+-- Guardians as the native lair reader orders them: nearest first, with state/delay and distance.
+function R.LairList(lairs)
+ local list={}
+ local source=getglobal("FieldKitLairFrame")
+ for k=1,(source and source.rows and table.getn(source.rows) or 0) do
+  local row=source.rows[k];local text=row.label and row.label:GetText()
+  if text and text~="" and row:IsShown() then
+   local state=row.value and row.value:GetText() or "";local name=string.gsub(text,"^> ","")
+   local color={.45,.45,.45};if state==FieldKit_L("awake") then color={1,.25,.25} elseif state==FieldKit_L("asleep") then color={.2,1,.2} end
+   table.insert(list,{name=name,state=state,dist=row.dist and row.dist:GetText() or "",color=color})
+  end
+ end
+ if table.getn(list)==0 and type(lairs)=="table" then
+  for _,e in ipairs(lairs) do
+   if type(e)=="table" and type(e.name)=="string" then
+    local state,color
+    if e.state=="awake" then state,color=FieldKit_L("awake"),{1,.25,.25}
+    elseif e.state=="asleep" then state,color=FieldKit_L("asleep"),{.2,1,.2}
+    elseif FieldKit.Number(e.left) and e.left>0 then state,color=FieldKit_L("back in ")..FieldKitNative.Clock(e.left),{.45,.45,.45}
+    else state,color=FieldKit_L("empty"),{.45,.45,.45} end
+    table.insert(list,{name=FieldKitNative.Text(e.name),state=state,dist="",color=color})
+   end
+  end
+ end
+ return list
+end
 function R.Panels(variant,zone)
  for _,f in pairs(H.summaries or {}) do f:Hide() end
  local detail=false;for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if FieldKitZoneThemes.open[kind] then detail=true end end
@@ -379,16 +412,30 @@ function R.Panels(variant,zone)
     end
    elseif kind=="Lairs" then
     FieldKit_Text(f.more,"View list");f.more.fieldkitLabel:SetText(FieldKit_L("View list").." →");local lairs=FieldKitNative.Read("AZS_GetLairs");local active=0;for _,e in ipairs(type(lairs)=="table" and lairs or {}) do if e.state=="awake" then active=active+1 end end
-    if zone=="naxx" then
-     f.more:Hide();local source=getglobal("FieldKitLairFrame")
-     for i=1,4 do local r=Row(f,i,52,53+(i-1)*31,a[3]-77,28);local e=type(lairs)=="table" and lairs[i];local native=source and source.rows and source.rows[i]
-      r.label:SetWidth(a[3]-138);r.label:SetJustifyH("LEFT");r.label:SetText(e and FieldKitNative.Text(e.name) or (i==1 and FieldKit_L("No active lair") or ""));r.value:SetWidth(53);r.value:SetText(e and native and native.dist and native.dist:GetText() or "")
-      if not r.lamp then r.lamp=r:CreateTexture(nil,"ARTWORK");r.lamp:SetWidth(9);r.lamp:SetHeight(9);r.lamp:SetPoint("LEFT",r,"LEFT",-14,0) end
-      local color=e and (e.state=="awake" and {1,.25,.25} or (e.state=="asleep" and {.2,1,.2} or {.45,.45,.45})) or {.25,.25,.25};T.Solid(r.lamp,color);if e then r.lamp:Show() else r.lamp:Hide() end
+    local list=R.LairList(lairs)
+    if table.getn(list)>0 then
+     -- Guardians in native order (nearest first): name, state / return delay, distance. Overflow is counted, never dropped.
+     f.more:Hide();local capacity=zone=="naxx" and 4 or 3;local total=table.getn(list);local shown=total>capacity and capacity-1 or total
+     for i=1,(shown<total and capacity or shown) do
+      local e=list[i];local overflow=i>shown
+      local r=zone=="naxx" and Row(f,i,52,53+(i-1)*31,a[3]-77,28) or Row(f,i,38,47+(i-1)*28,a[3]-64,27)
+      local vw=math.min(150,math.max(80,a[3]*.4));r.value:SetWidth(vw);r.label:SetWidth(a[3]-vw-90);r.label:SetJustifyH("LEFT");r.value:SetJustifyH("RIGHT")
+      if overflow then r.label:SetText(string.format(FieldKit_L("+%d more lairs"),total-shown));r.value:SetText(FieldKit_L("View list").." →")
+      else r.label:SetText(e.name);r.value:SetText(e.state..(e.dist~="" and ("  "..e.dist) or "")) end
+      if not r.lamp then r.lamp=r:CreateTexture(nil,"ARTWORK");r.lamp:SetWidth(9);r.lamp:SetHeight(9) end
+      r.lamp:ClearAllPoints();r.lamp:SetPoint("LEFT",r,"LEFT",-14,0)
+      if overflow then r.lamp:Hide() else T.Solid(r.lamp,e.color);r.lamp:Show() end
      end
+    elseif zone=="naxx" then
+     f.more:Hide()
+     for i=1,4 do local r=Row(f,i,52,53+(i-1)*31,a[3]-77,28);r.label:SetWidth(a[3]-138);r.label:SetJustifyH("LEFT");r.label:SetText(i==1 and FieldKit_L("No active lair") or "");r.value:SetWidth(53);r.value:SetText("") end
     else local r=Row(f,1,30,52,a[3]-60,28);r.label:SetWidth(a[3]-60);r.label:SetJustifyH("CENTER");r.label:SetText(type(lairs)~="table" and "?" or (active==0 and FieldKit_L("No active lair") or tostring(active).." "..FieldKit_L("active lairs")));r.value:SetText("");r.value:SetWidth(0) end
    elseif kind=="Accessories" then
     FieldKit_Text(f.more,"Equipment / spells");f.more:Hide()
+    if not f.spells then f.spells=T.Button(f,nil,"",0,0,100,22,function() R.OpenSpells() end);Blank(f.spells) end
+    f.spells:SetFrameLevel(f:GetFrameLevel()+30);f.spells:ClearAllPoints();f.spells:SetPoint("TOPRIGHT",f,"TOPRIGHT",-34,-12);f.spells:SetWidth(96);f.spells:SetHeight(26)
+    f.spells.fieldkitLabel:SetText(FieldKit_L("Spells").." →");f.spells.fieldkitLabel:SetWidth(96);f.spells.fieldkitLabel:SetJustifyH("RIGHT");T.Font(f.spells.fieldkitLabel,15,{1,.82,.12},true);f.spells:Show()
+    f.title:SetWidth(a[3]-140)
     local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
     for i=1,5 do local r=Row(f,i,72,51+(i-1)*35,a[3]-94,30);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
      local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(texture);r.icon:Show() end
@@ -400,9 +447,17 @@ function R.Panels(variant,zone)
      for _,s in ipairs(source and source.rows or {}) do if s.label:GetText()==FieldKit_L(name) then value=s.value:GetText() or "?" end end;r.value:SetText(value)
     end
    else
-    FieldKit_Text(f.more,"All effects");f.more:Hide();local source=getglobal("FieldKitEffectsFrame");local e=source and source.rows[1];local r=Row(f,1,72,52,a[3]-99,31)
-    r.label:SetText(e and e.label:GetText() and e.label:GetText()~="" and e.label:GetText() or FieldKit_L("No active effect"));r.value:SetText(e and e.value:GetText() or "");local available=a[3]-99;local vw=r.value:GetText()~="" and math.min(110,math.max(60,(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+4)) or 0;r.value:SetWidth(vw);r.label:SetWidth(available-vw-8)
-    if e and e.icon and e.icon:GetTexture() then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,0);r.icon:SetTexture(e.icon:GetTexture());r.icon:Show() end
+    FieldKit_Text(f.more,"All effects");f.more:Hide()
+    local source=FieldKitNativeTools and FieldKitNativeTools.frames[1];local list=source and source.lastRows or {}
+    local capacity=2;local total=table.getn(list);local shown=total>capacity and capacity-1 or total
+    if total==0 then list={{label=FieldKit_L("No active effect"),value=""}};total=1;shown=1 end
+    for i=1,(shown<total and capacity or shown) do
+     local e=list[i];local overflow=i>shown;local r=Row(f,i,72,46+(i-1)*34,a[3]-99,31)
+     if overflow then r.label:SetText(string.format(FieldKit_L("+%d more effects"),total-shown));r.value:SetText("")
+     else r.label:SetText(e.label or "");r.value:SetText(e.value or "") end
+     local available=a[3]-99;local vw=r.value:GetText()~="" and math.min(110,math.max(60,(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+4)) or 0;r.value:SetWidth(vw);r.label:SetWidth(available-vw-8)
+     if not overflow and e.icon and e.icon~="" then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,0);r.icon:SetTexture(e.icon);r.icon:Show() end
+    end
    end
    R.Fit(f.title,21,12);if f.total:IsShown() then R.Fit(f.total,zone=="naxx" and 30 or 16,12) end
    for _,r in ipairs(f.rows) do if r:IsShown() then

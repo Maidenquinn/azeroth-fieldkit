@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.12 - 2026-11-07 (restored spells, effects and lair detail, unpublished)
+
+- Equipment card: direct "Spells" access opens the native reader on its Spells tab (ranks, stats and tooltips unchanged).
+- Effects: new source "Track active buffs" (default on) lists the player's real client buffs with name, icon, stacks and time left beside totems/summons/timers; the card shows real rows, with a counted overflow, and an exact empty state.
+- Lairs card lists guardians in native order with state or return delay and distance; overflow is counted, the full reader stays one click away.
+
 ## 0.6.0-alpha.11 - 2026-11-07 (target auras restored, unpublished)
 
 - The themed target hid the native frame without replacing its auras. It now shows the real native debuffs (dispel-colored border) and buffs as icon rows under the card, with stack counts and native aura tooltips on hover; the cast bar sits below them. Hidden while the selected boss card already shows the target.

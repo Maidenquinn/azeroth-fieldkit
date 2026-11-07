@@ -136,6 +136,12 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.12 - SORTS, EFFETS, ANTRES
+Carte Equipement : bouton "Sorts" -> lecteur natif sur l'onglet Sorts (1 clic).
+Effets : vrais buffs du joueur (nom, icone, stacks, duree) ; reglage "Suivre les buffs actifs".
+Antres : gardiens, etat/delai de retour, distance ; "+N" si la liste depasse la carte.
+A recetter en jeu : Elwynn et Naxx, variante Complete ; textes longs, listes longues, etat vide.
+
 ALPHA.11 - AURAS DE CIBLE
 La cible thematisee affiche sous sa carte les vrais debuffs (bordure selon le type)
 et buffs, avec stacks et infobulle native au survol. A recetter : cible avec

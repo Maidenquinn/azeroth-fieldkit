@@ -320,3 +320,31 @@ UnitExists=function(unit) return unit=="target" or (exists and exists(unit)) end
 C.Refresh();assert(FieldKitThemeTarget.frame:IsShown() and TargetFrame:GetParent()==H.storage)
 UnitIsFriend=oldFriend;UnitExists=exists;C.Set("zoneThemes",false)
 print("Locked HUD readers remain movable and persistent; localized taken sources and single target surface passed")
+
+-- Restored accesses: Spells tab, real lair rows (never silently dropped) and real effects.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ FieldKitDB.loadoutTab=1;C.Refresh(true)
+ local acc=R.frames.Accessories;assert(acc.spells and acc.spells:IsShown(),zone..": Spells access on the Equipment card")
+ click(acc.spells);assert(FieldKitDB.loadoutTab==2 and C.open.Accessories,zone..": Spells opens the native reader on its Spells tab")
+ click(acc.spells);assert(FieldKitDB.loadoutTab==2 and C.open.Accessories,zone..": Spells stays open and selected")
+ C.Open("Accessories");FieldKitDB.loadoutTab=1
+ local oldLairs=AZS_GetLairs;local lairs={}
+ for i=1,6 do table.insert(lairs,{name="Guardian "..i,state=(i==1 and "awake" or (i==2 and "asleep" or "empty")),left=(i>2 and 30*i or nil),x=i*10,y=0}) end
+ AZS_GetLairs=function() return lairs end
+ local list=R.LairList(lairs);assert(table.getn(list)==6 and list[2].state==FieldKit_L("asleep") and list[3].state==FieldKit_L("back in ").."1:30")
+ local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
+ C.Refresh(true);local panel=R.frames.Lairs;local capacity=zone=="naxx" and 4 or 3
+ assert(panel.rows[1].label:GetText()=="Guardian 1" and panel.rows[capacity]:IsShown(),zone..": lair rows listed")
+ assert(string.find(panel.rows[capacity].label:GetText(),tostring(6-(capacity-1))),zone..": lair overflow is counted")
+ FieldKitNative.Read=oldRead
+ AZS_GetLairs=oldLairs
+ local effects=FieldKitNativeTools.frames[1];local oldRows=effects.lastRows
+ effects.lastRows={{label="Power Word: Fortitude",value="2x · 1:15",icon="Interface\Icons\Spell_Holy_WordFortitude"},{label="Totem",value="1"},{label="Third",value=""}}
+ C.Refresh(true);local e=R.frames.Effects;assert(e:IsShown() and e.rows[1].label:GetText()=="Power Word: Fortitude" and e.rows[1].icon:IsShown(),zone..": real effects listed")
+ assert(e.rows[2]:IsShown() and string.find(e.rows[2].label:GetText(),"2"),zone..": overflow is counted, not dropped")
+ effects.lastRows={};C.Refresh(true);assert(e.rows[1].label:GetText()==FieldKit_L("No active effect") and not e.rows[2]:IsShown(),zone..": exact empty effects state")
+ effects.lastRows=oldRows
+end
+C.Set("zoneThemes",false)
+print("Spells access, lair guardians and real effects panels passed (synthetic)")

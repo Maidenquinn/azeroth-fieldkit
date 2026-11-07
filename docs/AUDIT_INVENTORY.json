@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.11",
+  "candidate": "0.6.0-alpha.12",
   "runtimeModules": 47,
   "textureCount": 245,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5187,
-      "sha256": "89cfcca58db82bcf3793594041a9ea2cf7e51d770b2f132db2c9accb72c2d08a",
+      "sha256": "5f387dea1a23846e2657a251b35b01dfaf6639c0420d240da318bad6a1669a31",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -128,8 +128,8 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 8849,
-      "sha256": "0576dc233eae0adb5495eec88e68fb39ad94da038da98bd1f4749c384641a9dd",
+      "bytes": 8866,
+      "sha256": "e03f1b1e9b500d2fbd47b7e731cce48871e46fc5a5054b14017e233dabb069dc",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
@@ -281,8 +281,8 @@
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 34736,
-      "sha256": "6d6a613303a579420393c26bb6ca817cb82e8aa0bcb35ffa9628fb41e3d75571",
+      "bytes": 34935,
+      "sha256": "949e8fdce180aa5d8104ca0007bb9784f26dcf2073b1c5bb01aa113166be504e",
       "namedFunctions": [],
       "literalEvents": []
     },
@@ -1233,8 +1233,8 @@
       "literalEvents": []
     },
     "NativeTools.lua": {
-      "bytes": 11904,
-      "sha256": "02fd0fa3bb904e9c71c51c68b61f53a6bb5cca5c70eec120895440cbbd8dd7f8",
+      "bytes": 13492,
+      "sha256": "879758ff87bec5474c26de9ffbfe637ed77b645df868b93e35813359cd7716f1",
       "namedFunctions": [
         {
           "name": "Count",
@@ -1249,44 +1249,48 @@
           "line": 40
         },
         {
+          "name": "T.Buffs",
+          "line": 66
+        },
+        {
           "name": "T.Effects",
-          "line": 64
+          "line": 92
         },
         {
           "name": "T.Revive",
-          "line": 100
+          "line": 129
         },
         {
           "name": "T.NextBoss",
-          "line": 116
+          "line": 145
         },
         {
           "name": "T.Reminders",
-          "line": 141
+          "line": 170
         },
         {
           "name": "T.Push",
-          "line": 161
+          "line": 190
         },
         {
           "name": "T.Banner",
-          "line": 167
+          "line": 196
         },
         {
           "name": "T.Subscription",
-          "line": 176
+          "line": 205
         },
         {
           "name": "T.Warnings",
-          "line": 183
+          "line": 212
         },
         {
           "name": "T.Update",
-          "line": 209
+          "line": 238
         },
         {
           "name": "T.Diagnostic",
-          "line": 221
+          "line": 251
         }
       ],
       "literalEvents": []
@@ -1556,8 +1560,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 74209,
-      "sha256": "5381c438dc80e06bf312777b2a43b204aa7554a21ba5960304b330bffac90832",
+      "bytes": 74246,
+      "sha256": "5a8e5af57c8605b50fd02238129d6857fbbe7369a733ab8c9072bf4a6d6f5bf5",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -2895,8 +2899,8 @@
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 44635,
-      "sha256": "be8a75de3d2388c303a40302b076ed506e20b48c5baab39f908b9974aa2b10a2",
+      "bytes": 47817,
+      "sha256": "3345ed5214f5e99556c44d6f8bb4b1515b260b76e5ac5648daf7dede81840d8b",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2967,16 +2971,24 @@
           "line": 330
         },
         {
+          "name": "R.OpenSpells",
+          "line": 335
+        },
+        {
+          "name": "R.LairList",
+          "line": 342
+        },
+        {
           "name": "R.Panels",
-          "line": 334
+          "line": 367
         },
         {
           "name": "R.Settings",
-          "line": 418
+          "line": 473
         },
         {
           "name": "R.Buffs",
-          "line": 433
+          "line": 488
         }
       ],
       "literalEvents": []
@@ -5095,7 +5107,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.11",
+    "version": "0.6.0-alpha.12",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5106,7 +5118,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
+    "inGameTestScope": "Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,
