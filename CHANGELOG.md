@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.14 - 2026-11-07 (visual corrections, unpublished)
+
+- Equipment / Spells tabs: a thin rule under every tab and the gold underline on the active one only; full "Equipement" / "Sorts" labels.
+- Player portrait: the live native portrait now sits in a frame below the card art over an opaque backing, so the art rim masks it to the socket (no square corners or transparent gap); Elwynn Complete slightly oversized to fill its socket.
+- Damage navigation: six categories in a 3x2 grid with wide, centred labels (also on Naxxramas, where the tabs were hidden); rows moved below the grid.
+- Boss / guardian card (themed zones): 340x66, centred on its plate, portrait ring, framed health bar, bounded name that shrinks to fit (full value kept), type tag tinted per kind (boss, final, guardian), stack spacing 72, placed 8 px lower under the progress banner.
+
 ## 0.6.0-alpha.13 - 2026-11-07 (in-card tabs, bounded lists, unpublished)
 
 - Equipment card: real in-card Equipment / Spells tabs (flat gold-underline tabs, same card, no reader, no reload). Spells keep icon, rank and the native tooltip; the "Spells ->" button of alpha.12 is removed.

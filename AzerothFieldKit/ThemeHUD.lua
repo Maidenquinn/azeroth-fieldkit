@@ -233,7 +233,7 @@ function H.ReferenceValues()
   if b and H.saved[b] and H.saved[b].alpha==0 and FieldKitDB.zoneThemeNativeBefore and FieldKitDB.zoneThemeNativeBefore.build==true then H.saved[b].alpha=1 end
  end
  for _,name in ipairs({"FieldKitCompactBar","FieldKitMoneyFrame","MainMenuBar","PlayerFrame","FieldKitPlayerBar"}) do FieldKitZoneThemes.Mask(getglobal(name),true) end
- local boss=getglobal("FieldKitBossFrame1");if boss then FieldKitZoneThemes.Place(boss,"TOP",UIParent,"TOP",0,-90/FieldKitZoneThemes.ElementScale("FieldKitThemeBosses"),true) end
+ local boss=getglobal("FieldKitBossFrame1");if boss then FieldKitZoneThemes.Place(boss,"TOP",UIParent,"TOP",0,-98/FieldKitZoneThemes.ElementScale("FieldKitThemeBosses"),true) end
 end
 function H.Update(variant,zone)
  H.Create();H.CompositionCreate()
@@ -323,7 +323,7 @@ function H.Update(variant,zone)
  local health=getglobal("FieldKitPlayerBar")
  for _,name in ipairs({"FieldKitCompactBar","FieldKitMoneyFrame","MainMenuBar","PlayerFrame","FieldKitPlayerBar"}) do local f=getglobal(name);if f then c.Mask(f,true) end end
  local buffs=getglobal("FieldKitPlayerBuffs");if buffs then Place(buffs,"BOTTOM",H.healthRoot,"TOP",0,4) end
- local boss=getglobal("FieldKitBossFrame1");if boss then Place(boss,"TOP",UIParent,"TOP",0,-90) end
+ local boss=getglobal("FieldKitBossFrame1");if boss then Place(boss,"TOP",UIParent,"TOP",0,-98) end
  for _,f in ipairs({H.dock,H.header,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.nav,H.utility}) do f:Show();T.Update(f) end
 end
 

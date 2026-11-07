@@ -392,3 +392,46 @@ for _,zone in ipairs({"elwynn","naxx"}) do
 end
 C.Set("zoneThemes",false)
 print("Equipment/Spells tabs, bounded effects and lairs, native buff restoration passed (synthetic)")
+
+-- alpha.14: portrait under the art rim, readable two-row damage navigation, centred boss/guardian card.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local d=R.frames.Damage;local a=R.layout.rects.Damage
+ assert(table.getn(R.tabs)==6)
+ local seen={}
+ for i,b in ipairs(R.tabs) do
+  assert(b:IsShown(),zone..": all six damage categories are reachable ("..i..")")
+  local _,_,_,x,y=b:GetPoint();assert(x>=0 and x+b:GetWidth()<=a[3] and -y+b:GetHeight()<=a[4]-10,zone..": damage tab inside the card")
+  for j=1,i-1 do local o=R.tabs[j];local _,_,_,ox,oy=o:GetPoint();assert(not (x<ox+o:GetWidth() and ox<x+b:GetWidth() and y==oy),zone..": damage tabs collide") end
+  assert(b.fieldkitLabel:GetWidth()>=60,zone..": damage tab label has room")
+ end
+ click(R.tabs[3]);local _,index=FieldKitMeterSuite.View();assert(index==3 and R.tabs[3].underline:IsShown() and not R.tabs[1].underline:IsShown(),zone..": category changes immediately and the active tab is marked")
+ click(R.tabs[1])
+ local firstRow=nil;for _,r in ipairs(d.rows) do if r:IsShown() then local _,_,_,_,y=r:GetPoint();firstRow=-y;break end end
+ local _,_,_,_,lowTab=R.tabs[6]:GetPoint();assert(firstRow>=-lowTab+R.tabs[6]:GetHeight(),zone..": first row does not overlap the tab rows")
+ -- Portrait: owned by a frame beneath the art, over an opaque backing
+ assert(R.portraitFrame and R.portraitBack and R.portraitFrame:GetFrameLevel()<=H.healthRoot:GetFrameLevel(),zone..": portrait is drawn under the art rim")
+ -- Equipment / Spells tabs keep a visible active mark
+ FieldKitDB.loadoutTab=1;C.Refresh(true);local acc=R.frames.Accessories
+ assert(acc.cardTabs[1].underline:IsShown() and not acc.cardTabs[2].underline:IsShown() and acc.cardTabs[1].rule:IsShown() and acc.cardTabs[2].rule:IsShown(),zone..": active tab marked, inactive tab has a rule")
+end
+-- Boss and guardian cards
+local oldUnits,oldPhase=AZS_UNITS,AZS_RUN.ph
+AZS_RUN.ph="run"
+local long="An extremely long boss name that cannot fit one line of the compact card"
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ AZS_UNITS={{kind="boss",id=1,name=long,hp=500,hpm=1000,state=0},{kind="guardian",id=5001,name="Brute gordunni",hp=6705,hpm=12200,state=1}}
+ update(FieldKitFrame,.3)
+ local b1,b2=getglobal("FieldKitBossFrame1Compact"),getglobal("FieldKitBossFrame2Compact")
+ assert(b1:IsShown() and b1:GetWidth()==340 and b1:GetHeight()==66,zone..": themed boss card size")
+ local p,rel=b1:GetPoint();assert(p=="TOP" and rel==getglobal("FieldKitBossFrame1"),zone..": boss card is centred on its plate")
+ assert(b1.name.referenceFullText==long and b1.hp:GetText()~="" and b1.tag:GetText()==FieldKit_L("Boss"),zone..": full long name retained, type and HP shown")
+ assert(b1.name:GetWidth()+b1.tag:GetWidth()+72<=b1:GetWidth(),zone..": name and tag do not collide")
+ if b2 and b2:IsShown() then assert(b2.tag:GetText()==FieldKit_L("Guardian"),zone..": guardian is labelled differently");local _,_,_,_,y=getglobal("FieldKitBossFrame2"):GetPoint();assert(-y>=66,zone..": stacked boss cards do not overlap") end
+ AZS_UNITS={};update(FieldKitFrame,.3);assert(not b1:IsShown(),zone..": boss card disappears with the real state")
+ AZS_UNITS={{kind="boss",id=1,name="Back",hp=1,hpm=1,state=0}};update(FieldKitFrame,.3);assert(b1:IsShown(),zone..": boss card reappears")
+end
+AZS_UNITS,AZS_RUN.ph=oldUnits,oldPhase
+C.Set("zoneThemes",false)
+print("Portrait layering, damage navigation, tab marks and boss/guardian card passed (synthetic)")

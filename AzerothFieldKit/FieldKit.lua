@@ -526,6 +526,21 @@ local function SyncHudBosses()
 	end
 end
 
+-- Themed boss/guardian card: centred on its plate, portrait ring, framed bar, type-coloured tag.
+local BOSS_TAG_TINT={guardian={.55,.75,1},final={1,.8,.3},boss={1,.55,.45}}
+local function ZoneBossLayout(c,f,kind)
+ local W,H=340,66
+ if c:GetWidth()~=W then c:SetWidth(W) end;if c:GetHeight()~=H then c:SetHeight(H) end
+ c:ClearAllPoints();c:SetPoint("TOP",f,"TOP",0,0)
+ c.portrait:SetWidth(42);c.portrait:SetHeight(42);c.portrait:ClearAllPoints();c.portrait:SetPoint("LEFT",c,"LEFT",13,0)
+ c.premiumMedallionShadow:Show();c.premiumMedallion:Show();c.premiumBarBorder:Show()
+ c.tag:ClearAllPoints();c.tag:SetPoint("TOPRIGHT",c,"TOPRIGHT",-12,-12);c.tag:SetWidth(96);c.tag:SetJustifyH("RIGHT")
+ local tint=BOSS_TAG_TINT[kind=="guardian" and "guardian" or (kind=="final" and "final" or "boss")]
+ FieldKitTheme.Font(c.tag,11,tint,true)
+ c.name:ClearAllPoints();c.name:SetPoint("TOPLEFT",c,"TOPLEFT",72,-9);c.name:SetWidth(W-72-14-96);c.name:SetHeight(18)
+ c.bar:ClearAllPoints();c.bar:SetPoint("TOPLEFT",c,"TOPLEFT",72,-34);c.bar:SetWidth(W-72-16);c.bar:SetHeight(20)
+ c.hp:SetWidth(W-72-24)
+end
 -- Fill one frame from a native instance id, HP and state, then its native debuffs.
 local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
  local compact=f.compact
@@ -541,6 +556,7 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
    for _,part in ipairs(compact.premiumParts) do part:Hide() end
    compact.premiumOverlay:Hide()
    for _,part in ipairs(compact.premiumRim) do part:Hide() end
+   if ZoneBosses() then ZoneBossLayout(compact,f,kind) end
    if premium then
     local guardian=(kind=="guardian")
     -- Native frame accents, deliberately independent of external TGA assets.
@@ -578,6 +594,7 @@ local function ShowBossFrame(f, name, hp, hpm, kind, state, id)
    compact.hp:SetText(premium and "" or FieldKit_FormatHealth(hp,hpm,DB.bossHealthMode))
    compact.bar:SetStatusBarColor(kind=="guardian" and .19 or .68,kind=="guardian" and .45 or .15,kind=="guardian" and .69 or .17)
    compact.tag:SetText(premium and "" or (kind=="guardian" and FieldKit_L("Guardian") or (kind=="final" and FieldKit_L("Final boss") or FieldKit_L("Boss"))))
+   if ZoneBosses() and FieldKitReferenceHUD and FieldKitReferenceHUD.Fit then FieldKitReferenceHUD.Fit(compact.name,13,10);FieldKitReferenceHUD.Fit(compact.hp,12,10) end
   else
    f:SetAlpha(1);compact:Hide()
   end
@@ -695,7 +712,7 @@ local function UpdateBossFrame()
  for bi=2,table.getn(bossFrames) do
   local bf=bossFrames[bi]
   bf:ClearAllPoints()
-  bf:SetPoint("TOP",bossFrames[bi-1],"TOP",0,-((BossStyle()=="compact" or BossStyle()=="premium") and 58 or BOSS_STACK))
+  bf:SetPoint("TOP",bossFrames[bi-1],"TOP",0,-((BossStyle()=="compact" or BossStyle()=="premium") and (ZoneBosses() and 72 or 58) or BOSS_STACK))
  end
 	if ( table.getn(bossFrames) == 0 ) then
 		return

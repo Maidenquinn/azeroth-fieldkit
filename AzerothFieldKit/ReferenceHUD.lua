@@ -61,7 +61,10 @@ function R.Create()
   b:SetScript("OnLeave",H.HideTip);b:SetScript("OnClick",function() H.Tip(this,FieldKit_L(({"Kills","Gold","Chest price"})[index]),{R.counterValues and R.counterValues[index] or "?"},true) end)
  end
  R.stored=T.Button(R.canvas,"FieldKitReferenceStoredLevels","",0,0,240,30,function() if type(AZS_OpenStoredLevels)=="function" then pcall(AZS_OpenStoredLevels) end end);R.stored:SetFrameStrata("HIGH");R.stored:Hide()
- R.portrait=H.healthRoot:CreateTexture(nil,"ARTWORK")
+ -- The live portrait sits in a frame one level BELOW the card art: the art's rim masks it to the socket shape, over a dark backing, so no square corners or world show through.
+ R.portraitFrame=CreateFrame("Frame",nil,H.healthRoot);R.portraitFrame:SetAllPoints(H.healthRoot)
+ R.portraitBack=R.portraitFrame:CreateTexture(nil,"BACKGROUND");T.Solid(R.portraitBack,{.03,.05,.07})
+ R.portrait=R.portraitFrame:CreateTexture(nil,"ARTWORK")
  local playerEnter=H.player:GetScript("OnEnter")
  H.player:SetScript("OnEnter",function() if playerEnter then playerEnter() end;R.Buffs(true) end)
  R.heroic=T.Label(H.identity,nil,0,0,240,28,17,R.body,true)
@@ -210,14 +213,17 @@ function R.Update(variant,zone)
  if shield and shield>0 and max and max>0 and FieldKitDB.playerShield then H.shield:SetWidth(d.health[3]*math.min(1,shield/max));H.shield:SetHeight(d.health[4]);H.shield:Show() else H.shield:Hide() end
  if d.portrait then
   local a=d.portrait;local p=d.rects.vitality
-  R.portrait:ClearAllPoints();R.portrait:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",a[1]-p[1],p[2]-a[2]);R.portrait:SetWidth(a[3]);R.portrait:SetHeight(a[3])
+  R.portraitFrame:SetFrameLevel(math.max(0,H.healthRoot:GetFrameLevel()-1));R.portraitFrame:Show()
+  local grow=R.key=="naxx_alternative" and 1 or 1.1;local size=a[3]*grow;local shift=(size-a[3])/2
+  R.portraitBack:ClearAllPoints();R.portraitBack:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",a[1]-p[1]-shift,p[2]-a[2]+shift);R.portraitBack:SetWidth(size);R.portraitBack:SetHeight(size);R.portraitBack:Show()
+  R.portrait:ClearAllPoints();R.portrait:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",a[1]-p[1]-shift,p[2]-a[2]+shift);R.portrait:SetWidth(size);R.portrait:SetHeight(size)
   if R.portraitKey~=key then
    local ok=false;if type(SetPortraitTexture)=="function" then ok=pcall(SetPortraitTexture,R.portrait,"player") end
    if not ok then R.portrait:SetTexture("Interface\\Icons\\INV_Helmet_74") end
    R.portraitKey=key
   end
   R.portrait:Show()
- else R.portrait:Hide() end
+ else R.portrait:Hide();R.portraitBack:Hide();R.portraitFrame:Hide() end
  for i=1,7 do
   local a=d.actions;local b=getglobal("ActionButton"..slots[i]);if b then
    local redraw=b:GetParent()~=H.dock or b.referenceKey~=key or b.referenceSerial~=FieldKitNative.serial;local shown=b:IsShown()
@@ -350,8 +356,10 @@ function R.CardTabs(f,a,active,keys,pick)
   local b=f.cardTabs[i]
   if not b then
    local index=i;b=T.Button(f,nil,key,0,0,100,26,function() pick(index) end);f.cardTabs[i]=b
-   b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1)
+   b.rule=b:CreateTexture(nil,"ARTWORK");b.rule:SetHeight(1);b.rule:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",0,0);b.rule:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",0,0)
+   b.underline=b:CreateTexture(nil,"OVERLAY");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",0,0);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",0,0)
   end
+  T.Solid(b.rule,{1,.82,.12},.3);b.rule:Show()
   FieldKit_Text(b,key);b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+(i-1)*width,-44);b:SetWidth(width-3);b:SetHeight(26)
   b.fieldkitLabel:SetWidth(width-7);T.Font(b.fieldkitLabel,15,active==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=active==i;Blank(b)
   T.Solid(b.underline,{1,.82,.12});if active==i then b.underline:Show() else b.underline:Hide() end;b:Show()
@@ -436,8 +444,8 @@ function R.Panels(variant,zone)
      f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
      f.title:SetWidth(a[3]-100);f.more:Hide()
     else T.Font(f.total,16,R.color,true) end
-    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+(i-1)*(a[3]-48)/6,-46);b:SetWidth((a[3]-48)/6-3);b.fieldkitLabel:SetWidth((a[3]-48)/6-7);T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b);if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1) end;T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end;if zone=="naxx" then b:Hide() else b:Show() end end
-    for i=1,4 do local r=Row(f,i,82,(zone=="naxx" and 108 or 83)+(i-1)*(zone=="naxx" and 53 or 33),a[3]-100,29);local e=lines[i];if not e and i>1 then r:Hide() end
+    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();local col,row=math.mod(i-1,3),math.floor((i-1)/3);local tabW=(a[3]-48)/3;local tabTop=zone=="naxx" and 92 or 46;b:SetPoint("TOPLEFT",f,"TOPLEFT",24+col*tabW,-(tabTop+row*25));b:SetWidth(tabW-4);b:SetHeight(24);b.fieldkitLabel:SetWidth(tabW-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b);if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1) end;T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end;b:Show() end
+    for i=1,4 do local r=Row(f,i,82,(zone=="naxx" and 146 or 98)+(i-1)*(zone=="naxx" and 46 or 33),a[3]-100,29);local e=lines[i];if not e and i>1 then r:Hide() end
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
      if e then
