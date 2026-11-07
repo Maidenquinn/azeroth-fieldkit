@@ -70,6 +70,14 @@ for zone in ('elwynn','naxx'):
             tile.paste(region,(cuts[ix],cuts[iy]))
     target=out/(zone+'_material_v3.tga');tile.save(target);generated_paths.add(target.name)
     media['files']['media/ReferenceHUD/'+target.name]={'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'bytes':target.stat().st_size,'source':'Mechanical nine-slice packing of the approved equipment-panel perimeter; live widgets supply all labels and values.'}
+# Pack one unchanged, decoration-free material rectangle from each lair card.
+# No inpainting/resampling: the crop is already a power-of-two 128x32 region.
+for zone in ('elwynn','naxx'):
+    layout=layouts[zone+'_complete'];x,y,w,h=layout['rects']['Lairs']
+    original=Image.open(source/(zone+'_complete.png')).convert('RGBA')
+    tile=original.crop((x+100,y+60,x+228,y+92))
+    target=out/(zone+'_card_body_v9.tga');tile.save(target);generated_paths.add(target.name)
+    media['files']['media/ReferenceHUD/'+target.name]={'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'bytes':target.stat().st_size,'source':'Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments.'}
 # Small illustrative previews are encoded separately and never used as live HUD.
 concepts=source/'approved'
 for zone,folder,prefix in [('elwynn','01_Foret_Elwynn','Foret_Elwynn'),('naxx','13_Naxxramas','Naxxramas')]:

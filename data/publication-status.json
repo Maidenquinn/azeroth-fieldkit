@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0-alpha.8",
+  "version": "0.6.0-alpha.9",
   "maintainerAcceptedForPublication": false,
   "maintainerAcceptanceDate": null,
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -10,5 +10,5 @@
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
   "maintainerInGameTestingReported": true,
-  "inGameTestScope": "Alpha8: Lua 5.0.3/5.1 empty meter with no live icon/track, six consistent tab surfaces, measured Elwynn Complete seven action socket interiors and existing regressions. Native ready-phase inspection after reload; no new combat acceptance or full six-zone visual validation."
+  "inGameTestScope": "Alpha9: Lua 5.0.3/5.1 coverage for clean card materials, flat meter tabs, bounded 252px Elwynn Complete minimap, empty meter and action socket regressions. Native Elwynn Complete ready-phase inspection after reload: terrain contained inside title/footer, flat tabs, uniform Effects body. No full six-layout combat acceptance or physical map drag certification."
 }

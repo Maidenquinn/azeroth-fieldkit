@@ -750,6 +750,16 @@
       "bytes": 65580,
       "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
       "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_card_body_v9.tga": {
+      "sha256": "8ef3e1833370f968369a7bf9000f88af8d642c8dc9eeb9d1a72d6766d96a812b",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/naxx_card_body_v9.tga": {
+      "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
     }
   }
 }

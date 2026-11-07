@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.9 - 2026-11-07 (card surfaces and minimap bounds, unpublished)
+
+- Replace opaque footer/socket patches and meter wash with an unchanged decoration-free crop of each approved theme material. Preserve authored rims.
+- Use flat meter tabs with a single selected underline, without miniature ornate button frames.
+- Inset Elwynn Complete terrain inside its header/footer.
+
 ## 0.6.0-alpha.8 — 2026-11-07 (empty meter and measured sockets, unpublished)
 
 - Cover illustrative meter sockets/tracks and the baked first-tab rim with owned textured material. Only real entries receive live icons and gauges; all six tabs share the same surface.

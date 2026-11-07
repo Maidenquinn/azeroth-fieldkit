@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.8",
+  "candidate": "0.6.0-alpha.9",
   "runtimeModules": 47,
-  "textureCount": 243,
+  "textureCount": 245,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
       "bytes": 5186,
-      "sha256": "286f5471ea8e79528f64aa47f9c5de2a5ed14d8d3c652c0e4fda3ca55b544980",
+      "sha256": "21986588f3025a553de80729a10cdda878ed37cad6f7a27764a5dcba3150e7d0",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -2882,13 +2882,13 @@
     },
     "ReferenceArt.lua": {
       "bytes": 11141,
-      "sha256": "3c6ecb635ff1b4858f3fafc351774eabc64d5185bb4899d11a3c21954b4d9027",
+      "sha256": "7231ff353beae327899ff0ae8455356e456c155e5d1e6088ac5b9fcd17fa8ee8",
       "namedFunctions": [],
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 45475,
-      "sha256": "7418e256940430b2f5233c3a4f85553a783077b87c2503b6fbe5d8dd55ab4565",
+      "bytes": 44635,
+      "sha256": "be8a75de3d2388c303a40302b076ed506e20b48c5baab39f908b9974aa2b10a2",
       "namedFunctions": [
         {
           "name": "Short",
@@ -2964,11 +2964,11 @@
         },
         {
           "name": "R.Settings",
-          "line": 425
+          "line": 418
         },
         {
           "name": "R.Buffs",
-          "line": 440
+          "line": 433
         }
       ],
       "literalEvents": []
@@ -3791,6 +3791,11 @@
       "sha256": "9b9b46f1455045444b301bbcba1bc43ff4eaacd08840c66d9b67809f90acf669"
     },
     {
+      "path": "media/ReferenceHUD/elwynn_card_body_v9.tga",
+      "bytes": 16428,
+      "sha256": "8ef3e1833370f968369a7bf9000f88af8d642c8dc9eeb9d1a72d6766d96a812b"
+    },
+    {
       "path": "media/ReferenceHUD/elwynn_complete_Accessories_1.tga",
       "bytes": 524332,
       "sha256": "69dc996194b0755515b228a55a89a827302eef087daa337d30d46f63486aa534"
@@ -4034,6 +4039,11 @@
       "path": "media/ReferenceHUD/naxx_alternative_xpBadge_1_v3.tga",
       "bytes": 65580,
       "sha256": "3447b28a893e7d11ad66d2a09049928a61d565dd6e50c7ddb127c0b7f7645555"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_card_body_v9.tga",
+      "bytes": 16428,
+      "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587"
     },
     {
       "path": "media/ReferenceHUD/naxx_complete_Accessories_1.tga",
@@ -5054,12 +5064,22 @@
       "bytes": 65580,
       "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
       "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_card_body_v9.tga": {
+      "sha256": "8ef3e1833370f968369a7bf9000f88af8d642c8dc9eeb9d1a72d6766d96a812b",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/naxx_card_body_v9.tga": {
+      "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
     }
   },
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.8",
+    "version": "0.6.0-alpha.9",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5070,7 +5090,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha8: Lua 5.0.3/5.1 empty meter with no live icon/track, six consistent tab surfaces, measured Elwynn Complete seven action socket interiors and existing regressions. Native ready-phase inspection after reload; no new combat acceptance or full six-zone visual validation."
+    "inGameTestScope": "Alpha9: Lua 5.0.3/5.1 coverage for clean card materials, flat meter tabs, 252px bounded Elwynn Complete minimap, existing empty meter and action socket regressions. Native visual inspection scope recorded in delivery notes; no full six-layout combat acceptance or physical map drag certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

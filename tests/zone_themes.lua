@@ -229,7 +229,7 @@ C.Open("Stats")
 local chrome=T.Button(UIParent,nil,"Test",0,0,200,30,function() end)
 T.State(chrome,true);assert(not chrome.fieldkitSkin.selected:IsShown(),"No side stripe on selected controls")
 local row=R.frames.Lairs.rows[1];if row.lamp then assert(not row.lamp:IsShown(),"Elwynn empty state must not inherit Naxx lamps") end
-assert(Minimap:GetWidth()==270 and ActionButton1:GetWidth()==R.layout.actions[3]-8)
+assert(Minimap:GetWidth()==252 and ActionButton1:GetWidth()==R.layout.actions[3]-8)
 C.Set("zoneThemes",false)
 print("Review feedback: persistent summaries, readable detail rows, clean selection and inset actions passed")
 
@@ -265,9 +265,9 @@ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zone
 local savedRead=FieldKitMeterLedger.Read
 FieldKitMeterLedger.Read=function() return {},0,nil,true end
 C.Refresh()
-assert(R.frames.Damage.liveBody:IsShown() and R.frames.Damage.liveGrain:IsShown())
+assert(R.frames.Damage.cleanBody:IsShown());assert(not R.frames.Damage.liveBody or not R.frames.Damage.liveBody:IsShown())
 for _,row in ipairs(R.frames.Damage.rows) do assert(not row.icon:IsShown() and not row.bar:IsShown());assert(not row.trough or not row.trough:IsShown()) end
-for _,tab in ipairs(R.tabs) do assert(not tab.fieldkitArtOnly and tab.fieldkitSkin) end
+for _,tab in ipairs(R.tabs) do assert(tab.fieldkitArtOnly and tab.fieldkitSkin) end
 local xs={579,662,745,828,911,994,1077}
 for i,slot in ipairs({1,2,3,4,5,6,12}) do
  local b=getglobal("ActionButton"..slot);local _,_,_,x,y=b:GetPoint()
@@ -276,3 +276,13 @@ for i,slot in ipairs({1,2,3,4,5,6,12}) do
 end
 FieldKitMeterLedger.Read=savedRead;C.Set("zoneThemes",false)
 print("Empty combat state, consistent tab surfaces and measured Elwynn action sockets passed")
+
+C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+FieldKitDB.meterFrame=true;FieldKitDB.lairFrame=true;FieldKitDB.statsFrame=true;FieldKitDB.effectsFrame=true;FieldKitDB.statsCollapsed=false;FieldKitDB.collapsedWindows={};C.Refresh()
+for _,kind in ipairs({"Damage","Lairs","Stats","Effects"}) do
+ local f=R.frames[kind];assert(f.cleanBody:IsShown());assert(not f.footerPatch or not f.footerPatch:IsShown());assert(not f.emptySocket or not f.emptySocket:IsShown())
+end
+assert(Minimap:GetWidth()==252)
+for _,tab in ipairs(R.tabs) do assert(tab.fieldkitArtOnly);for _,part in ipairs(tab.fieldkitSkin.parts) do assert(not part.texture:IsShown()) end end
+C.Set("zoneThemes",false)
+print("Clean card materials, flat meter tabs and bounded square minimap passed")

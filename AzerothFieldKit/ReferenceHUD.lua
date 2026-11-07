@@ -351,19 +351,15 @@ function R.Panels(variant,zone)
 
    f.title:ClearAllPoints();f.title:SetPoint("TOPLEFT",f,"TOPLEFT",65,-14);f.title:SetWidth(a[3]-78);f.title:SetHeight(30);T.Font(f.title,21,R.color,true)
    local titles={Damage="DAMAGE",Lairs="LAIRS",Accessories="EQUIPMENT",Stats="BONUSES",Effects="EFFECTS"};FieldKit_Text(f.title,titles[kind])
-   if not f.footerPatch then f.footerPatch=f:CreateTexture(nil,"BORDER") end
-   local tile=d.tiles[kind] and d.tiles[kind][1];if tile then local t=f.footerPatch;T.Solid(t,T.background);t:ClearAllPoints();t:SetPoint("BOTTOMLEFT",f,"BOTTOMLEFT",65,15);t:SetWidth(a[3]-130);t:SetHeight(32);t:Show() end
+   if f.footerPatch then f.footerPatch:Hide() end
+   if kind~="Accessories" then
+    if not f.cleanBody then f.cleanBody=f:CreateTexture(nil,"BORDER") end
+    local t=f.cleanBody;t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_card_body_v9.tga");t:SetTexCoord(0,1,0,1);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",17,-44);t:SetWidth(a[3]-34);t:SetHeight(a[4]-60);t:Show()
+   end
    f.more:Show();f.more:SetFrameLevel(f:GetFrameLevel()+15);f.more:ClearAllPoints();f.more:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);f.more:SetWidth(a[3]-42);f.more:SetHeight(28);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
    if f.emptySocket then f.emptySocket:Hide() end;f.total:Hide();f.rateLabel:Hide();for _,r in ipairs(f.rows) do r:Hide();r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end end
    if kind=="Damage" then
-    -- The authored interior contains illustrative sockets, tracks and a fixed
-    -- first-tab rim. Replace that interior with owned textured material; all
-    -- data-dependent shapes below are created only for a real meter entry.
-    if not f.liveBody then
-     f.liveBody=f:CreateTexture(nil,"BORDER");f.liveGrain=f:CreateTexture(nil,"BORDER")
-    end
-    for _,texture in ipairs({f.liveBody,f.liveGrain}) do texture:ClearAllPoints();texture:SetPoint("TOPLEFT",f,"TOPLEFT",17,-45);texture:SetWidth(a[3]-34);texture:SetHeight(a[4]-61);texture:Show() end
-    T.Solid(f.liveBody,T.panel);f.liveGrain:SetTexture(T.media.."ChronicleGrain.tga");f.liveGrain:SetAlpha(.24)
+    if f.liveBody then f.liveBody:Hide();f.liveGrain:Hide() end
     FieldKit_Text(f.more,"All spells");f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →");local view,index=FieldKitMeterSuite.View();local lines,total,rate,known=FieldKitMeterLedger.Read(view)
     FieldKit_Text(f.title,({"DAMAGE","HEALING","BOSS DAMAGE","DAMAGE TAKEN","PARTY DPS","KILLS"})[index] or "DAMAGE")
     f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-11);f.total:SetWidth(a[3]-200);f.total:SetHeight(25);f.total:SetJustifyH("RIGHT");if index==6 then FieldKit_Text(f.title,"Kills short") end;f.total:SetText(Short(total)..(rate and (" · "..Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS"))) or ""));f.total:Show();f.title:SetWidth(125)
@@ -372,7 +368,7 @@ function R.Panels(variant,zone)
      f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
      f.title:SetWidth(a[3]-100);f.more:Hide()
     else T.Font(f.total,16,R.color,true) end
-    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+(i-1)*(a[3]-48)/6,-46);b:SetWidth((a[3]-48)/6-3);b.fieldkitLabel:SetWidth((a[3]-48)/6-7);T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;b.fieldkitArtOnly=nil;T.State(b,index==i);if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1) end;T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end;if zone=="naxx" then b:Hide() else b:Show() end end
+    for i,b in ipairs(R.tabs) do b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+(i-1)*(a[3]-48)/6,-46);b:SetWidth((a[3]-48)/6-3);b.fieldkitLabel:SetWidth((a[3]-48)/6-7);T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b);if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",2,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-4,1) end;T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end;if zone=="naxx" then b:Hide() else b:Show() end end
     for i=1,4 do local r=Row(f,i,82,(zone=="naxx" and 108 or 83)+(i-1)*(zone=="naxx" and 53 or 33),a[3]-100,29);local e=lines[i];if not e and i>1 then r:Hide() end
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
@@ -406,9 +402,6 @@ function R.Panels(variant,zone)
    else
     FieldKit_Text(f.more,"All effects");f.more:Hide();local source=getglobal("FieldKitEffectsFrame");local e=source and source.rows[1];local r=Row(f,1,72,52,a[3]-99,31)
     r.label:SetText(e and e.label:GetText() and e.label:GetText()~="" and e.label:GetText() or FieldKit_L("No active effect"));r.value:SetText(e and e.value:GetText() or "");local available=a[3]-99;local vw=r.value:GetText()~="" and math.min(110,math.max(60,(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+4)) or 0;r.value:SetWidth(vw);r.label:SetWidth(available-vw-8)
-    if not (e and e.icon and e.icon:GetTexture()) then
-     if not f.emptySocket then f.emptySocket=f:CreateTexture(nil,"BORDER") end;local t=f.emptySocket;T.Solid(t,T.background);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",22,-48);t:SetWidth(47);t:SetHeight(45);t:Show()
-    end
     if e and e.icon and e.icon:GetTexture() then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,0);r.icon:SetTexture(e.icon:GetTexture());r.icon:Show() end
    end
    R.Fit(f.title,21,12);if f.total:IsShown() then R.Fit(f.total,zone=="naxx" and 30 or 16,12) end
