@@ -456,7 +456,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  assert(not acc.title:IsShown() and acc.cardTabs[1]:IsShown() and acc.cardTabs[2]:IsShown(),zone..": equipment title replaced by header tabs")
  local _,_,_,x1,y1=acc.cardTabs[1]:GetPoint();local _,_,_,x2,y2=acc.cardTabs[2]:GetPoint()
  assert(y1==y2 and -y1<=12 and acc.cardTabs[1]:GetHeight()>=32 and x1+acc.cardTabs[1]:GetWidth()==x2 and x2+acc.cardTabs[2]:GetWidth()<=a[3]-30,zone..": header tabs are contiguous, in the header and clear of the collapse button")
- local _,_,_,_,ry=acc.rows[1]:GetPoint();assert(-ry<=56,zone..": content starts in the recovered space")
+ local _,_,_,_,ry=acc.rows[1]:GetPoint();assert(-ry==R.SocketY(zone,1) and -ry<=58,zone..": content starts in the recovered space, on the first socket")
  -- Lair names get the width that is left
  local lairs={};for i=1,4 do table.insert(lairs,{name="Anub'Rekhan the Very Long Named Guardian "..i,state=(i==1 and "awake" or "empty"),left=(i>1 and 60 or nil),x=i,y=0}) end
  local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
@@ -477,3 +477,72 @@ end
 C.Set("zoneThemes",false)
 assert(FieldKitThemeMinimap.rim==nil or not FieldKitThemeMinimap.rim:IsShown(),"rim hidden when the theme is off")
 print("Map fill and rim, portrait socket, header tabs, lair columns, empty damage state and tab stability passed (synthetic)")
+
+-- alpha.16: drag survives the 0.2 s refresh, icons centred in painted sockets, Damage foot never overlaps rows, third-party map buttons.
+FieldKitDB.windowsLocked=false
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ for _,kind in ipairs({"Accessories","Damage","Lairs"}) do
+  local f=R.frames[kind];this=f;f.scripts.OnDragStart();assert(f.azsMoving,zone.." "..kind..": drag starts")
+  -- The mock does not fire OnHide, so count Hide calls: in the client every Hide of a bound card ends its drag (C.Bind OnHide -> C.Finish).
+  local hides=0;f.Hide=function(self) hides=hides+1;self.shown=false end
+  for tick=1,4 do NOW=NOW+.25;C.Refresh(true);assert(f.azsMoving and f:IsShown(),zone.." "..kind..": refresh must not end a card that is being dragged (tick "..tick..")") end
+  assert(hides==0,zone.." "..kind..": the refresh must never Hide a card under the mouse ("..hides.." Hide calls)");f.Hide=nil
+  f.GetLeft=function() return 321 end;f.GetTop=function() return 654 end
+  f:ClearAllPoints();f:SetPoint("TOPLEFT",R.canvas,"BOTTOMLEFT",321,654);this=f;f.scripts.OnDragStop()
+  local saved=C.Position(f);assert(saved and saved[3]==321 and saved[4]==654,zone.." "..kind..": released position saved even when the engine anchors to the canvas")
+  C.Refresh(true);local _,rel,_,x,y=f:GetPoint();assert(rel==UIParent and x==321 and y==654,zone.." "..kind..": position kept after refresh")
+  f.referenceRect=nil;f.referenceGeometryKey=nil;C.revision=C.revision+1;C.Refresh(true);_,rel,_,x,y=f:GetPoint();assert(x==321 and y==654,zone.." "..kind..": position restored after a re-layout / reload")
+  f.GetLeft=nil;f.GetTop=nil;FieldKitDB.zoneThemePositions[C.currentLayout][f:GetName()]=nil;f.referenceRect=nil;C.revision=C.revision+1;C.Refresh(true)
+ end
+ -- icons centred in sockets
+ local oldTex=GetInventoryItemTexture;GetInventoryItemTexture=function() return "Interface\Icons\X" end
+ local oldItems=FieldKitLoadout.items;FieldKitLoadout.items={[2]={name="Amulet",bonuses={}}};FieldKitDB.loadoutTab=1;C.Refresh(true)
+ local acc=R.frames.Accessories
+ for i=1,5 do
+  local r=acc.rows[i];local _,_,_,rx,ry=r:GetPoint();local _,_,_,ix,iy=r.icon:GetPoint();local size=r.icon:GetWidth()
+  local sy=R.SocketY(zone,i);local sh=R.SocketH(zone);local _,sock=nil,nil
+  assert(-ry==sy and r:GetHeight()==sh,zone..": row "..i.." sits on its socket")
+  assert(r.icon:GetHeight()==size and size<=sh-2 and -iy==(sh-size)/2,zone..": icon "..i.." vertically centred")
+  local socketCentre=({elwynn=32+14,naxx=32+19})[zone];assert(rx+ix+size/2==socketCentre,zone..": icon "..i.." horizontally centred")
+ end
+ GetInventoryItemTexture=oldTex;FieldKitLoadout.items=oldItems
+ -- Damage: last row clear of the foot, scrolling, FR and EN
+ local oldRead=FieldKitMeterLedger.Read
+ for _,count in ipairs({0,1,4,6,12}) do
+  for _,lang in ipairs({"fr","en"}) do
+   FieldKitDB.language=lang
+   FieldKitMeterLedger.Read=function() local lines={};for i=1,count do table.insert(lines,{name="Spell "..i,share=1/i,icon="Interface\Icons\X"}) end return lines,100,10,true end
+   R.scroll.Damage=0;C.Refresh(true);local dm=R.frames.Damage;local dr=R.layout.rects.Damage
+   local capacity=zone=="naxx" and 4 or 3;local shown=0;local lowest=0
+   for _,r in ipairs(dm.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();lowest=math.max(lowest,-y+r:GetHeight()+(count>0 and 9 or 0)) end end
+   assert(shown==math.max(1,math.min(capacity,count)),zone..": Damage shows "..count.." spells in "..shown.." rows")
+   local limit=zone=="naxx" and dr[4]-12 or dr[4]-48
+   assert(lowest<=limit,zone..": Damage last row ("..lowest..") stays above the foot ("..limit..") with "..count.." spells ["..lang.."]")
+   assert(dm.pager:IsShown()==(count>capacity),zone..": Damage pager only when scrolling is needed")
+   if zone=="elwynn" then assert(dm.more:IsShown() and dm.more:GetHeight()==28 and dm.more:GetWidth()==dr[3]-42,zone..": All spells button spans its full surface") end
+   if count>capacity then this=dm;arg1=-100;dm.scripts.OnMouseWheel();assert(dm.rows[1].label:GetText()=="Spell "..(count-capacity+1),zone..": scrolling reaches the last spell") end
+  end
+ end
+ FieldKitMeterLedger.Read=oldRead;FieldKitDB.language="fr"
+end
+-- Third-party minimap buttons: owner keeps control; gear rides the opening edge; everything restored.
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local M=FieldKitThemeMinimap
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local hidden=CreateFrame("Button","AzerothStatsMinimap",Minimap);hidden:SetAlpha(0)
+ local shownOne=CreateFrame("Button","AzerothOneMinimapButton",Minimap);shownOne:SetAlpha(1)
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear,hidden,shownOne end
+ C.Refresh(true)
+ local _,rel,_,gx,gy=gear:GetPoint();assert(rel==Minimap and gx>80,"AzerothHub gear is moved out to the edge of the opening, same angle")
+ assert(hidden:GetAlpha()==0 and hidden:GetParent()==Minimap,"a button hidden by its owner keeps its alpha and parent")
+ assert(M.launcherProxies[2] and not M.launcherProxies[2]:IsShown(),"no proxy for a button its owner hid")
+ assert(M.launcherProxies[3] and M.launcherProxies[3]:IsShown(),"proxy shown for a button its owner left visible")
+ assert(shownOne:GetAlpha()==1 and shownOne:GetParent()==Minimap,"visible third-party button is never re-parented or re-alpha'd")
+ C.Set("zoneThemes",false)
+ _,rel,_,gx,gy=gear:GetPoint();assert(rel==Minimap and gx==80 and gy==0,"gear anchor restored")
+ assert(hidden:GetAlpha()==0,"FieldKit does not reactivate a button hidden by another addon")
+ Minimap.GetChildren=oldChildren
+end
+print("Drag across refreshes (simulated), socket-centred icons, Damage foot clearance and third-party map buttons passed (synthetic)")

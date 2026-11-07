@@ -350,7 +350,7 @@ function H.Summaries(variant,zone)
    local route=kind
    f.more=T.Button(f,nil,"Full details",14,0,282,25,function() Open(route) end)
   end
-  f:Hide()
+  if not f.azsMoving then f:Hide() end
   if variant=="complete" and not detail and source and FieldKitDB[pref] and not FieldKitZoneThemes.open[kind] then
    local count=0
    local rows=source.fieldkitLayoutRows or source.rows or source.slots or {}

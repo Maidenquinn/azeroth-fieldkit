@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.16 - 2026-11-07 (drag, sockets, third-party map buttons, unreleased)
+
+- Card drag: the 0.2 s theme refresh hid every card (`R.Panels` / summaries `Hide()`), and the `OnHide` handler of `FieldKitZoneThemes.Bind` ends the drag (`C.Finish`). A card under the mouse is no longer hidden. `C.Remember` also stores the released spot against UIParent when the engine leaves the card anchored to the scaled canvas, so the position is saved and restored.
+- Equipment/Spells: rows and icons sit on the sockets painted in the art (Elwynn 28 px every 36 px, Naxxramas 38x30 every 34.75 px), icon centred and inset; alpha.13-15 had moved the rows off them.
+- Damage: three rows on Elwynn (four on Naxxramas) end above the "All spells" foot; longer lists scroll with a pager; the category change resets the scroll.
+- Minimap buttons of other addons: they stay Minimap children so their owner keeps control of alpha/mouse; only the duplicate-prone originals are parked off screen (anchors saved, restored with the theme) and a proxy is shown only when the original is not hidden by its owner. Buttons anchored at a native-sized radius (AzerothHub gear at 80 px) keep their angle but ride the edge of the visible opening; restored with the theme.
+
 ## 0.6.0-alpha.15 - 2026-11-07 (map fill, header tabs, portrait socket, unreleased)
 
 - Minimap: measured art openings (`mapHole` in layouts.json, exported by build_reference_skins.py) are not square; the native map stays square (no stretching) but now covers the whole opening, and the art strip around the opening is redrawn above it (non-interactive) to mask any overflow. Applies to every layout that has a map frame.

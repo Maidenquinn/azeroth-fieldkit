@@ -83,7 +83,7 @@ function R.Create()
  R.tabs={}
  for i,key in ipairs(FieldKitMeterLedger.views) do
   local view=key
-  local b=T.Button(R.frames.Damage,nil,({"Damage","Healing","Boss","Taken","Groups","Kills short"})[i],0,0,54,30,function() FieldKitMeterSuite.SetView(view);FieldKitZoneThemes.Refresh(true) end)
+  local b=T.Button(R.frames.Damage,nil,({"Damage","Healing","Boss","Taken","Groups","Kills short"})[i],0,0,54,30,function() FieldKitMeterSuite.SetView(view);R.scroll=R.scroll or {};R.scroll.Damage=0;FieldKitZoneThemes.Refresh(true) end)
   Blank(b);R.tabs[i]=b
  end
 end
@@ -353,9 +353,10 @@ function R.Map()
     M.launcherProxies[i]=proxy
    end
    local texture=original.icon or original.texture;local path=texture and texture.GetTexture and texture:GetTexture();if not path and original.GetNormalTexture then local n=original:GetNormalTexture();path=type(n)=="string" and n or (n and n.GetTexture and n:GetTexture()) end
-   proxy.icon:SetTexture(path or (i==1 and T.media.."ChronicleSeal.tga" or "Interface\\Icons\\INV_Misc_Book_09"));proxy:ClearAllPoints();local left=a[1]<R.layout.size[1]/2;proxy:SetPoint(left and "TOPLEFT" or "TOPRIGHT",M.root,left and "TOPRIGHT" or "TOPLEFT",left and 5 or -5,-8-(i-1)*36);proxy:SetFrameStrata("HIGH");proxy:SetFrameLevel(M.root:GetFrameLevel()+80);proxy:Show();FieldKitZoneThemes.Mask(original,true)
+   proxy.icon:SetTexture(path or (i==1 and T.media.."ChronicleSeal.tga" or "Interface\\Icons\\INV_Misc_Book_09"));proxy:ClearAllPoints();local left=a[1]<R.layout.size[1]/2;proxy:SetPoint(left and "TOPLEFT" or "TOPRIGHT",M.root,left and "TOPRIGHT" or "TOPLEFT",left and 5 or -5,-8-(i-1)*36);proxy:SetFrameStrata("HIGH");proxy:SetFrameLevel(M.root:GetFrameLevel()+80);M.Park(original);if original:GetAlpha()>.01 then proxy:Show() else proxy:Hide() end
   end
  end
+ M.Ring(hole[3]/2,hole[4]/2)
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
   local x,y=a[1]+a[3]-29,a[2]+a[3]-(i==1 and 28 or 60)
@@ -385,6 +386,15 @@ function R.DamageTabs(f,a,zone,index)
   end
   b:Show()
  end
+end
+-- Socket geometry measured on the approved Equipment art (reference px, card-local): icons are centred in them.
+local SOCKETS={elwynn={x=32,y=51,step=36,w=28,h=28},naxx={x=32,y=57,step=34.75,w=38,h=30}}
+function R.SocketY(zone,i) local s=SOCKETS[zone] or SOCKETS.elwynn;return math.floor(s.y+s.step*(i-1)+.5) end
+function R.SocketH(zone) return (SOCKETS[zone] or SOCKETS.elwynn).h end
+function R.SocketIcon(r,zone,texture)
+ local s=SOCKETS[zone] or SOCKETS.elwynn;local size=math.min(s.w,s.h)-4
+ r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",s.x+(s.w-size)/2-72,-(s.h-size)/2);r.icon:SetWidth(size);r.icon:SetHeight(size)
+ r.icon:SetTexCoord(.07,.93,.07,.93);r.icon:SetTexture(texture);r.icon:Show()
 end
 -- Scrolling window over a list that can outgrow its fixed art card; the wheel moves it, a pager shows position.
 function R.Window(f,kind,total,capacity)
@@ -461,9 +471,10 @@ function R.LairList(lairs)
  return list
 end
 function R.Panels(variant,zone)
- for _,f in pairs(H.summaries or {}) do f:Hide() end
+ -- A card under the mouse must not be hidden by the 0.2 s refresh: OnHide ends the drag (C.Bind -> C.Finish).
+ for _,f in pairs(H.summaries or {}) do if not f.azsMoving then f:Hide() end end
  local detail=false;for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if FieldKitZoneThemes.open[kind] then detail=true end end
- for _,f in pairs(R.frames) do f:Hide() end
+ for _,f in pairs(R.frames) do if not f.azsMoving then f:Hide() end end
  if variant~="complete" then R.MaskBuffs(false);return end
  R.effectBuffs=false
  local d=R.layout
@@ -499,7 +510,10 @@ function R.Panels(variant,zone)
      f.title:SetWidth(a[3]-100);f.more:Hide()
     else T.Font(f.total,16,R.color,true) end
     R.DamageTabs(f,a,zone,index)
-    for i=1,4 do local r=Row(f,i,82,(zone=="naxx" and 146 or 98)+(i-1)*(zone=="naxx" and 46 or 33),a[3]-100,29);local e=lines[i];if not e and i>1 then r:Hide() end
+    -- Content area ends above the foot button: 3 rows on Elwynn (4 on Naxx, which has no foot); longer lists scroll.
+    local capacity=zone=="naxx" and 4 or 3;local offset=R.Window(f,"Damage",table.getn(lines),capacity)
+    f.pager:ClearAllPoints();f.pager:SetPoint("TOPRIGHT",f,"TOPRIGHT",-26,zone=="naxx" and -309 or -194);f.pager:SetHeight(14)
+    for i=1,capacity do local r=Row(f,i,82,(zone=="naxx" and 146 or 98)+(i-1)*(zone=="naxx" and 44 or 33),a[3]-100,29);local e=lines[offset+i];if not e and i>1 then r:Hide() end
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
      if e then
@@ -540,17 +554,17 @@ function R.Panels(variant,zone)
     R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end)
     if tab==1 then
      local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
-     for i=1,5 do local r=Row(f,i,72,54+(i-1)*34,a[3]-94,30);local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
-      local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(texture);r.icon:Show() end
+     for i=1,5 do local r=Row(f,i,72,R.SocketY(zone,i),a[3]-94,R.SocketH(zone));local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
+      local texture=type(GetInventoryItemTexture)=="function" and GetInventoryItemTexture("player",ids[i]);if texture then R.SocketIcon(r,zone,texture) end
       r.fontSize=16;r.fontMin=16
      end
     else
      local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset=R.Window(f,"Accessories",total,5)
-     if total==0 then local r=Row(f,1,72,54,a[3]-94,30);r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
+     if total==0 then local r=Row(f,1,72,R.SocketY(zone,1),a[3]-94,R.SocketH(zone));r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
      for i=1,math.min(5,total-offset) do
-      local e=spells[offset+i];local r=Row(f,i,72,54+(i-1)*34,a[3]-94,30);r.entry=e
+      local e=spells[offset+i];local r=Row(f,i,72,R.SocketY(zone,i),a[3]-94,R.SocketH(zone));r.entry=e
       r.label:SetText(e.name or "?");r.value:SetText(e.rank or "");r.value:SetWidth(78);r.label:SetWidth(a[3]-98-82)
-      local icon=FieldKitLoadout.Icon(e.name);if icon then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-42,0);r.icon:SetTexture(icon);r.icon:Show() end
+      local icon=FieldKitLoadout.Icon(e.name);if icon then R.SocketIcon(r,zone,icon) end
       r.fontSize=16;r.fontMin=12;local cr,cg,cb=FieldKitLoadout.RankColor(e.rankValue);r.valueTint={cr,cg,cb}
      end
     end

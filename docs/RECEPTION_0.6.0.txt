@@ -136,6 +136,11 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.16 - GLISSER, SOCKETS, BOUTONS DE MINIMAP
+Glisser une carte : doit etre continu des le premier essai. Icones Equipement/Sorts centrees dans les sockets.
+Degats : derniere ligne au-dessus de "All spells". Minimap : engrenage AzerothHub au bord ; icones masquees
+par AzerothHub restent masquees. A recetter en jeu, Elwynn et Naxx Complete.
+
 ALPHA.15 - CARTE, ONGLETS EN-TETE, PORTRAIT
 Minimap : remplit l'ouverture du cadre (carre non etire, rebord redessine). Equipement/Sorts : onglets
 dans l'en-tete. Portrait : couvre tout le socle. Antres : noms plus larges. Degats : etat vide centre,

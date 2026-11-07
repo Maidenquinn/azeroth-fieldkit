@@ -98,6 +98,11 @@ function C.Remember(frame)
  for _,key in ipairs(C.positionNames) do if key==name then allowed=true end end
  if not allowed then return false end
  local a=H.Points(frame)[1]
+ if a and a[2]~=UIParent and frame.GetLeft and frame:GetLeft() and frame:GetTop() then
+  -- After StopMovingOrSizing a card parented to the scaled canvas may stay anchored to it: store the same
+  -- on-screen spot against UIParent (BOTTOMLEFT origin) so the position can be saved and restored.
+  frame:ClearAllPoints();frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",frame:GetLeft(),frame:GetTop());a=H.Points(frame)[1]
+ end
  if not a or a[2]~=UIParent then return false end
  local value={a[1],a[3],a[4],a[5]}
  if not FieldKitPositions.Valid(value) then return false end

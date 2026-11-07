@@ -12,8 +12,60 @@ function M.Rotate(x,y)
  local c,s=math.cos(-angle),math.sin(-angle)
  return x*c-y*s,x*s+y*c
 end
+-- Third-party launcher buttons stay Minimap children, so their owners (e.g. a button manager that fades or hides
+-- them) keep control of alpha/mouse. FieldKit only moves a duplicate-prone original off screen and remembers its anchors.
+function M.Park(f)
+ M.parked=M.parked or {}
+ if not M.parked[f] then M.parked[f]=FieldKitThemeHUD.Points(f) end
+ local _,rel,_,x=f:GetPoint()
+ if not (rel==UIParent and x==-4000) then f:ClearAllPoints();f:SetPoint("CENTER",UIParent,"CENTER",-4000,-4000) end
+end
+function M.Unpark()
+ for f,points in pairs(M.parked or {}) do
+  local _,rel,_,x=f:GetPoint()
+  if rel==UIParent and x==-4000 then
+   f:ClearAllPoints();for i=1,table.getn(points) do local a=points[i];f:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
+  end
+ end
+ M.parked={}
+end
+-- Buttons that follow the common minimap-button convention (one CENTER anchor on the Minimap at a native-sized
+-- radius) keep their angle but ride the edge of the visible opening instead of sitting inside the enlarged map.
+local ringProxied={FieldKitMinimapButton=true,AzerothStatsMinimap=true,AzerothOneMinimapButton=true}
+function M.Ring(halfW,halfH)
+ M.ring=M.ring or {}
+ if not Minimap or not Minimap.GetChildren then return end
+ for _,f in ipairs({Minimap:GetChildren()}) do
+  local name=f.GetName and f:GetName()
+  if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and not string.find(name,"^FieldKit") then
+   local points=FieldKitThemeHUD.Points(f);local p=points[1];local record=M.ring[f]
+   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and type(p[4])=="number" and type(p[5])=="number" then
+    if record and record.ax==p[4] and record.ay==p[5] then
+     -- already ours
+    else
+     local radius=math.sqrt(p[4]*p[4]+p[5]*p[5])
+     if radius>=55 and radius<=100 then
+      local dx,dy=p[4]/radius,p[5]/radius
+      local reach=1/math.max(math.abs(dx)/halfW,math.abs(dy)/halfH)+6
+      local ax,ay=dx*reach,dy*reach
+      M.ring[f]={rx=p[4],ry=p[5],ax=ax,ay=ay}
+      f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",ax,ay)
+     end
+    end
+   end
+  end
+ end
+end
+function M.RingRestore()
+ for f,r in pairs(M.ring or {}) do
+  local points=FieldKitThemeHUD.Points(f);local p=points[1]
+  if table.getn(points)==1 and p[4]==r.ax and p[5]==r.ay then f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
+ end
+ M.ring={}
+end
 function M.Restore()
  if not M.active then return end
+ M.Unpark();M.RingRestore()
  local old=M.before
  if old.scripts then for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do Minimap:SetScript(event,old.scripts[event]) end end
  if old.movable~=nil then Minimap:SetMovable(old.movable) end
@@ -92,5 +144,6 @@ function M.Apply(variant)
  Minimap:ClearAllPoints();Minimap:SetPoint("CENTER",M.root,"CENTER",0,0);Minimap:SetWidth(size);Minimap:SetHeight(size)
  local clock=getglobal("GameTimeFrame")
  if clock then FieldKitThemeHUD.Anchor(clock,"TOPRIGHT",M.root,"TOPRIGHT",0,0);clock:SetScale(.75) end
+ M.Ring(size/2,size/2)
  FieldKitTheme.Update(M.root);M.root:Show();return true
 end
