@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.21 - 2026-11-08 (real screen edges, map buttons reachable, unreleased)
+
+- Screen edges: cards were held back by (1) SetClampedToScreen on the whole technical rectangle (its transparent margins, 5-11 px, had to stay on screen) and (2) the placement engine comparing with the REFERENCE canvas (margins 8/12 px) while the canvas is only fitted into the screen (e.g. ~1063 px high on a 1080 px screen). Now: screen bounds are measured (R.ScreenBounds), the clamp uses the drawn art (SetClampRectInsets when the client has it, otherwise a snap flush with the real edge at the drop that also updates the saved position), a card the user placed is never moved when nothing is in its way (no margin for manual placement), and automatic placement keeps 8 px from the real edges.
+- Bonuses growth is limited by protected HUD parts (e.g. the bottom-right navigation) and the screen, then scrolls; the placement search no longer lands a card on the preferred place of a card not yet handled, and a card handled earlier keeps its place (a priority card that found no room below no longer climbs over the Equipment card and starts a displacement cascade).
+- Map buttons: the map drag handle (a mouse-taking frame above the native map and its buttons) is removed, and the native map's mouse is no longer switched off while the HUD is unlocked; the map container only takes the pointer when it is the art frame. New `/fieldkit mapfocus` records for 8 seconds which frame really receives the pointer.
+
 ## 0.6.0-alpha.20 - 2026-11-08 (map root cause, saved cards that yield, permanent sockets, unreleased)
 
 - Map: the map container (FieldKitThemeMap) was made draggable on its own by FieldKitZoneThemes.Bind, although on layouts without map art it is only an invisible holder INSIDE the identity card; a drag reaching it moved the native map alone while the decorative frame stayed (the captured "map leaves its frame"). A drag on it now moves the owner of the whole group (identity card, or the art frame when the map has art) and it is no longer movable on its own there. No FieldKit script remains on the native Minimap (the alpha.2-19 OnDragStart/OnMouseDown handlers are gone). Zoom buttons are re-levelled and re-shown once per layout, not on every refresh.

@@ -271,7 +271,23 @@ function C.Refresh(force)
  if FieldKitScreenLayers then FieldKitScreenLayers.ApplyChoice() end
  if FieldKitUI and FieldKitUI.frame and FieldKitUI.referenceZone~=zone then FieldKitUI.referenceZone=zone;FieldKitUI.Reflow() end
 end
+-- /fieldkit mapfocus: for 8 seconds, record which frame really receives the pointer (hover the map buttons meanwhile).
+function C.Sample()
+ local now=GetTime()
+ if now>C.focusUntil then
+  DEFAULT_CHAT_FRAME:AddMessage("mapfocus: "..table.getn(C.focusLog).." change(s)")
+  for _,line in ipairs(C.focusLog) do DEFAULT_CHAT_FRAME:AddMessage("  "..line) end
+  C.focusUntil=nil;return
+ end
+ if now<(C.focusNext or 0) then return end;C.focusNext=now+.15
+ local f=type(GetMouseFocus)=="function" and GetMouseFocus()
+ local name=f and f.GetName and f:GetName() or (f and tostring(f.GetObjectType and f:GetObjectType())) or "none"
+ local parent=f and f.GetParent and f:GetParent();local pn=parent and parent.GetName and parent:GetName() or "?"
+ local line=string.format("%s (parent %s) strata=%s level=%s",tostring(name),tostring(pn),tostring(f and f.GetFrameStrata and f:GetFrameStrata()),tostring(f and f.GetFrameLevel and f:GetFrameLevel()))
+ if line~=C.focusLast then C.focusLast=line;if table.getn(C.focusLog)<24 then table.insert(C.focusLog,line) end end
+end
 function C.Tick()
+ if C.focusUntil then C.Sample() end
  if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
   for _,frame in ipairs(C.bound or {}) do C.Finish(frame) end
  end
@@ -314,6 +330,7 @@ function C.Command(msg)
    local f=getglobal(name)
    if f then local p=f:GetParent();DEFAULT_CHAT_FRAME:AddMessage(name.." parent="..tostring(p and p:GetName()).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown())) end
   end
+ elseif arg=="mapfocus" then C.focusUntil=GetTime()+8;C.focusLog={};C.focusLast=nil;DEFAULT_CHAT_FRAME:AddMessage("mapfocus: move the pointer over the map buttons for 8 seconds")
  elseif arg=="clickdiag" then
   for _,d in ipairs(FieldKitReferenceHUD.diagButtons or {}) do DEFAULT_CHAT_FRAME:AddMessage(d.label..": down "..d.down.." up "..d.up.." click "..d.click.." hide "..d.hide) end
  elseif arg=="mapdiag" then

@@ -136,6 +136,10 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.21 - BORDS D'ECRAN, BOUTONS DE MINIMAP
+Les cartes vont jusqu'aux vrais bords ; la poignee de carte (qui couvrait les boutons) est supprimee ;
+/fieldkit mapfocus indique quel cadre recoit la souris. A recetter en jeu.
+
 ALPHA.20 - MINIMAP, CARTES ENREGISTREES, 7 SOCKETS
 La carte ne part plus seule ; les cartes que vous avez placees cedent la place (position enregistree jamais reecrite) ;
 l'onglet Sorts affiche toujours 7 emplacements. A recetter en jeu, Elwynn et Naxx Complete.

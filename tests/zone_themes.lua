@@ -707,7 +707,8 @@ end
 do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
  local M=FieldKitThemeMinimap
- assert(M.dragHandle:GetFrameLevel()<=Minimap:GetFrameLevel()+1 and M.dragHandle:GetFrameStrata()==Minimap:GetFrameStrata(),"drag handle is not above the buttons placed on the map")
+ assert(M.dragHandle==nil,"no FieldKit frame covers the map and its buttons")
+ assert(Minimap:IsMouseEnabled()==M.before.mouse,"the native map keeps its own mouse state while themed (FieldKit no longer switches it off)")
  local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end;C.Refresh(true)
  for _,angle in ipairs({0,90,180,270,45,225}) do local a=math.rad(angle);gear:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80)
@@ -753,7 +754,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   table.sort(pieces,function(p,q) return p[1]<q[1] end);for _,p in ipairs(pieces) do assert(p[1]==reach,zone..": art continuity at "..p[1].." expected "..reach.." ("..count..")");reach=reach+p[2] end
   assert(reach==acc:GetHeight(),zone..": art ends at the card bottom ("..count..")")
   NoOverlap(zone.." "..count.." spells")
-  assert((R.shift.Stats or 0)>0 or (R.shiftX.Stats or 0)~=0,zone..": Stats gives way to the taller Equipment card")
+  assert((R.shift.Stats or 0)>0 or (R.shiftX.Stats or 0)~=0,zone..": Stats gives way to the taller Equipment card "..count.." sh="..table.concat({tostring(R.shift.Accessories),tostring(R.shiftX.Accessories),tostring(R.shift.Stats),tostring(R.shiftX.Stats),tostring(R.shift.Effects),tostring(R.shiftX.Effects),tostring(R.shift.Lairs),tostring(R.shift.Damage)},",").." last="..tostring(R.lastMoved).." noRoom="..tostring(R.noRoom))
  end
  FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1;C.Refresh(true)
  for _,k in ipairs({"Stats","Effects"}) do assert((R.shift[k] or 0)==0 and (R.shiftX[k] or 0)==0,zone..": "..k.." is back at its preferred place on the Equipment tab") end
@@ -807,7 +808,9 @@ local function Apart(label)
  for _,k in ipairs(kinds) do if R.frames[k]:IsShown() then table.insert(seen,{k,Opaque2(k)}) end end
  for i=1,table.getn(seen) do
   local a=seen[i][2]
-  assert(a[1]>=0 and a[3]<=R.layout.size[1]+1 and a[2]>=0 and a[4]<=R.layout.size[2]+1,label..": "..seen[i][1].." leaves the screen ("..a[1]..","..a[2]..","..a[3]..","..a[4]..")")
+  local dump="";for _,q in ipairs(seen) do dump=dump.." "..q[1]..":"..math.floor(q[2][1])..","..math.floor(q[2][2])..","..math.floor(q[2][3])..","..math.floor(q[2][4]).."(sh "..tostring(R.shift[q[1]])..","..tostring(R.shiftX[q[1]])..")" end
+  local sl,st,sr,sb=R.ScreenBounds(R.layout)
+  assert(a[1]>=sl-1 and a[3]<=sr+1 and a[2]>=st-1 and a[4]<=sb+1,label..dump..": "..seen[i][1].." leaves the screen ("..a[1]..","..a[2]..","..a[3]..","..a[4]..") bounds="..table.concat({R.ScreenBounds(R.layout)},",").." shift="..tostring(R.shift[seen[i][1]])..","..tostring(R.shiftX[seen[i][1]]).." noRoom="..tostring(R.noRoom))
   for j=i+1,table.getn(seen) do
    local b=seen[j][2]
    local across=math.min(a[3],b[3])-math.max(a[1],b[1]);local depth=math.min(a[4],b[4])-math.max(a[2],b[2])
@@ -836,6 +839,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  local snapshot={};for k,v in pairs(FieldKitDB.zoneThemePositions[layout]) do snapshot[k]=v[3]..":"..v[4] end
  FieldKitStatsFrame.rows=FakeStats(14);R.statsOpen=true;C.Refresh(true);C.Refresh(true)
  Apart(zone.." saved layout, Bonuses expanded")
+ for _,k in ipairs({"Damage","Lairs","Accessories"}) do assert((R.shift[k] or 0)==0 and (R.shiftX[k] or 0)==0,zone..": "..k.." is above/beside Bonuses and must not move (shift "..tostring(R.shift[k])..","..tostring(R.shiftX[k])..")") end
  local el,et=Rendered(R.frames.Effects);local sl,st,sw,sh=Rendered(R.frames.Stats)
  assert(R.frames.Stats:GetHeight()>R.layout.rects.Stats[4],zone..": Bonuses really grew")
  assert(el~=before.Effects[1] or et~=before.Effects[2],zone..": Effects gave way to the expanded Bonuses card")
@@ -921,3 +925,62 @@ for _,case in ipairs({{"elwynn",true},{"naxx",false}}) do
  C.Set("zoneThemes",false);assert(not M.root:IsShown(),zone..": container hidden with the theme off")
 end
 print("Map group owner, zoom buttons and native map scripts passed (synthetic)")
+
+-- alpha.21: real screen edges (letterboxed canvas), manual placement without artificial margin, mouse coverage of the map.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+ R.statsOpen=false;FieldKitDB.loadoutTab=1;R.lastMoved=nil
+ local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ local saved={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local r=R.layout.rects[k];saved[k]={r[1],r[2]} end
+ SaveAll(layout,saved);Stage()
+ local LETTERBOX=17 -- the canvas is fitted into the screen: the real screen reaches 17 px above it
+ R.canvas.GetTop=function() return UIH-LETTERBOX end
+ local hidden={};for _,name in ipairs({"header","chat","identity","nav","vitality","mapArt"}) do local r=R.layout.rects[name];if r then hidden[name]=r;R.layout.rects[name]={-5000,-5000,r[3],r[4]} end end -- edge test only: no protected part in the way
+ local sl,st,sr,sb=R.ScreenBounds(R.layout)
+ assert(math.abs(st+LETTERBOX)<.01 and math.abs(sb-(UIH-LETTERBOX))<.01 and sr>R.layout.size[1],zone..": bounds are those of the REAL screen, not of the canvas ("..st..","..sb..")")
+ -- ref y of the real screen top is -17: a pinned card whose DRAWN art touches the very top edge must stay there
+ local n=OP[R.key].Effects;local h=R.layout.rects.Effects[4]
+ local function PlaceEffects(frameTopScreen) FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]={"TOPLEFT","TOPLEFT",R.layout.rects.Effects[1],-frameTopScreen};Relayout() end
+ local topScreen=-n[2] -- frame top such that the drawn top is exactly the screen top (screen y 0)
+ PlaceEffects(topScreen);C.Refresh(true);C.Refresh(true)
+ local l,t=Rendered(R.frames.Effects);assert(math.abs((t+n[2])-0)<.01,zone..": art flush with the top screen edge is accepted ("..(t+n[2])..")")
+ assert((R.shift.Effects or 0)==0 and (R.shiftX.Effects or 0)==0,zone..": and nothing moves it away from the edge")
+ -- bottom edge: drawn bottom exactly on the screen bottom
+ local bottomTop=UIH+n[4]-h;PlaceEffects(bottomTop);C.Refresh(true);C.Refresh(true)
+ l,t=Rendered(R.frames.Effects);assert(math.abs((t+h-n[4])-UIH)<.01 and (R.shift.Effects or 0)==0,zone..": art flush with the bottom screen edge is accepted")
+ -- dropped beyond the edge: snapped back flush, saved position follows, no artificial margin
+ local a=FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"];a[4]=-(bottomTop+40);R.frames.Effects:ClearAllPoints();R.frames.Effects:SetPoint(a[1],UIParent,a[2],a[3],a[4])
+ R.NoteMoved("FieldKitReferencePanelEffects");l,t=Rendered(R.frames.Effects)
+ assert(math.abs((t+h-n[4])-UIH)<.01 and math.abs(a[4]+bottomTop)<.01,zone..": a drop beyond the real edge snaps flush (saved "..a[4].." expected "..-bottomTop..")")
+ a[4]=-(topScreen-40);R.frames.Effects:ClearAllPoints();R.frames.Effects:SetPoint(a[1],UIParent,a[2],a[3],a[4]);R.NoteMoved("FieldKitReferencePanelEffects")
+ l,t=Rendered(R.frames.Effects);assert(math.abs((t+n[2])-0)<.01,zone..": and at the top edge")
+ for name,r in pairs(hidden) do R.layout.rects[name]=r end
+ R.canvas.GetTop=function() return UIH end -- (the automatic-placement checks below use an exact canvas)
+ -- automatic placement keeps its visual margin from the real edge
+ FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]=nil;SaveAll(layout,saved);Relayout()
+ FieldKitStatsFrame.rows=FakeStats(29);R.statsOpen=true;C.Refresh(true);C.Refresh(true)
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local o=Opaque2(k);assert(o[4]<=UIH-8+.5 and o[2]>=0,zone..": "..k.." automatic placement stays inside the real screen") end
+ for _,k in ipairs({"Damage","Lairs","Accessories"}) do assert((R.shift[k] or 0)==0 and (R.shiftX[k] or 0)==0,zone..": "..k.." is not shoved around by Bonuses "..tostring(R.shift[k])..","..tostring(R.shiftX[k]).." stats="..table.concat({Rendered(R.frames.Stats)},",").." extra="..tostring(R.statsExtra).." acc="..table.concat({Rendered(R.frames.Accessories)},",")) end
+ R.statsOpen=false;FieldKitStatsFrame.rows=realStatsRows
+ R.canvas.GetTop=nil;FieldKitDB.zoneThemePositions[layout]=nil;Unstage();Relayout()
+ -- mouse coverage of the native map: nothing of FieldKit sits over it except the zoom buttons and the art frame itself
+ local M=FieldKitThemeMinimap;C.Refresh(true)
+ local covering={}
+ for _,f in ipairs(objects) do
+  local p=f.parent;local inside=false;while p do if p==M.root then inside=true end;p=p.parent end
+  if inside and f.mouseEnabled and f:IsShown() and f~=M.zoomIn and f~=M.zoomOut and f.kind~="Texture" and f.kind~="FontString" then
+   local proxy=false;for _,pr in pairs(M.launcherProxies or {}) do if pr==f then proxy=true end end
+   if not proxy then table.insert(covering,tostring(f.kind)..":"..tostring(f._name)) end
+  end
+ end
+ assert(table.getn(covering)==0,zone..": FieldKit frames over the map that take the pointer: "..table.concat(covering,", "))
+ assert(M.dragHandle==nil or not M.dragHandle:IsShown(),zone..": no drag handle")
+ assert(M.root:IsMouseEnabled()==(M.GroupOwner()==M.root),zone..": the map container takes the pointer only when it is the art frame")
+ -- a third-party button on the map keeps its own clicks and drags
+ local clicked,dragged=0,0
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetScript("OnClick",function() clicked=clicked+1 end);gear:SetScript("OnDragStart",function() dragged=dragged+1 end)
+ click(gear);gear.scripts.OnDragStart();assert(clicked==1 and dragged==1,zone..": third-party button keeps its handlers")
+ assert(not H.identity.azsMoving and not M.root.azsMoving,zone..": using it never moves the map")
+ C.Set("zoneThemes",false)
+end
+print("Real screen edges, drop snapping, protected obstacles and map mouse coverage passed (synthetic)")

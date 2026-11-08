@@ -366,14 +366,11 @@ function R.Map()
    if stamp~=M.followStamp then M.followStamp=stamp;Minimap:Hide();Minimap:Show() end
   end)
  end
- if not M.dragHandle then
-  local handle=CreateFrame("Button",nil,M.root);M.dragHandle=handle;handle:SetMovable(true);handle:EnableMouse(true);handle:RegisterForDrag("LeftButton")
-  handle:SetScript("OnDragStart",function() local target=M.GroupOwner();M.dragOwner=target;target.azsMoving=true;target:StartMoving() end)
-  local function Finish() if M.dragOwner then FieldKitZoneThemes.Finish(M.dragOwner);M.dragOwner=nil;M.screenStamp=nil;FieldKitZoneThemes.Refresh(true) end end
-  handle:SetScript("OnDragStop",Finish);handle:SetScript("OnMouseUp",Finish)
- end
- R.Child(M.dragHandle,M.root,{a[1],a[2],a[3],a[3]});R.Stable(M.dragHandle,Minimap:GetFrameStrata()..Minimap:GetFrameLevel()..":"..M.dragHandle:GetFrameLevel(),function(h) h:SetFrameStrata(Minimap:GetFrameStrata());h:SetFrameLevel(Minimap:GetFrameLevel()) end) -- below the map's own child buttons, so a button on the map keeps its mouse
- Minimap:EnableMouse(FieldKitDB.windowsLocked and true or false);if FieldKitDB.windowsLocked then M.dragHandle:Hide() else M.dragHandle:Show() end
+ -- No FieldKit frame covers the map any more: the old drag handle sat over the native map and the map's own buttons, and
+ -- the native map's mouse was switched off while the HUD was unlocked. The group is moved from the identity card or the
+ -- art frame (rim, title, foot); the map interior and every button on it keep the client's native hit testing.
+ if M.dragHandle then M.dragHandle:Hide();M.dragHandle:EnableMouse(false) end
+ M.root:EnableMouse(M.GroupOwner()==M.root)
  M.launcherProxies=M.launcherProxies or {}
  for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton"}) do
   local original=getglobal(name)
@@ -530,14 +527,80 @@ function R.NoteMoved(name)
  for _,k in ipairs(CARDS) do if "FieldKitReferencePanel"..k==name then kind=k end end
  if not kind then return end
  R.lastMoved=kind;local f=R.frames[kind];if f then f.fieldkitDX,f.fieldkitDY=nil,nil end
+ R.ClampToScreen(kind)
  if R.shift then R.shift[kind]=nil end;if R.shiftX then R.shiftX[kind]=nil end
+end
+-- The canvas is the reference rectangle fitted into the screen; the real screen can extend past it (other aspect ratios).
+-- Returns left, top, right, bottom of the REAL screen in canvas reference px (the canvas itself when it cannot be measured).
+function R.ScreenBounds(d)
+ local c=R.canvas
+ if c and c.GetLeft and c.GetTop and c:GetLeft() and c:GetTop() and c.GetEffectiveScale and UIParent.GetEffectiveScale then
+  local cs,us=c:GetEffectiveScale(),UIParent:GetEffectiveScale()
+  if cs and cs>0 and us and us>0 then
+   return -c:GetLeft(),(c:GetTop()*cs-UIParent:GetHeight()*us)/cs,(UIParent:GetWidth()*us-c:GetLeft()*cs)/cs,c:GetTop()
+  end
+ end
+ return 0,0,d.size[1],d.size[2]
+end
+-- A card is clamped by what is drawn, not by its technical rectangle: the transparent margins may leave the screen.
+function R.ApplyClamp(f,kind)
+ local n=Inset(kind);local key=R.key..":"..n[1]..n[2]..n[3]..n[4]
+ if f.fieldkitClampKey==key then return end
+ f.fieldkitClampKey=key
+ if f.SetClampRectInsets then pcall(f.SetClampRectInsets,f,n[1],-n[3],-n[2],n[4]);f:SetClampedToScreen(true)
+ else f:SetClampedToScreen(false) end -- corrected at the drop (R.ClampToScreen) instead
+end
+-- At the drop: if the drawn art is beyond the real screen, bring it back flush with the edge (its saved position follows).
+function R.ClampToScreen(kind)
+ local f=R.frames[kind];local a=f and FieldKitZoneThemes.Position(f);if not a then return end
+ local lx,ly,w,h=R.LiveRect(f);if not lx then return end
+ local n=Inset(kind);local L,T,Rg,B=R.ScreenBounds(R.layout)
+ local l,t,r,b=lx+n[1],ly+n[2],lx+w-n[3],ly+h-n[4];local dx,dy=0,0
+ if l<L then dx=L-l elseif r>Rg then dx=Rg-r end
+ if t<T then dy=T-t elseif b>B then dy=B-b end
+ if dx==0 and dy==0 then return end
+ local cs=R.canvas.GetEffectiveScale and R.canvas:GetEffectiveScale() or 1;local fe=f.GetEffectiveScale and f:GetEffectiveScale() or 1
+ local k=(fe and fe>0 and cs) and cs/fe or 1
+ a[3]=a[3]+dx*k;a[4]=a[4]-dy*k;f:ClearAllPoints();f:SetPoint(a[1],UIParent,a[2],a[3],a[4])
+end
+-- Opaque rectangles of the protected (non-card) HUD parts.
+local function FixedObstacles(d)
+ local list={}
+ for _,name in ipairs(OBSTACLES) do local r=d.rects[name];if r then local n=Inset(name);table.insert(list,{r[1]+n[1],r[2]+n[2],r[1]+r[3]-n[3],r[2]+r[4]-n[4]}) end end
+ return list
+end
+-- Preferred position of a card: default rectangle, or where the user's saved card really is minus our displacement.
+function R.PreferredAny(kind,d)
+ local f=R.frames[kind]
+ if f and FieldKitZoneThemes.Position(f) then
+  local lx,ly=R.LiveRect(f)
+  if not lx then return nil end
+  local rect=R.CardRect(kind,d,true);local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanel"..kind) or 1
+  return lx-(f.fieldkitDX or 0),ly-(f.fieldkitDY or 0),rect[3]*s,rect[4]*s,true
+ end
+ local x,y,w,h=R.Preferred(kind,d);return x,y,w,h,false
+end
+-- How far Bonuses may grow before it would meet a protected part of the HUD or the real screen edge: beyond that it scrolls
+-- instead of pushing the other cards around.
+function R.StatsRoom(d)
+ local was=R.statsExtra;R.statsExtra=0
+ local x,y,w,h=R.PreferredAny("Stats",d);R.statsExtra=was
+ if not x then return 0 end
+ local n=Inset("Stats");local l,r,top=x+n[1],x+w-n[3],y+n[2]
+ local _,_,_,sb=R.ScreenBounds(d);local limit=sb-8
+ for _,o in ipairs(FixedObstacles(d)) do
+  if math.min(r,o[3])-math.max(l,o[1])>0 and o[4]>top and o[2]>top then limit=math.min(limit,o[2]-GAP) end
+ end
+ local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanelStats") or 1
+ return math.max(0,(limit+n[4]-y)/s-d.rects.Stats[4])
 end
 function R.Resolve(zone,d)
  for _,kind in ipairs(CARDS) do if R.frames[kind] and R.frames[kind].azsMoving then return end end -- never rearrange under a drag
  R.shift={};R.shiftX={};R.noRoom=false;R.overflow=0
  if FieldKitDB.zoneThemeOverlap then return end
- local W,H=d.size[1],d.size[2]
- local bottomLimit,topLimit,leftLimit,rightLimit=H-12,8,4,W-4
+ -- Automatic placement keeps a visual margin from the REAL screen edges; manual placement has none (see "pinned" below).
+ local sl,st,sr,sb=R.ScreenBounds(d)
+ local bottomLimit,topLimit,leftLimit,rightLimit=sb-8,st+8,sl+4,sr-4
  local function Opaque(name,x,y,w,h) local n=Inset(name);return {x+n[1],y+n[2],x+w-n[3],y+h-n[4]} end
  local fixed={}
  for _,name in ipairs(OBSTACLES) do local r=d.rects[name];if r then table.insert(fixed,Opaque(name,r[1],r[2],r[3],r[4])) end end
@@ -551,7 +614,7 @@ function R.Resolve(zone,d)
     if lx then local rect=R.CardRect(kind,d,true);local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanel"..kind) or 1
      x,y,w,h=lx-(f.fieldkitDX or 0),ly-(f.fieldkitDY or 0),rect[3]*s,rect[4]*s end
    else x,y,w,h=R.Preferred(kind,d) end
-   if x then table.insert(items,{kind=kind,x=x,y=y,w=w,h=h,index=index,inset=Inset(kind)}) end
+   if x then table.insert(items,{kind=kind,x=x,y=y,w=w,h=h,index=index,inset=Inset(kind),pinned=FieldKitZoneThemes.Position(f) and true or false}) end
   end
  end
  local function Rank(c) if c.kind=="Stats" and R.statsOpen then return 0 elseif c.kind==R.lastMoved then return 1 end return 2 end
@@ -559,39 +622,47 @@ function R.Resolve(zone,d)
   local rp,rq=Rank(p),Rank(q);if rp~=rq then return rp<rq end
   if p.y~=q.y then return p.y<q.y end if p.x~=q.x then return p.x<q.x end return p.index<q.index end)
  local placed={};local deepest=0
- local function Free(c,x,y)
+ -- Tier 1 also refuses spots that sit on the PREFERRED place of a card not yet handled (no cascade of displacements);
+ -- tier 2 (only if tier 1 finds nothing) accepts them.
+ local soft={};for _,c in ipairs(items) do c.done=false;table.insert(soft,{c.x+c.inset[1],c.y+c.inset[2],c.x+c.w-c.inset[3],c.y+c.h-c.inset[4],owner=c}) end
+ local function Free(c,x,y,strict)
   local l,t,r,b=x+c.inset[1],y+c.inset[2],x+c.w-c.inset[3],y+c.h-c.inset[4]
-  for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
-   local across=math.min(r,o[3])-math.max(l,o[1]);local depth=math.min(b,o[4])-math.max(t,o[2])
-   if across>0 and depth>TOLERANCE then return false end
-  end end
+  local function Hit(o) local across=math.min(r,o[3])-math.max(l,o[1]);local depth=math.min(b,o[4])-math.max(t,o[2]);return across>0 and depth>TOLERANCE end
+  for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do if Hit(o) then return false end end end
+  if strict then for _,o in ipairs(soft) do if o.owner~=c and not o.owner.done and Hit(o) then return false end end end
   return true
  end
- local function SearchY(c,x)
+ local function SearchY(c,x,strict)
   local ys={c.y}
-  for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
+  for _,list in ipairs({fixed,placed,soft}) do for _,o in ipairs(list) do
    if math.min(x+c.w-c.inset[3],o[3])-math.max(x+c.inset[1],o[1])>0 then table.insert(ys,o[4]+GAP-c.inset[2]);table.insert(ys,o[2]-GAP-c.h+c.inset[4]) end
   end end
   table.sort(ys)
-  for _,y in ipairs(ys) do if y>=c.y and y+c.h-c.inset[4]<=bottomLimit and Free(c,x,y) then return y end end
-  for n=table.getn(ys),1,-1 do local y=ys[n];if y<c.y and y+c.inset[2]>=topLimit and Free(c,x,y) then return y end end
+  for _,y in ipairs(ys) do if y>=c.y and y+c.h-c.inset[4]<=bottomLimit and Free(c,x,y,strict) then return y end end
+  for n=table.getn(ys),1,-1 do local y=ys[n];if y<c.y and y+c.inset[2]>=topLimit and Free(c,x,y,strict) then return y end end
+  return nil
+ end
+ local function Search(c,strict)
+  local by=SearchY(c,c.x,strict);if by then return c.x,by end
+  local xs={}
+  for _,list in ipairs({fixed,placed,soft}) do for _,o in ipairs(list) do
+   table.insert(xs,o[1]-GAP-(c.w-c.inset[3]));table.insert(xs,o[3]+GAP-c.inset[1])
+  end end
+  table.sort(xs,function(p,q) local dp,dq=math.abs(p-c.x),math.abs(q-c.x);if dp~=dq then return dp<dq end return p<q end)
+  for _,x in ipairs(xs) do
+   if x+c.inset[1]>=leftLimit and x+c.w-c.inset[3]<=rightLimit then local y=SearchY(c,x,strict);if y then return x,y end end
+  end
   return nil
  end
  for _,c in ipairs(items) do
-  local bx,by=c.x,SearchY(c,c.x)
-  if not by then
-   local xs={}
-   for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
-    table.insert(xs,o[1]-GAP-(c.w-c.inset[3]));table.insert(xs,o[3]+GAP-c.inset[1])
-   end end
-   table.sort(xs,function(p,q) local dp,dq=math.abs(p-c.x),math.abs(q-c.x);if dp~=dq then return dp<dq end return p<q end)
-   for _,x in ipairs(xs) do
-    if x+c.inset[1]>=leftLimit and x+c.w-c.inset[3]<=rightLimit then local y=SearchY(c,x);if y then bx,by=x,y;break end end
-   end
-  end
-  if not by then bx,by=c.x,c.y;R.noRoom=true end
+  -- A card the user put somewhere stays there whenever nothing is in its way, even against the very edge of the screen.
+  local bx,by
+  -- (a card handled earlier keeps its place whenever nothing PLACED or fixed is in its way; later cards are the ones that yield)
+  if Free(c,c.x,c.y) and (c.pinned or (c.y+c.h-c.inset[4]<=bottomLimit and c.y+c.inset[2]>=topLimit)) then bx,by=c.x,c.y
+  else bx,by=Search(c,true);if not bx then bx,by=Search(c,false) end end
+  if not bx then bx,by=c.x,c.y;R.noRoom=true end
   local dx,dy=math.floor(bx-c.x+.5),math.floor(by-c.y+.5)
-  R.shift[c.kind]=dy;R.shiftX[c.kind]=dx
+  R.shift[c.kind]=dy;R.shiftX[c.kind]=dx;c.done=true
   table.insert(placed,{c.x+dx+c.inset[1],c.y+dy+c.inset[2],c.x+dx+c.w-c.inset[3],c.y+dy+c.h-c.inset[4]});deepest=math.max(deepest,c.y+dy+c.h-c.inset[4])
  end
  R.overflow=math.max(0,deepest-bottomLimit);if R.noRoom then R.overflow=math.max(R.overflow,1) end
@@ -610,6 +681,7 @@ end
 -- One layout pass: sizes first, then placement. A Bonuses card that cannot fit loses rows (scrolls) instead of overlapping.
 function R.PlanLayout(zone,d)
  R.StatsPlan(zone,d);R.AccPlan();R.shift=R.shift or {};R.shiftX=R.shiftX or {}
+ if R.statsOpen and R.statsExtra>0 then R.statsExtra=math.min(R.statsExtra,math.floor(R.StatsRoom(d)));R.statsCap=R.StatsCapFor(zone,d.rects.Stats,R.statsExtra) end
  for pass=1,24 do
   R.Resolve(zone,d)
   if R.overflow<=0 or not R.statsOpen or R.statsExtra<=0 then break end
@@ -737,7 +809,7 @@ function R.Panels(variant,zone)
   local f=R.frames[kind];local a,extra,split,rep=R.CardRect(kind,d);f.referenceExtra=extra;f.referenceSplit=split;f.referenceRepeat=rep
   local nativeName=({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[kind];local folded=(kind=="Stats" and FieldKitDB.statsCollapsed) or (kind=="Accessories" and FieldKitDB.gearCollapsed) or (FieldKitDB.collapsedWindows and FieldKitDB.collapsedWindows[nativeName])
   if a and R.CardVisible(kind,d) then
-   R.Geometry(f,a);R.ApplyShift(f,kind);R.Art(f,kind);f:Show();f.fieldkitWanted=true
+   R.Geometry(f,a);R.ApplyShift(f,kind);R.ApplyClamp(f,kind);R.Art(f,kind);f:Show();f.fieldkitWanted=true
    R.Stable(f.collapse,"c"..f:GetFrameLevel(),function(b) b:ClearAllPoints();b:SetPoint("TOPRIGHT",f,"TOPRIGHT",-8,-8);b:SetFrameLevel(f:GetFrameLevel()+25) end);f.collapse:Show()
    if f.bodyWash then f.bodyWash:Hide() end
 
