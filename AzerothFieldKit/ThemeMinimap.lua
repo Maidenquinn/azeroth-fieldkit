@@ -88,6 +88,12 @@ function M.RingRestore()
  for f,r in pairs(M.ring or {}) do f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
  M.ring={};M.wrapped={};M.ringHalf=nil
 end
+-- The frame that owns the map group: the identity card when the map has no art of its own, else the art frame.
+function M.GroupOwner()
+ local R=FieldKitReferenceHUD
+ if R and R.active and R.layout and not R.layout.rects.mapArt and FieldKitThemeHUD.identity then return FieldKitThemeHUD.identity end
+ return M.root
+end
 function M.Restore()
  if not M.active then return end
  M.Unpark();M.RingRestore()
@@ -125,19 +131,20 @@ function M.Apply(variant)
   local points=FieldKitThemeHUD.Points(Minimap)
   M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask,scripts={},mouse=Minimap.IsMouseEnabled and Minimap:IsMouseEnabled(),movable=Minimap.IsMovable and Minimap:IsMovable()}
   for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do M.before.scripts[event]=Minimap:GetScript(event) end
-  local function StartMapDrag()
-   if FieldKitDB.windowsLocked then return end
-   local R=FieldKitReferenceHUD;local target=R and R.active and not R.layout.rects.mapArt and FieldKitThemeHUD.identity or M.root
-   if target then M.dragTarget=target;target.azsMoving=true;target:StartMoving() end
-  end
-  local function FinishMapDrag() if M.dragTarget then FieldKitZoneThemes.Finish(M.dragTarget);M.dragTarget=nil end end
-  Minimap:SetMovable(false);Minimap:RegisterForDrag("LeftButton")
-  Minimap:SetScript("OnDragStart",StartMapDrag);Minimap:SetScript("OnDragStop",FinishMapDrag)
-  Minimap:SetScript("OnMouseDown",function() if arg1=="LeftButton" and not FieldKitDB.windowsLocked then StartMapDrag() elseif M.before.scripts.OnMouseDown then M.before.scripts.OnMouseDown() end end)
-  Minimap:SetScript("OnMouseUp",function() if M.dragTarget then FinishMapDrag() elseif M.before.scripts.OnMouseUp then M.before.scripts.OnMouseUp() end end)
+  -- FieldKit installs NO script on the native Minimap any more: the map is never moved on its own. The group is moved
+  -- from the identity card / art frame, or from the dedicated handle (see FieldKitReferenceHUD.Map).
   if not M.root then
    M.root=CreateFrame("Frame","FieldKitThemeMap",UIParent);M.root:SetFrameStrata("MEDIUM")
    FieldKitTheme.Surface(M.root,"card",true);FieldKitZoneThemes.Bind(M.root)
+   -- ROOT CAUSE of "the map leaves its frame": Bind made this container movable on its own, but on layouts without map art it
+   -- only holds the native map INSIDE the identity card. A drag reaching it moved the map alone. A drag here now moves the
+   -- owner of the whole group (never this container when it is not the owner).
+   M.root:SetScript("OnDragStart",function()
+    if not FieldKitZoneThemes.active or FieldKitDB.windowsLocked then return end
+    local owner=M.GroupOwner();owner.azsMoving=true;M.dragOwner=owner;owner:StartMoving()
+   end)
+   local function Done() local owner=M.dragOwner or M.root;M.dragOwner=nil;FieldKitZoneThemes.Finish(owner) end
+   M.root:SetScript("OnDragStop",Done);M.root:SetScript("OnMouseUp",Done);M.root:SetScript("OnHide",Done)
    for i,step in ipairs({-1,1}) do
     local delta=step
     local b=FieldKitTheme.Button(M.root,nil,step==1 and "+" or "-",0,0,22,22,function()
@@ -169,6 +176,6 @@ function M.Apply(variant)
  Minimap:ClearAllPoints();Minimap:SetPoint("CENTER",M.root,"CENTER",0,0);Minimap:SetWidth(size);Minimap:SetHeight(size)
  local clock=getglobal("GameTimeFrame")
  if clock then FieldKitThemeHUD.Anchor(clock,"TOPRIGHT",M.root,"TOPRIGHT",0,0);clock:SetScale(.75) end
- M.Ring(size/2,size/2)
+ M.root:SetMovable(true);M.Ring(size/2,size/2)
  FieldKitTheme.Update(M.root);M.root:Show();return true
 end

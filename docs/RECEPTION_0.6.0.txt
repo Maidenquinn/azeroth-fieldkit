@@ -136,6 +136,10 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.20 - MINIMAP, CARTES ENREGISTREES, 7 SOCKETS
+La carte ne part plus seule ; les cartes que vous avez placees cedent la place (position enregistree jamais reecrite) ;
+l'onglet Sorts affiche toujours 7 emplacements. A recetter en jeu, Elwynn et Naxx Complete.
+
 ALPHA.19 - PLACEMENT DYNAMIQUE DES CARTES
 Les cartes ne se chevauchent plus (option "Autoriser le chevauchement"). Equipement : 7 sorts. Degats : lignes alignees,
 icones, infobulle thematisee, aucun clic ne s'ouvre en fenetre. Carte : la texture suit le cadre pendant le deplacement.

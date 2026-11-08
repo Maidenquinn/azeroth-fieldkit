@@ -111,6 +111,7 @@ function C.Remember(frame)
  if type(all)~="table" then all={};FieldKitDB.zoneThemePositions=all end
  if type(all[C.currentLayout])~="table" then all[C.currentLayout]={} end
  all[C.currentLayout][name]=value
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.NoteMoved then FieldKitReferenceHUD.NoteMoved(name) end
  H.Anchor(frame,value[1],UIParent,value[2],value[3],value[4],true)
  return true
 end

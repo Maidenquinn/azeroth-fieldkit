@@ -368,7 +368,7 @@ function R.Map()
  end
  if not M.dragHandle then
   local handle=CreateFrame("Button",nil,M.root);M.dragHandle=handle;handle:SetMovable(true);handle:EnableMouse(true);handle:RegisterForDrag("LeftButton")
-  handle:SetScript("OnDragStart",function() local target=R.layout.rects.mapArt and M.root or H.identity;M.dragOwner=target;target.azsMoving=true;target:StartMoving() end)
+  handle:SetScript("OnDragStart",function() local target=M.GroupOwner();M.dragOwner=target;target.azsMoving=true;target:StartMoving() end)
   local function Finish() if M.dragOwner then FieldKitZoneThemes.Finish(M.dragOwner);M.dragOwner=nil;M.screenStamp=nil;FieldKitZoneThemes.Refresh(true) end end
   handle:SetScript("OnDragStop",Finish);handle:SetScript("OnMouseUp",Finish)
  end
@@ -389,13 +389,13 @@ function R.Map()
    proxy.icon:SetTexture(path or (i==1 and T.media.."ChronicleSeal.tga" or "Interface\\Icons\\INV_Misc_Book_09"));proxy:ClearAllPoints();local left=a[1]<R.layout.size[1]/2;proxy:SetPoint(left and "TOPLEFT" or "TOPRIGHT",M.root,left and "TOPRIGHT" or "TOPLEFT",left and 5 or -5,-8-(i-1)*36);proxy:SetFrameStrata("HIGH");proxy:SetFrameLevel(M.root:GetFrameLevel()+80);M.Park(original);if original:GetAlpha()>.01 then proxy:Show() else proxy:Hide() end
   end
  end
- M.Ring(hole[3]/2,hole[4]/2)
+ M.root:SetMovable(M.GroupOwner()==M.root);M.Ring(hole[3]/2,hole[4]/2)
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
   local x,y=a[1]+a[3]-29,a[2]+a[3]-(i==1 and 28 or 60)
   if T.zone=="elwynn" and R.key=="elwynn_minimal" then x=a[1]+a[3]-16 end
   if T.zone=="elwynn" and R.key=="elwynn_complete" then x=a[1]+a[3]-24;y=a[2]+a[3]-(i==1 and 42 or 74) end
-  R.Child(b,M.root,{x,y,24,25});b:SetFrameStrata("DIALOG");b:SetFrameLevel(80);Blank(b);T.Font(b.fieldkitLabel,18,T.gold,true);b.fieldkitLabel:SetText((R.key=="elwynn_minimal" or R.key=="elwynn_complete") and "" or (i==1 and "-" or "+"))
+  R.Child(b,M.root,{x,y,24,25});R.Stable(b,"z"..R.key..":"..M.root:GetFrameLevel(),function() b:SetFrameStrata("DIALOG");b:SetFrameLevel(80);b:Hide();b:Show() end);Blank(b);T.Font(b.fieldkitLabel,18,T.gold,true);b.fieldkitLabel:SetText((R.key=="elwynn_minimal" or R.key=="elwynn_complete") and "" or (i==1 and "-" or "+"))
   if T.zone=="elwynn" or over then if not b:IsShown() then b:Show() end else b:Hide() end
  end
  return true
@@ -486,8 +486,7 @@ function R.StatsPlan(zone,d)
 end
 -- Spells tab: up to seven rows; the card grows by the missing socket rows (art slice repeated).
 function R.AccPlan()
- R.accRows=0
- if FieldKitDB.loadoutTab==2 and FieldKitLoadout then R.accRows=math.max(0,math.min(7,table.getn(FieldKitLoadout.spells or {}))-5) end
+ R.accRows=FieldKitDB.loadoutTab==2 and 2 or 0 -- the Spells tab always shows seven sockets, whatever the number of spells
 end
 -- ===== Placement: preferred position (default rectangle or the user's saved spot) vs displayed position. =====
 -- Pure function of the preferred layout, the visible card sizes and the protected HUD rectangles: nothing is stored,
@@ -524,52 +523,93 @@ function R.LiveRect(frame)
  local l,t=(frame:GetLeft()*fs-c:GetLeft()*cs)/cs,(c:GetTop()*cs-frame:GetTop()*fs)/cs
  return l,t,frame:GetWidth()*fs/cs,frame:GetHeight()*fs/cs
 end
+-- Priority (documented): 1) the Bonuses card while expanded, 2) the card the user moved last, 3) top-to-bottom,
+-- left-to-right, then fixed card order. A card that must give way is moved: down first, then up, then sideways.
+function R.NoteMoved(name)
+ local kind=nil
+ for _,k in ipairs(CARDS) do if "FieldKitReferencePanel"..k==name then kind=k end end
+ if not kind then return end
+ R.lastMoved=kind;local f=R.frames[kind];if f then f.fieldkitDX,f.fieldkitDY=nil,nil end
+ if R.shift then R.shift[kind]=nil end;if R.shiftX then R.shiftX[kind]=nil end
+end
 function R.Resolve(zone,d)
  for _,kind in ipairs(CARDS) do if R.frames[kind] and R.frames[kind].azsMoving then return end end -- never rearrange under a drag
- R.shift={};R.noRoom=false;R.overflow=0
+ R.shift={};R.shiftX={};R.noRoom=false;R.overflow=0
  if FieldKitDB.zoneThemeOverlap then return end
- local bottomLimit,topLimit=d.size[2]-12,8
- -- a rectangle is {left,top,right,bottom} of the OPAQUE art
+ local W,H=d.size[1],d.size[2]
+ local bottomLimit,topLimit,leftLimit,rightLimit=H-12,8,4,W-4
  local function Opaque(name,x,y,w,h) local n=Inset(name);return {x+n[1],y+n[2],x+w-n[3],y+h-n[4]} end
  local fixed={}
  for _,name in ipairs(OBSTACLES) do local r=d.rects[name];if r then table.insert(fixed,Opaque(name,r[1],r[2],r[3],r[4])) end end
- local movable={}
+ local items={}
  for index,kind in ipairs(CARDS) do
   if R.CardVisible(kind,d) then
-   local f=R.frames[kind]
-   if FieldKitZoneThemes.Position(f) then local x,y,w,h=R.LiveRect(f);if x then table.insert(fixed,Opaque(kind,x,y,w,h)) end
-   else local x,y,w,h=R.Preferred(kind,d);table.insert(movable,{kind=kind,x=x,y=y,w=w,h=h,index=index,inset=Inset(kind)}) end
+   local f=R.frames[kind];local x,y,w,h
+   if FieldKitZoneThemes.Position(f) then
+    -- A card the user placed: its PREFERRED rectangle is where it really is minus the displacement we applied.
+    local lx,ly=R.LiveRect(f)
+    if lx then local rect=R.CardRect(kind,d,true);local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanel"..kind) or 1
+     x,y,w,h=lx-(f.fieldkitDX or 0),ly-(f.fieldkitDY or 0),rect[3]*s,rect[4]*s end
+   else x,y,w,h=R.Preferred(kind,d) end
+   if x then table.insert(items,{kind=kind,x=x,y=y,w=w,h=h,index=index,inset=Inset(kind)}) end
   end
  end
- table.sort(movable,function(p,q) if p.y~=q.y then return p.y<q.y end if p.x~=q.x then return p.x<q.x end return p.index<q.index end)
+ local function Rank(c) if c.kind=="Stats" and R.statsOpen then return 0 elseif c.kind==R.lastMoved then return 1 end return 2 end
+ table.sort(items,function(p,q)
+  local rp,rq=Rank(p),Rank(q);if rp~=rq then return rp<rq end
+  if p.y~=q.y then return p.y<q.y end if p.x~=q.x then return p.x<q.x end return p.index<q.index end)
  local placed={};local deepest=0
- local function Free(c,y)
-  local l,t,r,b=c.x+c.inset[1],y+c.inset[2],c.x+c.w-c.inset[3],y+c.h-c.inset[4]
+ local function Free(c,x,y)
+  local l,t,r,b=x+c.inset[1],y+c.inset[2],x+c.w-c.inset[3],y+c.h-c.inset[4]
   for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
    local across=math.min(r,o[3])-math.max(l,o[1]);local depth=math.min(b,o[4])-math.max(t,o[2])
    if across>0 and depth>TOLERANCE then return false end
   end end
   return true
  end
- for _,c in ipairs(movable) do
-  local candidates={c.y}
+ local function SearchY(c,x)
+  local ys={c.y}
   for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
-   if math.min(c.x+c.w-c.inset[3],o[3])-math.max(c.x+c.inset[1],o[1])>0 then
-    table.insert(candidates,o[4]+GAP-c.inset[2]);table.insert(candidates,o[2]-GAP-c.h+c.inset[4])
-   end
+   if math.min(x+c.w-c.inset[3],o[3])-math.max(x+c.inset[1],o[1])>0 then table.insert(ys,o[4]+GAP-c.inset[2]);table.insert(ys,o[2]-GAP-c.h+c.inset[4]) end
   end end
-  table.sort(candidates)
-  local best
-  for _,y in ipairs(candidates) do if y>=c.y and y+c.h-c.inset[4]<=bottomLimit and Free(c,y) then best=y;break end end
-  if not best then for n=table.getn(candidates),1,-1 do local y=candidates[n];if y<c.y and y+c.inset[2]>=topLimit and Free(c,y) then best=y;break end end end
-  if not best then best=c.y;R.noRoom=true end
-  R.shift[c.kind]=best-c.y;table.insert(placed,{c.x+c.inset[1],best+c.inset[2],c.x+c.w-c.inset[3],best+c.h-c.inset[4]});deepest=math.max(deepest,best+c.h-c.inset[4])
+  table.sort(ys)
+  for _,y in ipairs(ys) do if y>=c.y and y+c.h-c.inset[4]<=bottomLimit and Free(c,x,y) then return y end end
+  for n=table.getn(ys),1,-1 do local y=ys[n];if y<c.y and y+c.inset[2]>=topLimit and Free(c,x,y) then return y end end
+  return nil
+ end
+ for _,c in ipairs(items) do
+  local bx,by=c.x,SearchY(c,c.x)
+  if not by then
+   local xs={}
+   for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
+    table.insert(xs,o[1]-GAP-(c.w-c.inset[3]));table.insert(xs,o[3]+GAP-c.inset[1])
+   end end
+   table.sort(xs,function(p,q) local dp,dq=math.abs(p-c.x),math.abs(q-c.x);if dp~=dq then return dp<dq end return p<q end)
+   for _,x in ipairs(xs) do
+    if x+c.inset[1]>=leftLimit and x+c.w-c.inset[3]<=rightLimit then local y=SearchY(c,x);if y then bx,by=x,y;break end end
+   end
+  end
+  if not by then bx,by=c.x,c.y;R.noRoom=true end
+  local dx,dy=math.floor(bx-c.x+.5),math.floor(by-c.y+.5)
+  R.shift[c.kind]=dy;R.shiftX[c.kind]=dx
+  table.insert(placed,{c.x+dx+c.inset[1],c.y+dy+c.inset[2],c.x+dx+c.w-c.inset[3],c.y+dy+c.h-c.inset[4]});deepest=math.max(deepest,c.y+dy+c.h-c.inset[4])
  end
  R.overflow=math.max(0,deepest-bottomLimit);if R.noRoom then R.overflow=math.max(R.overflow,1) end
 end
+-- A card the user placed keeps its saved anchor; the automatic displacement is applied on top of it (and only at display time).
+function R.ApplyShift(f,kind)
+ local a=FieldKitZoneThemes.Position(f);if not a or f.azsMoving then return end
+ local dx,dy=(R.shiftX and R.shiftX[kind]) or 0,(R.shift and R.shift[kind]) or 0
+ local cs=R.canvas.GetEffectiveScale and R.canvas:GetEffectiveScale() or 1;local fe=f.GetEffectiveScale and f:GetEffectiveScale() or 1
+ local k=(fe and fe>0 and cs) and cs/fe or 1
+ local ex,ey=a[3]+dx*k,a[4]-dy*k
+ local _,_,_,x,y=f:GetPoint()
+ if not x or math.abs(x-ex)>.01 or math.abs(y-ey)>.01 then f:ClearAllPoints();f:SetPoint(a[1],UIParent,a[2],ex,ey) end
+ f.fieldkitDX,f.fieldkitDY=dx,dy
+end
 -- One layout pass: sizes first, then placement. A Bonuses card that cannot fit loses rows (scrolls) instead of overlapping.
 function R.PlanLayout(zone,d)
- R.StatsPlan(zone,d);R.AccPlan();R.shift=R.shift or {}
+ R.StatsPlan(zone,d);R.AccPlan();R.shift=R.shift or {};R.shiftX=R.shiftX or {}
  for pass=1,24 do
   R.Resolve(zone,d)
   if R.overflow<=0 or not R.statsOpen or R.statsExtra<=0 then break end
@@ -596,11 +636,13 @@ function R.CardRect(kind,d,noShift)
   grow={top=0,extra=R.accRows*step,split=0,rep={at=R.key=="naxx_complete" and 121 or 155,h=step,count=R.accRows}}
  end
  if not base then return nil,0,0 end
- local top=(grow and grow.top or 0)+((not noShift and R.shift and R.shift[kind]) or 0)
- if not grow and top==0 then return base,0,0 end
+ local pinned=R.frames[kind] and FieldKitZoneThemes.Position(R.frames[kind])
+ local top=(grow and grow.top or 0)+((not noShift and not pinned and R.shift and R.shift[kind]) or 0)
+ local left=(not noShift and not pinned and R.shiftX and R.shiftX[kind]) or 0
+ if not grow and top==0 and left==0 then return base,0,0 end
  grow=grow or {top=0,extra=0,split=0}
- R.rectCache=R.rectCache or {};local key=R.key..":"..kind..":"..top..":"..grow.extra..":"..(grow.rep and grow.rep.count or 0);local c=R.rectCache[key]
- if not c or c.base~=base then c={base=base,rect={base[1],base[2]+top,base[3],base[4]+grow.extra}};R.rectCache[key]=c end
+ R.rectCache=R.rectCache or {};local key=R.key..":"..kind..":"..top..":"..left..":"..grow.extra..":"..(grow.rep and grow.rep.count or 0);local c=R.rectCache[key]
+ if not c or c.base~=base then c={base=base,rect={base[1]+left,base[2]+top,base[3],base[4]+grow.extra}};R.rectCache[key]=c end
  return c.rect,(grow.rep and 0 or grow.extra),grow.split,grow.rep
 end
 -- Scrolling window over a list that can outgrow its fixed art card; the wheel moves it, a pager shows position.
@@ -695,7 +737,7 @@ function R.Panels(variant,zone)
   local f=R.frames[kind];local a,extra,split,rep=R.CardRect(kind,d);f.referenceExtra=extra;f.referenceSplit=split;f.referenceRepeat=rep
   local nativeName=({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[kind];local folded=(kind=="Stats" and FieldKitDB.statsCollapsed) or (kind=="Accessories" and FieldKitDB.gearCollapsed) or (FieldKitDB.collapsedWindows and FieldKitDB.collapsedWindows[nativeName])
   if a and R.CardVisible(kind,d) then
-   R.Geometry(f,a);R.Art(f,kind);f:Show();f.fieldkitWanted=true
+   R.Geometry(f,a);R.ApplyShift(f,kind);R.Art(f,kind);f:Show();f.fieldkitWanted=true
    R.Stable(f.collapse,"c"..f:GetFrameLevel(),function(b) b:ClearAllPoints();b:SetPoint("TOPRIGHT",f,"TOPRIGHT",-8,-8);b:SetFrameLevel(f:GetFrameLevel()+25) end);f.collapse:Show()
    if f.bodyWash then f.bodyWash:Hide() end
 

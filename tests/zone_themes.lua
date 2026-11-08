@@ -254,8 +254,9 @@ click(R.frames.Stats.collapse);assert(FieldKitDB.statsCollapsed and not R.frames
 FieldKitDB.statsCollapsed=false;FieldKit.ApplyHUDProfileLive();C.Refresh();assert(R.frames.Stats:IsShown())
 assert(R.tabs[1].underline:IsShown())
 local oldlocked=FieldKitDB.windowsLocked;FieldKitDB.windowsLocked=false
-local start=Minimap:GetScript("OnDragStart");assert(type(start)=="function");start();assert(H.identity.azsMoving and not M.root.azsMoving)
-Minimap:GetScript("OnDragStop")();assert(not H.identity.azsMoving)
+assert(Minimap:GetScript("OnDragStart")==nil and Minimap:GetScript("OnMouseDown")==nil,"FieldKit installs no script on the native Minimap")
+local start=M.root:GetScript("OnDragStart");assert(type(start)=="function");this=M.root;start();assert(H.identity.azsMoving and not M.root.azsMoving,"a drag reaching the map container moves the whole group (its owner), never the container alone")
+M.root:GetScript("OnDragStop")();assert(not H.identity.azsMoving)
 FieldKitDB.windowsLocked=oldlocked
 C.Set("zoneThemes",false)
 print("Complete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed")
@@ -660,7 +661,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   assert(shown==math.min(n,R.statsCap or n) and f.rows[1].label:GetText()=="Stat 1" and f.rows[1].value:GetText()=="+1%",zone..": rows show the live values ("..n..")")
   assert(lowest<=rect[4]-(zone=="naxx" and 44 or 48)+4,zone..": rows end above the foot ("..lowest.." vs "..rect[4]..")")
   assert(rect[2]+rect[4]<=R.layout.size[2] and eff[2]+eff[4]<=R.layout.size[2] and R.overflow<=0 and not R.noRoom,zone..": nothing leaves the screen ("..n..") stats="..(rect[2]+rect[4]).." eff="..(eff[2]+eff[4]).." size="..R.layout.size[2].." extra="..tostring(R.statsExtra).." noRoom="..tostring(R.noRoom).." over="..tostring(R.overflow))
-  assert(rect[2]+rect[4]<=eff[2]+eff[4] and ((R.shift.Effects or 0)==0 or rect[2]+rect[4]-12<=eff[2]),zone..": Bonuses does not run into Effects ("..n..")")
+  -- (non-overlap of the rendered rectangles is asserted in the placement tests below, vertically or sideways)
   assert(f.more:IsShown(),zone..": a foot button is there to reduce the card")
   src.rows[1].value:SetText("+99%");C.Refresh(true);assert(f.rows[1].value:GetText()=="+99%",zone..": values keep updating while expanded")
   if n>(R.statsCap or n) then this=f;arg1=-100;f.scripts.OnMouseWheel();assert(f.rows[math.min(n,R.statsCap)].label:GetText()=="Stat "..n,zone..": the last statistic is reachable by scrolling")
@@ -743,7 +744,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  for _,count in ipairs({0,1,5,7,8,12}) do
   FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="R"..i,rankValue=i,bonuses={},upgrades={}}) end
   FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);local acc=R.frames.Accessories;local base=R.layout.rects.Accessories
-  local rows=math.max(0,math.min(7,count)-5);local step=(zone=="naxx" and 35 or 36)
+  local rows=2;local step=(zone=="naxx" and 35 or 36) -- seven permanent sockets on the Spells tab
   assert(acc:GetHeight()==base[4]+rows*step,zone..": card height for "..count.." spells")
   local shown=0;for i,r in ipairs(acc.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();assert(-y==R.SocketY(zone,i),zone..": row "..i.." sits on socket "..i.." ("..count..")") end end
   assert(shown==math.max(1,math.min(7,count)),zone..": visible spell rows for "..count)
@@ -752,10 +753,10 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   table.sort(pieces,function(p,q) return p[1]<q[1] end);for _,p in ipairs(pieces) do assert(p[1]==reach,zone..": art continuity at "..p[1].." expected "..reach.." ("..count..")");reach=reach+p[2] end
   assert(reach==acc:GetHeight(),zone..": art ends at the card bottom ("..count..")")
   NoOverlap(zone.." "..count.." spells")
-  if rows==0 then for _,k in ipairs({"Stats","Effects"}) do assert((R.shift[k] or 0)==0,zone..": "..k.." is back at its preferred place") end
-  else assert((R.shift.Stats or 0)>0,zone..": Stats is pushed below the taller Equipment card") end
+  assert((R.shift.Stats or 0)>0 or (R.shiftX.Stats or 0)~=0,zone..": Stats gives way to the taller Equipment card")
  end
- FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1
+ FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1;C.Refresh(true)
+ for _,k in ipairs({"Stats","Effects"}) do assert((R.shift[k] or 0)==0 and (R.shiftX[k] or 0)==0,zone..": "..k.." is back at its preferred place on the Equipment tab") end
  -- Bonuses expanded: everything stays apart; reduced: everything returns; preferred positions never rewritten
  C.Refresh(true);local saved=Snapshot(FieldKitDB.zoneThemePositions and FieldKitDB.zoneThemePositions[C.currentLayout])
  FieldKitStatsFrame.rows=FakeStats(14);R.statsOpen=true;C.Refresh(true);NoOverlap(zone.." Bonuses expanded")
@@ -770,19 +771,103 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  R.statsOpen=true;C.Refresh(true);local frozen=R.shift;R.frames.Stats.azsMoving=true;R.Resolve(zone,R.layout);assert(R.shift==frozen,zone..": nothing is rearranged while a card is dragged");R.frames.Stats.azsMoving=nil
  R.statsOpen=false;FieldKitStatsFrame.rows=realStatsRows;C.Refresh(true)
 end
--- element scales and a user-placed neighbour
-do
- C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);R.statsOpen=true
- local oldScale=FieldKitZoneThemes.ElementScale;FieldKitZoneThemes.ElementScale=function(name) if name=="FieldKitReferencePanelStats" then return 1.2 end return oldScale(name) end
- FieldKitStatsFrame.rows=FakeStats(10);C.Refresh(true);FieldKitZoneThemes.ElementScale=oldScale
- local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
- FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]={"TOPLEFT","BOTTOMLEFT",900,300}
- local e=R.frames.Effects;e.GetLeft=function() return 1325 end;e.GetTop=function() return 700 end
- R.canvas.GetLeft=function() return 0 end;R.canvas.GetTop=function() return 933 end;R.canvas.GetEffectiveScale=function() return 1 end;e.GetEffectiveScale=function() return 1 end
- C.Refresh(true);local a=Snapshot(R.shift);C.Refresh(true);for k,v in pairs(a) do assert(R.shift[k]==v,"deterministic with a pinned neighbour") end
- e.GetLeft=nil;e.GetTop=nil;R.canvas.GetLeft=nil;R.canvas.GetTop=nil;R.canvas.GetEffectiveScale=nil;e.GetEffectiveScale=nil
- FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]=nil;R.statsOpen=false;FieldKitStatsFrame.rows=realStatsRows
+-- alpha.20: regression bench for the captured case. Every card has a SAVED position (as in the user's SavedVariables);
+-- collisions are read from the RENDERED rectangles (derived from the frames' real anchors), never from the engine's own model.
+local UIH,UIW=UIParent:GetHeight(),UIParent:GetWidth()
+local function Anchors(f) return f:GetPoint() end
+local function Rendered(f)
+ local p,rel,rp,x,y=f:GetPoint();local s=f:GetScale() or 1;local w,h=f:GetWidth()*s,f:GetHeight()*s
+ local function frac(str,a,b) if string.find(str,a,1,true) then return 1 elseif string.find(str,b,1,true) then return 0 end return .5 end
+ local ax,ay
+ if rel==UIParent then ax=frac(rp,"RIGHT","LEFT")*UIW+x*s;ay=frac(rp,"BOTTOM","TOP")*UIH-y*s
+ else ax=x*s;ay=-y*s end
+ return ax-frac(p,"RIGHT","LEFT")*w,ay-frac(p,"BOTTOM","TOP")*h,w,h
 end
+local function Stage()
+ R.canvas.GetLeft=function() return 0 end;R.canvas.GetTop=function() return UIH end;R.canvas.GetEffectiveScale=function() return 1 end
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do
+  local f=R.frames[k]
+  f.GetLeft=function(self) local l=Rendered(self);return l end
+  f.GetTop=function(self) local _,t=Rendered(self);return UIH-t end
+  f.GetEffectiveScale=function() return 1 end
+ end
+end
+local function Unstage()
+ R.canvas.GetLeft=nil;R.canvas.GetTop=nil;R.canvas.GetEffectiveScale=nil
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local f=R.frames[k];f.GetLeft=nil;f.GetTop=nil;f.GetEffectiveScale=nil end
+end
+local OP={elwynn_complete={Damage={10,6,0,6},Lairs={10,9,9,7},Accessories={8,5,8,6},Stats={8,7,7,8},Effects={8,5,7,11}},
+ naxx_complete={Damage={4,1,6,5},Lairs={7,2,5,9},Accessories={9,0,11,0},Stats={10,0,11,0},Effects={9,3,9,10}}}
+local function Opaque2(k)
+ local f=R.frames[k];local l,t,w,h=Rendered(f);local n=OP[R.key][k]
+ return {l+n[1],t+n[2],l+w-n[3],t+h-n[4]}
+end
+local function Apart(label)
+ local kinds={"Damage","Lairs","Accessories","Stats","Effects"};local seen={}
+ for _,k in ipairs(kinds) do if R.frames[k]:IsShown() then table.insert(seen,{k,Opaque2(k)}) end end
+ for i=1,table.getn(seen) do
+  local a=seen[i][2]
+  assert(a[1]>=0 and a[3]<=R.layout.size[1]+1 and a[2]>=0 and a[4]<=R.layout.size[2]+1,label..": "..seen[i][1].." leaves the screen ("..a[1]..","..a[2]..","..a[3]..","..a[4]..")")
+  for j=i+1,table.getn(seen) do
+   local b=seen[j][2]
+   local across=math.min(a[3],b[3])-math.max(a[1],b[1]);local depth=math.min(a[4],b[4])-math.max(a[2],b[2])
+   assert(not (across>0 and depth>6),label..": RENDERED "..seen[i][1].." and "..seen[j][1].." overlap by "..depth.." px")
+  end
+ end
+end
+local function SaveAll(layout,list)
+ FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ for k,pos in pairs(list) do FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanel"..k]={"TOPLEFT","TOPLEFT",pos[1],-pos[2]} end
+end
+local function Relayout()
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do R.frames[k].referenceRect=nil;R.frames[k].referenceGeometryKey=nil end
+ C.revision=C.revision+1;C.Refresh(true)
+end
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+ R.statsOpen=false;FieldKitDB.loadoutTab=1;R.lastMoved=nil
+ local realRows=FieldKitStatsFrame.rows;local layout=C.currentLayout
+ FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ local saved={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local r=R.layout.rects[k];saved[k]={r[1],r[2]} end
+ -- (a) the captured case: all five cards saved, Bonuses expanded
+ SaveAll(layout,saved);Stage();Relayout()
+ local before={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do before[k]={Rendered(R.frames[k])} end
+ Apart(zone.." saved layout, compact")
+ local snapshot={};for k,v in pairs(FieldKitDB.zoneThemePositions[layout]) do snapshot[k]=v[3]..":"..v[4] end
+ FieldKitStatsFrame.rows=FakeStats(14);R.statsOpen=true;C.Refresh(true);C.Refresh(true)
+ Apart(zone.." saved layout, Bonuses expanded")
+ local el,et=Rendered(R.frames.Effects);local sl,st,sw,sh=Rendered(R.frames.Stats)
+ assert(R.frames.Stats:GetHeight()>R.layout.rects.Stats[4],zone..": Bonuses really grew")
+ assert(el~=before.Effects[1] or et~=before.Effects[2],zone..": Effects gave way to the expanded Bonuses card")
+ for k,v in pairs(FieldKitDB.zoneThemePositions[layout]) do assert(snapshot[k]==v[3]..":"..v[4],zone..": the saved position of "..k.." was not rewritten") end
+ -- (b) deterministic: further refreshes change nothing
+ local a1={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do a1[k]={Rendered(R.frames[k])} end
+ for n=1,5 do C.Refresh(true) end
+ for k,v in pairs(a1) do local now={Rendered(R.frames[k])};assert(math.abs(now[1]-v[1])<.01 and math.abs(now[2]-v[2])<.01,zone..": "..k.." keeps still across refreshes") end
+ -- (c) Show less: every card returns to its saved place
+ R.statsOpen=false;C.Refresh(true);C.Refresh(true)
+ for k,v in pairs(before) do local now={Rendered(R.frames[k])};assert(math.abs(now[1]-v[1])<.5 and math.abs(now[2]-v[2])<.5,zone..": "..k.." returned to its preferred place ("..now[1]..","..now[2].." vs "..v[1]..","..v[2]..")") end
+ -- (d) Effects saved near the bottom edge: no room below -> up or sideways, never off screen
+ saved.Effects={saved.Effects[1],(zone=="elwynn" and 800 or 790)};SaveAll(layout,saved);Relayout()
+ R.statsOpen=true;C.Refresh(true);C.Refresh(true);Apart(zone.." Effects near the bottom, Bonuses expanded")
+ R.statsOpen=false;saved.Effects={R.layout.rects.Effects[1],R.layout.rects.Effects[2]};SaveAll(layout,saved);Relayout()
+ -- (e) seven spells with a saved Equipment card
+ local oldSpells=FieldKitLoadout.spells;FieldKitLoadout.spells={};for i=1,7 do table.insert(FieldKitLoadout.spells,{name="S"..i,rank="R",rankValue=1,bonuses={},upgrades={}}) end
+ FieldKitDB.loadoutTab=2;C.Refresh(true);C.Refresh(true);Apart(zone.." seven spells, all cards saved")
+ FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1
+ -- (f) the card dropped last has priority: drop Effects onto Stats, the others give way, Effects stays where it was dropped
+ saved.Effects={saved.Stats[1],saved.Stats[2]+40};SaveAll(layout,saved);Relayout()
+ R.NoteMoved("FieldKitReferencePanelEffects");C.Refresh(true);C.Refresh(true)
+ Apart(zone.." Effects dropped onto Bonuses")
+ local dl,dt=Rendered(R.frames.Effects);assert(math.abs(dl-saved.Effects[1])<.5 and math.abs(dt-saved.Effects[2])<.5,zone..": the card dropped last stays exactly where it was dropped")
+ -- (g) option: overlap allowed -> nothing is displaced
+ FieldKitDB.zoneThemeOverlap=true;C.Refresh(true);C.Refresh(true);dl,dt=Rendered(R.frames.Stats)
+ assert(math.abs(dl-saved.Stats[1])<.5 and math.abs(dt-saved.Stats[2])<.5,zone..": with overlap allowed no card is displaced")
+ FieldKitDB.zoneThemeOverlap=false;R.lastMoved=nil
+ -- clean up
+ FieldKitDB.zoneThemePositions[layout]=nil;Unstage();R.statsOpen=false;FieldKitStatsFrame.rows=realRows;Relayout()
+end
+
 -- Six damage categories: one row geometry, icon column, alignment never leaks between categories
 for _,zone in ipairs({"elwynn","naxx"}) do
  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
@@ -814,3 +899,25 @@ do
 end
 C.Set("zoneThemes",false)
 print("Placement engine, seven spells, damage categories and map follower passed (synthetic)")
+
+-- alpha.20: map group owner, zoom buttons, no FieldKit script left on the native map.
+for _,case in ipairs({{"elwynn",true},{"naxx",false}}) do
+ local zone,viaIdentity=case[1],case[2]
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local M=FieldKitThemeMinimap
+ assert((M.GroupOwner()==H.identity)==viaIdentity,zone..": the group owner is the identity card only when the map has no art of its own")
+ assert(Minimap:GetScript("OnDragStart")==nil and Minimap:GetScript("OnDragStop")==nil and Minimap:GetScript("OnMouseDown")==nil and Minimap:GetScript("OnMouseUp")==nil,zone..": no FieldKit script on the native map")
+ FieldKitDB.windowsLocked=false;this=M.root;M.root:GetScript("OnDragStart")()
+ assert(M.GroupOwner().azsMoving and (viaIdentity==not M.root.azsMoving),zone..": a drag reaching the container moves the owner of the group")
+ M.root:GetScript("OnDragStop")();assert(not H.identity.azsMoving and not M.root.azsMoving,zone..": and ends cleanly")
+ FieldKitDB.windowsLocked=true;M.root:GetScript("OnDragStart")();assert(not H.identity.azsMoving and not M.root.azsMoving,zone..": locked HUD: nothing moves");FieldKitDB.windowsLocked=false
+ -- zoom buttons: first click, both ways, bounded
+ local zoom=3;Minimap.GetZoom=function() return zoom end;Minimap.SetZoom=function(_,v) zoom=v end
+ for n=1,3 do C.Refresh(true) end
+ M.zoomIn:Show();M.zoomOut:Show()
+ click(M.zoomIn);assert(zoom==4,zone..": zoom + works at the first click");click(M.zoomOut);click(M.zoomOut);assert(zoom==2,zone..": zoom - works")
+ for n=1,10 do click(M.zoomOut) end;assert(zoom==0,zone..": zoom is bounded");Minimap.GetZoom=nil;Minimap.SetZoom=nil
+ -- teardown restores the original container behaviour
+ C.Set("zoneThemes",false);assert(not M.root:IsShown(),zone..": container hidden with the theme off")
+end
+print("Map group owner, zoom buttons and native map scripts passed (synthetic)")
