@@ -26,7 +26,7 @@ function R.Create()
   f.total=T.Label(f,nil,0,0,300,30,16,R.body)
   f.rateLabel=T.Label(f,nil,0,0,110,30,17,R.body)
   f.rows={}
-  for i=1,6 do
+  for i=1,(kind=="Stats" and 30 or 6) do
    local row=CreateFrame("Button",nil,f);f.rows[i]=row;row:SetWidth(300);row:SetHeight(34)
    row.label=T.Label(row,nil,0,0,210,28,17,R.body);pcall(row.label.SetFont,row.label,T.media.."NotoSerif-Regular.ttf",17,"")
    row.value=T.Label(row,nil,212,0,78,28,17,R.body);row.value:SetJustifyH("RIGHT")
@@ -35,18 +35,18 @@ function R.Create()
    row.bar:SetFrameLevel(row:GetFrameLevel()+1)
    row:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) end end)
    row:SetScript("OnLeave",function() GameTooltip:Hide() end)
-   local route=kind;row:RegisterForClicks("LeftButtonUp","RightButtonUp");row:SetScript("OnClick",function() if this.buffIndex and arg1=="RightButton" and type(CancelPlayerBuff)=="function" then CancelPlayerBuff(this.buffIndex) else FieldKitZoneThemes.Open(route) end end)
+   local route=kind;row:RegisterForClicks("LeftButtonUp","RightButtonUp");row:SetScript("OnClick",function() if this.buffIndex and arg1=="RightButton" and type(CancelPlayerBuff)=="function" then CancelPlayerBuff(this.buffIndex) elseif route=="Stats" then R.ToggleStats() elseif route~="Damage" then FieldKitZoneThemes.Open(route) end end)
   end
   local route=kind
   f:EnableMouse(true)
   local start=f:GetScript("OnDragStart");local finish=f:GetScript("OnMouseUp")
   f:SetScript("OnMouseDown",function() this.referenceDragged=false end)
   f:SetScript("OnDragStart",function() this.referenceDragged=true;if start then start() end end)
-  f:SetScript("OnMouseUp",function() local moved=this.referenceDragged;if finish then finish() end;if not moved then FieldKitZoneThemes.Open(route) end end)
+  f:SetScript("OnMouseUp",function() local moved=this.referenceDragged;if finish then finish() end;if not moved then if route=="Stats" then R.ToggleStats() else FieldKitZoneThemes.Open(route) end end end)
   f.collapse=T.Button(f,nil,"−",0,0,18,18,function()
    local native=getglobal(({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[route]);if native and native.mashCollapseButton then native.mashCollapseButton:Click();FieldKitZoneThemes.Refresh(true) end
   end)
-  f.more=T.Button(f,nil,"",0,0,300,28,function() FieldKitZoneThemes.Open(route) end);Blank(f.more)
+  f.more=T.Button(f,nil,"",0,0,300,28,function() if route=="Stats" then R.ToggleStats() else FieldKitZoneThemes.Open(route) end end);Blank(f.more)
   f.pager=T.Label(f,nil,0,0,96,20,13,R.body);f.pager:ClearAllPoints();f.pager:SetPoint("TOPRIGHT",f,"TOPRIGHT",-34,-18);f.pager:SetJustifyH("RIGHT");f.pager:Hide()
   f.referenceKind=kind;f:EnableMouseWheel(true)
   local function Wheel() local p=this.referenceKind and this or this:GetParent();R.scroll=R.scroll or {};R.scroll[p.referenceKind]=(R.scroll[p.referenceKind] or 0)-(arg1 or 0);FieldKitZoneThemes.Refresh(true) end
@@ -349,12 +349,12 @@ function R.Map()
  local clock=getglobal("GameTimeFrame");if clock then FieldKitZoneThemes.Mask(clock,true) end
  M.root:Show()
  if not M.dragHandle then
-  local handle=CreateFrame("Button",nil,M.root);M.dragHandle=handle;handle:SetMovable(true);handle:EnableMouse(true);handle:RegisterForDrag("LeftButton");handle:SetFrameStrata("HIGH")
+  local handle=CreateFrame("Button",nil,M.root);M.dragHandle=handle;handle:SetMovable(true);handle:EnableMouse(true);handle:RegisterForDrag("LeftButton")
   handle:SetScript("OnDragStart",function() local target=R.layout.rects.mapArt and M.root or H.identity;M.dragOwner=target;target.azsMoving=true;target:StartMoving() end)
   local function Finish() if M.dragOwner then FieldKitZoneThemes.Finish(M.dragOwner);M.dragOwner=nil;M.screenStamp=nil;FieldKitZoneThemes.Refresh(true) end end
   handle:SetScript("OnDragStop",Finish);handle:SetScript("OnMouseUp",Finish)
  end
- R.Child(M.dragHandle,M.root,{a[1],a[2],a[3],a[3]});M.dragHandle:SetFrameLevel(M.root:GetFrameLevel()+50)
+ R.Child(M.dragHandle,M.root,{a[1],a[2],a[3],a[3]});R.Stable(M.dragHandle,Minimap:GetFrameStrata()..Minimap:GetFrameLevel()..":"..M.dragHandle:GetFrameLevel(),function(h) h:SetFrameStrata(Minimap:GetFrameStrata());h:SetFrameLevel(Minimap:GetFrameLevel()) end) -- below the map's own child buttons, so a button on the map keeps its mouse
  Minimap:EnableMouse(FieldKitDB.windowsLocked and true or false);if FieldKitDB.windowsLocked then M.dragHandle:Hide() else M.dragHandle:Show() end
  M.launcherProxies=M.launcherProxies or {}
  for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton"}) do
@@ -383,7 +383,7 @@ function R.Map()
  return true
 end
 local function Row(f,i,x,y,w,h,hidden)
- local r=f.rows[i];r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r.fieldkitUsed=true
+ local r=f.rows[i];r.fieldkitLine=nil;r.fieldkitSpell=nil;r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r.fieldkitUsed=true
  -- Re-levelling / re-anchoring a button on every refresh can cancel a click in progress: only when it changes.
  R.Stable(r,table.concat({x,y,w,h,f:GetFrameLevel()},":"),function() r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h) end)
  r:SetAlpha(1);if not hidden then r:Show() end;r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
@@ -422,6 +422,34 @@ function R.DiagHook(b,label)
  local callback=b.callback;b.callback=function() d.click=d.click+1;if callback then callback() end end
  b:SetScript("OnMouseDown",function() d.down=d.down+1 end);b:SetScript("OnMouseUp",function() d.up=d.up+1 end);b:SetScript("OnHide",function() d.hide=d.hide+1 end)
 end
+-- Full hover tooltip for a meter line: what the client's own GameTooltip and the hit ledger really know, nothing invented.
+function R.DamageTip(row)
+ local e=row.fieldkitLine;if not e then return false end
+ local x=row.GetCenter and row:GetCenter();local right=x and UIParent.GetWidth and x>UIParent:GetWidth()/2
+ GameTooltip:SetOwner(row,right and "ANCHOR_LEFT" or "ANCHOR_RIGHT")
+ GameTooltip:SetText(tostring(e.displayName or e.name or "?"),1,.82,0)
+ local share,dps=FieldKit.Number(e.share),FieldKit.Number(e.dps)
+ if share then GameTooltip:AddLine(FieldKit_L("Share of total")..": "..string.format("%.1f%%",share*100),.9,.9,.9) end
+ if dps then GameTooltip:AddLine("DPS: "..string.format("%.1f",dps),.9,.9,.9) end
+ if FieldKitMeterLedger and FieldKitMeterLedger.AppendStats then FieldKitMeterLedger.AppendStats(e.name,e.spellId,e.icon,FieldKit.Number(e.dmg)) end
+ GameTooltip:Show();return true
+end
+-- "All statistics" opens the Bonuses card in place: it grows downward by exactly what the rows need, the Effects card
+-- below follows (unless the user moved it), and the growth stops at the screen edge; beyond that the rows scroll.
+function R.ToggleStats() R.statsOpen=not R.statsOpen;R.scroll=R.scroll or {};R.scroll.Stats=0;FieldKitZoneThemes.Refresh(true) end
+function R.StatsPlan(zone,d)
+ R.statsExtra=0;R.effectsShift=0;R.statsCap=nil;R.statsN=0
+ local base=d.rects.Stats;if not base then return end
+ local source=getglobal("FieldKitStatsFrame");local n=0
+ for _,s in ipairs(source and source.rows or {}) do if s.label:IsShown() then n=n+1 end end
+ R.statsN=n;if not R.statsOpen then return end
+ local step,head,foot=zone=="naxx" and 27 or 29,49,zone=="naxx" and 44 or 56
+ local extra=math.max(0,head+n*step+foot-base[4])
+ local eff=d.rects.Effects;local movable=eff and R.frames.Effects and not FieldKitZoneThemes.Position(R.frames.Effects)
+ local room=d.size[2]-12-(movable and (eff[2]+eff[4]) or (base[2]+base[4]))
+ if extra>room then extra=math.max(0,room) end
+ R.statsExtra=extra;R.statsCap=math.max(1,math.floor((base[4]+extra-head-foot)/step));R.effectsShift=movable and extra or 0
+end
 function R.Stable(frame,key,apply) if frame.fieldkitStable~=key then frame.fieldkitStable=key;apply(frame) end end
 function R.HideUnwanted() for _,f in pairs(R.frames) do if not f.fieldkitWanted and not f.azsMoving then f:Hide() end end end
 -- Taller cards without new artwork: the art is cut at `split` (inside the uniform body) and a thin mid band is
@@ -430,8 +458,10 @@ local GROW={elwynn_complete={Damage={top=6,extra=68,split=110},Lairs={top=0,extr
  naxx_complete={Damage={top=-21,extra=21,split=200}}}
 function R.CardRect(kind,d)
  local base=d.rects[kind];local grow=base and GROW[R.key] and GROW[R.key][kind]
+ if base and kind=="Stats" and (R.statsExtra or 0)>0 then grow={top=0,extra=R.statsExtra,split=100}
+ elseif base and kind=="Effects" and (R.effectsShift or 0)>0 then grow={top=R.effectsShift,extra=0,split=0} end
  if not grow then return base,0,0 end
- R.rectCache=R.rectCache or {};local key=R.key..":"..kind;local c=R.rectCache[key]
+ R.rectCache=R.rectCache or {};local key=R.key..":"..kind..":"..grow.top..":"..grow.extra;local c=R.rectCache[key]
  if not c or c.base~=base then c={base=base,rect={base[1],base[2]+grow.top,base[3],base[4]+grow.extra}};R.rectCache[key]=c end
  return c.rect,grow.extra,grow.split
 end
@@ -445,7 +475,7 @@ function R.Window(f,kind,total,capacity)
  return offset
 end
 -- Flat text tabs inside a card (same language as the meter tabs: gold underline on the active one).
-function R.CardTabs(f,a,active,keys,pick)
+function R.CardTabs(f,a,active,keys,pick,suffix)
  f.cardTabs=f.cardTabs or {}
  -- Tabs live in the card header (where the title was): from x=62 to the collapse button, full header height.
  local left,top,height=62,9,36
@@ -458,11 +488,12 @@ function R.CardTabs(f,a,active,keys,pick)
    b.underline=b:CreateTexture(nil,"OVERLAY");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",0,0);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",0,0)
   end
   T.Solid(b.rule,{1,.82,.12},.3);b.rule:Show()
-  local stamp=table.concat({a[3],active==i and 1 or 0,tostring(FieldKitDB.language),tostring(f:GetFrameLevel())},":")
+  local stamp=table.concat({a[3],active==i and 1 or 0,tostring(FieldKitDB.language),tostring(f:GetFrameLevel()),tostring(suffix and suffix[i])},":")
   if b.layoutKey~=stamp then
    b.layoutKey=stamp
-   FieldKit_Text(b,key);b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",left+(i-1)*width,-top);b:SetWidth(width);b:SetHeight(height)
-   b.fieldkitLabel:SetWidth(width-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,18,active==i and {1,.82,.12} or R.body,true);R.Fit(b.fieldkitLabel,18,12);b.fieldkitSelected=active==i;Blank(b)
+   FieldKit_Text(b,key);if suffix and suffix[i] then b.fieldkitLabel:SetText(FieldKit_L(key).."  "..suffix[i]) end
+   b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",left+(i-1)*width,-top);b:SetWidth(width);b:SetHeight(height)
+   b.fieldkitLabel:SetWidth(width-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,18,active==i and {1,.82,.12} or R.body,true);R.Fit(b.fieldkitLabel,18,11);b.fieldkitSelected=active==i;Blank(b)
    T.Solid(b.underline,{1,.82,.12});if active==i then b.underline:Show() else b.underline:Hide() end
   end
   b:Show()
@@ -516,7 +547,7 @@ function R.Panels(variant,zone)
  for _,f in pairs(R.frames) do f.fieldkitWanted=nil end
  if variant~="complete" then R.HideUnwanted();R.MaskBuffs(false);return end
  R.effectBuffs=false
- local d=R.layout
+ local d=R.layout;R.StatsPlan(zone,d)
  if not FieldKitNative.Active() and (not R.readyAt or GetTime()>R.readyAt or R.readySerial~=FieldKitNative.serial) then
   R.readyItems={};R.readyAt=GetTime()+5;R.readySerial=FieldKitNative.serial
   if FieldKitLoadout.readSlot then for _,id in ipairs({2,13,14,11,12}) do local ok,name=pcall(FieldKitLoadout.readSlot,id);if ok then R.readyItems[id]={name=name,bonuses={}} end end end
@@ -560,6 +591,7 @@ function R.Panels(variant,zone)
     for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 146 or 98)+(i-1)*(zone=="naxx" and 34 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
+     if e then r.fieldkitLine=e;r.fieldkitSpell=e.name end
      if e then
       if not r.trough then r.trough=r:CreateTexture(nil,"BACKGROUND") end
       r.trough:ClearAllPoints();r.trough:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.trough:SetWidth(a[3]-160);r.trough:SetHeight(8);T.Solid(r.trough,{.12,.14,.08});r.trough:Show()
@@ -595,7 +627,10 @@ function R.Panels(variant,zone)
    elseif kind=="Accessories" then
     FieldKit_Text(f.more,"Equipment / spells");f.more:Hide();f.title:Hide()
     local tab=FieldKitDB.loadoutTab==2 and 2 or 1
-    R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end)
+    -- The scroll position lives in the Spells tab label (header): the card body keeps every socket row free.
+    local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset,range=0,nil
+    if tab==2 then offset=R.Window(f,"Accessories",total,5);if f.pager:IsShown() then range=string.gsub(f.pager:GetText()," / ","/") end;f.pager:Hide() end
+    R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end,{[2]=range})
     if tab==1 then
      local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
      for i=1,5 do local r=Row(f,i,72,R.SocketY(zone,i),a[3]-94,R.SocketH(zone));local e=FieldKitLoadout.items[ids[i]] or (R.readyItems and R.readyItems[ids[i]]);r.entry=e;local occupied=e and e.name and e.name~="" and e.name~=FieldKit_L("Empty");if occupied then r.label:SetText(e.name);r.value:SetText("");r.label:SetWidth(a[3]-98);r.value:SetWidth(0) else FieldKit_Text(r.label,names[i]);r.value:SetText(e and FieldKit_L("Empty") or "?");r.label:SetWidth(126);r.value:SetWidth(a[3]-228) end
@@ -603,7 +638,6 @@ function R.Panels(variant,zone)
       r.fontSize=16;r.fontMin=16
      end
     else
-     local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset=R.Window(f,"Accessories",total,5)
      if total==0 then local r=Row(f,1,72,R.SocketY(zone,1),a[3]-94,R.SocketH(zone));r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
      for i=1,math.min(5,total-offset) do
       local e=spells[offset+i];local r=Row(f,i,72,R.SocketY(zone,i),a[3]-94,R.SocketH(zone));r.entry=e
@@ -614,9 +648,18 @@ function R.Panels(variant,zone)
     end
    elseif kind=="Stats" then
     FieldKit_Text(f.more,"All statistics");f.more.fieldkitLabel:SetText(FieldKit_L("All statistics").." →");local source=getglobal("FieldKitStatsFrame");local labels={"Damage","Haste","Crit Chance","Lifesteal"}
-    if zone=="naxx" then f.more:Hide() end
-    for i,name in ipairs(labels) do local r=Row(f,i,zone=="naxx" and 72 or 31,49+(i-1)*(zone=="naxx" and 27 or 29),a[3]-(zone=="naxx" and 100 or 65),27);FieldKit_Text(r.label,name=="Crit Chance" and "Critique" or name);local value="?"
+    if zone=="naxx" and not R.statsOpen then f.more:Hide() end
+    local sx,sw,step=zone=="naxx" and 72 or 31,a[3]-(zone=="naxx" and 100 or 65),zone=="naxx" and 27 or 29
+    if R.statsOpen then
+     -- Expanded in place: every row the statistics frame really holds, read live from it (no second calculation).
+     local shown={};for _,s in ipairs(source and source.rows or {}) do if s.label:IsShown() then table.insert(shown,s) end end
+     local total=table.getn(shown);local capacity=math.min(total,R.statsCap or total);local offset=R.Window(f,"Stats",total,capacity)
+     f.more.fieldkitLabel:SetText("← "..FieldKit_L("Show less")..(total>capacity and ("   "..(offset+1).."-"..math.min(total,offset+capacity).."/"..total) or ""));f.more:Show();f.pager:Hide()
+     for i=1,capacity do local s=shown[offset+i];local r=Row(f,i,sx,49+(i-1)*step,sw,27);r.label:SetText(s.label:GetText() or "?");r.value:SetText(s.value:GetText() or "?") end
+    else
+    for i,name in ipairs(labels) do local r=Row(f,i,sx,49+(i-1)*step,sw,27);FieldKit_Text(r.label,name=="Crit Chance" and "Critique" or name);local value="?"
      for _,s in ipairs(source and source.rows or {}) do if s.label:GetText()==FieldKit_L(name) then value=s.value:GetText() or "?" end end;r.value:SetText(value)
+    end
     end
    else
     FieldKit_Text(f.more,"All effects");f.more:Hide();f.title:SetWidth(a[3]-175)
@@ -640,7 +683,8 @@ function R.Panels(variant,zone)
     local size=r.fontSize or 16;local least=r.fontMin or (kind=="Accessories" and 16 or 12)
     T.Font(r.label,size,r.labelTint or R.body,false);T.Font(r.value,size,r.valueTint or r.labelTint or R.body,false);R.Fit(r.label,size,least);R.Fit(r.value,size,least)
     r.fullLines={r.label.referenceFullText or "",r.value.referenceFullText or ""}
-    r:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) elseif this.buffIndex and GameTooltip.SetPlayerBuff then GameTooltip:SetOwner(this,"ANCHOR_LEFT");GameTooltip:SetPlayerBuff(this.buffIndex);GameTooltip:Show() else H.Tip(this,f.title:GetText(),this.fullLines) end end);r:SetScript("OnLeave",function() GameTooltip:Hide();H.HideTip() end)
+    r:SetScript("OnEnter",function() if this.entry and FieldKitLoadout then FieldKitLoadout.Tip(this,this.entry) elseif this.fieldkitLine and R.DamageTip(this) then -- complete tooltip, nothing to click
+  elseif this.buffIndex and GameTooltip.SetPlayerBuff then GameTooltip:SetOwner(this,"ANCHOR_LEFT");GameTooltip:SetPlayerBuff(this.buffIndex);GameTooltip:Show() else H.Tip(this,f.title:GetText(),this.fullLines) end end);r:SetScript("OnLeave",function() GameTooltip:Hide();H.HideTip() end)
    end end
   end
  end

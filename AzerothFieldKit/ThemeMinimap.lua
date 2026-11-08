@@ -39,7 +39,8 @@ local function Edge(x,y)
  local radius=math.sqrt(x*x+y*y)
  if radius<55 or radius>100 then return nil end
  local dx,dy=x/radius,y/radius
- local reach=1/math.max(math.abs(dx)/half[1],math.abs(dy)/half[2])+6
+ -- Ride just INSIDE the visible opening (button centre 14 px in): never over the rim art or the labels under the map.
+ local reach=1/math.max(math.abs(dx)/half[1],math.abs(dy)/half[2])-14
  return dx*reach,dy*reach
 end
 function M.Wrap(f)
@@ -49,7 +50,11 @@ function M.Wrap(f)
  f.SetPoint=function(self,point,rel,relPoint,x,y)
   if M.active and point=="CENTER" and rel==Minimap and relPoint=="CENTER" and type(x)=="number" and type(y)=="number" then
    local ax,ay=Edge(x,y)
-   if ax then M.ring[self]={rx=x,ry=y,ax=ax,ay=ay};return original(self,point,rel,relPoint,ax,ay) end
+   if ax then
+    M.ring[self]={rx=x,ry=y,ax=ax,ay=ay}
+    M.log=M.log or {};table.insert(M.log,string.format("%s raw %.1f,%.1f -> %.1f,%.1f",tostring(self:GetName()),x,y,ax,ay));if table.getn(M.log)>8 then table.remove(M.log,1) end
+    return original(self,point,rel,relPoint,ax,ay)
+   end
   end
   M.ring[self]=nil -- the owner placed it some other way: it is no longer ours to restore
   return original(self,point,rel,relPoint,x,y)
@@ -60,8 +65,15 @@ function M.Ring(halfW,halfH)
  local changed=not M.ringHalf or M.ringHalf[1]~=halfW or M.ringHalf[2]~=halfH
  M.ringHalf={halfW,halfH}
  if not Minimap or not Minimap.GetChildren then return end
+ M.alphaSeen=M.alphaSeen or {}
  for _,f in ipairs({Minimap:GetChildren()}) do
   local name=f.GetName and f:GetName()
+  if name and f.GetAlpha then
+   -- Evidence for "hidden icons come back on hover": who raises a hidden button's alpha, and when.
+   local alpha=f:GetAlpha();local was=M.alphaSeen[f]
+   if was and was==0 and alpha>0 then M.log=M.log or {};table.insert(M.log,string.format("%s alpha 0 -> %.2f (mouse over map: %s)",name,alpha,tostring(type(MouseIsOver)=="function" and MouseIsOver(Minimap) and true or false)));if table.getn(M.log)>8 then table.remove(M.log,1) end end
+   M.alphaSeen[f]=alpha
+  end
   if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and not string.find(name,"^FieldKit") and not f.fieldkitRingOriginal then
    local points=FieldKitThemeHUD.Points(f);local p=points[1]
    if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5]) then

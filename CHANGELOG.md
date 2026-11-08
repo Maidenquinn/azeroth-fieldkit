@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.18 - 2026-11-08 (in-place Bonuses, hover tooltips, gear placement, unreleased)
+
+- Map buttons: ring-style third-party buttons (AzerothHub gear) now ride just INSIDE the visible opening (centre 14 px in) instead of 6 px outside it, so they never sit on the rim art or the labels under the map ("Heroic III"). The map's drag handle was a HIGH-strata button at M.root+50 covering the whole map when the HUD is unlocked, i.e. above the buttons it was meant to leave alone: it is now at the Minimap's own level, below its child buttons. `/fieldkit mapdiag` also prints the frame under the mouse, the handle level, the last ring placements (raw owner offsets -> applied) and any hidden button whose alpha is raised (with the mouse position), to identify the "icon returns on hover" culprit.
+- Spells: the scroll position moved from the bottom-right of the card (over the fifth row) into the Spells tab label ("Sorts 1-5/7").
+- Bonuses: "All statistics" (or a click on the card in Naxxramas) expands the same card in place with every statistic the statistics frame holds, live; "Show less" reduces it. The card grows downward by what the rows need, Effects follows unless it was moved by the user, growth stops at the screen edge and the rows scroll. No second window.
+- Damage: hovering a line shows the client tooltip with name, share, DPS and the hit ledger (total, hits, crits and rate, max hit/crit, average, burst, kills) when really known; a left click on a line no longer opens a window. The "All spells" button is unchanged.
+
 ## 0.6.0-alpha.17 - 2026-11-07 (clicks, six damage rows, map buttons, unreleased)
 
 - Intermittent tab clicks: the 0.2 s refresh hid and re-showed every card, the Equipment/Spells tabs and every row (Hide on a pressed button drops the click). Cards, tabs and rows now stay shown and are hidden only when they should disappear; buttons, rows, foot and collapse controls are re-levelled/re-anchored only when their layout changes; the minimap zoom buttons no longer Hide/Show on refresh. New `/fieldkit clickdiag` prints presses, releases, clicks and hides per tab for the native recette.

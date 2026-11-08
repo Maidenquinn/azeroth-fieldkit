@@ -98,8 +98,9 @@ function C.Remember(frame)
  for _,key in ipairs(C.positionNames) do if key==name then allowed=true end end
  if not allowed then return false end
  local a=H.Points(frame)[1]
- if a and a[2]~=UIParent and frame.GetLeft and frame:GetLeft() and frame:GetTop() then
-  -- After StopMovingOrSizing a card parented to the scaled canvas may stay anchored to it: store the same
+ if a and (a[2]~=UIParent or a[1]~="TOPLEFT") and frame.GetLeft and frame:GetLeft() and frame:GetTop() then
+  -- Always store a card by its top-left corner (cards that change height, like Bonuses, grow downward), and when the
+  -- engine leaves it anchored to the scaled canvas store the same
   -- on-screen spot against UIParent (BOTTOMLEFT origin) so the position can be saved and restored.
   frame:ClearAllPoints();frame:SetPoint("TOPLEFT",UIParent,"BOTTOMLEFT",frame:GetLeft(),frame:GetTop());a=H.Points(frame)[1]
  end
@@ -315,7 +316,10 @@ function C.Command(msg)
  elseif arg=="clickdiag" then
   for _,d in ipairs(FieldKitReferenceHUD.diagButtons or {}) do DEFAULT_CHAT_FRAME:AddMessage(d.label..": down "..d.down.." up "..d.up.." click "..d.click.." hide "..d.hide) end
  elseif arg=="mapdiag" then
-  local M=FieldKitThemeMinimap;DEFAULT_CHAT_FRAME:AddMessage("map active="..tostring(M.active).." ring="..tostring(M.ringHalf and M.ringHalf[1]).."x"..tostring(M.ringHalf and M.ringHalf[2]))
+  local M=FieldKitThemeMinimap
+  local focus=type(GetMouseFocus)=="function" and GetMouseFocus();DEFAULT_CHAT_FRAME:AddMessage("mouse focus="..tostring(focus and focus.GetName and focus:GetName()).." handle="..tostring(M.dragHandle and (M.dragHandle:GetFrameStrata().."/"..M.dragHandle:GetFrameLevel())).." minimap level="..tostring(Minimap and Minimap:GetFrameLevel()))
+  for _,line in ipairs(M.log or {}) do DEFAULT_CHAT_FRAME:AddMessage("  "..line) end
+  DEFAULT_CHAT_FRAME:AddMessage("map active="..tostring(M.active).." ring="..tostring(M.ringHalf and M.ringHalf[1]).."x"..tostring(M.ringHalf and M.ringHalf[2]))
   if Minimap and Minimap.GetChildren then for _,f in ipairs({Minimap:GetChildren()}) do
    local name=f.GetName and f:GetName()
    if name then local p,rel,rp,x,y=f:GetPoint();local parked=(x==-4000)

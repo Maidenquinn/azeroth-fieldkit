@@ -343,11 +343,11 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  assert(acc.rows[1].label:GetText()=="Amulet of Test" and not C.open.Accessories,zone..": equipment tab content")
  click(acc.cardTabs[2]);assert(FieldKitDB.loadoutTab==2 and not C.open.Accessories,zone..": Spells replaces the content of the same card")
  assert(acc:IsShown() and acc.rows[1].label:GetText()=="Spell 1" and acc.rows[1].value:GetText()=="Rank 1" and acc.rows[1].entry.name=="Spell 1",zone..": spells listed with ranks and tooltip entries")
- assert(acc.pager:IsShown() and acc.pager:GetText()=="1-5 / 8",zone..": spells beyond the card scroll with a pager")
+ assert(not acc.pager:IsShown() and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"1-5/8",1,true),zone..": the scroll position is in the Spells tab, not over the rows")
  Inside(acc,zone,"Accessories")
  this=acc;arg1=-1;acc.scripts.OnMouseWheel();assert(R.scroll.Accessories==1 and acc.rows[1].label:GetText()=="Spell 2",zone..": wheel scrolls the list")
 
- arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[5].label:GetText()=="Spell 8" and acc.pager:GetText()=="4-8 / 8",zone..": scrolling is clamped")
+ arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[5].label:GetText()=="Spell 8" and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"4-8/8",1,true) and not acc.pager:IsShown(),zone..": scrolling is clamped")
  click(acc.cardTabs[1]);assert(FieldKitDB.loadoutTab==1 and acc.rows[1].label:GetText()=="Amulet of Test" and not acc.pager:IsShown(),zone..": back to Equipment")
  FieldKitLoadout.items,FieldKitLoadout.spells=oldItems,oldSpells
  -- Effects: 0,1,2,4,many
@@ -617,3 +617,101 @@ do
  C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
 end
 print("30-alternation click stability, taller Damage card, lair margins and repeated map-button transitions passed (synthetic)")
+
+-- alpha.18: Spells indicator never over rows, for 0/1/5/6/7/12 spells in FR and EN.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ local oldSpells=FieldKitLoadout.spells
+ for _,count in ipairs({0,1,5,6,7,12}) do for _,lang in ipairs({"fr","en"}) do
+  FieldKitDB.language=lang;FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
+  FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);local acc=R.frames.Accessories
+  assert(not acc.pager:IsShown(),zone..": no counter over the rows ("..count.." spells, "..lang..")")
+  local label=acc.cardTabs[2].fieldkitLabel:GetText();assert((count>5)==(string.find(label,"/",1,true)~=nil),zone..": range in the tab only when scrolling is needed ("..count..")")
+  local lastBottom=0;for _,r in ipairs(acc.rows) do if r:IsShown() then local _,_,_,_,y=r:GetPoint();lastBottom=math.max(lastBottom,-y+r:GetHeight()) end end
+  assert(lastBottom<=R.CardRect("Accessories",R.layout)[4]-10,zone..": rows stay inside the card")
+ end end
+ FieldKitLoadout.spells=oldSpells;FieldKitDB.language="fr";FieldKitDB.loadoutTab=1
+end
+C.Set("zoneThemes",false)
+print("Spells indicator in the header tab passed (synthetic)")
+
+-- alpha.18: Bonuses expand in place, Damage hover tooltips without a window, map handle under the buttons.
+local function FakeStats(n)
+ local rows={}
+ for i=1,n do
+  local label=CreateFrame("FontString");label:SetText("Stat "..i);label:Show()
+  local value=CreateFrame("FontString");value:SetText("+"..i.."%")
+  rows[i]={label=label,value=value}
+ end
+ return rows
+end
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ local src=FieldKitStatsFrame;local realRows=src.rows;R.statsOpen=false;R.scroll.Stats=0
+ for _,n in ipairs({4,12,29}) do
+  src.rows=FakeStats(n);C.Refresh(true);local f=R.frames.Stats;local base=R.layout.rects.Stats
+  local before=0;for _,fr in ipairs(objects) do if fr._name=="FieldKitReferencePanelStats" then before=before+1 end end
+  assert(f:GetHeight()==base[4] and f.more:IsShown()==(zone=="elwynn"),zone..": compact Bonuses is unchanged ("..n..")")
+  local oldTitle=f.title:GetText()
+  -- a click on "All statistics" (or on the card in Naxxramas, which has no foot link) grows the same card
+  if zone=="elwynn" then click(f.more) else this=f;f.scripts.OnMouseUp() end
+  assert(R.statsOpen and not C.open.Stats,zone..": no reader window opens ("..n..")")
+  local rect=R.CardRect("Stats",R.layout);local eff=R.CardRect("Effects",R.layout)
+  assert(f:GetHeight()==rect[4] and f.title:GetText()==oldTitle,zone..": same card, same title, taller ("..n..")")
+  local shown=0;local lowest=0;for _,r in ipairs(f.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();lowest=math.max(lowest,-y+r:GetHeight()) end end
+  assert(shown==math.min(n,R.statsCap or n) and f.rows[1].label:GetText()=="Stat 1" and f.rows[1].value:GetText()=="+1%",zone..": rows show the live values ("..n..")")
+  assert(lowest<=rect[4]-(zone=="naxx" and 44 or 48)+4,zone..": rows end above the foot ("..lowest.." vs "..rect[4]..")")
+  assert(rect[2]+rect[4]<=R.layout.size[2]-12 and eff[2]+eff[4]<=R.layout.size[2]-12,zone..": nothing leaves the screen ("..n..")")
+  assert(rect[2]+rect[4]<=eff[2]+eff[4] and (R.effectsShift==0 or rect[2]+rect[4]-12<=eff[2]),zone..": Bonuses does not run into Effects ("..n..")")
+  assert(f.more:IsShown(),zone..": a foot button is there to reduce the card")
+  src.rows[1].value:SetText("+99%");C.Refresh(true);assert(f.rows[1].value:GetText()=="+99%",zone..": values keep updating while expanded")
+  if n>(R.statsCap or n) then this=f;arg1=-100;f.scripts.OnMouseWheel();assert(f.rows[math.min(n,R.statsCap)].label:GetText()=="Stat "..n,zone..": the last statistic is reachable by scrolling")
+   assert(string.find(f.more.fieldkitLabel:GetText(),"/"..n,1,true),zone..": scroll position shown on the foot button") end
+  click(f.more);assert(not R.statsOpen and f:GetHeight()==base[4],zone..": reduce returns to the compact card")
+ end
+ -- custom position survives the height change; a moved Effects card is not pushed
+ src.rows=FakeStats(12);local f=R.frames.Stats
+ local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelStats"]={"TOPLEFT","BOTTOMLEFT",1200,640}
+ FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]={"TOPLEFT","BOTTOMLEFT",900,300}
+ f.referenceRect=nil;R.frames.Effects.referenceRect=nil;C.revision=C.revision+1;C.Refresh(true)
+ local p,rel,rp,x,y=f:GetPoint();assert(p=="TOPLEFT" and x==1200 and y==640,zone..": saved position before growing")
+ R.statsOpen=true;C.Refresh(true);p,rel,rp,x,y=f:GetPoint();assert(p=="TOPLEFT" and x==1200 and y==640 and R.effectsShift==0,zone..": custom positions are kept after the height change, Effects not pushed")
+ R.statsOpen=false;C.Refresh(true);p,rel,rp,x,y=f:GetPoint();assert(x==1200 and y==640,zone..": and after reducing")
+ FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelStats"]=nil;FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]=nil
+ src.rows=realRows;R.statsOpen=false
+end
+-- Damage hover tooltips
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ local lines,shownTip,hidden={},0,0
+ local old={GameTooltip.SetOwner,GameTooltip.SetText,GameTooltip.AddLine,GameTooltip.Show,GameTooltip.Hide}
+ GameTooltip.SetOwner=function() lines={} end;GameTooltip.SetText=function(_,t) table.insert(lines,t) end
+ GameTooltip.AddLine=function(_,t) table.insert(lines,t) end;GameTooltip.Show=function() shownTip=shownTip+1 end;GameTooltip.Hide=function() hidden=hidden+1 end
+ local oldRead=FieldKitMeterLedger.Read
+ FieldKitMeterLedger.Read=function() return {{name="Fireball",displayName="Fireball",dmg=1200,share=.6,dps=45.5,icon="Interface\Icons\X"},{name="Partial"}},2000,80,true end
+ C.Refresh(true);local dm=R.frames.Damage
+ local framesBefore=table.getn(objects)
+ local row=dm.rows[1];this=row;row.scripts.OnEnter()
+ local text=table.concat(lines,"|");assert(string.find(text,"Fireball",1,true) and string.find(text,"60.0%",1,true) and string.find(text,"45.5",1,true) and string.find(text,"1200",1,true),"tooltip shows name, share, DPS and total")
+ assert(shownTip>0,"the native tooltip is shown on hover");row.scripts.OnLeave();assert(hidden>0,"and hidden when the cursor leaves")
+ local partial=dm.rows[2];this=partial;partial.scripts.OnEnter();text=table.concat(lines,"|")
+ assert(string.find(text,"Partial",1,true) and not string.find(text,"DPS",1,true) and not string.find(text,"%%"),"absent data is not invented")
+ for i=1,20 do this=row;row.scripts.OnEnter();row.scripts.OnLeave() end;assert(table.getn(objects)==framesBefore,"hovering never creates frames")
+ local wasShown=FieldKitMeterFrame:IsShown();click(row);assert(not C.open.Damage and FieldKitMeterFrame:IsShown()==wasShown,"a left click on a line opens no window")
+ FieldKitMeterLedger.Read=oldRead;GameTooltip.SetOwner,GameTooltip.SetText,GameTooltip.AddLine,GameTooltip.Show,GameTooltip.Hide=old[1],old[2],old[3],old[4],old[5]
+end
+-- Map handle sits below the map's own buttons; gear rides inside the opening
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local M=FieldKitThemeMinimap
+ assert(M.dragHandle:GetFrameLevel()<=Minimap:GetFrameLevel()+1 and M.dragHandle:GetFrameStrata()==Minimap:GetFrameStrata(),"drag handle is not above the buttons placed on the map")
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end;C.Refresh(true)
+ for _,angle in ipairs({0,90,180,270,45,225}) do local a=math.rad(angle);gear:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80)
+  local _,_,_,gx,gy=gear:GetPoint();local hw,hh=R.layout.mapHole[3]/2,R.layout.mapHole[4]/2
+  assert((gx*gx)/(hw*hw)+(gy*gy)/(hh*hh)<1.6 and math.abs(gx)<=hw and math.abs(gy)<=hh,"gear stays inside the opening at "..angle.." degrees ("..gx..","..gy..")") end
+ FieldKitZoneThemes.Command("mapdiag");FieldKitZoneThemes.Command("clickdiag")
+ C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
+end
+print("Bonuses expansion, Damage hover tooltips, map handle and gear placement passed (synthetic)")
