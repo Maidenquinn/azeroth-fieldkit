@@ -26,7 +26,7 @@ function R.Create()
   f.total=T.Label(f,nil,0,0,300,30,16,R.body)
   f.rateLabel=T.Label(f,nil,0,0,110,30,17,R.body)
   f.rows={}
-  for i=1,(kind=="Stats" and 30 or 6) do
+  for i=1,(kind=="Stats" and 30 or (kind=="Accessories" and 7 or 6)) do
    local row=CreateFrame("Button",nil,f);f.rows[i]=row;row:SetWidth(300);row:SetHeight(34)
    row.label=T.Label(row,nil,0,0,210,28,17,R.body);pcall(row.label.SetFont,row.label,T.media.."NotoSerif-Regular.ttf",17,"")
    row.value=T.Label(row,nil,212,0,78,28,17,R.body);row.value:SetJustifyH("RIGHT")
@@ -42,7 +42,7 @@ function R.Create()
   local start=f:GetScript("OnDragStart");local finish=f:GetScript("OnMouseUp")
   f:SetScript("OnMouseDown",function() this.referenceDragged=false end)
   f:SetScript("OnDragStart",function() this.referenceDragged=true;if start then start() end end)
-  f:SetScript("OnMouseUp",function() local moved=this.referenceDragged;if finish then finish() end;if not moved then if route=="Stats" then R.ToggleStats() else FieldKitZoneThemes.Open(route) end end end)
+  f:SetScript("OnMouseUp",function() local moved=this.referenceDragged;if finish then finish() end;if not moved then if route=="Stats" then R.ToggleStats() elseif route~="Damage" then FieldKitZoneThemes.Open(route) end end end)
   f.collapse=T.Button(f,nil,"−",0,0,18,18,function()
    local native=getglobal(({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[route]);if native and native.mashCollapseButton then native.mashCollapseButton:Click();FieldKitZoneThemes.Refresh(true) end
   end)
@@ -121,7 +121,13 @@ function R.Art(frame,component,layout)
  local pieces={}
  for _,a in ipairs(tiles) do
   local dx,dy,iw,ih,tw,th=a[2],a[3],a[4],a[5],a[6],a[7]
-  if extra>0 and split>dy and split<dy+ih then
+  local rep=frame.referenceRepeat;local endTop=rep and rep.at+rep.h
+  if rep and rep.count>0 and endTop>dy and endTop<dy+ih then
+   -- Extra rows: the art row slice [at,at+h) is repeated `count` times, so sockets and separators stay periodic.
+   table.insert(pieces,{a[1],dx,dy,iw,endTop-dy,iw/tw,0,(endTop-dy)/th})
+   for c=0,rep.count-1 do table.insert(pieces,{a[1],dx,endTop+c*rep.h,iw,rep.h,iw/tw,(rep.at-dy)/th,(endTop-dy)/th}) end
+   table.insert(pieces,{a[1],dx,endTop+rep.count*rep.h,iw,dy+ih-endTop,iw/tw,(endTop-dy)/th,ih/th})
+  elseif extra>0 and split>dy and split<dy+ih then
    table.insert(pieces,{a[1],dx,dy,iw,split-dy,iw/tw,0,(split-dy)/th})
    table.insert(pieces,{a[1],dx,split,iw,extra,iw/tw,(split-dy-4)/th,(split-dy+4)/th})
    table.insert(pieces,{a[1],dx,split+extra,iw,dy+ih-split,iw/tw,(split-dy)/th,ih/th})
@@ -348,6 +354,18 @@ function R.Map()
  local world=getglobal("MiniMapWorldMapButton");if world and R.worldClick then FieldKitZoneThemes.Mask(world,true) end
  local clock=getglobal("GameTimeFrame");if clock then FieldKitZoneThemes.Mask(clock,true) end
  M.root:Show()
+ if not M.follower then
+  -- The client caches the native map geometry: while the card (or the whole identity group) is being dragged, refresh
+  -- the map each time its owner has moved, so the map texture cannot lag behind (or leave) its frame.
+  local follower=CreateFrame("Frame");M.follower=follower;follower.t=0
+  follower:SetScript("OnUpdate",function()
+   local owner=(M.root and M.root.azsMoving and M.root) or (H.identity and H.identity.azsMoving and H.identity) or (M.dragOwner and M.dragOwner.azsMoving and M.dragOwner)
+   if not owner then M.followStamp=nil;return end
+   follower.t=follower.t+(arg1 or 0);if follower.t<.03 then return end;follower.t=0
+   local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())
+   if stamp~=M.followStamp then M.followStamp=stamp;Minimap:Hide();Minimap:Show() end
+  end)
+ end
  if not M.dragHandle then
   local handle=CreateFrame("Button",nil,M.root);M.dragHandle=handle;handle:SetMovable(true);handle:EnableMouse(true);handle:RegisterForDrag("LeftButton")
   handle:SetScript("OnDragStart",function() local target=R.layout.rects.mapArt and M.root or H.identity;M.dragOwner=target;target.azsMoving=true;target:StartMoving() end)
@@ -383,7 +401,7 @@ function R.Map()
  return true
 end
 local function Row(f,i,x,y,w,h,hidden)
- local r=f.rows[i];r.fieldkitLine=nil;r.fieldkitSpell=nil;r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r.fieldkitUsed=true
+ local r=f.rows[i];r.label:SetJustifyH("LEFT");r.label:SetJustifyV("MIDDLE");r.value:SetJustifyH("RIGHT");r.fieldkitLine=nil;r.fieldkitSpell=nil;r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r.fieldkitUsed=true
  -- Re-levelling / re-anchoring a button on every refresh can cancel a click in progress: only when it changes.
  R.Stable(r,table.concat({x,y,w,h,f:GetFrameLevel()},":"),function() r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h) end)
  r:SetAlpha(1);if not hidden then r:Show() end;r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
@@ -407,7 +425,9 @@ function R.DamageTabs(f,a,zone,index)
 end
 -- Socket geometry measured on the approved Equipment art (reference px, card-local): icons are centred in them.
 local SOCKETS={elwynn={x=32,y=51,step=36,w=28,h=28},naxx={x=32,y=57,step=34.75,w=38,h=30}}
-function R.SocketY(zone,i) local s=SOCKETS[zone] or SOCKETS.elwynn;return math.floor(s.y+s.step*(i-1)+.5) end
+function R.SocketY(zone,i) local s=SOCKETS[zone] or SOCKETS.elwynn
+ if zone=="naxx" and i>3 then return math.floor(126.5+35*(i-3)+.5) end -- rows 4+ come from the repeated 35 px art slice
+ return math.floor(s.y+s.step*(i-1)+.5) end
 function R.SocketH(zone) return (SOCKETS[zone] or SOCKETS.elwynn).h end
 function R.SocketIcon(r,zone,texture)
  local s=SOCKETS[zone] or SOCKETS.elwynn;local size=math.min(s.w,s.h)-4
@@ -425,45 +445,163 @@ end
 -- Full hover tooltip for a meter line: what the client's own GameTooltip and the hit ledger really know, nothing invented.
 function R.DamageTip(row)
  local e=row.fieldkitLine;if not e then return false end
- local x=row.GetCenter and row:GetCenter();local right=x and UIParent.GetWidth and x>UIParent:GetWidth()/2
- GameTooltip:SetOwner(row,right and "ANCHOR_LEFT" or "ANCHOR_RIGHT")
- GameTooltip:SetText(tostring(e.displayName or e.name or "?"),1,.82,0)
- local share,dps=FieldKit.Number(e.share),FieldKit.Number(e.dps)
- if share then GameTooltip:AddLine(FieldKit_L("Share of total")..": "..string.format("%.1f%%",share*100),.9,.9,.9) end
- if dps then GameTooltip:AddLine("DPS: "..string.format("%.1f",dps),.9,.9,.9) end
- if FieldKitMeterLedger and FieldKitMeterLedger.AppendStats then FieldKitMeterLedger.AppendStats(e.name,e.spellId,e.icon,FieldKit.Number(e.dmg)) end
- GameTooltip:Show();return true
+ local ledger=FieldKitMeterLedger
+ local st=ledger and ledger.Stats and FieldKitDB.meterSpellTips~=false and ledger.Stats(e.name,e.spellId,e.icon) or nil
+ local share,dps,dmg=FieldKit.Number(e.share),FieldKit.Number(e.dps),FieldKit.Number(e.dmg)
+ local white,soft={1,1,1},{.85,.85,.85}
+ local function Add(list,label,value,color) list[table.getn(list)+1]={FieldKit_L(label)..": "..value,color or soft} end
+ local damage,crits,other={},{},{}
+ if dmg then Add(damage,"Total",string.format("%d",math.floor(dmg+.5)),white) end
+ if dps then Add(damage,"DPS",string.format("%.1f",dps)) end
+ if st then
+  if st.avg>0 then Add(damage,"Average",string.format("%.0f",st.avg)) end
+  if st.maxHit>0 then Add(damage,"Maximum",string.format("%d",st.maxHit)) end
+  if st.burst>0 then Add(damage,"Burst (1s)",string.format("%d",st.burst),{.7,.85,1}) end
+  if st.crits>0 then Add(crits,"Critical hits",tostring(st.crits),{1,.65,.3}) end
+  if st.hits>0 then Add(crits,"Crit rate",string.format("%.0f%%",st.critPct),{1,.65,.3}) end
+  if st.maxCrit>0 then Add(crits,"Max crit",string.format("%d",st.maxCrit),{1,.55,.2}) end
+  if st.hits>0 then Add(other,"Hits",tostring(st.hits)) end
+  if st.kills>0 then Add(other,"Kills",tostring(st.kills),{.9,.75,.4}) end
+ end
+ H.RichTip(row,{icon=e.icon or (FieldKitLoadout and FieldKitLoadout.Icon and FieldKitLoadout.Icon(e.name)),title=tostring(e.displayName or e.name or "?"),
+  sub=share and (FieldKit_L("Share of total")..": "..string.format("%.1f%%",share*100)) or nil,
+  sections={{head=FieldKit_L("Damage"),lines=damage},{head=FieldKit_L("Critical hits"),lines=crits},{head=FieldKit_L("Other"),lines=other}}})
+ return true
 end
 -- "All statistics" opens the Bonuses card in place: it grows downward by exactly what the rows need, the Effects card
 -- below follows (unless the user moved it), and the growth stops at the screen edge; beyond that the rows scroll.
 function R.ToggleStats() R.statsOpen=not R.statsOpen;R.scroll=R.scroll or {};R.scroll.Stats=0;FieldKitZoneThemes.Refresh(true) end
+function R.StatsCapFor(zone,base,extra)
+ local step,head,foot=zone=="naxx" and 27 or 29,49,zone=="naxx" and 44 or 56
+ return math.max(1,math.floor((base[4]+extra-head-foot)/step))
+end
 function R.StatsPlan(zone,d)
- R.statsExtra=0;R.effectsShift=0;R.statsCap=nil;R.statsN=0
+ R.statsExtra=0;R.statsCap=nil;R.statsN=0
  local base=d.rects.Stats;if not base then return end
  local source=getglobal("FieldKitStatsFrame");local n=0
  for _,s in ipairs(source and source.rows or {}) do if s.label:IsShown() then n=n+1 end end
  R.statsN=n;if not R.statsOpen then return end
  local step,head,foot=zone=="naxx" and 27 or 29,49,zone=="naxx" and 44 or 56
- local extra=math.max(0,head+n*step+foot-base[4])
- local eff=d.rects.Effects;local movable=eff and R.frames.Effects and not FieldKitZoneThemes.Position(R.frames.Effects)
- local room=d.size[2]-12-(movable and (eff[2]+eff[4]) or (base[2]+base[4]))
- if extra>room then extra=math.max(0,room) end
- R.statsExtra=extra;R.statsCap=math.max(1,math.floor((base[4]+extra-head-foot)/step));R.effectsShift=movable and extra or 0
+ R.statsExtra=math.max(0,head+n*step+foot-base[4]);R.statsCap=R.StatsCapFor(zone,base,R.statsExtra)
+end
+-- Spells tab: up to seven rows; the card grows by the missing socket rows (art slice repeated).
+function R.AccPlan()
+ R.accRows=0
+ if FieldKitDB.loadoutTab==2 and FieldKitLoadout then R.accRows=math.max(0,math.min(7,table.getn(FieldKitLoadout.spells or {}))-5) end
+end
+-- ===== Placement: preferred position (default rectangle or the user's saved spot) vs displayed position. =====
+-- Pure function of the preferred layout, the visible card sizes and the protected HUD rectangles: nothing is stored,
+-- so a card returns to its preferred place as soon as the room is free again, and the search cannot oscillate.
+local CARDS={"Damage","Lairs","Accessories","Stats","Effects"}
+local OBSTACLES={"header","chat","identity","nav","vitality","mapArt"}
+local GAP,TOLERANCE=4,6 -- visual gap after a push; overlaps up to 6 px are the approved art's own and are left alone
+-- Opaque insets (left, top, right, bottom) measured on the approved art: collisions use what is really drawn.
+local OPAQUE={
+ elwynn_complete={header={8,12,8,10},chat={4,9,0,11},identity={7,8,10,7},nav={0,11,7,0},vitality={6,9,8,8},
+  Damage={10,6,0,6},Lairs={10,9,9,7},Accessories={8,5,8,6},Stats={8,7,7,8},Effects={8,5,7,11}},
+ naxx_complete={header={11,10,11,11},chat={8,7,0,13},identity={8,9,11,0},vitality={0,0,0,0},mapArt={9,9,11,5},
+  Damage={4,1,6,5},Lairs={7,2,5,9},Accessories={9,0,11,0},Stats={10,0,11,0},Effects={9,3,9,10}}}
+local PREFS={Damage="meterFrame",Lairs="lairFrame",Accessories="gearFrame",Stats="statsFrame",Effects="effectsFrame"}
+local NATIVE={Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"}
+local function Inset(name) local t=OPAQUE[R.key];return (t and t[name]) or {6,6,6,6} end
+function R.CardVisible(kind,d)
+ local folded=(kind=="Stats" and FieldKitDB.statsCollapsed) or (kind=="Accessories" and FieldKitDB.gearCollapsed) or (FieldKitDB.collapsedWindows and FieldKitDB.collapsedWindows[NATIVE[kind]])
+ return d.rects[kind] and FieldKitDB[PREFS[kind]] and not folded and not (kind=="Damage" and FieldKitZoneThemes.nativeMeterOpen)
+end
+-- Preferred rectangle in canvas reference px, with the same corner rule as R.Geometry.
+function R.Preferred(kind,d)
+ local rect=R.CardRect(kind,d,true);local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanel"..kind) or 1
+ local w,h=rect[3]*s,rect[4]*s;local cx,cy=rect[1]+rect[3]/2,rect[2]+rect[4]/2
+ local x=cx>d.size[1]*2/3 and rect[1]+rect[3]-w or (cx<d.size[1]/3 and rect[1] or rect[1]+(rect[3]-w)/2)
+ local y=cy>d.size[2]*2/3 and rect[2]+rect[4]-h or (cy<d.size[2]/3 and rect[2] or rect[2]+(rect[4]-h)/2)
+ return x,y,w,h
+end
+-- A card the user placed: its live rectangle in canvas reference px (nil when it cannot be measured yet).
+function R.LiveRect(frame)
+ local c=R.canvas
+ if not (frame.GetLeft and c and c.GetLeft and frame:GetLeft() and c:GetLeft() and frame.GetEffectiveScale and c.GetEffectiveScale) then return nil end
+ local cs,fs=c:GetEffectiveScale(),frame:GetEffectiveScale();if not cs or cs<=0 then return nil end
+ local l,t=(frame:GetLeft()*fs-c:GetLeft()*cs)/cs,(c:GetTop()*cs-frame:GetTop()*fs)/cs
+ return l,t,frame:GetWidth()*fs/cs,frame:GetHeight()*fs/cs
+end
+function R.Resolve(zone,d)
+ for _,kind in ipairs(CARDS) do if R.frames[kind] and R.frames[kind].azsMoving then return end end -- never rearrange under a drag
+ R.shift={};R.noRoom=false;R.overflow=0
+ if FieldKitDB.zoneThemeOverlap then return end
+ local bottomLimit,topLimit=d.size[2]-12,8
+ -- a rectangle is {left,top,right,bottom} of the OPAQUE art
+ local function Opaque(name,x,y,w,h) local n=Inset(name);return {x+n[1],y+n[2],x+w-n[3],y+h-n[4]} end
+ local fixed={}
+ for _,name in ipairs(OBSTACLES) do local r=d.rects[name];if r then table.insert(fixed,Opaque(name,r[1],r[2],r[3],r[4])) end end
+ local movable={}
+ for index,kind in ipairs(CARDS) do
+  if R.CardVisible(kind,d) then
+   local f=R.frames[kind]
+   if FieldKitZoneThemes.Position(f) then local x,y,w,h=R.LiveRect(f);if x then table.insert(fixed,Opaque(kind,x,y,w,h)) end
+   else local x,y,w,h=R.Preferred(kind,d);table.insert(movable,{kind=kind,x=x,y=y,w=w,h=h,index=index,inset=Inset(kind)}) end
+  end
+ end
+ table.sort(movable,function(p,q) if p.y~=q.y then return p.y<q.y end if p.x~=q.x then return p.x<q.x end return p.index<q.index end)
+ local placed={};local deepest=0
+ local function Free(c,y)
+  local l,t,r,b=c.x+c.inset[1],y+c.inset[2],c.x+c.w-c.inset[3],y+c.h-c.inset[4]
+  for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
+   local across=math.min(r,o[3])-math.max(l,o[1]);local depth=math.min(b,o[4])-math.max(t,o[2])
+   if across>0 and depth>TOLERANCE then return false end
+  end end
+  return true
+ end
+ for _,c in ipairs(movable) do
+  local candidates={c.y}
+  for _,list in ipairs({fixed,placed}) do for _,o in ipairs(list) do
+   if math.min(c.x+c.w-c.inset[3],o[3])-math.max(c.x+c.inset[1],o[1])>0 then
+    table.insert(candidates,o[4]+GAP-c.inset[2]);table.insert(candidates,o[2]-GAP-c.h+c.inset[4])
+   end
+  end end
+  table.sort(candidates)
+  local best
+  for _,y in ipairs(candidates) do if y>=c.y and y+c.h-c.inset[4]<=bottomLimit and Free(c,y) then best=y;break end end
+  if not best then for n=table.getn(candidates),1,-1 do local y=candidates[n];if y<c.y and y+c.inset[2]>=topLimit and Free(c,y) then best=y;break end end end
+  if not best then best=c.y;R.noRoom=true end
+  R.shift[c.kind]=best-c.y;table.insert(placed,{c.x+c.inset[1],best+c.inset[2],c.x+c.w-c.inset[3],best+c.h-c.inset[4]});deepest=math.max(deepest,best+c.h-c.inset[4])
+ end
+ R.overflow=math.max(0,deepest-bottomLimit);if R.noRoom then R.overflow=math.max(R.overflow,1) end
+end
+-- One layout pass: sizes first, then placement. A Bonuses card that cannot fit loses rows (scrolls) instead of overlapping.
+function R.PlanLayout(zone,d)
+ R.StatsPlan(zone,d);R.AccPlan();R.shift=R.shift or {}
+ for pass=1,24 do
+  R.Resolve(zone,d)
+  if R.overflow<=0 or not R.statsOpen or R.statsExtra<=0 then break end
+  R.statsExtra=math.max(0,R.statsExtra-math.max(R.overflow,24,R.noRoom and math.floor(R.statsExtra/4) or 0));R.statsCap=R.StatsCapFor(zone,d.rects.Stats,R.statsExtra)
+ end
+end
+-- Fixed icon column: a real icon, or a neutral socket of the same size (never a guessed icon, never a shifted text).
+function R.RowIcon(r,texture)
+ r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-45,-1);r.icon:SetWidth(26);r.icon:SetHeight(26)
+ if texture then r.icon:SetTexCoord(.07,.93,.07,.93);r.icon:SetVertexColor(1,1,1,1);r.icon:SetTexture(texture)
+ else r.icon:SetTexCoord(0,1,0,1);r.icon:SetTexture("Interface\Buttons\WHITE8X8");r.icon:SetVertexColor(.16,.14,.1,.85) end
+ r.icon:Show()
 end
 function R.Stable(frame,key,apply) if frame.fieldkitStable~=key then frame.fieldkitStable=key;apply(frame) end end
 function R.HideUnwanted() for _,f in pairs(R.frames) do if not f.fieldkitWanted and not f.azsMoving then f:Hide() end end end
 -- Taller cards without new artwork: the art is cut at `split` (inside the uniform body) and a thin mid band is
 -- stretched, so borders stay crisp. top = vertical shift, extra = added height (reference px).
-local GROW={elwynn_complete={Damage={top=6,extra=68,split=110},Lairs={top=0,extra=8,split=70}},
- naxx_complete={Damage={top=-21,extra=21,split=200}}}
-function R.CardRect(kind,d)
+local GROW={elwynn_complete={Damage={top=0,extra=68,split=110},Lairs={top=0,extra=8,split=70}}}
+function R.CardRect(kind,d,noShift)
  local base=d.rects[kind];local grow=base and GROW[R.key] and GROW[R.key][kind]
  if base and kind=="Stats" and (R.statsExtra or 0)>0 then grow={top=0,extra=R.statsExtra,split=100}
- elseif base and kind=="Effects" and (R.effectsShift or 0)>0 then grow={top=R.effectsShift,extra=0,split=0} end
- if not grow then return base,0,0 end
- R.rectCache=R.rectCache or {};local key=R.key..":"..kind..":"..grow.top..":"..grow.extra;local c=R.rectCache[key]
- if not c or c.base~=base then c={base=base,rect={base[1],base[2]+grow.top,base[3],base[4]+grow.extra}};R.rectCache[key]=c end
- return c.rect,grow.extra,grow.split
+ elseif base and kind=="Accessories" and (R.accRows or 0)>0 then
+  local step=R.key=="naxx_complete" and 35 or 36
+  grow={top=0,extra=R.accRows*step,split=0,rep={at=R.key=="naxx_complete" and 121 or 155,h=step,count=R.accRows}}
+ end
+ if not base then return nil,0,0 end
+ local top=(grow and grow.top or 0)+((not noShift and R.shift and R.shift[kind]) or 0)
+ if not grow and top==0 then return base,0,0 end
+ grow=grow or {top=0,extra=0,split=0}
+ R.rectCache=R.rectCache or {};local key=R.key..":"..kind..":"..top..":"..grow.extra..":"..(grow.rep and grow.rep.count or 0);local c=R.rectCache[key]
+ if not c or c.base~=base then c={base=base,rect={base[1],base[2]+top,base[3],base[4]+grow.extra}};R.rectCache[key]=c end
+ return c.rect,(grow.rep and 0 or grow.extra),grow.split,grow.rep
 end
 -- Scrolling window over a list that can outgrow its fixed art card; the wheel moves it, a pager shows position.
 function R.Window(f,kind,total,capacity)
@@ -547,16 +685,16 @@ function R.Panels(variant,zone)
  for _,f in pairs(R.frames) do f.fieldkitWanted=nil end
  if variant~="complete" then R.HideUnwanted();R.MaskBuffs(false);return end
  R.effectBuffs=false
- local d=R.layout;R.StatsPlan(zone,d)
+ local d=R.layout;R.PlanLayout(zone,d)
  if not FieldKitNative.Active() and (not R.readyAt or GetTime()>R.readyAt or R.readySerial~=FieldKitNative.serial) then
   R.readyItems={};R.readyAt=GetTime()+5;R.readySerial=FieldKitNative.serial
   if FieldKitLoadout.readSlot then for _,id in ipairs({2,13,14,11,12}) do local ok,name=pcall(FieldKitLoadout.readSlot,id);if ok then R.readyItems[id]={name=name,bonuses={}} end end end
  end
  local prefs={Damage="meterFrame",Lairs="lairFrame",Accessories="gearFrame",Stats="statsFrame",Effects="effectsFrame"}
  for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do
-  local f=R.frames[kind];local a,extra,split=R.CardRect(kind,d);f.referenceExtra=extra;f.referenceSplit=split
+  local f=R.frames[kind];local a,extra,split,rep=R.CardRect(kind,d);f.referenceExtra=extra;f.referenceSplit=split;f.referenceRepeat=rep
   local nativeName=({Damage="FieldKitMeterFrame",Lairs="FieldKitLairFrame",Accessories="FieldKitGearFrame",Stats="FieldKitStatsFrame",Effects="FieldKitEffectsFrame"})[kind];local folded=(kind=="Stats" and FieldKitDB.statsCollapsed) or (kind=="Accessories" and FieldKitDB.gearCollapsed) or (FieldKitDB.collapsedWindows and FieldKitDB.collapsedWindows[nativeName])
-  if a and FieldKitDB[prefs[kind]] and not folded and not (kind=="Damage" and FieldKitZoneThemes.nativeMeterOpen) then
+  if a and R.CardVisible(kind,d) then
    R.Geometry(f,a);R.Art(f,kind);f:Show();f.fieldkitWanted=true
    R.Stable(f.collapse,"c"..f:GetFrameLevel(),function(b) b:ClearAllPoints();b:SetPoint("TOPRIGHT",f,"TOPRIGHT",-8,-8);b:SetFrameLevel(f:GetFrameLevel()+25) end);f.collapse:Show()
    if f.bodyWash then f.bodyWash:Hide() end
@@ -588,18 +726,20 @@ function R.Panels(variant,zone)
      f.pager:Hide();local count=table.getn(lines)
      if count>capacity then f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →   "..(offset+1).."-"..math.min(count,offset+capacity).." / "..count) end
     end
-    for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 146 or 98)+(i-1)*(zone=="naxx" and 34 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end
+    for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 144 or 98)+(i-1)*(zone=="naxx" and 30 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end
      r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
      if e then r.fieldkitLine=e;r.fieldkitSpell=e.name end
+     if e or i==1 then r:SetHitRectInsets(-48,0,0,0) end
+     if not e then r.icon:Hide() end
      if e then
       if not r.trough then r.trough=r:CreateTexture(nil,"BACKGROUND") end
       r.trough:ClearAllPoints();r.trough:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.trough:SetWidth(a[3]-160);r.trough:SetHeight(8);T.Solid(r.trough,{.12,.14,.08});r.trough:Show()
-      r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-45,0);r.icon:SetTexture(e.icon or FieldKitLoadout.Icon(e.name));r.icon:Show();r.bar:ClearAllPoints();r.bar:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.bar:SetWidth(a[3]-160);r.bar:SetMinMaxValues(0,1);r.bar:SetValue(0);r.bar:SetValue(math.max(0,math.min(1,e.share or 0)));r.bar:SetStatusBarColor(zone=="elwynn" and .65 or .1,zone=="elwynn" and .55 or .75,zone=="elwynn" and .18 or .85);r.bar:Show() end
+      R.RowIcon(r,e.icon or FieldKitLoadout.Icon(e.name));r.bar:ClearAllPoints();r.bar:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.bar:SetWidth(a[3]-160);r.bar:SetMinMaxValues(0,1);r.bar:SetValue(0);r.bar:SetValue(math.max(0,math.min(1,e.share or 0)));r.bar:SetStatusBarColor(zone=="elwynn" and .65 or .1,zone=="elwynn" and .55 or .75,zone=="elwynn" and .18 or .85);r.bar:Show() end
     end
     if not lines[1] then
      -- Empty state: centred in the content area between the tab rows and the card foot, not in the whole frame.
-     local top=zone=="naxx" and 146 or 98;local bottom=zone=="naxx" and a[4]-30 or a[4]-52
+     local top=zone=="naxx" and 144 or 98;local bottom=zone=="naxx" and a[4]-30 or a[4]-52
      local r=Row(f,1,24,top,a[3]-48,bottom-top);r.label:SetWidth(a[3]-48);r.label:SetHeight(bottom-top);r.label:SetJustifyH("CENTER");r.label:SetJustifyV("MIDDLE")
      r.label:SetText(FieldKit_L("No combat data"));r.value:SetText("");r.value:SetWidth(0)
     end
@@ -629,7 +769,7 @@ function R.Panels(variant,zone)
     local tab=FieldKitDB.loadoutTab==2 and 2 or 1
     -- The scroll position lives in the Spells tab label (header): the card body keeps every socket row free.
     local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset,range=0,nil
-    if tab==2 then offset=R.Window(f,"Accessories",total,5);if f.pager:IsShown() then range=string.gsub(f.pager:GetText()," / ","/") end;f.pager:Hide() end
+    if tab==2 then offset=R.Window(f,"Accessories",total,7);if f.pager:IsShown() then range=string.gsub(f.pager:GetText()," / ","/") end;f.pager:Hide() end
     R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end,{[2]=range})
     if tab==1 then
      local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
@@ -639,7 +779,7 @@ function R.Panels(variant,zone)
      end
     else
      if total==0 then local r=Row(f,1,72,R.SocketY(zone,1),a[3]-94,R.SocketH(zone));r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
-     for i=1,math.min(5,total-offset) do
+     for i=1,math.min(7,total-offset) do
       local e=spells[offset+i];local r=Row(f,i,72,R.SocketY(zone,i),a[3]-94,R.SocketH(zone));r.entry=e
       r.label:SetText(e.name or "?");r.value:SetText(e.rank or "");r.value:SetWidth(78);r.label:SetWidth(a[3]-98-82)
       local icon=FieldKitLoadout.Icon(e.name);if icon then R.SocketIcon(r,zone,icon) end

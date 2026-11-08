@@ -55,6 +55,9 @@ function methods:GetChecked() return self.checked end
 function methods:SetParent(p) self.parent=p end
 function methods:GetParent() return self.parent end
 for _,k in ipairs({"SetFont","SetTextColor","SetJustifyH","SetTexCoord","SetFrameStrata","SetStatusBarTexture","SetStatusBarColor","SetMinMaxValues","SetMovable","RegisterForDrag","EnableMouse","SetBackdrop","SetBackdropColor","SetBackdropBorderColor","SetVertexColor","SetBlendMode","Enable","Disable","SetClampedToScreen","SetHitRectInsets","SetValueStep","SetNormalTexture","SetPushedTexture","SetHighlightTexture","RegisterForClicks","SetID","SetOwner","AddLine","SetToplevel","StartMoving","StopMovingOrSizing","SetScale","SetAlphaGradient","SetJustifyV"}) do methods[k]=function() end end
+function methods:SetJustifyH(v) self.justifyH=v end
+function methods:GetJustifyH() return self.justifyH or "LEFT" end
+function methods:IsMouseEnabled() return self.mouseEnabled==true end
 function methods:SetFrameStrata(v) self.strata=v end
 function methods:GetFrameStrata() return self.strata or "MEDIUM" end
 function CreateFrame(kind,name,parent,template)

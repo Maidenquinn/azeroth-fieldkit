@@ -136,6 +136,11 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.19 - PLACEMENT DYNAMIQUE DES CARTES
+Les cartes ne se chevauchent plus (option "Autoriser le chevauchement"). Equipement : 7 sorts. Degats : lignes alignees,
+icones, infobulle thematisee, aucun clic ne s'ouvre en fenetre. Carte : la texture suit le cadre pendant le deplacement.
+A recetter en jeu, Elwynn et Naxx Complete.
+
 ALPHA.18 - BONUSES EN PLACE, INFOBULLES DEGATS, ENGRENAGE
 All statistics deploie la carte Bonuses ; survol d'une ligne Degats = infobulle complete, clic = rien ;
 indicateur de Sorts dans l'onglet ; engrenage AzerothHub a l'interieur de l'ouverture.

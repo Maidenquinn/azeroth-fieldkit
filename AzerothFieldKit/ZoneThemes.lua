@@ -279,7 +279,7 @@ function C.Tick()
  C.deadline=now+.2;C.Refresh()
 end
 function C.Set(key,value)
- local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeArt=true,zoneThemeScale=true,cardOpacity=true}
+ local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
  C.Suspend();FieldKitDB[key]=value
  if FieldKit.ApplyHUDProfileLive then FieldKit.ApplyHUDProfileLive() end
@@ -356,6 +356,7 @@ function FieldKitThemeUI(parent,offset)
  local enabled=Button("zoneThemes","toggle","Enable / disable themes",0,334,260)
  local map=Button("zoneThemeMinimap","toggle","Square minimap",274,334,260)
  local art=Button("zoneThemeArt","toggle","Character ornaments",548,334,260)
+ local overlap=Button("zoneThemeOverlap","toggle","Allow card overlap",822,334,200)
  local sliders={}
  for i,key in ipairs({"zoneThemeScale","cardOpacity"}) do
   local title=T.Label(page,nil,(i-1)*420,384,400,26,18,T.text,true)

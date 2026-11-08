@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha.19 - 2026-11-08 (card placement engine, unreleased)
+
+- Placement engine (vertical phase): the preferred position of a card (its default rectangle or the spot the user saved) is separate from the displayed one. `R.Resolve` is a pure, deterministic function of the preferred layout, the visible card sizes and the protected HUD rectangles (header, chat, identity, nav, vitality, map), measured on their OPAQUE art. A card that would overlap another is pushed down (4 px gap), else searched upward, else left in place and flagged; cards the user placed are obstacles and are never moved or rewritten; nothing is rearranged while a card is dragged; the default approved layout is not moved (6 px tolerance for the art's own overlaps); a Bonuses card that cannot fit loses rows (scroll) instead of overlapping. Option "Allow card overlap" (off by default) restores the historical behaviour. Left/right search is NOT implemented yet (plan in the delivery report).
+- Equipment/Spells: seven visible spell rows, the card grows with a repeated art row slice (sockets and separators stay periodic); scroll only beyond seven.
+- Damage: one row geometry for the six categories (alignment is reset on every row, a centred empty state no longer leaks into the next category), neutral icon socket when no icon is known; the hit area of a line includes its icon; a click on the icon column or the card background opens no window.
+- Damage tooltip: one themed frame (icon, name, share, then Damage / Critical hits / Other sections that only exist when the data does), placed beside the line, never taking the pointer; the native GameTooltip is no longer used for it.
+- Map: the native map is refreshed while its owner is dragged, so its texture cannot lag behind (or leave) its frame. Naxxramas Damage no longer grows upward over the identity card (alpha.17 regression, measured: 20 px overlap): six rows at pitch 30 fit its approved height.
+
 ## 0.6.0-alpha.18 - 2026-11-08 (in-place Bonuses, hover tooltips, gear placement, unreleased)
 
 - Map buttons: ring-style third-party buttons (AzerothHub gear) now ride just INSIDE the visible opening (centre 14 px in) instead of 6 px outside it, so they never sit on the rim art or the labels under the map ("Heroic III"). The map's drag handle was a HIGH-strata button at M.root+50 covering the whole map when the HUD is unlocked, i.e. above the buttons it was meant to leave alone: it is now at the Minimap's own level, below its child buttons. `/fieldkit mapdiag` also prints the frame under the mouse, the handle level, the last ring placements (raw owner offsets -> applied) and any hidden button whose alpha is raised (with the mouse position), to identify the "icon returns on hover" culprit.

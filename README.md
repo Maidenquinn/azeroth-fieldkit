@@ -1,6 +1,6 @@
 # Azeroth FieldKit
 
-> **Development branch: 0.6.0-alpha.18.** Elwynn/Naxxramas themes, three HUD layouts,
+> **Development branch: 0.6.0-alpha.19.** Elwynn/Naxxramas themes, three HUD layouts,
 > themed settings, square native minimap and reversible native frame ownership.
 > Not merged or published. Start with [the French acceptance guide](docs/RECEPTION_0.6.0.txt).
 

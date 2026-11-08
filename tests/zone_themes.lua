@@ -2,7 +2,7 @@
 TARGET=nil
 fire(FieldKitFrame,"VARIABLES_LOADED")
 SlashCmdList.FieldKit("")
-assert(FieldKitZoneThemes.ui and table.getn(FieldKitZoneThemes.ui)==9,"Theme settings must be present in the real options journey")
+assert(FieldKitZoneThemes.ui and table.getn(FieldKitZoneThemes.ui)==10,"Theme settings must be present in the real options journey")
 local C,H,M,T=FieldKitZoneThemes,FieldKitThemeHUD,FieldKitThemeMinimap,FieldKitTheme
 assert(not C.active and not FieldKitDB.zoneThemes)
 FieldKit.zoneThemeReady=false;FieldKitDB.zoneThemes=true;FieldKitDB.zoneThemeMode="naxx"
@@ -343,11 +343,11 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  assert(acc.rows[1].label:GetText()=="Amulet of Test" and not C.open.Accessories,zone..": equipment tab content")
  click(acc.cardTabs[2]);assert(FieldKitDB.loadoutTab==2 and not C.open.Accessories,zone..": Spells replaces the content of the same card")
  assert(acc:IsShown() and acc.rows[1].label:GetText()=="Spell 1" and acc.rows[1].value:GetText()=="Rank 1" and acc.rows[1].entry.name=="Spell 1",zone..": spells listed with ranks and tooltip entries")
- assert(not acc.pager:IsShown() and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"1-5/8",1,true),zone..": the scroll position is in the Spells tab, not over the rows")
+ assert(not acc.pager:IsShown() and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"1-7/8",1,true),zone..": the scroll position is in the Spells tab, not over the rows")
  Inside(acc,zone,"Accessories")
  this=acc;arg1=-1;acc.scripts.OnMouseWheel();assert(R.scroll.Accessories==1 and acc.rows[1].label:GetText()=="Spell 2",zone..": wheel scrolls the list")
 
- arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[5].label:GetText()=="Spell 8" and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"4-8/8",1,true) and not acc.pager:IsShown(),zone..": scrolling is clamped")
+ arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[7].label:GetText()=="Spell 8" and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"2-8/8",1,true) and not acc.pager:IsShown(),zone..": scrolling is clamped")
  click(acc.cardTabs[1]);assert(FieldKitDB.loadoutTab==1 and acc.rows[1].label:GetText()=="Amulet of Test" and not acc.pager:IsShown(),zone..": back to Equipment")
  FieldKitLoadout.items,FieldKitLoadout.spells=oldItems,oldSpells
  -- Effects: 0,1,2,4,many
@@ -467,7 +467,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  local dm=R.frames.Damage;local dr=R.CardRect("Damage",R.layout)
  for k=1,6 do local b=R.tabs[k];assert(b:IsShown() and b:GetHeight()>=24 and b:GetWidth()>=80,zone..": damage tab hit area "..k) end
  local seenLevel=R.tabs[1]:GetFrameLevel();local key=R.tabs[1].layoutKey;C.Refresh(true);assert(R.tabs[1].layoutKey==key and R.tabs[1]:GetFrameLevel()==seenLevel,zone..": tab layout is stable across refreshes")
- local r1=dm.rows[1];local _,_,_,rx,ry=r1:GetPoint();local top=zone=="naxx" and 146 or 98;local bottom=zone=="naxx" and dr[4]-30 or dr[4]-52
+ local r1=dm.rows[1];local _,_,_,rx,ry=r1:GetPoint();local top=zone=="naxx" and 144 or 98;local bottom=zone=="naxx" and dr[4]-30 or dr[4]-52
  if r1.label:GetText()==FieldKit_L("No combat data") then
   assert(rx==24 and -ry==top and r1:GetHeight()==bottom-top and r1.label:GetWidth()==dr[3]-48,zone..": empty state spans the content area (centred)")
  end
@@ -571,7 +571,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  click(R.tabs[1])
  -- Damage card: taller, art contiguous, neighbours clear
  C.Refresh(true);local d0=R.layout.rects.Damage;local a=R.CardRect("Damage",R.layout)
- assert(a[4]>d0[4] and dm:GetHeight()==a[4],zone..": Damage card is taller")
+ assert((zone=="elwynn")==(a[4]>d0[4]) and dm:GetHeight()==a[4],zone..": Damage card is taller only where the art has room (Naxxramas keeps its approved height)")
  local pieces={};for _,t in ipairs(dm.referenceTiles) do if t:IsShown() then local _,_,_,_,y=t:GetPoint();table.insert(pieces,{-y,t:GetHeight()}) end end
  table.sort(pieces,function(p,q) return p[1]<q[1] end);local reach=0
  for _,p in ipairs(pieces) do assert(p[1]==reach,zone..": Damage art has a gap or overlap at "..tostring(p[1]).." (expected "..tostring(reach)..")");reach=p[1]+p[2] end
@@ -579,9 +579,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  local rects=R.layout.rects;local L=R.CardRect("Lairs",R.layout)
  if zone=="elwynn" then
   assert(L[2]+L[4]-7<a[2]+6,"Lairs bottom edge stays above the taller Damage card");assert(a[2]+a[4]-6<=rects.chat[2]+9,"Damage bottom edge stays above the chat")
- else
-  assert(a[2]+1>rects.header[2]+rects.header[4]-8 or a[2]>rects.header[2]+rects.header[4]-8,"Damage stays below the header");assert(a[2]+a[4]-5<L[2]+2,"Damage bottom edge stays above the Lairs card")
- end
+ else assert(a[2]==rects.Damage[2] and a[4]==rects.Damage[4],"Naxxramas Damage keeps its approved place (identity card above, Lairs below)") end
  -- Lairs: larger inner margins, four guardians, long names
  local lairs={};for i=1,4 do table.insert(lairs,{name="Anub'Rekhan the Very Long Named Guardian "..i,state="awake",x=i,y=0}) end
  local oldRead=FieldKitNative.Read;FieldKitNative.Read=function(name,...) if name=="AZS_GetLairs" then return lairs end return oldRead(name,unpack(arg)) end
@@ -626,7 +624,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   FieldKitDB.language=lang;FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
   FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);local acc=R.frames.Accessories
   assert(not acc.pager:IsShown(),zone..": no counter over the rows ("..count.." spells, "..lang..")")
-  local label=acc.cardTabs[2].fieldkitLabel:GetText();assert((count>5)==(string.find(label,"/",1,true)~=nil),zone..": range in the tab only when scrolling is needed ("..count..")")
+  local label=acc.cardTabs[2].fieldkitLabel:GetText();assert((count>7)==(string.find(label,"/",1,true)~=nil),zone..": range in the tab only when scrolling is needed ("..count..")")
   local lastBottom=0;for _,r in ipairs(acc.rows) do if r:IsShown() then local _,_,_,_,y=r:GetPoint();lastBottom=math.max(lastBottom,-y+r:GetHeight()) end end
   assert(lastBottom<=R.CardRect("Accessories",R.layout)[4]-10,zone..": rows stay inside the card")
  end end
@@ -661,8 +659,8 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   local shown=0;local lowest=0;for _,r in ipairs(f.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();lowest=math.max(lowest,-y+r:GetHeight()) end end
   assert(shown==math.min(n,R.statsCap or n) and f.rows[1].label:GetText()=="Stat 1" and f.rows[1].value:GetText()=="+1%",zone..": rows show the live values ("..n..")")
   assert(lowest<=rect[4]-(zone=="naxx" and 44 or 48)+4,zone..": rows end above the foot ("..lowest.." vs "..rect[4]..")")
-  assert(rect[2]+rect[4]<=R.layout.size[2]-12 and eff[2]+eff[4]<=R.layout.size[2]-12,zone..": nothing leaves the screen ("..n..")")
-  assert(rect[2]+rect[4]<=eff[2]+eff[4] and (R.effectsShift==0 or rect[2]+rect[4]-12<=eff[2]),zone..": Bonuses does not run into Effects ("..n..")")
+  assert(rect[2]+rect[4]<=R.layout.size[2] and eff[2]+eff[4]<=R.layout.size[2] and R.overflow<=0 and not R.noRoom,zone..": nothing leaves the screen ("..n..") stats="..(rect[2]+rect[4]).." eff="..(eff[2]+eff[4]).." size="..R.layout.size[2].." extra="..tostring(R.statsExtra).." noRoom="..tostring(R.noRoom).." over="..tostring(R.overflow))
+  assert(rect[2]+rect[4]<=eff[2]+eff[4] and ((R.shift.Effects or 0)==0 or rect[2]+rect[4]-12<=eff[2]),zone..": Bonuses does not run into Effects ("..n..")")
   assert(f.more:IsShown(),zone..": a foot button is there to reduce the card")
   src.rows[1].value:SetText("+99%");C.Refresh(true);assert(f.rows[1].value:GetText()=="+99%",zone..": values keep updating while expanded")
   if n>(R.statsCap or n) then this=f;arg1=-100;f.scripts.OnMouseWheel();assert(f.rows[math.min(n,R.statsCap)].label:GetText()=="Stat "..n,zone..": the last statistic is reachable by scrolling")
@@ -676,30 +674,33 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]={"TOPLEFT","BOTTOMLEFT",900,300}
  f.referenceRect=nil;R.frames.Effects.referenceRect=nil;C.revision=C.revision+1;C.Refresh(true)
  local p,rel,rp,x,y=f:GetPoint();assert(p=="TOPLEFT" and x==1200 and y==640,zone..": saved position before growing")
- R.statsOpen=true;C.Refresh(true);p,rel,rp,x,y=f:GetPoint();assert(p=="TOPLEFT" and x==1200 and y==640 and R.effectsShift==0,zone..": custom positions are kept after the height change, Effects not pushed")
+ R.statsOpen=true;C.Refresh(true);p,rel,rp,x,y=f:GetPoint();assert(p=="TOPLEFT" and x==1200 and y==640 and (R.shift.Effects or 0)==0,zone..": custom positions are kept after the height change, Effects not pushed")
  R.statsOpen=false;C.Refresh(true);p,rel,rp,x,y=f:GetPoint();assert(x==1200 and y==640,zone..": and after reducing")
  FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelStats"]=nil;FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]=nil
  src.rows=realRows;R.statsOpen=false
 end
--- Damage hover tooltips
+-- Damage hover tooltips (themed tip frame, sections only when data exists)
 do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
- local lines,shownTip,hidden={},0,0
- local old={GameTooltip.SetOwner,GameTooltip.SetText,GameTooltip.AddLine,GameTooltip.Show,GameTooltip.Hide}
- GameTooltip.SetOwner=function() lines={} end;GameTooltip.SetText=function(_,t) table.insert(lines,t) end
- GameTooltip.AddLine=function(_,t) table.insert(lines,t) end;GameTooltip.Show=function() shownTip=shownTip+1 end;GameTooltip.Hide=function() hidden=hidden+1 end
- local oldRead=FieldKitMeterLedger.Read
+ local function TipText() local out={H.tipTitle:GetText()};for _,r in ipairs(H.tipRows) do if r:IsShown() and r:GetText() then table.insert(out,r:GetText()) end end;return table.concat(out,"|") end
+ local oldRead=FieldKitMeterLedger.Read;local oldStats=FieldKitMeterLedger.Stats
  FieldKitMeterLedger.Read=function() return {{name="Fireball",displayName="Fireball",dmg=1200,share=.6,dps=45.5,icon="Interface\Icons\X"},{name="Partial"}},2000,80,true end
+ FieldKitMeterLedger.Stats=function(name) if name=="Fireball" then return {hits=20,crits=5,critPct=25,maxHit=300,maxCrit=620,avg=60,burst=410,amount=1200,kills=3} end end
  C.Refresh(true);local dm=R.frames.Damage
- local framesBefore=table.getn(objects)
- local row=dm.rows[1];this=row;row.scripts.OnEnter()
- local text=table.concat(lines,"|");assert(string.find(text,"Fireball",1,true) and string.find(text,"60.0%",1,true) and string.find(text,"45.5",1,true) and string.find(text,"1200",1,true),"tooltip shows name, share, DPS and total")
- assert(shownTip>0,"the native tooltip is shown on hover");row.scripts.OnLeave();assert(hidden>0,"and hidden when the cursor leaves")
- local partial=dm.rows[2];this=partial;partial.scripts.OnEnter();text=table.concat(lines,"|")
- assert(string.find(text,"Partial",1,true) and not string.find(text,"DPS",1,true) and not string.find(text,"%%"),"absent data is not invented")
+ local row=dm.rows[1];this=row;row.scripts.OnEnter();local framesBefore=table.getn(objects) -- the tip frame is created once, by the first hover
+ local text=TipText()
+ for _,needle in ipairs({"Fireball","60.0%","1200","45.5","60","300","410","25%","620","Hits: 20","3"}) do assert(string.find(text,needle,1,true) or string.find(text,string.gsub(needle,"Hits: ",""),1,true),"tooltip lacks "..needle..": "..text) end
+ assert(H.tip:IsShown() and H.tip.icon:IsShown() and not H.tip:IsMouseEnabled(),"themed tip with the spell icon, never taking the pointer")
+ local x=H.tip:GetPoint();assert(x=="TOPLEFT" or x=="TOPRIGHT","tip is anchored beside the row, never over it")
+ row.scripts.OnLeave();assert(not H.tip:IsShown(),"hidden when the cursor leaves")
+ local partial=dm.rows[2];this=partial;partial.scripts.OnEnter();text=TipText()
+ assert(string.find(text,"Partial",1,true) and not string.find(text,"DPS",1,true) and not string.find(text,"%",1,true) and not H.tip.icon:IsShown(),"absent data and icon are not invented: "..text)
  for i=1,20 do this=row;row.scripts.OnEnter();row.scripts.OnLeave() end;assert(table.getn(objects)==framesBefore,"hovering never creates frames")
  local wasShown=FieldKitMeterFrame:IsShown();click(row);assert(not C.open.Damage and FieldKitMeterFrame:IsShown()==wasShown,"a left click on a line opens no window")
- FieldKitMeterLedger.Read=oldRead;GameTooltip.SetOwner,GameTooltip.SetText,GameTooltip.AddLine,GameTooltip.Show,GameTooltip.Hide=old[1],old[2],old[3],old[4],old[5]
+ this=dm;dm.scripts.OnMouseUp();assert(not C.open.Damage,"nor does a click on the icon column (card background)")
+ -- the tooltip must not break the pinned details of other cards
+ H.Tip(dm,"Pinned",{"a"},true);assert(H.tip:IsMouseEnabled() and H.tipClose:IsShown(),"classic pinned tips still take the pointer and show Close");H.pinned=false;H.tip:Hide()
+ FieldKitMeterLedger.Read,FieldKitMeterLedger.Stats=oldRead,oldStats
 end
 -- Map handle sits below the map's own buttons; gear rides inside the opening
 do
@@ -715,3 +716,101 @@ do
  C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
 end
 print("Bonuses expansion, Damage hover tooltips, map handle and gear placement passed (synthetic)")
+
+-- alpha.19: placement engine, seven spells, damage categories, map follower.
+local function Opaque(kind)
+ local rect=R.CardRect(kind,R.layout);local n=({elwynn_complete={Damage={10,6,0,6},Lairs={10,9,9,7},Accessories={8,5,8,6},Stats={8,7,7,8},Effects={8,5,7,11}},
+  naxx_complete={Damage={4,1,6,5},Lairs={7,2,5,9},Accessories={9,0,11,0},Stats={10,0,11,0},Effects={9,3,9,10}}})[R.key][kind]
+ return {rect[1]+n[1],rect[2]+n[2],rect[1]+rect[3]-n[3],rect[2]+rect[4]-n[4]}
+end
+local function NoOverlap(label)
+ local kinds={"Damage","Lairs","Accessories","Stats","Effects"};local seen={}
+ for _,k in ipairs(kinds) do if R.CardVisible(k,R.layout) and not FieldKitZoneThemes.Position(R.frames[k]) then table.insert(seen,{k,Opaque(k)}) end end
+ for i=1,table.getn(seen) do for j=i+1,table.getn(seen) do
+  local a,b=seen[i][2],seen[j][2]
+  local across=math.min(a[3],b[3])-math.max(a[1],b[1]);local depth=math.min(a[4],b[4])-math.max(a[2],b[2])
+  assert(not (across>0 and depth>6),label..": "..seen[i][1].." and "..seen[j][1].." overlap by "..tostring(depth))
+ end end
+end
+local function Snapshot(t) local out={} for k,v in pairs(t or {}) do out[k]=v end return out end
+local realStatsRows=FieldKitStatsFrame.rows
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+ local oldSpells=FieldKitLoadout.spells
+ R.statsOpen=false;FieldKitDB.loadoutTab=1;C.Refresh(true)
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do assert((R.shift[k] or 0)==0,zone..": the approved default layout is not moved ("..k..")") end
+ -- seven spells: the card grows, the cards below follow without overlapping, and come back when the room is free again
+ for _,count in ipairs({0,1,5,7,8,12}) do
+  FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="R"..i,rankValue=i,bonuses={},upgrades={}}) end
+  FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);local acc=R.frames.Accessories;local base=R.layout.rects.Accessories
+  local rows=math.max(0,math.min(7,count)-5);local step=(zone=="naxx" and 35 or 36)
+  assert(acc:GetHeight()==base[4]+rows*step,zone..": card height for "..count.." spells")
+  local shown=0;for i,r in ipairs(acc.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();assert(-y==R.SocketY(zone,i),zone..": row "..i.." sits on socket "..i.." ("..count..")") end end
+  assert(shown==math.max(1,math.min(7,count)),zone..": visible spell rows for "..count)
+  assert((count>7)==(string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"/",1,true)~=nil),zone..": scroll only beyond seven")
+  local reach=0;local pieces={};for _,t in ipairs(acc.referenceTiles) do if t:IsShown() then local _,_,_,_,y=t:GetPoint();table.insert(pieces,{-y,t:GetHeight()}) end end
+  table.sort(pieces,function(p,q) return p[1]<q[1] end);for _,p in ipairs(pieces) do assert(p[1]==reach,zone..": art continuity at "..p[1].." expected "..reach.." ("..count..")");reach=reach+p[2] end
+  assert(reach==acc:GetHeight(),zone..": art ends at the card bottom ("..count..")")
+  NoOverlap(zone.." "..count.." spells")
+  if rows==0 then for _,k in ipairs({"Stats","Effects"}) do assert((R.shift[k] or 0)==0,zone..": "..k.." is back at its preferred place") end
+  else assert((R.shift.Stats or 0)>0,zone..": Stats is pushed below the taller Equipment card") end
+ end
+ FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1
+ -- Bonuses expanded: everything stays apart; reduced: everything returns; preferred positions never rewritten
+ C.Refresh(true);local saved=Snapshot(FieldKitDB.zoneThemePositions and FieldKitDB.zoneThemePositions[C.currentLayout])
+ FieldKitStatsFrame.rows=FakeStats(14);R.statsOpen=true;C.Refresh(true);NoOverlap(zone.." Bonuses expanded")
+ local first=Snapshot(R.shift);C.Refresh(true);local second=Snapshot(R.shift)
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do assert((first[k] or 0)==(second[k] or 0),zone..": placement is deterministic and does not oscillate ("..k..")") end
+ R.statsOpen=false;C.Refresh(true);for _,k in ipairs({"Stats","Effects","Accessories"}) do assert((R.shift[k] or 0)==0,zone..": "..k.." returned to its preferred place after Show less") end
+ for k,v in pairs(Snapshot(FieldKitDB.zoneThemePositions and FieldKitDB.zoneThemePositions[C.currentLayout])) do assert(saved[k]==v,"automatic placement never writes a position") end
+ -- option: overlap allowed keeps the historical layout
+ R.statsOpen=true;FieldKitDB.zoneThemeOverlap=true;C.Refresh(true);local moved=0;for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do moved=moved+math.abs(R.shift[k] or 0) end;assert(moved==0,zone..": with overlap allowed nothing is moved")
+ FieldKitDB.zoneThemeOverlap=false;R.statsOpen=false
+ -- a card under the mouse freezes the layout
+ R.statsOpen=true;C.Refresh(true);local frozen=R.shift;R.frames.Stats.azsMoving=true;R.Resolve(zone,R.layout);assert(R.shift==frozen,zone..": nothing is rearranged while a card is dragged");R.frames.Stats.azsMoving=nil
+ R.statsOpen=false;FieldKitStatsFrame.rows=realStatsRows;C.Refresh(true)
+end
+-- element scales and a user-placed neighbour
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);R.statsOpen=true
+ local oldScale=FieldKitZoneThemes.ElementScale;FieldKitZoneThemes.ElementScale=function(name) if name=="FieldKitReferencePanelStats" then return 1.2 end return oldScale(name) end
+ FieldKitStatsFrame.rows=FakeStats(10);C.Refresh(true);FieldKitZoneThemes.ElementScale=oldScale
+ local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]={"TOPLEFT","BOTTOMLEFT",900,300}
+ local e=R.frames.Effects;e.GetLeft=function() return 1325 end;e.GetTop=function() return 700 end
+ R.canvas.GetLeft=function() return 0 end;R.canvas.GetTop=function() return 933 end;R.canvas.GetEffectiveScale=function() return 1 end;e.GetEffectiveScale=function() return 1 end
+ C.Refresh(true);local a=Snapshot(R.shift);C.Refresh(true);for k,v in pairs(a) do assert(R.shift[k]==v,"deterministic with a pinned neighbour") end
+ e.GetLeft=nil;e.GetTop=nil;R.canvas.GetLeft=nil;R.canvas.GetTop=nil;R.canvas.GetEffectiveScale=nil;e.GetEffectiveScale=nil
+ FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanelEffects"]=nil;R.statsOpen=false;FieldKitStatsFrame.rows=realStatsRows
+end
+-- Six damage categories: one row geometry, icon column, alignment never leaks between categories
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+ local oldRead=FieldKitMeterLedger.Read;local dm=R.frames.Damage
+ local datasets={complete=function() return {{name="A",dmg=10,share=.5,icon="Interface\\Icons\\X"},{name="B",dmg=5,share=.3,icon="Interface\\Icons\\Y"}},15,3,true end,
+  partial=function() return {{name="NoIcon",share=.2},{name="Bare"}},0,0,false end,empty=function() return {},0,0,false end}
+ for view=1,6 do for _,which in ipairs({"empty","complete","partial","empty","complete"}) do
+  click(R.tabs[view]);FieldKitMeterLedger.Read=datasets[which];C.Refresh(true)
+  local first=dm.rows[1];assert(first:IsShown(),zone..": first row present ("..view.."/"..which..")")
+  if which=="empty" then assert(first.label:GetJustifyH()=="CENTER" and not first.icon:IsShown(),zone..": empty state is centred, without an icon")
+  else
+   for i=1,2 do local r=dm.rows[i];assert(r:IsShown() and r.label:GetJustifyH()=="LEFT" and r.value:GetJustifyH()=="RIGHT",zone..": row "..i.." aligned like the others ("..view.."/"..which..")")
+    local _,_,_,ix=r.icon:GetPoint();assert(r.icon:IsShown() and ix==-45 and r.icon:GetWidth()==26,zone..": row "..i.." keeps its icon column ("..view.."/"..which..")") end
+   assert(dm.rows[3] and not dm.rows[3]:IsShown(),zone..": no phantom row")
+  end
+ end end
+ FieldKitMeterLedger.Read=oldRead;click(R.tabs[1])
+end
+-- The native map follows a moving owner
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local M=FieldKitThemeMinimap;local hides=0;local x=100
+ Minimap.Hide=function(self) hides=hides+1;self.shown=false end;M.root.GetLeft=function() return x end;M.root.GetTop=function() return 500 end
+ arg1=.05;M.follower.scripts.OnUpdate();assert(hides==0,"idle: the map is left alone")
+ M.root.azsMoving=true
+ for step=1,5 do x=x+10;arg1=.05;M.follower.scripts.OnUpdate() end;assert(hides==5,"the native map is refreshed each time its owner moved ("..hides..")")
+ arg1=.05;M.follower.scripts.OnUpdate();assert(hides==5,"and not when the owner is still")
+ M.root.azsMoving=nil;x=x+10;M.follower.scripts.OnUpdate();assert(hides==5,"nothing once the drag is over");Minimap.Hide=nil;M.root.GetLeft=nil;M.root.GetTop=nil
+end
+C.Set("zoneThemes",false)
+print("Placement engine, seven spells, damage categories and map follower passed (synthetic)")

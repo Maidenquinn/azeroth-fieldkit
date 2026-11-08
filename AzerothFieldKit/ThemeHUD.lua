@@ -55,16 +55,50 @@ function H.Restore()
  for _,f in pairs(H.summaries or {}) do f:Hide() end
  for _,f in ipairs({H.dock,H.nav,H.header,H.tip,H.micro,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.utility,H.schedule,H.back}) do if f then f:Hide() end end
 end
-function H.Tip(owner,title,lines,pinned)
- if H.pinned and not pinned then return end
+function H.EnsureTip()
  if not H.tip then
   local f=CreateFrame("Frame","FieldKitThemeTooltip",UIParent);H.tip=f
   f:SetFrameStrata("TOOLTIP");f:EnableMouse(true);T.Surface(f,"window")
   H.tipTitle=T.Label(f,"",12,8,316,26,16,T.gold,true)
   for i=1,18 do H.tipRows[i]=T.Label(f,"",12,38+(i-1)*36,316,34,12,T.text) end
-  T.Button(f,nil,"Close",244,8,84,24,function() H.tip:Hide();H.pinned=false end)
+  H.tipClose=T.Button(f,nil,"Close",244,8,84,24,function() H.tip:Hide();H.pinned=false end)
   f:SetScript("OnMouseDown",function() H.pinned=not H.pinned end)
  end
+end
+-- Themed hover tooltip with an icon, a title, a sub line and titled sections (one frame, reused; never takes the pointer).
+-- spec={icon=,title=,sub=,sections={{head=,lines={{text,{r,g,b}}...}}...}}; sections without lines are not drawn.
+function H.RichTip(owner,spec)
+ H.EnsureTip();local tip=H.tip
+ if not tip.icon then tip.icon=tip:CreateTexture(nil,"ARTWORK");tip.icon:SetWidth(30);tip.icon:SetHeight(30) end
+ tip:EnableMouse(false);if H.tipClose then H.tipClose:Hide() end
+ local x=12
+ if spec.icon then tip.icon:ClearAllPoints();tip.icon:SetPoint("TOPLEFT",tip,"TOPLEFT",12,-8);tip.icon:SetTexCoord(.07,.93,.07,.93);tip.icon:SetTexture(spec.icon);tip.icon:Show();x=50 else tip.icon:Hide() end
+ H.tipTitle:ClearAllPoints();H.tipTitle:SetPoint("TOPLEFT",tip,"TOPLEFT",x,-8);H.tipTitle:SetWidth(328-x);H.tipTitle:SetText(spec.title or "")
+ local y=spec.sub and 30 or 18;local used=0
+ local function Line(text,color,heading)
+  if used>=18 then return end
+  used=used+1;local row=H.tipRows[used]
+  T.Font(row,12,color or T.text,heading);row:SetText(text);row:SetWidth(316);row:SetHeight(18)
+  row:ClearAllPoints();row:SetPoint("TOPLEFT",tip,"TOPLEFT",12,-y);row:Show();y=y+18
+ end
+ if spec.sub then Line(spec.sub,T.muted);y=math.max(y,spec.icon and 42 or 30) else y=math.max(y,spec.icon and 42 or 30) end
+ for _,section in ipairs(spec.sections or {}) do
+  if table.getn(section.lines or {})>0 then
+   y=y+4;Line(section.head,T.gold,true)
+   for _,entry in ipairs(section.lines) do Line(entry[1],entry[2]) end
+  end
+ end
+ for n=used+1,18 do H.tipRows[n]:Hide() end
+ tip:SetWidth(340);tip:SetHeight(y+12);T.Update(tip);tip:ClearAllPoints()
+ local center=owner.GetCenter and owner:GetCenter();local right=center and center>UIParent:GetWidth()/2
+ if right then tip:SetPoint("TOPRIGHT",owner,"TOPLEFT",-8,0) else tip:SetPoint("TOPLEFT",owner,"TOPRIGHT",8,0) end
+ tip:SetClampedToScreen(true);H.tipOwner=owner;H.pinned=false;tip:Show()
+end
+function H.Tip(owner,title,lines,pinned)
+ if H.pinned and not pinned then return end
+ H.EnsureTip()
+ H.tipTitle:ClearAllPoints();H.tipTitle:SetPoint("TOPLEFT",H.tip,"TOPLEFT",12,-8);H.tipTitle:SetWidth(316);if H.tip.icon then H.tip.icon:Hide() end
+ H.tip:EnableMouse(true);if H.tipClose then H.tipClose:Show() end
  H.tipTitle:SetText(title or "FieldKit");H.tip:SetWidth(340)
  local count=math.min(18,table.getn(lines or {}))
  local y=38
