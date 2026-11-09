@@ -321,6 +321,7 @@ function R.Update(variant,zone)
 end
 -- Re-draw only the art tiles' strip around the map opening on a non-interactive frame above the native map.
 function R.MapRim(M,hole)
+ if M.probe.rim==false then if M.rim then M.rim:Hide() end;return end
  local rects=R.layout.rects;local name=rects.mapArt and "mapArt" or "identity";local comp=rects.mapArt and M.root or H.identity
  local origin=rects[name];local tiles=R.layout.tiles[name]
  if not comp or not origin or not tiles then if M.rim then M.rim:Hide() end;return end
@@ -360,7 +361,7 @@ function R.Map()
   local follower=CreateFrame("Frame");M.follower=follower;follower.t=0
   follower:SetScript("OnUpdate",function()
    local owner=(M.root and M.root.azsMoving and M.root) or (H.identity and H.identity.azsMoving and H.identity) or (M.dragOwner and M.dragOwner.azsMoving and M.dragOwner)
-   if not owner then M.followStamp=nil;return end
+   if not owner or M.probe.follower==false then M.followStamp=nil;return end
    follower.t=follower.t+(arg1 or 0);if follower.t<.03 then return end;follower.t=0
    local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())
    if stamp~=M.followStamp then M.followStamp=stamp;Minimap:Hide();Minimap:Show() end
@@ -372,8 +373,9 @@ function R.Map()
  if M.dragHandle then M.dragHandle:Hide();M.dragHandle:EnableMouse(false) end
  M.root:EnableMouse(M.GroupOwner()==M.root)
  M.launcherProxies=M.launcherProxies or {}
+ if M.probe.proxies==false then for _,proxy in pairs(M.launcherProxies) do proxy:Hide() end;M.Unpark() end
  for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton"}) do
-  local original=getglobal(name)
+  local original=M.probe.proxies~=false and getglobal(name)
   if original then
    local proxy=M.launcherProxies[i]
    if not proxy then
@@ -386,7 +388,8 @@ function R.Map()
    proxy.icon:SetTexture(path or (i==1 and T.media.."ChronicleSeal.tga" or "Interface\\Icons\\INV_Misc_Book_09"));proxy:ClearAllPoints();local left=a[1]<R.layout.size[1]/2;proxy:SetPoint(left and "TOPLEFT" or "TOPRIGHT",M.root,left and "TOPRIGHT" or "TOPLEFT",left and 5 or -5,-8-(i-1)*36);proxy:SetFrameStrata("HIGH");proxy:SetFrameLevel(M.root:GetFrameLevel()+80);M.Park(original);if original:GetAlpha()>.01 then proxy:Show() else proxy:Hide() end
   end
  end
- M.root:SetMovable(M.GroupOwner()==M.root);M.Ring(hole[3]/2,hole[4]/2)
+ M.root:SetMovable(M.GroupOwner()==M.root)
+ if M.probe.ring then M.Ring(hole[3]/2,hole[4]/2) else M.RingRestore() end
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
   local x,y=a[1]+a[3]-29,a[2]+a[3]-(i==1 and 28 or 60)
@@ -527,7 +530,10 @@ function R.NoteMoved(name)
  for _,k in ipairs(CARDS) do if "FieldKitReferencePanel"..k==name then kind=k end end
  if not kind then return end
  R.lastMoved=kind;local f=R.frames[kind];if f then f.fieldkitDX,f.fieldkitDY=nil,nil end
+ local before=R.dragDiag and FieldKitZoneThemes.Position(f) and {FieldKitZoneThemes.Position(f)[3],FieldKitZoneThemes.Position(f)[4]}
  R.ClampToScreen(kind)
+ if R.dragDiag and before then local a=FieldKitZoneThemes.Position(f);R.dragReport=kind
+  DEFAULT_CHAT_FRAME:AddMessage(string.format("dragdiag drop %s: saved %.0f,%.0f -> after screen clamp %.0f,%.0f",kind,before[1],before[2],a[3],a[4])) end
  if R.shift then R.shift[kind]=nil end;if R.shiftX then R.shiftX[kind]=nil end
 end
 -- The canvas is the reference rectangle fitted into the screen; the real screen can extend past it (other aspect ratios).
@@ -544,11 +550,11 @@ function R.ScreenBounds(d)
 end
 -- A card is clamped by what is drawn, not by its technical rectangle: the transparent margins may leave the screen.
 function R.ApplyClamp(f,kind)
- local n=Inset(kind);local key=R.key..":"..n[1]..n[2]..n[3]..n[4]
- if f.fieldkitClampKey==key then return end
- f.fieldkitClampKey=key
- if f.SetClampRectInsets then pcall(f.SetClampRectInsets,f,n[1],-n[3],-n[2],n[4]);f:SetClampedToScreen(true)
- else f:SetClampedToScreen(false) end -- corrected at the drop (R.ClampToScreen) instead
+ -- The client keeps the whole TECHNICAL rectangle (its transparent margins included) on screen when SetClampedToScreen is on,
+ -- and SetClampRectInsets is not a reliable way out on this client: the clamp is simply off for the cards, and the drop
+ -- (R.ClampToScreen) brings the DRAWN art flush with the real edge if it was left beyond it.
+ if f.fieldkitClampOff then return end
+ f.fieldkitClampOff=true;f:SetClampedToScreen(false)
 end
 -- At the drop: if the drawn art is beyond the real screen, bring it back flush with the edge (its saved position follows).
 function R.ClampToScreen(kind)
@@ -563,10 +569,25 @@ function R.ClampToScreen(kind)
  local k=(fe and fe>0 and cs) and cs/fe or 1
  a[3]=a[3]+dx*k;a[4]=a[4]-dy*k;f:ClearAllPoints();f:SetPoint(a[1],UIParent,a[2],a[3],a[4])
 end
--- Opaque rectangles of the protected (non-card) HUD parts.
-local function FixedObstacles(d)
+-- Opaque rectangles of the protected (non-card) HUD parts, taken from where those frames REALLY are (the user moves them:
+-- the identity card, the player block, the navigation...). The layout's default rectangle is only a fallback for a frame
+-- that is not shown or cannot be measured yet, so a part that was moved no longer leaves an invisible obstacle behind.
+local OBSTACLE_FRAME={header=function() return H.header end,chat=function() return R.chat end,identity=function() return H.identity end,
+ nav=function() return H.nav end,vitality=function() return H.healthRoot end,mapArt=function() return FieldKitThemeMinimap and FieldKitThemeMinimap.root end}
+local function FixedObstacles(d,report)
  local list={}
- for _,name in ipairs(OBSTACLES) do local r=d.rects[name];if r then local n=Inset(name);table.insert(list,{r[1]+n[1],r[2]+n[2],r[1]+r[3]-n[3],r[2]+r[4]-n[4]}) end end
+ for _,name in ipairs(OBSTACLES) do
+  local r=d.rects[name]
+  if r then
+   local n=Inset(name);local f=OBSTACLE_FRAME[name] and OBSTACLE_FRAME[name]()
+   local x,y,w,h
+   if f and f.IsShown and f:IsShown() then x,y,w,h=R.LiveRect(f) end
+   local source="live"
+   if not x or w<=1 or h<=1 then x,y,w,h=r[1],r[2],r[3],r[4];source="default" end
+   table.insert(list,{x+n[1],y+n[2],x+w-n[3],y+h-n[4],name=name,source=source})
+   if report then table.insert(report,string.format("%-9s %s opaque %.0f,%.0f -> %.0f,%.0f",name,source,x+n[1],y+n[2],x+w-n[3],y+h-n[4])) end
+  end
+ end
  return list
 end
 -- Preferred position of a card: default rectangle, or where the user's saved card really is minus our displacement.
@@ -594,6 +615,20 @@ function R.StatsRoom(d)
  local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanelStats") or 1
  return math.max(0,(limit+n[4]-y)/s-d.rects.Stats[4])
 end
+-- Text report for /fieldkit cardprobe: what the engine sees (screen bounds, the obstacles it really uses, every card).
+function R.Probe()
+ local out={};local d=R.layout;if not d then return {"no reference layout active"} end
+ local l,t,r,b=R.ScreenBounds(d)
+ table.insert(out,string.format("layout %s | screen in ref px %.0f,%.0f -> %.0f,%.0f | canvas %dx%d | overlap option %s",tostring(R.key),l,t,r,b,d.size[1],d.size[2],tostring(FieldKitDB.zoneThemeOverlap)))
+ local obstacles={};FixedObstacles(d,obstacles);for _,line in ipairs(obstacles) do table.insert(out,"  obstacle "..line) end
+ for _,kind in ipairs(CARDS) do
+  local f=R.frames[kind];local a=FieldKitZoneThemes.Position(f)
+  local lx,ly,lw,lh=R.LiveRect(f)
+  table.insert(out,string.format("%-11s shown=%s saved=%s live=%s shift=%s,%s clamp=%s clampAPI=%s",kind,tostring(f:IsShown()),a and string.format("%s/%s %.0f,%.0f",a[1],a[2],a[3],a[4]) or "default",
+   lx and string.format("%.0f,%.0f %.0fx%.0f",lx,ly,lw,lh) or "?",tostring(R.shift and R.shift[kind]),tostring(R.shiftX and R.shiftX[kind]),tostring(f.IsClampedToScreen and f:IsClampedToScreen()),tostring(f.SetClampRectInsets~=nil)))
+ end
+ return out
+end
 function R.Resolve(zone,d)
  for _,kind in ipairs(CARDS) do if R.frames[kind] and R.frames[kind].azsMoving then return end end -- never rearrange under a drag
  R.shift={};R.shiftX={};R.noRoom=false;R.overflow=0
@@ -602,8 +637,7 @@ function R.Resolve(zone,d)
  local sl,st,sr,sb=R.ScreenBounds(d)
  local bottomLimit,topLimit,leftLimit,rightLimit=sb-8,st+8,sl+4,sr-4
  local function Opaque(name,x,y,w,h) local n=Inset(name);return {x+n[1],y+n[2],x+w-n[3],y+h-n[4]} end
- local fixed={}
- for _,name in ipairs(OBSTACLES) do local r=d.rects[name];if r then table.insert(fixed,Opaque(name,r[1],r[2],r[3],r[4])) end end
+ local fixed=FixedObstacles(d)
  local items={}
  for index,kind in ipairs(CARDS) do
   if R.CardVisible(kind,d) then
@@ -666,6 +700,8 @@ function R.Resolve(zone,d)
   table.insert(placed,{c.x+dx+c.inset[1],c.y+dy+c.inset[2],c.x+dx+c.w-c.inset[3],c.y+dy+c.h-c.inset[4]});deepest=math.max(deepest,c.y+dy+c.h-c.inset[4])
  end
  R.overflow=math.max(0,deepest-bottomLimit);if R.noRoom then R.overflow=math.max(R.overflow,1) end
+ if R.dragReport then local k=R.dragReport;R.dragReport=nil
+  DEFAULT_CHAT_FRAME:AddMessage(string.format("dragdiag after resolve %s: shift dy=%s dx=%s noRoom=%s",k,tostring(R.shift[k]),tostring(R.shiftX[k]),tostring(R.noRoom))) end
 end
 -- A card the user placed keeps its saved anchor; the automatic displacement is applied on top of it (and only at display time).
 function R.ApplyShift(f,kind)

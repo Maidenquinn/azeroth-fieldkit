@@ -136,6 +136,10 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.22 - OBSTACLES REELS, DIAGNOSTICS
+Les cartes ne sont plus bloquees par les anciens emplacements des parties deplacees. Engrenage : positionnement natif ;
+/fieldkit cardprobe, dragdiag, mapprobe, mapstack pour diagnostiquer en jeu. A recetter.
+
 ALPHA.21 - BORDS D'ECRAN, BOUTONS DE MINIMAP
 Les cartes vont jusqu'aux vrais bords ; la poignee de carte (qui couvrait les boutons) est supprimee ;
 /fieldkit mapfocus indique quel cadre recoit la souris. A recetter en jeu.

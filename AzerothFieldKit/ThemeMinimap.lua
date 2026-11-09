@@ -1,5 +1,8 @@
 -- Own the native map geometry reversibly, never substitute a painted fake map.
 FieldKitThemeMinimap={active=false,hidden={}}
+-- Runtime-only switches for /fieldkit mapprobe (never saved): ring = edge placement of ring-style buttons through a SetPoint
+-- interception (OFF by default: third-party buttons keep their native positioning), rim/proxies/follower = FieldKit parts.
+FieldKitThemeMinimap.probe={ring=false,rim=true,proxies=true,follower=true}
 local M=FieldKitThemeMinimap
 local borderNames={"MinimapBorder","MinimapBorderTop","MinimapZoneTextButton","MinimapToggleButton","MinimapBackdrop"}
 function M.Rotate(x,y)
@@ -176,6 +179,7 @@ function M.Apply(variant)
  Minimap:ClearAllPoints();Minimap:SetPoint("CENTER",M.root,"CENTER",0,0);Minimap:SetWidth(size);Minimap:SetHeight(size)
  local clock=getglobal("GameTimeFrame")
  if clock then FieldKitThemeHUD.Anchor(clock,"TOPRIGHT",M.root,"TOPRIGHT",0,0);clock:SetScale(.75) end
- M.root:SetMovable(true);M.Ring(size/2,size/2)
+ M.root:SetMovable(true)
+ if M.probe.ring then M.Ring(size/2,size/2) else M.RingRestore() end
  FieldKitTheme.Update(M.root);M.root:Show();return true
 end

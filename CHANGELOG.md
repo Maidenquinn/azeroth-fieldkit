@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.22 - 2026-11-09 (real obstacles, clamp off, map probes, unreleased)
+
+- Cards "returned" from places that were free: the placement engine protected the DEFAULT rectangles of the header, chat, identity card, player block ("Aethus"), navigation and map, but the user moves those parts (the captured SavedVariables place the identity card at 1205,-164 and the player block at 8,-3). A card dropped on one of those old places hit an invisible obstacle and was displaced. Obstacles are now measured on the real frames (R.LiveRect); the default rectangle is only a fallback for a part that is hidden or cannot be measured yet.
+- Right edge: the cards' technical clamp (SetClampedToScreen on the whole rectangle) is now always off; the drop snaps the DRAWN art flush with the real screen edge (alpha.21 only did so when the client lacked SetClampRectInsets).
+- AzerothHub gear / third-party map buttons: the SetPoint interception (edge placement of ring-style buttons) is OFF by default so those buttons keep their native positioning, methods and mouse; `/fieldkit mapprobe ring on` turns it back on for this session. No other FieldKit change on the buttons. Nothing here is saved.
+- Diagnostics (runtime only): `/fieldkit cardprobe` (screen bounds, obstacles actually used, every card: saved/live/shift/clamp), `/fieldkit dragdiag on` (coordinates at the drop, after the screen snap and after the resolve), `/fieldkit mapprobe <ring|rim|proxies|follower|events> <on|off>` (bisect the FieldKit parts around the map; `events` logs the mouse events the gear really receives while its own handlers still run), `/fieldkit mapstack [seconds]` (every shown mouse-enabled frame under the pointer, topmost first), plus `/fieldkit mapfocus` and `mapdiag`.
+
 ## 0.6.0-alpha.21 - 2026-11-08 (real screen edges, map buttons reachable, unreleased)
 
 - Screen edges: cards were held back by (1) SetClampedToScreen on the whole technical rectangle (its transparent margins, 5-11 px, had to stay on screen) and (2) the placement engine comparing with the REFERENCE canvas (margins 8/12 px) while the canvas is only fitted into the screen (e.g. ~1063 px high on a 1080 px screen). Now: screen bounds are measured (R.ScreenBounds), the clamp uses the drawn art (SetClampRectInsets when the client has it, otherwise a snap flush with the real edge at the drop that also updates the saved position), a card the user placed is never moved when nothing is in its way (no margin for manual placement), and automatic placement keeps 8 px from the real edges.

@@ -532,6 +532,7 @@ end
 do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
  local M=FieldKitThemeMinimap
+ FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
  local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local hidden=CreateFrame("Button","AzerothStatsMinimap",Minimap);hidden:SetAlpha(0)
  local shownOne=CreateFrame("Button","AzerothOneMinimapButton",Minimap);shownOne:SetAlpha(1)
@@ -592,6 +593,7 @@ end
 do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
  local M=FieldKitThemeMinimap
+ FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
  local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap)
  local parkedOne=CreateFrame("Button","AzerothStatsMinimap",Minimap);parkedOne:SetPoint("CENTER",Minimap,"CENTER",70,20)
  -- this client may return the relative frame as a name
@@ -709,6 +711,7 @@ do
  local M=FieldKitThemeMinimap
  assert(M.dragHandle==nil,"no FieldKit frame covers the map and its buttons")
  assert(Minimap:IsMouseEnabled()==M.before.mouse,"the native map keeps its own mouse state while themed (FieldKit no longer switches it off)")
+ FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
  local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end;C.Refresh(true)
  for _,angle in ipairs({0,90,180,270,45,225}) do local a=math.rad(angle);gear:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80)
@@ -984,3 +987,67 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  C.Set("zoneThemes",false)
 end
 print("Real screen edges, drop snapping, protected obstacles and map mouse coverage passed (synthetic)")
+
+-- alpha.22: protected parts are measured where they REALLY are (the user moves them), the technical clamp is off, probes.
+local PARTS={}
+local function StagePart(f)
+ f.GetLeft=function(self) local l=Rendered(self);return l end
+ f.GetTop=function(self) local _,t=Rendered(self);return UIH-t end
+ f.GetEffectiveScale=function() return 1 end
+ table.insert(PARTS,f)
+end
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+ R.statsOpen=false;FieldKitDB.loadoutTab=1;R.lastMoved=nil;FieldKitThemeMinimap.probe.ring=false
+ local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ local saved={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local r=R.layout.rects[k];saved[k]={r[1],r[2]} end
+ -- the player block ("Aethus") and the identity card were moved by the user, exactly as in the captured SavedVariables
+ local movedTo={FieldKitThemeIdentity={1205,164},FieldKitThemeVitality={8,3}}
+ for name,pos in pairs(movedTo) do FieldKitDB.zoneThemePositions[layout][name]={"TOPLEFT","TOPLEFT",pos[1],-pos[2]} end
+ SaveAll(layout,saved);Stage();StagePart(H.identity);StagePart(H.healthRoot)
+ Relayout()
+ local report={};local lines=R.Probe()
+ local found={};for _,line in ipairs(lines) do
+  if string.find(line,"^  obstacle identity") then found.identity=line end;if string.find(line,"^  obstacle vitality") then found.vitality=line end end
+ assert(found.identity and string.find(found.identity,"live",1,true),zone..": the identity obstacle is measured where the identity card really is ("..tostring(found.identity)..")")
+ assert(found.vitality and string.find(found.vitality,"live",1,true),zone..": and the player block too ("..tostring(found.vitality)..")")
+ -- (a) a card dropped where those parts USED to be stays exactly there (it was blocked by an invisible obstacle before)
+ local oldIdentity=R.layout.rects.identity;local drop={oldIdentity[1]+40,170} -- just below the player block, inside the old identity rectangle
+ saved.Lairs={drop[1],drop[2]};SaveAll(layout,saved);Relayout();C.Refresh(true)
+ assert((R.shift.Lairs or 0)==0 and (R.shiftX.Lairs or 0)==0,zone..": a card dropped where a moved part used to be is NOT displaced (shift "..tostring(R.shift.Lairs)..","..tostring(R.shiftX.Lairs)..")")
+ local l,t=Rendered(R.frames.Lairs);assert(math.abs(l-drop[1])<.5 and math.abs(t-drop[2])<.5,zone..": it stays exactly where it was dropped")
+ -- (b) a card dropped onto the part's REAL place does give way
+ saved.Lairs={movedTo.FieldKitThemeIdentity[1]+20,movedTo.FieldKitThemeIdentity[2]+30};SaveAll(layout,saved);Relayout();C.Refresh(true)
+ assert((R.shift.Lairs or 0)~=0 or (R.shiftX.Lairs or 0)~=0,zone..": a card dropped onto the real identity card gives way")
+ -- (c) the technical clamp is off for every card
+ for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do
+  local f=R.frames[k];local last;f.fieldkitClampOff=nil;f.SetClampedToScreen=function(self,v) last=v end;C.Refresh(true)
+  assert(last==false,zone..": "..k.." is not clamped by its technical rectangle");f.SetClampedToScreen=nil
+ end
+ for _,p in ipairs(PARTS) do p.GetLeft=nil;p.GetTop=nil;p.GetEffectiveScale=nil end;PARTS={}
+ FieldKitDB.zoneThemePositions[layout]=nil;Unstage();Relayout()
+end
+-- probes: runtime switches for the map, never saved
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local M=FieldKitThemeMinimap
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end
+ M.probe.ring=false;C.Refresh(true);local _,_,_,gx,gy=gear:GetPoint();assert(gx==80 and gy==0 and rawget(gear,"SetPoint")==nil,"default: the gear keeps its native position and method")
+ C.Command("mapprobe ring on");_,_,_,gx,gy=gear:GetPoint();assert(M.probe.ring and math.sqrt(gx*gx+gy*gy)>85,"probe ring on: edge placement")
+ C.Command("mapprobe ring off");_,_,_,gx,gy=gear:GetPoint();assert(not M.probe.ring and gx==80 and gy==0 and rawget(gear,"SetPoint")==nil,"probe ring off: native position and method restored exactly")
+ C.Command("mapprobe rim off");assert(M.rim and not M.rim:IsShown(),"probe rim off hides the overlay");C.Command("mapprobe rim on");assert(M.rim:IsShown())
+ C.Command("mapprobe proxies off");for _,pr in pairs(M.launcherProxies or {}) do assert(not pr:IsShown(),"probe proxies off hides every proxy") end;C.Command("mapprobe proxies on")
+ local hides=0;Minimap.Hide=function(self) hides=hides+1 end;C.Command("mapprobe follower off");M.root.azsMoving=true;M.root.GetLeft=function() return hides end;M.root.GetTop=function() return 1 end;arg1=.05;M.follower.scripts.OnUpdate();assert(hides==0,"probe follower off");M.root.azsMoving=nil;Minimap.Hide=nil;M.root.GetLeft=nil;M.root.GetTop=nil;C.Command("mapprobe follower on")
+ -- event log: the gear's own handlers still run
+ local clicks=0;gear:SetScript("OnClick",function() clicks=clicks+1 end)
+ local messages={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(messages,m) end
+ C.Command("mapprobe events on");click(gear);assert(clicks==1,"events probe: the gear's handler still runs")
+ local logged=false;for _,m in ipairs(messages) do if string.find(m,"gear OnClick",1,true) then logged=true end end;assert(logged,"events probe: the click is logged")
+ C.Command("mapprobe events off");local n=table.getn(messages);click(gear);assert(clicks==2 and table.getn(messages)==n,"events probe off: handler restored, no more log")
+ C.Command("cardprobe");assert(table.getn(messages)>6,"cardprobe prints the screen bounds, the obstacles and every card")
+ C.Command("dragdiag on");assert(R.dragDiag);C.Command("dragdiag off");assert(not R.dragDiag)
+ C.Command("mapstack 3");assert(C.stackAt,"mapstack is scheduled");C.stackAt=nil
+ DEFAULT_CHAT_FRAME.AddMessage=oldAdd;Minimap.GetChildren=oldChildren;C.Set("zoneThemes",false)
+end
+print("Live protected obstacles, clamp off and map/card probes passed (synthetic)")

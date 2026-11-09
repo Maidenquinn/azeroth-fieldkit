@@ -286,7 +286,43 @@ function C.Sample()
  local line=string.format("%s (parent %s) strata=%s level=%s",tostring(name),tostring(pn),tostring(f and f.GetFrameStrata and f:GetFrameStrata()),tostring(f and f.GetFrameLevel and f:GetFrameLevel()))
  if line~=C.focusLast then C.focusLast=line;if table.getn(C.focusLog)<24 then table.insert(C.focusLog,line) end end
 end
+-- /fieldkit mapstack N: after N seconds, list EVERY shown mouse-enabled frame under the pointer, topmost first.
+local STRATA={BACKGROUND=1,LOW=2,MEDIUM=3,HIGH=4,DIALOG=5,FULLSCREEN=6,FULLSCREEN_DIALOG=7,TOOLTIP=8}
+function C.Stack()
+ local x,y=GetCursorPosition();local found={}
+ local function Walk(frame,depth)
+  if depth>14 then return end
+  for _,child in ipairs({frame:GetChildren()}) do
+   if child.IsShown and child:IsShown() and child.IsMouseEnabled and child:IsMouseEnabled() and child.GetLeft and child:GetLeft() then
+    local es=child:GetEffectiveScale()
+    if x>=child:GetLeft()*es and x<=child:GetRight()*es and y>=child:GetBottom()*es and y<=child:GetTop()*es then
+     local parent=child.GetParent and child:GetParent()
+     table.insert(found,{name=child:GetName() or ("<"..tostring(child:GetObjectType())..">"),parent=parent and parent.GetName and parent:GetName() or "?",
+      strata=child:GetFrameStrata(),level=child:GetFrameLevel()})
+    end
+   end
+   Walk(child,depth+1)
+  end
+ end
+ Walk(UIParent,0)
+ table.sort(found,function(p,q) local sp,sq=STRATA[p.strata] or 0,STRATA[q.strata] or 0;if sp~=sq then return sp>sq end return p.level>q.level end)
+ local focus=type(GetMouseFocus)=="function" and GetMouseFocus()
+ DEFAULT_CHAT_FRAME:AddMessage("mapstack: engine focus = "..tostring(focus and focus.GetName and focus:GetName()).." | "..table.getn(found).." mouse frame(s) under the pointer, topmost first:")
+ for i=1,math.min(10,table.getn(found)) do local f=found[i];DEFAULT_CHAT_FRAME:AddMessage(string.format("  %d. %s (parent %s) %s/%d",i,f.name,f.parent,f.strata,f.level)) end
+end
+-- /fieldkit mapprobe events on: log the mouse events the AzerothHub gear really receives (its own handlers still run).
+function C.GearEvents(on)
+ local gear=getglobal("AzerothHubMinimapButton");if not gear then DEFAULT_CHAT_FRAME:AddMessage("mapprobe events: no AzerothHub gear");return end
+ C.gearOriginal=C.gearOriginal or {}
+ for _,event in ipairs({"OnEnter","OnLeave","OnMouseDown","OnMouseUp","OnClick","OnDragStart","OnDragStop"}) do
+  if on and not C.gearOriginal[event] then
+   local original=gear:GetScript(event);C.gearOriginal[event]={original}
+   local name=event;gear:SetScript(event,function() DEFAULT_CHAT_FRAME:AddMessage("gear "..name.." button="..tostring(arg1));if original then original() end end)
+  elseif not on and C.gearOriginal[event] then gear:SetScript(event,C.gearOriginal[event][1]);C.gearOriginal[event]=nil end
+ end
+end
 function C.Tick()
+ if C.stackAt and GetTime()>=C.stackAt then C.stackAt=nil;C.Stack() end
  if C.focusUntil then C.Sample() end
  if type(IsMouseButtonDown)=="function" and not IsMouseButtonDown("LeftButton") then
   for _,frame in ipairs(C.bound or {}) do C.Finish(frame) end
@@ -330,6 +366,20 @@ function C.Command(msg)
    local f=getglobal(name)
    if f then local p=f:GetParent();DEFAULT_CHAT_FRAME:AddMessage(name.." parent="..tostring(p and p:GetName()).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown())) end
   end
+ elseif arg=="cardprobe" then
+  for _,line in ipairs(FieldKitReferenceHUD.Probe()) do DEFAULT_CHAT_FRAME:AddMessage(line) end
+ elseif string.find(arg,"^dragdiag") then
+  FieldKitReferenceHUD.dragDiag=not string.find(arg,"off");DEFAULT_CHAT_FRAME:AddMessage("dragdiag "..(FieldKitReferenceHUD.dragDiag and "on: drop a card, then read the 2 lines" or "off"))
+ elseif string.find(arg,"^mapstack") then
+  local seconds=tonumber((string.gsub(arg,"^mapstack%s*",""))) or 5
+  C.stackAt=GetTime()+seconds;DEFAULT_CHAT_FRAME:AddMessage("mapstack: place the pointer on the gear, report in "..seconds.." s")
+ elseif string.find(arg,"^mapprobe") then
+  local _,_,part,state=string.find(arg,"^mapprobe%s+(%a+)%s+(%a+)")
+  local M=FieldKitThemeMinimap
+  if part and M.probe[part]~=nil and (state=="on" or state=="off") then M.probe[part]=(state=="on");C.Refresh(true)
+  elseif part=="events" and (state=="on" or state=="off") then C.GearEvents(state=="on") end
+  local line="mapprobe:";for _,k in ipairs({"ring","rim","proxies","follower"}) do line=line.." "..k.."="..(M.probe[k] and "on" or "off") end
+  DEFAULT_CHAT_FRAME:AddMessage(line.." (usage: /fieldkit mapprobe <ring|rim|proxies|follower|events> <on|off>)")
  elseif arg=="mapfocus" then C.focusUntil=GetTime()+8;C.focusLog={};C.focusLast=nil;DEFAULT_CHAT_FRAME:AddMessage("mapfocus: move the pointer over the map buttons for 8 seconds")
  elseif arg=="clickdiag" then
   for _,d in ipairs(FieldKitReferenceHUD.diagButtons or {}) do DEFAULT_CHAT_FRAME:AddMessage(d.label..": down "..d.down.." up "..d.up.." click "..d.click.." hide "..d.hide) end
