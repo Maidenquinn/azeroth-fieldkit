@@ -160,6 +160,53 @@ function H.Sync()
 end
 
 -- ---------------------------------------------------------------------------------------------------------------------
+-- Consultation (tooltip) with an explicit provenance for every line:
+--   confirmed = read from a native source about THAT player (own client data for the local player, the native group packet
+--               for a teammate); observed = seen in a combat-log message (what was seen, NOT what was selected);
+--   unknown   = the client exposes nothing for it. Nothing is invented, no rank or level is guessed.
+local STATE_COLOR={confirmed={.4,.9,.5},observed={.95,.75,.3},unknown={.6,.6,.6}}
+local STATE_LABEL={confirmed="Confirmed",observed="Observed",unknown="Unknown"}
+function H.Detail(unit,name)
+ local out={}
+ local function Add(state,label,text) table.insert(out,{state=state,label=label,text=text}) end
+ if unit=="player" then
+  local spells=FieldKitLoadout and FieldKitLoadout.spells
+  if type(spells)=="table" and table.getn(spells)>0 then
+   local parts={};for i=1,math.min(8,table.getn(spells)) do local s=spells[i];table.insert(parts,(s.name or "?")..(s.rank and (" ("..s.rank..")") or "")) end
+   Add("confirmed","Spells",table.concat(parts,", ")..(table.getn(spells)>8 and " ..." or ""))
+  else Add("unknown","Spells","not received yet from the game") end
+  local items={}
+  if FieldKitLoadout and FieldKitLoadout.readSlot then
+   for _,slot in ipairs({2,13,14,11,12}) do local ok,item=pcall(FieldKitLoadout.readSlot,slot);if ok and type(item)=="string" and item~="" then table.insert(items,item) end end
+  end
+  if table.getn(items)>0 then Add("confirmed","Accessories",table.concat(items,", ")) else Add("unknown","Accessories","none readable") end
+ else
+  local line=FieldKitCoop and FieldKitCoop.MemberDamage and FieldKitCoop.MemberDamage(name)
+  if line and type(line.top)=="string" and line.top~="" then
+   Add("confirmed","Top spell this run",line.top..(line.topdps and (" ("..string.format("%.0f",line.topdps).." dps)") or ""))
+  else Add("unknown","Top spell this run","no group packet for this player") end
+  Add("unknown","Spells","the client exposes no spellbook or spell selection of another player")
+  Add("unknown","Accessories","not exposed for another player (see /fieldkit groupprobe items)")
+ end
+ return out
+end
+function H.DetailTooltip(tip,unit,name)
+ for _,e in ipairs(H.Detail(unit,name)) do
+  local c=STATE_COLOR[e.state]
+  tip:AddLine("["..FieldKit_L(STATE_LABEL[e.state]).."] "..FieldKit_L(e.label)..": "..FieldKit_L(e.text),c[1],c[2],c[3],true)
+ end
+ local c=STATE_COLOR.observed
+ if FieldKitDB.partyHistory then
+  local recent=H.Recent(name,FieldKitDB.partyHistoryCount)
+  if table.getn(recent)==0 then tip:AddLine("["..FieldKit_L(STATE_LABEL.unknown).."] "..FieldKit_L("Recent actions")..": "..FieldKit_L("No action received yet"),.6,.6,.6,true)
+  else
+   tip:AddLine("["..FieldKit_L(STATE_LABEL.observed).."] "..FieldKit_L("Recent actions")..":",c[1],c[2],c[3])
+   for _,e in ipairs(recent) do local text,r,g,b=H.Line(e);tip:AddLine("  "..text,r,g,b) end
+  end
+ else tip:AddLine("["..FieldKit_L(STATE_LABEL.unknown).."] "..FieldKit_L("Recent actions")..": "..FieldKit_L("history is off"),.6,.6,.6,true) end
+end
+
+-- ---------------------------------------------------------------------------------------------------------------------
 -- /fieldkit groupprobe [api|events [seconds]|items [notify]|reset] : what THIS client really exposes. Read-only.
 local function Say(text) DEFAULT_CHAT_FRAME:AddMessage("groupprobe: "..text) end
 local function Has(name) return type(getglobal(name))=="function" end

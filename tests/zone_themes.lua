@@ -1385,11 +1385,11 @@ do
   local c1=P.frames[1]
   assert(c1.hpBar:IsShown() and c1.hpBar.text:GetText()=="400 / 800 (50%)",zone..": health bar with current / maximum and percentage from the unit")
   assert(math.abs(c1.hpBar:GetValue()-.5)<1e-9,zone..": the bar is filled with the REAL fraction")
-  assert(c1.mpBar:IsShown() and math.abs(c1.mpBar:GetValue()-.3)<1e-9 and c1.mpBar:GetHeight()==5,zone..": thin resource bar from the unit")
-  FieldKitDB.partyDetail=3;P.Update();assert(c1.mpBar.text:GetText()=="30 / 100" and c1:GetHeight()==66 and P.frames[2]:GetHeight()==66,zone..": full detail: resource values, all cards the same size")
-  FieldKitDB.partyDetail=1;P.Update();assert(c1:GetHeight()==44 and not c1.mpBar:IsShown() and not c1.infoText:IsShown() and c1.hpBar:IsShown() and P.frames[2]:GetHeight()==44,zone..": compact detail: name and life only, all cards the same size")
+  assert(c1.mpBar:IsShown() and math.abs(c1.mpBar:GetValue()-.3)<1e-9 and c1.mpBar:GetHeight()==4,zone..": thin resource bar from the unit")
+  FieldKitDB.partyDetail=3;P.Update();assert(c1.mpBar.text:GetText()=="30 / 100" and c1:GetHeight()==76 and P.frames[2]:GetHeight()==76,zone..": full detail: resource values, all cards the same size")
+  FieldKitDB.partyDetail=1;P.Update();assert(c1:GetHeight()==52 and not c1.mpBar:IsShown() and not c1.infoText:IsShown() and c1.hpBar:IsShown() and P.frames[2]:GetHeight()==52,zone..": compact detail: name and life only, all cards the same size")
   FieldKitDB.partyDetail=2;P.Update()
-  assert(c1:GetWidth()==300 and c1:GetHeight()==60,zone..": standard card "..c1:GetWidth().."x"..c1:GetHeight())
+  assert(c1:GetWidth()==300 and c1:GetHeight()==68,zone..": standard card "..c1:GetWidth().."x"..c1:GetHeight())
   for _,row in ipairs(c1.rows) do assert(not row:IsShown(),zone..": the tall generic rows are not used") end
   assert(c1.hpBar:GetFrameLevel()>c1:GetFrameLevel() and c1.mpBar:GetFrameLevel()>c1:GetFrameLevel(),zone..": bars are explicitly above the card (children do not follow a parent's level)")
   assert(c1.fieldkitColor==nil and c1.hpBar.fieldkitColor[2]>c1.hpBar.fieldkitColor[1] or c1.hpBar.fieldkitColor[1]>.8,zone..": colour from the fraction")
@@ -1399,14 +1399,14 @@ do
   assert(g[2]>g[1] and y[1]>.8 and r[1]>.8 and r[2]<.3,zone..": health colours follow the real fraction")
   assert(P.HealthColor(.9,true)[1]==.45,zone..": muted colour for dead / offline")
   -- states
-  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].stateText:GetText()=="DEAD" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==60,zone..": dead: tag, empty grey bar, no resource bar, SAME size")
-  members[1].ghost=true;P.Update();assert(P.frames[1].stateText:GetText()=="GHOST" and P.frames[1]:GetHeight()==60,zone..": ghost")
+  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].stateText:GetText()=="DEAD" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==68,zone..": dead: tag, empty grey bar, no resource bar, SAME size")
+  members[1].ghost=true;P.Update();assert(P.frames[1].stateText:GetText()=="GHOST" and P.frames[1]:GetHeight()==68,zone..": ghost")
   members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].hpBar.text:GetText()=="400 / 800 (50%)" and P.frames[1].mpBar:IsShown() and P.frames[1].stateText:GetText()=="",zone..": resurrection")
-  members[1].online=false;P.Update();assert(P.frames[1].stateText:GetText()=="OFFLINE" and P.frames[1]:GetHeight()==60,zone..": offline");members[1].online=true
+  members[1].online=false;P.Update();assert(P.frames[1].stateText:GetText()=="OFFLINE" and P.frames[1]:GetHeight()==68,zone..": offline");members[1].online=true
   members[2].hp=0;P.Update();assert(P.frames[2].stateText:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
   members[2].hp=600;members[2].mana=0;members[2].mp=0;P.Update()
-  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==60 and P.frames[2]:GetHeight()==P.frames[1]:GetHeight(),zone..": resource unavailable: only that bar disappears, the card keeps the SAME size")
-  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==60 and P.frames[2].mpBar:IsShown())
+  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==68 and P.frames[2]:GetHeight()==P.frames[1]:GetHeight(),zone..": resource unavailable: only that bar disappears, the card keeps the SAME size")
+  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==68 and P.frames[2].mpBar:IsShown())
   members[2].hp=300;P.Update();assert(math.abs(P.frames[2].hpBar:GetValue()-.5)<1e-9 and P.frames[2].hpBar.text:GetText()=="300 / 600 (50%)",zone..": wounded")
   members[2].hp=600;P.Update();assert(P.frames[2].hpBar:GetValue()==1 and P.frames[2].hpBar.text:GetText()=="600 / 600 (100%)",zone..": full health")
   -- portrait: the real one, else the class icon
@@ -1441,22 +1441,34 @@ do
   local other=zone=="elwynn" and "naxx:complete:reference" or "elwynn:complete:reference"
   assert(FieldKitDB.zoneThemePositions[other]==nil or FieldKitDB.zoneThemePositions[other].FieldKitPartyCard1==nil,zone..": positions are stored per layout")
   -- alpha.32: one component, fixed geometry, nothing truncated or overlapping, player card, size and visibility options
-  for detail=1,3 do
-   FieldKitDB.partyDetail=detail;P.Update()
-   local spec=P.detail[detail];local w=P.frames[1]:GetWidth()
+  -- alpha.33: the defect seen natively (life bar sticking out of the gold border) reproduced and fixed at every detail and scale.
+  -- The border art is the card's skin: it must have the card's CURRENT size, and every widget must sit inside the content box.
+  for detail=1,3 do for _,scale in ipairs({70,100,130}) do
+   FieldKitDB.partyDetail=detail;FieldKitDB.partyCardScale=scale;P.Update()
+   local spec=P.detail[detail];local pad=P.pad
    for i=1,4 do
-    local f=P.frames[i]
-    assert(f:GetWidth()==300 and f:GetHeight()==spec.h,zone..": every card has the same size at detail "..detail)
-    local _,_,_,nx=f.nameText:GetPoint();local _,_,_,sx=f.stateText:GetPoint();local _,_,_,hx=f.hpBar:GetPoint()
-    assert(nx+f.nameText:GetWidth()<=sx,zone..": the name box ends before the state tag begins (detail "..detail..")")
-    assert(sx+f.stateText:GetWidth()<=w-8+.001 and hx+f.hpBar:GetWidth()==w-8,zone..": nothing sticks out of the card")
+    local f=P.frames[i];local L=f.fieldkitLayout;local w,h=f:GetWidth(),f:GetHeight()
+    local tag=zone.." detail "..detail.." scale "..scale.." card "..i
+    assert(w==300 and h==spec.content+2*pad,tag..": fixed size "..w.."x"..h)
+    assert(f.fieldkitSkin.width==w and f.fieldkitSkin.height==h,tag..": the border art has the card's current size (skin "..tostring(f.fieldkitSkin.width).."x"..tostring(f.fieldkitSkin.height)..")")
+    assert(f:GetScale()==scale/100,tag..": scale")
+    local function Inside(name,l,r,t,b) assert(l>=pad-.001 and r<=w-pad+.001 and t>=pad-.001 and b<=h-pad+.001,tag..": "..name.." is inside the border ("..l..","..t.." -> "..r..","..b.." in "..w.."x"..h..")") end
+    Inside("portrait",L.portrait[1],L.portrait[3],L.portrait[2],L.portrait[4])
+    Inside("name",L.name[1],L.name[2],L.name[3],L.name[3]+L.name[4])
+    Inside("state",L.state[1],L.state[2],L.state[3],L.state[3]+L.state[4])
+    Inside("life bar",L.hp[1],L.hp[2],L.hp[3],L.hp[3]+L.hp[4])
+    assert(L.name[2]<=L.state[1],tag..": the name ends before the state tag")
+    assert(L.hp[1]>=L.portrait[3],tag..": the bar starts after the portrait")
     if spec.info then
-     local _,_,_,ix=f.infoText:GetPoint();assert(ix+f.infoText:GetWidth()<=w-8-5*16+.001,zone..": the class/level box leaves room for five history icons")
+     Inside("secondary line",L.info[1],L.info[2],L.info[3],L.info[3]+L.info[4]);assert(L.info[2]<=w-pad-70+.001,tag..": room for five icons")
+     assert(L.info[3]+L.info[4]<=L.hp[3],tag..": the secondary line ends above the life bar")
     end
-    assert(hx==nx,zone..": bar and name share the same left edge")
-    assert(f.portraitBack:GetHeight()<=spec.h-4,zone..": the portrait fits the card")
+    assert(L.name[3]+L.name[4]<=L.hp[3],tag..": the name line ends above the life bar")
+    if f.mpBar:IsShown() then Inside("resource bar",L.res[1],L.res[2],L.res[3],L.res[3]+L.res[4]);assert(L.res[3]>=L.hp[3]+L.hp[4],tag..": resource under the life bar") end
+    assert(L.portrait[4]-L.portrait[2]==spec.content,tag..": portrait is as tall as the content")
    end
-  end
+  end end
+  FieldKitDB.partyCardScale=100
   FieldKitDB.partyDetail=2;P.Update()
   -- history icons: only spells of the local spellbook, only at detail 2 and 3
   local H=FieldKitGroupHistory

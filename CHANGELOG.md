@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.33 - 2026-11-10 (group card geometry, provenance tooltip, unreleased)
+
+- ROOT CAUSE of the life bar sticking out of the gold border (native capture of alpha.32): the border art is the card's skin and is only resized by `FieldKitTheme.Update`; the compact card set its width and height but never called it, so the skin kept the size of the previous layout (reproduced by the test: skin 280x90 on a 300x52 card) while the bars were sized for the new one.
+- Fix: `FieldKitTheme.Update(frame)` after every resize; every widget is now anchored to the card's own left AND right edges inside a 12 px content box (the border thickness of the zone material), so a widget can no longer be wider than the real card. Portrait socket flush inside the border and as tall as the content, gold outline on the life bar, thin resource bar, state tag inside the border, dead / offline cards greyed. Sizes: Compact 300x52, Standard 300x68, Full 300x76 (identical for every card at a given detail).
+- Tests: border art size equals card size, and every widget inside the content box, at the 3 detail levels x 3 scales (70/100/130 %).
+- Consultation tooltip: every line is tagged [Confirmed] / [Observed] / [Unknown]. Own card: own spells with rank and own accessories are Confirmed. Teammate: top spell of the native group packet is Confirmed; spellbook and accessories are Unknown (no API); combat-log actions are Observed. No new protocol: see docs/GROUP_COOP_DATA_AUDIT_0.6.0.md.
+
 ## 0.6.0-alpha.32 - 2026-11-10 (group frames redesign, group history, API audit, unreleased)
 
 - Group card: ONE component for the player's own card (option, off by default) and for each teammate. Fixed geometry per detail level (Compact 300x44, Standard 300x60, Full 300x66): all cards identical whatever the data, every text in its own box, nothing truncated. Portrait socket 36-44 px (native portrait, else class icon, else nothing), name, class and level on a secondary line, life bar with values and percentage, thin resource bar (values at Full), Dead / Ghost / Offline / 0 HP tag, last spell icons. An unavailable resource only empties its own bar.

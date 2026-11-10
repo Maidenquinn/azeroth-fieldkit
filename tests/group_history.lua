@@ -127,6 +127,35 @@ if clock then local took=os.clock()-start;assert(took<8,"6000 messages parsed in
 local total=0;for _,list in pairs(H.log) do total=total+table.getn(list) end
 assert(total<=2*5,"memory stays bounded by members x count after 6000 messages ("..total..")")
 
+-- consultation: every line says where it comes from; observed is never presented as selected
+do
+ local function Find(list,label) for _,e in ipairs(list) do if e.label==label then return e end end end
+ -- a teammate: only the native group packet is confirmed; spellbook and accessories are unknown, history is observed
+ FieldKitCoop.party={{name="Denza",dmg=1000,dps=100,top="Frostbolt",topdps=40}}
+ local d=H.Detail("party1","Denza")
+ assert(Find(d,"Top spell this run").state=="confirmed" and string.find(Find(d,"Top spell this run").text,"Frostbolt",1,true),"top spell from the native packet is confirmed")
+ assert(Find(d,"Spells").state=="unknown" and Find(d,"Accessories").state=="unknown","spellbook and accessories of another player are unknown: nothing invented")
+ FieldKitCoop.party={};d=H.Detail("party1","Denza");assert(Find(d,"Top spell this run").state=="unknown","no packet: unknown")
+ -- the local player: own client data is confirmed
+ local oldLoadout=FieldKitLoadout
+ FieldKitLoadout={spells={{name="Fireball",rank="Rank 3"},{name="Frostbolt",rank="Rank 2"}},readSlot=function(slot) if slot==2 then return "Amulet of Might" end return nil end}
+ d=H.Detail("player","Maiden")
+ assert(Find(d,"Spells").state=="confirmed" and string.find(Find(d,"Spells").text,"Fireball (Rank 3)",1,true),"own spells with their rank")
+ assert(Find(d,"Accessories").state=="confirmed" and Find(d,"Accessories").text=="Amulet of Might","own accessories (only readable ones)")
+ FieldKitLoadout={spells={},readSlot=function() return nil end};d=H.Detail("player","Maiden")
+ assert(Find(d,"Spells").state=="unknown" and Find(d,"Accessories").state=="unknown","own data not available: unknown, not made up")
+ FieldKitLoadout=oldLoadout
+ -- tooltip: confirmed / observed / unknown tags, FR and EN
+ H.Clear();FieldKitDB.partyHistory=true;FieldKitDB.partyHistoryCount=5;H.Handle("x","Denza's Frostbolt hits Boar for 40.")
+ local text={};local tip={AddLine=function(_,t) table.insert(text,t) end}
+ FieldKit_SetLanguage("en");H.DetailTooltip(tip,"party1","Denza");local all=table.concat(text," | ")
+ assert(string.find(all,"[Unknown] Spells",1,true) and string.find(all,"[Observed] Recent actions",1,true) and string.find(all,"Frostbolt",1,true),"EN tags: "..all)
+ text={};FieldKit_SetLanguage("fr");H.DetailTooltip(tip,"party1","Denza");all=table.concat(text," | ")
+ assert(string.find(all,"[Inconnu] Sorts",1,true) and string.find(all,"[Observé] Dernières actions",1,true),"FR tags: "..all)
+ FieldKit_SetLanguage("en");FieldKitDB.partyHistory=false;text={};H.DetailTooltip(tip,"party1","Denza")
+ assert(string.find(table.concat(text," | "),"history is off",1,true),"history off is said, not hidden")
+end
+
 -- probe: reports even when functions are missing, never errors
 local said={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(said,m) end
 H.Probe("groupprobe");local text=table.concat(said,"\n")

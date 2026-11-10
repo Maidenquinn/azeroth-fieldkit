@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.33 - CARTES DE GROUPE SANS DEBORDEMENT, SURVOL CONFIRME/OBSERVE/INCONNU
+La barre ne depasse plus du cadre dore ; survol : sorts et accessoires avec leur source. A recetter en jeu.
+
 ALPHA.32 - CARTES DE GROUPE, HISTORIQUE, AUDIT API
 Une seule carte pour joueur et coequipiers, options, historique des actions, /fieldkit groupprobe. A recetter en jeu.
 
