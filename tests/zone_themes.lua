@@ -1255,3 +1255,86 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  assert(one:GetParent()==Minimap and one:GetAlpha()==0,zone..": the third-party button stays under its owner's control")
 end
 print("Launcher proxies: tooltip, first click, hidden state passed (synthetic)")
+
+-- alpha.29: teammate cards (FieldKitPartyCard1-4) are elements of the common placement engine.
+do
+ local function StageCard(f) f.GetLeft=function(self) local l=Rendered(self);return l end;f.GetTop=function(self) local _,t=Rendered(self);return UIH-t end;f.GetEffectiveScale=function() return 1 end end
+ local function UnstageCard(f) f.GetLeft=nil;f.GetTop=nil;f.GetEffectiveScale=nil end
+ local function Box(f) local l,t,w,h=Rendered(f);return {l,t,l+w,t+h} end
+ local function Overlap(a,b) local across=math.min(a[3],b[3])-math.max(a[1],b[1]);local depth=math.min(a[4],b[4])-math.max(a[2],b[2]);return across>0 and depth>6 end
+ local function Place(f,x,y) f:ClearAllPoints();f:SetPoint("TOPLEFT",UIParent,"TOPLEFT",x,-y) end
+ local function Checked(label,cards)
+  local others={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if R.frames[k]:IsShown() then table.insert(others,{k,Opaque2(k)}) end end
+  for i,f in ipairs(cards) do
+   if f:IsShown() then
+    local b=Box(f)
+    for _,o in ipairs(others) do assert(not Overlap(b,o[2]),label..": teammate card "..f:GetName().." overlaps "..o[1]) end
+    for j=i+1,table.getn(cards) do if cards[j]:IsShown() then assert(not Overlap(b,Box(cards[j])),label..": "..f:GetName().." overlaps "..cards[j]:GetName()) end end
+   end
+  end
+ end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+  R.statsOpen=false;FieldKitDB.loadoutTab=1;R.lastMoved=nil;R.lastParty=nil
+  local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+  local saved={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local r=R.layout.rects[k];saved[k]={r[1],r[2]} end
+  SaveAll(layout,saved);Stage()
+  local cards={};for i=1,4 do local f=getglobal("FieldKitPartyCard"..i);assert(f,"party card "..i);f:SetWidth(280);f:SetHeight(90);StageCard(f);f:Hide();cards[i]=f end
+  Relayout()
+  C.Refresh(true);C.Refresh(true);C.Refresh(true) -- let the engine settle before measuring the reference
+  local legacyBefore={};for k,v in pairs(FieldKitDB.frameAnchors or {}) do legacyBefore[k]=v[3]..":"..v[4] end
+  local baseline={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do baseline[k]={Rendered(R.frames[k])} end
+  local dmg=Opaque2("Damage")
+  -- 0 members: nothing shown, nothing reserved
+  C.Refresh(true);for i=1,4 do assert(not cards[i]:IsShown() and cards[i].fieldkitApplied==nil,zone..": no card, nothing displaced") end
+  -- 1, 2 and 4 members, all dropped on top of the Damage card and of each other
+  for count=1,4 do
+   if count==3 then count=4 end
+   for i=1,4 do if i<=count then Place(cards[i],dmg[1]+10+i*8,dmg[2]+10+i*8);cards[i]:Show() else cards[i]:Hide() end end
+   C.Refresh(true);C.Refresh(true)
+   Checked(zone..": "..count.." member(s)",cards)
+   -- the cards that were already placed are not moved by the teammate cards
+   for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local l,t=Rendered(R.frames[k]);assert(math.abs(l-baseline[k][1])<.5 and math.abs(t-baseline[k][2])<.5,zone..": "..k.." stays put with "..count.." teammate card(s)") end
+   -- stable: no repositioning loop
+   local snap={};for i=1,4 do snap[i]={Rendered(cards[i])} end
+   for n=1,5 do C.Refresh(true) end
+   for i=1,4 do local l,t=Rendered(cards[i]);assert(math.abs(l-snap[i][1])<.01 and math.abs(t-snap[i][2])<.01,zone..": card "..i.." does not keep moving") end
+  end
+  -- a member leaves: the card is released at once and the others close ranks only if they can
+  cards[2]:Hide();C.Refresh(true);assert(cards[2].fieldkitApplied==nil and R.shift.Party2==nil,zone..": a hidden card holds no place")
+  Checked(zone..": a member left",cards)
+  -- preferred position comes back when the space is free again: only this card on its preferred spot
+  for i=1,4 do cards[i]:Hide() end;Place(cards[1],dmg[1]+10,dmg[2]+10);cards[1]:Show();C.Refresh(true)
+  local displaced=Box(cards[1]);cards[1]:Hide();C.Refresh(true)
+  local l,t=Rendered(cards[1]);assert(math.abs(l-(dmg[1]+10))<.5 and math.abs(t-(dmg[2]+10))<.5,zone..": hidden card is back on its preferred position")
+  -- no shift while dragging (themed or teammate card)
+  cards[1]:Show();C.Refresh(true);cards[1].azsMoving=true;local before={Rendered(cards[1])};R.shift.Party1=nil
+  local dl,dt=Rendered(R.frames.Damage);C.Refresh(true)
+  local nl,nt=Rendered(cards[1]);assert(math.abs(nl-before[1])<.01 and math.abs(nt-before[2])<.01,zone..": nothing moves a card that is being dragged")
+  cards[1].azsMoving=nil
+  -- manual move is saved by the shared store, wins over the engine, and is read back after a reload
+  Place(cards[1],dmg[1]+400,dmg[2]+250);local savedOk=C.Remember(cards[1]);assert(savedOk,zone..": the drop is stored")
+  local stored=FieldKitDB.zoneThemePositions[layout].FieldKitPartyCard1;assert(stored and stored[3]>0,zone..": stored in the shared position store")
+  C.Refresh(true);local ml,mt=Rendered(cards[1]);assert(R.lastParty=="Party1",zone..": the moved card is remembered as last moved")
+  Place(cards[1],5,5) -- "reload": the legacy code puts the card back at its old place
+  cards[1].fieldkitApplied=nil;cards[1].fieldkitBase=nil;C.Refresh(true);C.Refresh(true)
+  local rl,rt=Rendered(cards[1]);assert(math.abs(rl-ml)<.5 and math.abs(rt-mt)<.5,zone..": the saved position is applied again after a reload ("..rl..","..rt.." vs "..ml..","..mt..")")
+  -- old legacy values untouched
+  for k,v in pairs(FieldKitDB.frameAnchors or {}) do assert(legacyBefore[k]==v[3]..":"..v[4],zone..": legacy anchor "..k.." untouched") end
+  -- Bonuses expands while teammate cards are shown: nobody overlaps, Bonuses is not displaced by them
+  FieldKitStatsFrame.rows=FakeStats(14)
+  for i=1,2 do Place(cards[i],dmg[1]+20+i*10,dmg[2]+20+i*10);cards[i].fieldkitBase=nil;cards[i]:Show() end
+  FieldKitDB.zoneThemePositions[layout].FieldKitPartyCard1=nil
+  R.statsOpen=true;C.Refresh(true);C.Refresh(true)
+  Checked(zone..": Bonuses expanded with teammate cards",cards)
+  R.statsOpen=false;FieldKitStatsFrame.rows=realStatsRows;C.Refresh(true)
+  -- overlap option on: nothing is displaced
+  FieldKitDB.zoneThemeOverlap=true;C.Refresh(true);assert(cards[1].fieldkitApplied==nil and cards[2].fieldkitApplied==nil,zone..": overlap allowed, nothing displaced");FieldKitDB.zoneThemeOverlap=false
+  -- theme off: cards are back on their own place
+  for i=1,4 do cards[i]:Hide() end;FieldKitDB.zoneThemePositions[layout].FieldKitPartyCard1=nil
+  C.Set("zoneThemes",false)
+  for i=1,4 do cards[i].fieldkitApplied=nil;UnstageCard(cards[i]) end
+  Unstage()
+ end
+end
+print("Teammate cards in the placement engine: 0-4 members, collisions, stability, drag, persistence passed (synthetic)")

@@ -183,7 +183,7 @@ function R.Fit(label,size,minimum)
  label.fieldkitFit={path=path,baseSize=baseSize,minimum=requestedMinimum,renderSize=size,width=rawWidth,height=height,full=text,display=label:GetText()}
 end
 function R.Stop()
- R.active=false
+ R.active=false;R.PartyRestoreAll()
  if R.canvas then R.canvas:Hide() end
  if R.buffDrawer then R.buffDrawer:Hide() end
  -- Benilla caches native status bars independently of a hidden ancestor.
@@ -559,7 +559,11 @@ end
 function R.NoteMoved(name)
  local kind=nil
  for _,k in ipairs(CARDS) do if "FieldKitReferencePanel"..k==name then kind=k end end
- if not kind then return end
+ if not kind then
+  local i=nil;for n=1,4 do if name=="FieldKitPartyCard"..n then i=n end end
+  if i then local f=getglobal(name);R.lastParty="Party"..i;if f then f.fieldkitApplied=nil;f.fieldkitDX,f.fieldkitDY=nil,nil end;if R.shift then R.shift["Party"..i]=nil end;if R.shiftX then R.shiftX["Party"..i]=nil end end
+  return
+ end
  R.lastMoved=kind;local f=R.frames[kind];if f then f.fieldkitDX,f.fieldkitDY=nil,nil end
  local before=R.dragDiag and FieldKitZoneThemes.Position(f) and {FieldKitZoneThemes.Position(f)[3],FieldKitZoneThemes.Position(f)[4]}
  R.ClampToScreen(kind)
@@ -677,8 +681,53 @@ function R.Probe()
  end
  return out
 end
+-- Co-op teammate cards (FieldKitPartyCard1-4) in the common placement engine. Their saved position is the one the themed HUD
+-- already keeps for every movable card (zoneThemePositions[layout][name]); nothing is migrated or rewritten. The engine only
+-- adds a DISPLAY displacement on top of the preferred position, never saved, and never while the card is being dragged.
+local function PartySame(a,b) return a and b and a[1]==b[1] and a[2]==b[2] and math.abs(a[3]-b[3])<.01 and math.abs(a[4]-b[4])<.01 end
+function R.PartyFrames() local out={};for i=1,4 do local f=getglobal("FieldKitPartyCard"..i);if f then table.insert(out,{i,f}) end end;return out end
+-- Puts the card on its PREFERRED anchor (saved themed position, else wherever the legacy code left it) and returns the
+-- displacement (canvas px) the engine currently applies on top of it.
+function R.PartyPrepare(f)
+ local p,rel,rp,x,y=f:GetPoint();if not p then return 0,0 end
+ local cur={p,rp,x,y}
+ if f.fieldkitApplied and PartySame(cur,f.fieldkitApplied) then return f.fieldkitDX or 0,f.fieldkitDY or 0 end
+ f.fieldkitApplied=nil;f.fieldkitDX,f.fieldkitDY=nil,nil
+ local a=FieldKitZoneThemes.Position(f)
+ if a then
+  if not PartySame(cur,{a[1],a[2],a[3],a[4]}) then f:ClearAllPoints();f:SetPoint(a[1],UIParent,a[2],a[3],a[4]) end
+  f.fieldkitBase={a[1],a[2],a[3],a[4],UIParent}
+ else f.fieldkitBase={p,rp,x,y,rel} end
+ return 0,0
+end
+function R.PartyApply(f,dx,dy)
+ local base=f.fieldkitBase;if not base then return end
+ local cs=R.canvas.GetEffectiveScale and R.canvas:GetEffectiveScale() or 1;local fe=f.GetEffectiveScale and f:GetEffectiveScale() or 1
+ local k=(fe and fe>0 and cs) and cs/fe or 1
+ local tx,ty=base[3]+dx*k,base[4]-dy*k
+ local p,_,rp,x,y=f:GetPoint()
+ if not PartySame({p,rp,x,y},{base[1],base[2],tx,ty}) then f:ClearAllPoints();f:SetPoint(base[1],base[5],base[2],tx,ty) end
+ if dx==0 and dy==0 then f.fieldkitApplied=nil;f.fieldkitDX,f.fieldkitDY=nil,nil
+ else f.fieldkitApplied={base[1],base[2],tx,ty};f.fieldkitDX,f.fieldkitDY=dx,dy end
+end
+-- Gives the card its preferred place back (card hidden, theme off, layout not complete).
+function R.PartyRestore(f)
+ if f.fieldkitApplied and f.fieldkitBase and not f.azsMoving then R.PartyApply(f,0,0) end
+ f.fieldkitApplied=nil;f.fieldkitDX,f.fieldkitDY=nil,nil
+end
+function R.PartyRestoreAll() for _,e in ipairs(R.PartyFrames()) do R.PartyRestore(e[2]) end end
+-- After the plan: shown cards get their displacement, hidden ones release theirs at once.
+function R.PartyPass()
+ for _,e in ipairs(R.PartyFrames()) do
+  local i,f=e[1],e[2]
+  if f:IsShown() and not f.azsMoving then
+   R.PartyPrepare(f);R.PartyApply(f,(R.shiftX and R.shiftX["Party"..i]) or 0,(R.shift and R.shift["Party"..i]) or 0)
+  else R.PartyRestore(f) end
+ end
+end
 function R.Resolve(zone,d)
  for _,kind in ipairs(CARDS) do if R.frames[kind] and R.frames[kind].azsMoving then return end end -- never rearrange under a drag
+ for _,e in ipairs(R.PartyFrames()) do if e[2].azsMoving then return end end
  R.shift={};R.shiftX={};R.noRoom=false;R.overflow=0
  if FieldKitDB.zoneThemeOverlap then return end
  -- Automatic placement keeps a visual margin from the REAL screen edges; manual placement has none (see "pinned" below).
@@ -699,14 +748,22 @@ function R.Resolve(zone,d)
    if x then table.insert(items,{kind=kind,x=x,y=y,w=w,h=h,index=index,inset=Inset(kind),pinned=FieldKitZoneThemes.Position(f) and true or false}) end
   end
  end
- local function Rank(c) if c.kind=="Stats" and R.statsOpen then return 0 elseif c.kind==R.lastMoved then return 1 end return 2 end
+  for _,e in ipairs(R.PartyFrames()) do
+  local pi,pf=e[1],e[2]
+  if pf:IsShown() and not pf.azsMoving then
+   local pdx,pdy=R.PartyPrepare(pf);local lx,ly,w,h=R.LiveRect(pf)
+   if lx then table.insert(items,{kind="Party"..pi,x=lx-pdx,y=ly-pdy,w=w,h=h,index=100+pi,inset={0,0,0,0},pinned=true,party=true}) end
+  end
+ end
+-- Teammate cards come last (they yield to every other card); among themselves the one moved last goes first.
+ local function Rank(c) if c.party then return c.kind==R.lastParty and 2.5 or 3 end if c.kind=="Stats" and R.statsOpen then return 0 elseif c.kind==R.lastMoved then return 1 end return 2 end
  table.sort(items,function(p,q)
   local rp,rq=Rank(p),Rank(q);if rp~=rq then return rp<rq end
   if p.y~=q.y then return p.y<q.y end if p.x~=q.x then return p.x<q.x end return p.index<q.index end)
  local placed={};local deepest=0
  -- Tier 1 also refuses spots that sit on the PREFERRED place of a card not yet handled (no cascade of displacements);
  -- tier 2 (only if tier 1 finds nothing) accepts them.
- local soft={};for _,c in ipairs(items) do c.done=false;table.insert(soft,{c.x+c.inset[1],c.y+c.inset[2],c.x+c.w-c.inset[3],c.y+c.h-c.inset[4],owner=c}) end
+ local soft={};for _,c in ipairs(items) do c.done=false;if not c.party then table.insert(soft,{c.x+c.inset[1],c.y+c.inset[2],c.x+c.w-c.inset[3],c.y+c.h-c.inset[4],owner=c}) end end
  local function Free(c,x,y,strict)
   local l,t,r,b=x+c.inset[1],y+c.inset[2],x+c.w-c.inset[3],y+c.h-c.inset[4]
   local function Hit(o) local across=math.min(r,o[3])-math.max(l,o[1]);local depth=math.min(b,o[4])-math.max(t,o[2]);return across>0 and depth>TOLERANCE end
@@ -881,9 +938,9 @@ function R.Panels(variant,zone)
  for _,f in pairs(H.summaries or {}) do if not f.azsMoving then f:Hide() end end
  local detail=false;for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do if FieldKitZoneThemes.open[kind] then detail=true end end
  for _,f in pairs(R.frames) do f.fieldkitWanted=nil end
- if variant~="complete" then R.HideUnwanted();R.MaskBuffs(false);return end
+ if variant~="complete" then R.PartyRestoreAll();R.HideUnwanted();R.MaskBuffs(false);return end
  R.effectBuffs=false
- local d=R.layout;R.PlanLayout(zone,d)
+ local d=R.layout;R.PlanLayout(zone,d);R.PartyPass()
  if not FieldKitNative.Active() and (not R.readyAt or GetTime()>R.readyAt or R.readySerial~=FieldKitNative.serial) then
   R.readyItems={};R.readyAt=GetTime()+5;R.readySerial=FieldKitNative.serial
   if FieldKitLoadout.readSlot then for _,id in ipairs({2,13,14,11,12}) do local ok,name=pcall(FieldKitLoadout.readSlot,id);if ok then R.readyItems[id]={name=name,bonuses={}} end end end

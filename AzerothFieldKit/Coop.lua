@@ -235,6 +235,9 @@ function P.Update()
  if active then P.ReadParty() else P.party={} end
  P.UpdateMeter(active)
  for i=1,4 do P.UpdateMember(i,active) end
+ -- A card that appeared or disappeared frees / takes its place in the HUD engine at the next tick, not 0.2 s later.
+ local sig="";for i=1,4 do sig=sig..(P.frames[i] and P.frames[i]:IsShown() and "1" or "0") end
+ if sig~=P.shownSig then P.shownSig=sig;if FieldKitZoneThemes then FieldKitZoneThemes.deadline=nil end end
  FieldKitPartyDetails.Sync()
 end
 

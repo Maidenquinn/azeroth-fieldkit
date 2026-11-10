@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.29 - CARTES DE GROUPE DANS LE MOTEUR DE PLACEMENT
+Les cartes de coequipiers ne chevauchent plus les autres cartes et cedent la place. A recetter en jeu.
+
 ALPHA.28 - LANCEURS ET STATUT DE GROUPE
 Infobulle et clic des lanceurs corriges (Lua 5.0), statut Mort affiche si le client le fournit. A recetter en jeu.
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.29 - 2026-11-10 (teammate cards in the placement engine, unreleased)
+
+- Teammate cards (FieldKitPartyCard1-4) are now elements of the common placement engine (`R.Resolve`): they are measured live, never overlap the Damage / Lairs / Equipment / Bonuses / Effects cards, the protected HUD parts or each other (when overlap is off), and they YIELD: they come last in priority (among themselves the one moved last first), are not part of the soft preferences of the other cards, so they never displace a card that is already placed. The displacement is display-only (`R.PartyPrepare` / `R.PartyApply`), never saved, relative to the preferred position, removed at once when the card hides, the theme or the layout is switched, or overlap is allowed; nothing moves a card while it is dragged; the engine is deterministic (no repositioning loop).
+- No migration: the preferred position is the one the themed HUD already keeps for every movable card (`zoneThemePositions[layout][name]`, written by the existing drop handler); the legacy `frameAnchors` / `pos` values are not read back or rewritten. Fix of an incompatibility found by the audit: that saved position was written at the drop but never applied again, so a card moved while the theme was active went back to its legacy place after `/reload`; it is now applied again (`R.PartyPrepare`).
+- The roster change (a card shown or hidden) wakes the HUD refresh at the next tick instead of waiting up to 0.2 s.
+
 ## 0.6.0-alpha.28 - 2026-11-10 (launchers and party status, unreleased)
 
 - Launcher proxies (map side buttons for FieldKit / AzerothStats / AzerothOne): the tooltip captured the generic-for variable in a closure, which is nil once the loop ends in Lua 5.0 (found by the native 5.0 test runtime), so it had no title; the click would have failed the same way once made name-based. Each proxy now keeps its own copy of the name, looks up the owner's CURRENT frame at click time, and shows a readable title (`R.LauncherLabel`) plus a localized hint.
