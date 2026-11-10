@@ -755,8 +755,9 @@ function R.Resolve(zone,d)
    if lx then table.insert(items,{kind="Party"..pi,x=lx-pdx,y=ly-pdy,w=w,h=h,index=100+pi,inset={0,0,0,0},pinned=true,party=true}) end
   end
  end
--- Teammate cards come last (they yield to every other card); among themselves the one moved last goes first.
- local function Rank(c) if c.party then return c.kind==R.lastParty and 2.5 or 3 end if c.kind=="Stats" and R.statsOpen then return 0 elseif c.kind==R.lastMoved then return 1 end return 2 end
+-- Priority: protected parts (fixed), then the visible teammate cards (the one moved last first), then the main cards.
+ -- A teammate card keeps its preferred place; a main card that meets it looks for a free place (display only, never saved).
+ local function Rank(c) if c.party then return c.kind==R.lastParty and -2 or -1 end if c.kind=="Stats" and R.statsOpen then return 0 elseif c.kind==R.lastMoved then return 1 end return 2 end
  table.sort(items,function(p,q)
   local rp,rq=Rank(p),Rank(q);if rp~=rq then return rp<rq end
   if p.y~=q.y then return p.y<q.y end if p.x~=q.x then return p.x<q.x end return p.index<q.index end)

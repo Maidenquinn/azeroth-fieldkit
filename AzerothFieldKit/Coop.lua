@@ -173,39 +173,97 @@ function P.Row(frame,index,label,text,fraction,color)
  row:SetValue(fraction or 0);row:SetStatusBarColor(color[1],color[2],color[3],.55);row:Show()
 end
 
+-- With a themed HUD the teammate cards are the group display: they are shown and the native round frames are replaced
+-- (state saved, restored as soon as the theme or the group goes away). The saved preferences are not modified.
+function P.Themed() local R=FieldKitReferenceHUD;return R and R.active and true or false end
+function P.CardsOn() return FieldKitDB.partyCards or P.Themed() end
+function P.ReplaceOn() return FieldKitDB.replacePartyFrames or P.Themed() end
+-- Health colour from the real fraction; greyed when the unit is dead, a ghost or offline.
+function P.HealthColor(fraction,muted)
+ if muted then return {.45,.45,.45} end
+ if fraction>.5 then return {.22,.72,.3} elseif fraction>.25 then return {.88,.7,.18} end
+ return {.82,.2,.16}
+end
+-- Strata/level and header layout of a card, applied only when the style changes (the card is a legacy LOW window).
+function P.Style(frame,themed)
+ local R=FieldKitReferenceHUD
+ local level=themed and R.canvas and (R.canvas:GetFrameLevel()+20) or nil
+ local key=(themed and "t" or "n")..tostring(level)
+ if frame.fieldkitPartyStyle==key then return end
+ frame.fieldkitPartyStyle=key
+ if not frame.fieldkitOriginalLevel then frame.fieldkitOriginalLevel=frame:GetFrameLevel() end
+ if themed then
+  frame:SetFrameStrata("MEDIUM");frame:SetFrameLevel(level)
+  if not frame.portraitBack then
+   frame.portraitBack=frame:CreateTexture(nil,"ARTWORK");frame.portraitBack:SetTexture(FieldKitTheme.bronze[1],FieldKitTheme.bronze[2],FieldKitTheme.bronze[3])
+   frame.portrait=frame:CreateTexture(nil,"OVERLAY");frame.portrait:SetTexCoord(.1,.9,.1,.9)
+  end
+  frame.portraitBack:ClearAllPoints();frame.portraitBack:SetPoint("TOPLEFT",frame,"TOPLEFT",7,-5);frame.portraitBack:SetWidth(22);frame.portraitBack:SetHeight(22)
+  frame.portrait:ClearAllPoints();frame.portrait:SetPoint("TOPLEFT",frame,"TOPLEFT",8,-6);frame.portrait:SetWidth(20);frame.portrait:SetHeight(20)
+  frame.title:ClearAllPoints();frame.title:SetPoint("TOPLEFT",frame,"TOPLEFT",34,-7)
+ else
+  frame:SetFrameStrata("LOW");frame:SetFrameLevel(frame.fieldkitOriginalLevel)
+  frame.title:ClearAllPoints();frame.title:SetPoint("TOPLEFT",frame,"TOPLEFT",9,-7)
+  if frame.portrait then frame.portrait:Hide();frame.portraitBack:Hide() end
+ end
+end
+function P.Portrait(frame,unit,key)
+ if not frame.portrait then return end
+ local now=GetTime()
+ if frame.portraitKey~=key or (now>(frame.portraitAt or 0)) then
+  local ok=type(SetPortraitTexture)=="function" and pcall(SetPortraitTexture,frame.portrait,unit)
+  frame.portraitKey=key;frame.portraitAt=now+5
+  if not ok then frame.portrait:Hide();frame.portraitBack:Hide();return end
+ end
+ frame.portrait:Show();frame.portraitBack:Show()
+end
+
 function P.UpdateMember(index,active)
  local frame=P.frames[index];if not frame then return end
  local exists=active and UnitExists(frame.unit)
  local preview=not exists and FieldKit.layoutEditing
- if not FieldKitDB.partyCards or (not exists and not preview) then frame:Hide();P.Stock(index,false);return end
+ local themed=P.Themed()
+ if not P.CardsOn() or (not exists and not preview) then frame:Hide();P.Stock(index,false);return end
  local hp=type(UnitHealth)=="function" and FieldKit.Number(UnitHealth(frame.unit),nil,0)
  local max=type(UnitHealthMax)=="function" and FieldKit.Number(UnitHealthMax(frame.unit),nil,0)
  local known=not preview and hp~=nil and max and max>0
  if not known and not preview then frame:Hide();P.Stock(index,false);return end
+ P.Style(frame,themed)
  local name=preview and FieldKit_L("Teammate").." "..index.." ("..FieldKit_L("Preview")..")" or (UnitName(frame.unit) or "?")
  local class,token
  if not preview and type(UnitClass)=="function" then class,token=UnitClass(frame.unit) end
+ local level=not preview and type(UnitLevel)=="function" and FieldKit.Number(UnitLevel(frame.unit),nil,1)
  local color=colors[token] or {.4,.8,.5}
  frame:SetWidth(FieldKitCardLayout.Width(frame,280))
- frame.title:SetText((FieldKit.layoutEditing and not preview and index..". " or "")..name);frame.title:SetWidth(frame:GetWidth()*.55)
- frame.total:SetText(preview and FieldKit_L("Preview") or (class or "?"));frame.total:SetWidth(frame:GetWidth()*.3);frame.total:SetJustifyH("RIGHT")
- P.Row(frame,1,"Health",known and FieldKit_FormatHealth(hp,max,FieldKitDB.partyHealthMode) or FieldKit_L("Not provided"),known and math.min(hp/max,1) or 0,color)
+ frame.title:SetText((FieldKit.layoutEditing and not preview and index..". " or "")..name);frame.title:SetWidth(frame:GetWidth()*(themed and .42 or .55))
+ -- Level and class are shown only when the client provides them.
+ local detail=preview and FieldKit_L("Preview") or ((level and (FieldKit_L("Lvl").." "..level.." ") or "")..(class or "?"))
+ frame.total:SetText(detail);frame.total:SetWidth(frame:GetWidth()*(themed and .45 or .3));frame.total:SetJustifyH("RIGHT")
+ if themed then
+  if frame.total.SetTextColor then frame.total:SetTextColor(color[1],color[2],color[3]) end
+  if preview then frame.portrait:Hide();frame.portraitBack:Hide() else P.Portrait(frame,frame.unit,name..tostring(token)) end
+ end
+ local connected
+ if not preview and type(UnitIsConnected)=="function" then connected=UnitIsConnected(frame.unit) and true or false end
+ -- Dead / ghost only when the client reports it (optional API, never inferred from missing data).
+ local ghost=not preview and type(UnitIsGhost)=="function" and UnitIsGhost(frame.unit) and true or false
+ local dead=not preview and ghost or (not preview and (type(UnitIsDeadOrGhost)=="function" and UnitIsDeadOrGhost(frame.unit) or (type(UnitIsDead)=="function" and UnitIsDead(frame.unit))) and true or false)
+ local muted=dead or connected==false
+ local fraction=known and math.min(hp/max,1) or 0
+ local barColor=themed and P.HealthColor(fraction,muted) or color
+ P.Row(frame,1,"Health",known and FieldKit_FormatHealth(hp,max,FieldKitDB.partyHealthMode) or FieldKit_L("Not provided"),dead and 0 or fraction,barColor)
  local mana=type(UnitMana)=="function" and FieldKit.Number(UnitMana(frame.unit),nil,0)
  local manaMax=type(UnitManaMax)=="function" and FieldKit.Number(UnitManaMax(frame.unit),nil,0)
  if preview then mana=nil;manaMax=nil end
  local power=not preview and type(UnitPowerType)=="function" and UnitPowerType(frame.unit)
  local resource=power==0 and "Mana" or (power==1 and "Rage" or (power==3 and "Energy" or "Resource"))
- local powerColor=power==1 and {.9,.2,.15} or (power==3 and {.9,.8,.15} or {.2,.5,.9})
- P.Row(frame,2,resource,mana and manaMax and manaMax>0 and string.format("%.0f / %.0f",mana,manaMax) or FieldKit_L("Not provided"),mana and manaMax and manaMax>0 and math.min(mana/manaMax,1) or 0,powerColor)
+ local powerColor=muted and {.45,.45,.45} or (power==1 and {.9,.2,.15} or (power==3 and {.9,.8,.15} or {.2,.5,.9}))
+ P.Row(frame,2,resource,mana and manaMax and manaMax>0 and string.format("%.0f / %.0f",mana,manaMax) or FieldKit_L("Not provided"),mana and manaMax and manaMax>0 and not dead and math.min(mana/manaMax,1) or 0,powerColor)
  local line=P.MemberDamage(name)
  P.Row(frame,3,"Damage / DPS",line and FieldKit_FormatMeterValues(line,2) or FieldKit_L("Waiting for group data"),0,color)
- local connected
- if not preview and type(UnitIsConnected)=="function" then connected=UnitIsConnected(frame.unit) and true or false end
- -- Dead/ghost only when the client reports it (optional API: never inferred from missing data).
- local dead=not preview and (type(UnitIsDeadOrGhost)=="function" and UnitIsDeadOrGhost(frame.unit) or (type(UnitIsDead)=="function" and UnitIsDead(frame.unit))) and true or false
- local status=connected==false and "Offline" or (dead and "Dead" or (known and hp==0 and "0 HP" or (connected and "Online" or "Not provided")))
+ local status=connected==false and "Offline" or (ghost and "Ghost" or (dead and "Dead" or (known and hp==0 and "0 HP" or (connected and "Online" or "Not provided"))))
  P.Row(frame,4,"Status",FieldKit_L(status),0,color)
- P.fitRows(frame,4);frame:Show();P.Stock(index,FieldKitDB.replacePartyFrames and known and true or false)
+ P.fitRows(frame,4);frame:Show();P.Stock(index,P.ReplaceOn() and known and true or false)
 end
 
 function P.UpdateMeter(active)

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha.30 - 2026-11-10 (themed teammate cards, unreleased)
+
+- With a themed HUD the FieldKit teammate cards ARE the group display: they are shown without touching the saved `partyCards` / `replacePartyFrames` preferences, and the native round PartyMemberFrame1-4 are replaced (state saved by `P.Stock`, hook and visibility restored when the theme or the member goes away; never both shown). The cards keep the approved material of the active zone (Elwynn dark green + gold, Naxxramas metal) through the shared window skin.
+- Content: native portrait (SetPortraitTexture) in a square gold socket, name, level and class (only what the client reports), health bar coloured by the real fraction (green / amber / red, grey when dead, ghost or offline), resource bar, Dead / Ghost / Offline / 0 HP status, damage line from the group packets. Nothing is invented: unknown level or class shows nothing or "?", unknown max HP hides the card and keeps the native frame.
+- Stacking: the cards were LOW-strata legacy windows hidden under the MEDIUM main cards. They are now MEDIUM with a level above every main card while themed, legacy strata restored otherwise.
+- Placement priority (`R.Resolve`) is now: protected parts, then visible teammate cards (the one moved last first), then the five main cards, which look for a free place (display only; their saved positions are never rewritten). Group change recomputes at the next tick; an empty group frees every place. Overlap option unchanged.
+- Each card keeps its own saved position per layout (existing store), movable in every direction.
+
 ## 0.6.0-alpha.29 - 2026-11-10 (teammate cards in the placement engine, unreleased)
 
 - Teammate cards (FieldKitPartyCard1-4) are now elements of the common placement engine (`R.Resolve`): they are measured live, never overlap the Damage / Lairs / Equipment / Bonuses / Effects cards, the protected HUD parts or each other (when overlap is off), and they YIELD: they come last in priority (among themselves the one moved last first), are not part of the soft preferences of the other cards, so they never displace a card that is already placed. The displacement is display-only (`R.PartyPrepare` / `R.PartyApply`), never saved, relative to the preferred position, removed at once when the card hides, the theme or the layout is switched, or overlap is allowed; nothing moves a card while it is dragged; the engine is deterministic (no repositioning loop).

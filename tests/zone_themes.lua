@@ -1293,8 +1293,9 @@ do
    for i=1,4 do if i<=count then Place(cards[i],dmg[1]+10+i*8,dmg[2]+10+i*8);cards[i]:Show() else cards[i]:Hide() end end
    C.Refresh(true);C.Refresh(true)
    Checked(zone..": "..count.." member(s)",cards)
-   -- the cards that were already placed are not moved by the teammate cards
-   for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local l,t=Rendered(R.frames[k]);assert(math.abs(l-baseline[k][1])<.5 and math.abs(t-baseline[k][2])<.5,zone..": "..k.." stays put with "..count.." teammate card(s)") end
+   -- alpha.30 priority: the first teammate card keeps its preferred place, the main cards give way; saved positions untouched
+   local fl,ft=Rendered(cards[1]);assert(math.abs(fl-(dmg[1]+18))<.5 and math.abs(ft-(dmg[2]+18))<.5,zone..": the teammate card keeps its preferred place with "..count.." member(s)")
+   for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local v=FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanel"..k];assert(v and v[3]==saved[k][1] and v[4]==-saved[k][2],zone..": the saved position of "..k.." is never rewritten by the engine") end
    -- stable: no repositioning loop
    local snap={};for i=1,4 do snap[i]={Rendered(cards[i])} end
    for n=1,5 do C.Refresh(true) end
@@ -1302,6 +1303,9 @@ do
   end
   -- a member leaves: the card is released at once and the others close ranks only if they can
   cards[2]:Hide();C.Refresh(true);assert(cards[2].fieldkitApplied==nil and R.shift.Party2==nil,zone..": a hidden card holds no place")
+  for i=1,4 do cards[i]:Hide() end;C.Refresh(true);C.Refresh(true)
+  for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local l,t=Rendered(R.frames[k]);assert(math.abs(l-baseline[k][1])<.5 and math.abs(t-baseline[k][2])<.5,zone..": "..k.." goes back to its place when the group is empty ("..l..","..t.." vs "..baseline[k][1]..","..baseline[k][2]..")") end
+  cards[1]:Show();cards[3]:Show();cards[4]:Show();C.Refresh(true);C.Refresh(true)
   Checked(zone..": a member left",cards)
   -- preferred position comes back when the space is free again: only this card on its preferred spot
   for i=1,4 do cards[i]:Hide() end;Place(cards[1],dmg[1]+10,dmg[2]+10);cards[1]:Show();C.Refresh(true)
@@ -1338,3 +1342,95 @@ do
  end
 end
 print("Teammate cards in the placement engine: 0-4 members, collisions, stability, drag, persistence passed (synthetic)")
+
+-- alpha.30: themed teammate cards: shown with the theme, native frames replaced and restored, states, strata, individual moves.
+do
+ local P=FieldKitCoop
+ local members={}
+ local function M(unit) local _,_,i=string.find(unit,"^party(%d)$");return i and members[tonumber(i)] end
+ local old={}
+ for _,n in ipairs({"UnitExists","UnitName","UnitHealth","UnitHealthMax","UnitMana","UnitManaMax","UnitPowerType","UnitClass","UnitLevel","UnitIsConnected","UnitIsDeadOrGhost","UnitIsGhost","SetPortraitTexture"}) do old[n]=_G[n] end
+ UnitExists=function(u) return M(u)~=nil or old.UnitExists(u) end
+ UnitName=function(u) local m=M(u);return m and m.name or old.UnitName(u) end
+ UnitHealth=function(u) local m=M(u);return m and m.hp or old.UnitHealth(u) end
+ UnitHealthMax=function(u) local m=M(u);return m and m.max or old.UnitHealthMax(u) end
+ UnitMana=function(u) local m=M(u);return m and m.mana or old.UnitMana(u) end
+ UnitManaMax=function(u) local m=M(u);return m and m.mp or old.UnitManaMax(u) end
+ UnitPowerType=function(u) local m=M(u);return m and 0 or old.UnitPowerType(u) end
+ UnitClass=function(u) local m=M(u);if m then return m.class,m.key end return old.UnitClass(u) end
+ UnitLevel=function(u) local m=M(u);if m then return m.level end return old.UnitLevel(u) end
+ UnitIsConnected=function(u) local m=M(u);if m then return m.online end return true end
+ UnitIsDeadOrGhost=function(u) local m=M(u);return m and (m.dead or m.ghost) or false end
+ UnitIsGhost=function(u) local m=M(u);return m and m.ghost or false end
+ local portraits=0;SetPortraitTexture=function() portraits=portraits+1 end
+ local natives={};for i=1,4 do natives[i]=CreateFrame("Frame","PartyMemberFrame"..i,UIParent);natives[i]:Show() end
+ AZS_RUN.ph="playing";AZS_RUN.t=2000;P.phase=nil;P.TrackRun()
+ local function Stage1(f) f.GetLeft=function(self) local l=Rendered(self);return l end;f.GetTop=function(self) local _,t=Rendered(self);return UIH-t end;f.GetEffectiveScale=function() return 1 end end
+ local function Put(f,x,y) f:ClearAllPoints();f:SetPoint("TOPLEFT",UIParent,"TOPLEFT",x,-y) end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+  FieldKitDB.partyCards=false;FieldKitDB.replacePartyFrames=false;FieldKit_SetLanguage("en")
+  local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+  Stage()
+  for i=1,4 do Stage1(P.frames[i]);P.frames[i]:SetWidth(280);P.frames[i]:SetHeight(100) end
+  -- empty group: no card, native frames untouched
+  members={};P.Update();for i=1,4 do assert(not P.frames[i]:IsShown() and natives[i]:IsShown(),zone..": empty group: no FieldKit card, nothing hidden") end
+  -- two members: themed cards, native frames replaced, preferences untouched
+  members={{name="Denza",hp=400,max=800,mana=30,mp=100,class="Mage",key="MAGE",level=12,online=true},{name="Lockpin",hp=600,max=600,mana=10,mp=50,class="Priest",key="PRIEST",level=11,online=true}}
+  P.Update()
+  assert(P.frames[1]:IsShown() and P.frames[2]:IsShown() and not P.frames[3]:IsShown() and not P.frames[4]:IsShown(),zone..": two members, two cards")
+  assert(not natives[1]:IsShown() and not natives[2]:IsShown(),zone..": native frames are not shown together with the cards")
+  assert(FieldKitDB.partyCards==false and FieldKitDB.replacePartyFrames==false,zone..": saved preferences are not modified")
+  assert(P.frames[1].title:GetText()=="Denza" and P.frames[1].total:GetText()=="Lvl 12 Mage",zone..": name, level and class ("..tostring(P.frames[1].total:GetText())..")")
+  assert(P.frames[1].rows[1].value:GetText()=="400 / 800 (50%)",zone..": health and percentage from the unit")
+  assert(P.frames[1].portrait and P.frames[1].portrait:IsShown() and portraits>0,zone..": portrait through the native API, inside a square socket")
+  assert(P.frames[1]:GetFrameStrata()=="MEDIUM" and P.frames[1]:GetFrameLevel()>R.frames.Damage:GetFrameLevel() and P.frames[1]:GetFrameLevel()>R.frames.Stats:GetFrameLevel(),zone..": drawn above the main cards")
+  local g,y,r=P.HealthColor(.9,false),P.HealthColor(.4,false),P.HealthColor(.1,false)
+  assert(g[2]>g[1] and y[1]>.8 and r[1]>.8 and r[2]<.3,zone..": health colours follow the real fraction")
+  assert(P.HealthColor(.9,true)[1]==.45,zone..": muted colour for dead / offline")
+  -- states
+  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Dead",zone..": dead")
+  members[1].ghost=true;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Ghost",zone..": ghost")
+  members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Online",zone..": resurrection")
+  members[1].online=false;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Offline",zone..": offline");members[1].online=true
+  members[2].hp=0;P.Update();assert(P.frames[2].rows[4].value:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
+  members[2].hp=600
+  -- partial data: nothing invented
+  local level=members[1].level;members[1].level=nil;members[1].class=nil;members[1].key=nil;P.Update()
+  assert(P.frames[1].total:GetText()=="?",zone..": no level, no class: nothing invented ("..tostring(P.frames[1].total:GetText())..")")
+  members[1].level=level;members[1].class="Mage";members[1].key="MAGE"
+  members[2].max=0;P.Update();assert(not P.frames[2]:IsShown() and natives[2]:IsShown(),zone..": unknown max HP: no invented card, native frame kept");members[2].max=600;P.Update()
+  assert(P.frames[2]:IsShown() and not natives[2]:IsShown(),zone..": and back")
+  -- a member joins, then leaves: no ghost card, native frame back
+  members[3]={name="Empe",hp=300,max=300,mana=70,mp=100,class="Warrior",key="WARRIOR",level=13,online=true};P.Update();assert(P.frames[3]:IsShown() and not natives[3]:IsShown(),zone..": joins")
+  members[3]=nil;P.Update();assert(not P.frames[3]:IsShown() and P.stock[3]==nil,zone..": leaves: no ghost card, native hook released (the game hides the frame of a unit that is gone)")
+  -- four members, each card moved individually
+  members[3]={name="Empe",hp=300,max=300,mana=70,mp=100,class="Warrior",key="WARRIOR",level=13,online=true}
+  members[4]={name="Zed",hp=50,max=500,mana=0,mp=0,class="Rogue",key="ROGUE",level=14,online=true}
+  natives[3]:Show();natives[4]:Show() -- the game shows the native frame of a member who joins
+  P.Update()
+  for i=1,4 do assert(P.frames[i]:IsShown(),zone..": four members") end
+  local spots={{300,200},{900,260},{300,560},{1000,620}}
+  for i=1,4 do Put(P.frames[i],spots[i][1],spots[i][2]);assert(C.Remember(P.frames[i]),zone..": card "..i.." is stored on its own") end
+  C.Refresh(true);C.Refresh(true)
+  for i=1,4 do local v=FieldKitDB.zoneThemePositions[layout]["FieldKitPartyCard"..i];assert(v and v[3]==spots[i][1] and v[4]==-spots[i][2],zone..": independent saved position "..i) end
+  -- a main card put on a teammate card gives way; the teammate card keeps its place
+  FieldKitDB.zoneThemePositions[layout].FieldKitReferencePanelDamage={"TOPLEFT","TOPLEFT",spots[1][1],-spots[1][2]};Relayout();C.Refresh(true)
+  local od=Opaque2("Damage");local dl,dt,dw,dh=od[1],od[2],od[3]-od[1],od[4]-od[2];local pl,pt,pw,ph=Rendered(P.frames[1])
+  assert(not (math.min(dl+dw,pl+pw)-math.max(dl,pl)>0 and math.min(dt+dh,pt+ph)-math.max(dt,pt)>6),zone..": a main card dropped on a teammate card gives way")
+  assert(math.abs(pl-spots[1][1])<.5 and math.abs(pt-spots[1][2])<.5,zone..": the teammate card keeps its place")
+  local saved=FieldKitDB.zoneThemePositions[layout].FieldKitReferencePanelDamage;assert(saved[3]==spots[1][1] and saved[4]==-spots[1][2],zone..": the engine never rewrites the saved position of the main card")
+  local other=zone=="elwynn" and "naxx:complete:reference" or "elwynn:complete:reference"
+  assert(FieldKitDB.zoneThemePositions[other]==nil or FieldKitDB.zoneThemePositions[other].FieldKitPartyCard1==nil,zone..": positions are stored per layout")
+  -- theme off: native frames come back, the cards go
+  C.Set("zoneThemes",false);P.Update()
+  for i=1,4 do assert(not P.frames[i]:IsShown() and P.stock[i]==nil,zone..": theme off: no FieldKit card, native hooks released") end
+  for i=1,4 do if M("party"..i) then assert(natives[i]:IsShown(),zone..": theme off: the native frame of an existing member is back") end end
+  assert(P.frames[1]:GetFrameStrata()=="LOW" or not P.frames[1]:IsShown(),zone..": legacy strata back")
+  FieldKitDB.zoneThemePositions[layout]=nil;members={};P.Update()
+  for i=1,4 do P.frames[i].GetLeft=nil;P.frames[i].GetTop=nil;P.frames[i].GetEffectiveScale=nil end;Unstage()
+ end
+ for k,v in pairs(old) do _G[k]=v end
+ AZS_RUN.ph=nil;P.Update()
+end
+print("Themed teammate cards: states, native replacement, strata, individual moves passed (synthetic)")

@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.30 - CARTES DE GROUPE THEMATISEES
+Cartes du theme a la place des cadres natifs, devant les cartes principales, deplacables une par une. A recetter en jeu.
+
 ALPHA.29 - CARTES DE GROUPE DANS LE MOTEUR DE PLACEMENT
 Les cartes de coequipiers ne chevauchent plus les autres cartes et cedent la place. A recetter en jeu.
 
