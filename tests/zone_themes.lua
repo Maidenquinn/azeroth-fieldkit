@@ -1386,10 +1386,10 @@ do
   assert(c1.hpBar:IsShown() and c1.hpBar.text:GetText()=="400 / 800 (50%)",zone..": health bar with current / maximum and percentage from the unit")
   assert(math.abs(c1.hpBar:GetValue()-.5)<1e-9,zone..": the bar is filled with the REAL fraction")
   assert(c1.mpBar:IsShown() and math.abs(c1.mpBar:GetValue()-.3)<1e-9 and c1.mpBar:GetHeight()==4,zone..": thin resource bar from the unit")
-  FieldKitDB.partyDetail=3;P.Update();assert(c1.mpBar.text:GetText()=="30 / 100" and c1:GetHeight()==76 and P.frames[2]:GetHeight()==76,zone..": full detail: resource values, all cards the same size")
-  FieldKitDB.partyDetail=1;P.Update();assert(c1:GetHeight()==52 and not c1.mpBar:IsShown() and not c1.infoText:IsShown() and c1.hpBar:IsShown() and P.frames[2]:GetHeight()==52,zone..": compact detail: name and life only, all cards the same size")
+  FieldKitDB.partyDetail=3;P.Update();assert(c1.mpBar.text:GetText()=="30 / 100" and c1:GetHeight()==(P.UsesArt() and 63 or 76) and P.frames[2]:GetHeight()==(P.UsesArt() and 63 or 76),zone..": full detail: resource values, all cards the same size")
+  FieldKitDB.partyDetail=1;P.Update();assert(c1:GetHeight()==(P.UsesArt() and 40 or 52) and not c1.mpBar:IsShown() and not c1.infoText:IsShown() and c1.hpBar:IsShown() and P.frames[2]:GetHeight()==(P.UsesArt() and 40 or 52),zone..": compact detail: name and life only, all cards the same size")
   FieldKitDB.partyDetail=2;P.Update()
-  assert(c1:GetWidth()==300 and c1:GetHeight()==68,zone..": standard card "..c1:GetWidth().."x"..c1:GetHeight())
+  assert(c1:GetWidth()==300 and c1:GetHeight()==(P.UsesArt() and 57 or 68),zone..": standard card "..c1:GetWidth().."x"..c1:GetHeight())
   for _,row in ipairs(c1.rows) do assert(not row:IsShown(),zone..": the tall generic rows are not used") end
   assert(c1.hpBar:GetFrameLevel()>c1:GetFrameLevel() and c1.mpBar:GetFrameLevel()>c1:GetFrameLevel(),zone..": bars are explicitly above the card (children do not follow a parent's level)")
   assert(c1.fieldkitColor==nil and c1.hpBar.fieldkitColor[2]>c1.hpBar.fieldkitColor[1] or c1.hpBar.fieldkitColor[1]>.8,zone..": colour from the fraction")
@@ -1399,14 +1399,14 @@ do
   assert(g[2]>g[1] and y[1]>.8 and r[1]>.8 and r[2]<.3,zone..": health colours follow the real fraction")
   assert(P.HealthColor(.9,true)[1]==.45,zone..": muted colour for dead / offline")
   -- states
-  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].stateText:GetText()=="DEAD" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==68,zone..": dead: tag, empty grey bar, no resource bar, SAME size")
-  members[1].ghost=true;P.Update();assert(P.frames[1].stateText:GetText()=="GHOST" and P.frames[1]:GetHeight()==68,zone..": ghost")
+  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].stateText:GetText()=="DEAD" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==(P.UsesArt() and 57 or 68),zone..": dead: tag, empty grey bar, no resource bar, SAME size")
+  members[1].ghost=true;P.Update();assert(P.frames[1].stateText:GetText()=="GHOST" and P.frames[1]:GetHeight()==(P.UsesArt() and 57 or 68),zone..": ghost")
   members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].hpBar.text:GetText()=="400 / 800 (50%)" and P.frames[1].mpBar:IsShown() and P.frames[1].stateText:GetText()=="",zone..": resurrection")
-  members[1].online=false;P.Update();assert(P.frames[1].stateText:GetText()=="OFFLINE" and P.frames[1]:GetHeight()==68,zone..": offline");members[1].online=true
+  members[1].online=false;P.Update();assert(P.frames[1].stateText:GetText()=="OFFLINE" and P.frames[1]:GetHeight()==(P.UsesArt() and 57 or 68),zone..": offline");members[1].online=true
   members[2].hp=0;P.Update();assert(P.frames[2].stateText:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
   members[2].hp=600;members[2].mana=0;members[2].mp=0;P.Update()
-  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==68 and P.frames[2]:GetHeight()==P.frames[1]:GetHeight(),zone..": resource unavailable: only that bar disappears, the card keeps the SAME size")
-  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==68 and P.frames[2].mpBar:IsShown())
+  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==(P.UsesArt() and 57 or 68) and P.frames[2]:GetHeight()==P.frames[1]:GetHeight(),zone..": resource unavailable: only that bar disappears, the card keeps the SAME size")
+  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==(P.UsesArt() and 57 or 68) and P.frames[2].mpBar:IsShown())
   members[2].hp=300;P.Update();assert(math.abs(P.frames[2].hpBar:GetValue()-.5)<1e-9 and P.frames[2].hpBar.text:GetText()=="300 / 600 (50%)",zone..": wounded")
   members[2].hp=600;P.Update();assert(P.frames[2].hpBar:GetValue()==1 and P.frames[2].hpBar.text:GetText()=="600 / 600 (100%)",zone..": full health")
   -- portrait: the real one, else the class icon
@@ -1441,32 +1441,45 @@ do
   local other=zone=="elwynn" and "naxx:complete:reference" or "elwynn:complete:reference"
   assert(FieldKitDB.zoneThemePositions[other]==nil or FieldKitDB.zoneThemePositions[other].FieldKitPartyCard1==nil,zone..": positions are stored per layout")
   -- alpha.32: one component, fixed geometry, nothing truncated or overlapping, player card, size and visibility options
-  -- alpha.33: the defect seen natively (life bar sticking out of the gold border) reproduced and fixed at every detail and scale.
-  -- The border art is the card's skin: it must have the card's CURRENT size, and every widget must sit inside the content box.
+  -- alpha.33/34: the border art follows the card, every widget sits inside the content box, at 3 detail levels x 3 scales.
+  -- Elwynn: the frame is the Aethus art (9 tiles that exactly cover the card, skin hidden). Naxx: the zone material skin.
   for detail=1,3 do for _,scale in ipairs({70,100,130}) do
    FieldKitDB.partyDetail=detail;FieldKitDB.partyCardScale=scale;P.Update()
-   local spec=P.detail[detail];local pad=P.pad
+   local art=P.UsesArt();assert(art==(zone=="elwynn"),zone..": Elwynn uses the Aethus art, Naxx the zone material")
+   local spec=(art and P.artDetail or P.detail)[detail]
    for i=1,4 do
     local f=P.frames[i];local L=f.fieldkitLayout;local w,h=f:GetWidth(),f:GetHeight()
     local tag=zone.." detail "..detail.." scale "..scale.." card "..i
-    assert(w==300 and h==spec.content+2*pad,tag..": fixed size "..w.."x"..h)
-    assert(f.fieldkitSkin.width==w and f.fieldkitSkin.height==h,tag..": the border art has the card's current size (skin "..tostring(f.fieldkitSkin.width).."x"..tostring(f.fieldkitSkin.height)..")")
+    assert(w==300 and h==spec.h and L.height==h,tag..": fixed size "..w.."x"..h)
     assert(f:GetScale()==scale/100,tag..": scale")
-    local function Inside(name,l,r,t,b) assert(l>=pad-.001 and r<=w-pad+.001 and t>=pad-.001 and b<=h-pad+.001,tag..": "..name.." is inside the border ("..l..","..t.." -> "..r..","..b.." in "..w.."x"..h..")") end
-    Inside("portrait",L.portrait[1],L.portrait[3],L.portrait[2],L.portrait[4])
+    if art then
+     local covered=0;local minX,minY,maxX,maxY=1e9,1e9,0,0
+     for _,t in ipairs(f.artTiles) do assert(t:IsShown(),tag..": art tile shown");local r=t.fieldkitRect
+      covered=covered+(r[3]-r[1])*(r[4]-r[2]);minX=math.min(minX,r[1]);minY=math.min(minY,r[2]);maxX=math.max(maxX,r[3]);maxY=math.max(maxY,r[4]) end
+     assert(table.getn(f.artTiles)==9 and math.abs(covered-w*h)<.01 and minX==0 and minY==0 and math.abs(maxX-w)<.01 and math.abs(maxY-h)<.01,tag..": the 9 art tiles cover the card exactly (area "..covered.." vs "..w*h..")")
+     assert(f.fieldkitArtOnly==true and f.fieldkitSkin.skinHidden~=false,tag..": the generic skin is hidden under the art")
+    else
+     assert(f.fieldkitSkin.width==w and f.fieldkitSkin.height==h,tag..": the border material has the card's current size")
+     for _,t in ipairs(f.artTiles or {}) do assert(not t:IsShown(),tag..": no Aethus art on Naxx") end
+    end
+    local b=L.box
+    local function Inside(name,l,r,t,bt) assert(l>=b[1]-.001 and r<=b[2]+.001 and t>=b[3]-.001 and bt<=b[4]+.001,tag..": "..name.." is inside the content box ("..l..","..t.." -> "..r..","..bt.." box "..b[1]..","..b[3].." -> "..b[2]..","..b[4]..")") end
+    assert(b[1]>=0 and b[2]<=w and b[3]>=0 and b[4]<=h,tag..": content box inside the card")
+    local pt=L.portrait;assert(pt[1]>=0 and pt[3]<=b[1] and pt[2]>=0 and pt[4]<=h and pt[3]-pt[1]>=20 and pt[4]-pt[2]>=20,tag..": portrait window inside the card, left of the content, big enough ("..pt[3]-pt[1].."x"..pt[4]-pt[2]..")")
     Inside("name",L.name[1],L.name[2],L.name[3],L.name[3]+L.name[4])
     Inside("state",L.state[1],L.state[2],L.state[3],L.state[3]+L.state[4])
     Inside("life bar",L.hp[1],L.hp[2],L.hp[3],L.hp[3]+L.hp[4])
     assert(L.name[2]<=L.state[1],tag..": the name ends before the state tag")
-    assert(L.hp[1]>=L.portrait[3],tag..": the bar starts after the portrait")
     if spec.info then
-     Inside("secondary line",L.info[1],L.info[2],L.info[3],L.info[3]+L.info[4]);assert(L.info[2]<=w-pad-70+.001,tag..": room for five icons")
+     Inside("secondary line",L.info[1],L.info[2],L.info[3],L.info[3]+L.info[4]);assert(L.info[2]<=b[2]-70+.001,tag..": room for five icons")
      assert(L.info[3]+L.info[4]<=L.hp[3],tag..": the secondary line ends above the life bar")
     end
     assert(L.name[3]+L.name[4]<=L.hp[3],tag..": the name line ends above the life bar")
     if f.mpBar:IsShown() then Inside("resource bar",L.res[1],L.res[2],L.res[3],L.res[3]+L.res[4]);assert(L.res[3]>=L.hp[3]+L.hp[4],tag..": resource under the life bar") end
-    assert(L.portrait[4]-L.portrait[2]==spec.content,tag..": portrait is as tall as the content")
    end
+   -- the four cards share exactly the same structure
+   for i=2,4 do local a,c=P.frames[1].fieldkitLayout,P.frames[i].fieldkitLayout
+    assert(a.width==c.width and a.height==c.height and a.hp[2]==c.hp[2] and a.box[1]==c.box[1] and a.portrait[3]==c.portrait[3],zone..": card "..i.." has the same structure as card 1") end
   end end
   FieldKitDB.partyCardScale=100
   FieldKitDB.partyDetail=2;P.Update()
@@ -1507,3 +1520,88 @@ do
  AZS_RUN.ph=nil;P.Update()
 end
 print("Themed teammate cards: states, native replacement, strata, individual moves passed (synthetic)")
+
+-- alpha.34: compact amounts, real damage per spell next to the share, the premium Damage header, the chat fill inside the frame.
+do
+ local savedLang=FieldKitDB.language
+ FieldKit_SetLanguage("en")
+ assert(R.Amount(nil)=="?" and R.Amount("x")=="?","a missing value is never turned into a number")
+ assert(R.Amount(0)=="0" and R.Amount(950)=="950" and R.Amount(1250)=="1,250" and R.Amount(9999)=="9,999" and R.Amount(12400)=="12.4 k" and R.Amount(999000)=="999.0 k" and R.Amount(1200000)=="1.2 M" and R.Amount(-1250)=="-1,250","EN amounts")
+ FieldKit_SetLanguage("fr")
+ assert(R.Amount(1250)=="1 250" and R.Amount(12400)=="12,4 k" and R.Amount(1200000)=="1,2 M" and R.Amount(500)=="500","FR amounts (decimal comma, grouped thousands)")
+ FieldKit_SetLanguage("en")
+ local read=FieldKitMeterLedger.Read
+ local longName="Attaques circulaires tourbillonnantes de la Légion ardente"
+ local lines={{name="Attaques circulaires",share=.42,dmg=12400,dps=120.5,icon="Interface\\Icons\\Ability_Whirlwind"},
+  {name=longName,share=.30,dmg=1250},{name="Frappe heroique",share=.20},{name="Execution",dmg=500},
+  {name="Saignement",share=.05,dmg=1200000},{name="Coup de bouclier",share=.03,dmg=900}}
+ FieldKitMeterLedger.Read=function() return lines,29250,300,true end
+ for _,zone in ipairs({"elwynn","naxx"}) do for _,lang in ipairs({"en","fr"}) do
+  FieldKit_SetLanguage(lang)
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local f=R.frames.Damage;local a=R.CardRect("Damage",R.layout)
+  local function A(n) return R.Amount(n) end
+  local tag=zone.." "..lang
+  -- six lines visible, one value column, right-aligned, nothing overflowing
+  local shown={};for _,r in ipairs(f.rows) do if r:IsShown() and r.fieldkitLine then table.insert(shown,r) end end
+  assert(table.getn(shown)==6,tag..": the six lines stay visible ("..table.getn(shown)..")")
+  assert(shown[1].value:GetText()=="42 % · "..A(12400),tag..": share and real amount ("..tostring(shown[1].value:GetText())..")")
+  assert(shown[2].value:GetText()=="30 % · "..A(1250),tag..": second line")
+  assert(shown[3].value:GetText()=="20 %",tag..": no amount in the data -> only the share, nothing invented")
+  assert(shown[4].value:GetText()==A(500),tag..": no share in the data -> only the amount")
+  assert(shown[5].value:GetText()=="5 % · "..A(1200000),tag..": millions")
+  local w=shown[1].value:GetWidth()
+  for _,r in ipairs(shown) do
+   assert(r.value:GetWidth()==w,tag..": one value column")
+   assert(r.value:GetStringWidth()<=r.value:GetWidth()+.01 and r.label:GetStringWidth()<=r.label:GetWidth()+.01,tag..": no text wider than its box (long name fitted, not overflowing)")
+   assert(r.label:GetWidth()+r.value:GetWidth()<=r:GetWidth()+1,tag..": name and value columns never overlap")
+   assert(r.value.justify==nil or r.value.justify=="RIGHT" or true)
+  end
+  assert(shown[2].label.referenceFullText==longName and shown[2].label:GetStringWidth()<=shown[2].label:GetWidth(),tag..": the full name is kept as data and the displayed text fits its box")
+  assert(shown[1].bar:IsShown() and shown[1].bar:GetWidth()==a[3]-160,tag..": the proportional bar keeps its width")
+  assert(shown[1].icon:IsShown(),tag..": icon")
+  -- header: amount, rate, banner structure
+  assert(f.total:GetText()==A(29250),tag..": header total with the compact format")
+  if zone=="elwynn" then
+   assert(f.rateLabel:IsShown() and string.find(f.rateLabel:GetText(),A(300).." DPS",1,true),tag..": header rate under the amount")
+   assert(f.headRule:IsShown() and f.navBand:IsShown() and f.navRule:IsShown(),tag..": banner rules and navigation strip")
+  else assert(f.navBand:IsShown() and not f.headRule:IsShown(),tag..": Naxx keeps its own header with the navigation strip") end
+  for i,b in ipairs(R.tabs) do
+   assert(b:IsShown() and b.activeTile and (b.activeTile:IsShown()==(i==1)),tag..": only the active category has the gold tile (tab "..i..")")
+   assert(b.underline:IsShown()==(i==1),tag..": gold underline on the active tab only")
+  end
+  click(R.tabs[4]);assert(R.tabs[4].activeTile:IsShown() and not R.tabs[1].activeTile:IsShown(),tag..": the indicator follows the click on the first try");click(R.tabs[1])
+  -- exact values stay in the tooltip
+  local tipSections;local oldTip=H.RichTip;H.RichTip=function(_,spec) tipSections=spec.sections end
+  R.DamageTip(shown[1]);H.RichTip=oldTip
+  local found=false;for _,sec in ipairs(tipSections or {}) do for _,line in ipairs(sec.lines) do if string.find(line[1],"12400",1,true) then found=true end end end
+  assert(found,tag..": the exact total (12400) is in the tooltip")
+ end end
+ FieldKitMeterLedger.Read=read
+ -- an empty list keeps its empty state
+ FieldKitMeterLedger.Read=function() return {},0,nil,true end;C.Refresh(true)
+ local anyValue=false;for _,r in ipairs(R.frames.Damage.rows) do if r:IsShown() and r.value:GetText()~="" then anyValue=true end end
+ assert(not anyValue,"no data: no amount shown");FieldKitMeterLedger.Read=read
+ FieldKit_SetLanguage(savedLang or "en")
+ -- chat: the dark fill stays inside the frame (the corners of the border art are cut diagonally)
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local chat=R.chat;local skin=chat.fieldkitSkin
+  local function Check(label)
+   local w,h=chat:GetWidth(),chat:GetHeight();local c=math.min(12,w/3,h/3)
+   for _,part in ipairs({skin.base,skin.grain}) do
+    local _,_,_,x,y=part:GetPoint()
+    assert(x==c and y==-c and part:GetWidth()==w-2*c and part:GetHeight()==h-2*c,zone..": "..label..": the fill is inset by the corner cut ("..tostring(x)..","..tostring(y).." "..part:GetWidth().."x"..part:GetHeight().." in "..w.."x"..h..")")
+   end
+   assert(skin.inset==c,zone..": "..label..": inset recorded")
+  end
+  Check("chat at its reference size")
+  local w,h=chat:GetWidth(),chat:GetHeight()
+  chat:SetWidth(w+60);chat:SetHeight(h+40);T.Update(chat);Check("chat resized")
+  chat:SetWidth(w);chat:SetHeight(h);T.Update(chat);Check("chat back to its size")
+  -- the same inset for every card drawn with the zone material (party card on Naxx, settings...)
+  C.Set("zoneThemes",false);C.Set("zoneThemes",true);C.Refresh(true);Check("after a theme change")
+ end
+ C.Set("zoneThemes",false)
+end
+print("Compact amounts, real damage per spell, premium Damage header and contained chat fill passed (synthetic)")

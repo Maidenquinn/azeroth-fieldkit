@@ -229,8 +229,8 @@ function P.Style(frame,themed)
   frame:SetFrameStrata("MEDIUM");frame:SetFrameLevel(level)
   if not frame.portraitBack then
    frame.portraitBack=frame:CreateTexture(nil,"ARTWORK");frame.portraitBack:SetTexture(FieldKitTheme.gold[1],FieldKitTheme.gold[2],FieldKitTheme.gold[3])
-   frame.portraitInner=frame:CreateTexture(nil,"ARTWORK");frame.portraitInner:SetTexture(0,0,0,1)
-   frame.portrait=frame:CreateTexture(nil,"OVERLAY");frame.portrait:SetTexCoord(.08,.92,.08,.92)
+   frame.portraitInner=frame:CreateTexture(nil,"BACKGROUND");frame.portraitInner:SetTexture(0,0,0,1)
+   frame.portrait=frame:CreateTexture(nil,"BACKGROUND");frame.portrait:SetTexCoord(.08,.92,.08,.92)
    frame.hpBar=MakeBar(frame);frame.mpBar=MakeBar(frame)
    frame.nameText=frame:CreateFontString(nil,"OVERLAY","GameFontNormal")
    frame.infoText=frame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
@@ -250,6 +250,7 @@ function P.Style(frame,themed)
   if frame.portrait then
    frame.portrait:Hide();frame.portraitBack:Hide();frame.portraitInner:Hide();frame.hpBar:Hide();frame.mpBar:Hide()
    frame.nameText:Hide();frame.infoText:Hide();frame.stateText:Hide();for _,t in ipairs(frame.historyIcons) do t:Hide() end
+   P.HideArt(frame);frame.fieldkitArtOnly=nil;FieldKitTheme.State(frame,false)
   end
   if collapse then collapse:Show() end
  end
@@ -257,9 +258,12 @@ end
 -- Real portrait, else the class icon, else nothing (never a made-up face).
 function P.Portrait(frame,unit,token)
  local now=GetTime()
- if frame.portraitKey==token and now<(frame.portraitAt or 0) and frame.portrait:IsShown() then return end
+ -- a window wider than tall shows the middle of the (square) face instead of stretching it
+ local crop=frame.fieldkitPortraitCrop or 1;local margin=(.84*(1-crop))/2
+ local function Crop() frame.portrait:SetTexCoord(.08,.92,.08+margin,.92-margin) end
+ if frame.portraitKey==token and now<(frame.portraitAt or 0) and frame.portrait:IsShown() then Crop();return end
  frame.portraitKey=token;frame.portraitAt=now+5
- frame.portrait:SetTexCoord(.08,.92,.08,.92)
+ Crop()
  local ok=type(SetPortraitTexture)=="function" and pcall(SetPortraitTexture,frame.portrait,unit)
  if not ok then
   local c=CLASS_ICON[token or ""]
@@ -267,69 +271,122 @@ function P.Portrait(frame,unit,token)
  end
  if ok then frame.portrait:Show() else frame.portrait:Hide() end
 end
--- Every widget is anchored to the card's own edges (left AND right, or top-left plus a fixed size inside the content box), so a
--- widget can never be wider than the card that really exists. Alpha.32 sized the widgets for a 300 px card while the border
--- art (FieldKitTheme skin) kept the size of the previous layout: the skin is only resized by FieldKitTheme.Update, which was
--- not called after SetWidth, so the life bar stuck out of the gold border.
+-- Every widget is anchored to the card's own edges, and the border is either the Aethus art (Elwynn) or the zone material (Naxx).
+-- Elwynn: the card frame IS the approved Aethus vitality art (portrait window, gold border, corner studs, dark green body),
+-- cut into a 3x3 grid: corners and the portrait window keep their proportions (scale 0.5), only the plain centre bands stretch.
+-- Source art (texture pixels, texture 512x256): occupied area x 5..352, y 7..127; plain columns x 118..130 (checked flat).
+local ART={file="elwynn_complete_vitality_1.tga",tw=512,th=256,scale=.5,
+ xs={5,116,118,130,336,352},   -- left slice 5..116, plain band 118..130, right slice 336..352 (past the slot ends)
+ ys={7,46,95,127},             -- top 7..46, stretched 46..95, bottom 95..127
+ hole={11,11,101,109},         -- portrait window inside the art area (x1,y1,x2,y2), art-area pixels
+ contentTop=6,contentBottom=7,contentLeft=62,contentRight=12}
+P.art=ART
+-- Rows of the content box (heights in px), top to bottom; the card height = content + top + bottom insets.
+local ART_DETAIL={
+ {content=27,name=0,info=nil,hp=15,hpH=12,res=nil,resH=0},
+ {content=44,name=0,info=13,hp=26,hpH=12,res=40,resH=4},
+ {content=50,name=0,info=13,hp=26,hpH=13,res=41,resH=9},
+}
+for _,d in ipairs(ART_DETAIL) do d.h=d.content+ART.contentTop+ART.contentBottom end
+P.artDetail=ART_DETAIL
+function P.UsesArt() local R=FieldKitReferenceHUD;return R and R.key and string.find(R.key,"^elwynn") and true or false end
+-- Draws the 9 art tiles for a card of width x height (card pixels). Returns the portrait window in card pixels.
+function P.Art(frame,width,height)
+ local f=ART.scale
+ frame.artTiles=frame.artTiles or {}
+ local cols={{ART.xs[1],ART.xs[2]},{ART.xs[3],ART.xs[4]},{ART.xs[5],ART.xs[6]}}
+ local rows={{ART.ys[1],ART.ys[2]},{ART.ys[2],ART.ys[3]},{ART.ys[3],ART.ys[4]}}
+ local leftW=(cols[1][2]-cols[1][1])*f;local rightW=(cols[3][2]-cols[3][1])*f;local topH=(rows[1][2]-rows[1][1])*f;local bottomH=(rows[3][2]-rows[3][1])*f
+ local colW={leftW,width-leftW-rightW,rightW};local rowH={topH,height-topH-bottomH,bottomH}
+ local colX={0,leftW,width-rightW};local rowY={0,topH,height-bottomH}
+ local n=0
+ for r=1,3 do for c=1,3 do
+  n=n+1;local t=frame.artTiles[n]
+  if not t then t=frame:CreateTexture(nil,"BORDER");frame.artTiles[n]=t end
+  t:SetTexture(FieldKitTheme.media.."ReferenceHUD\\"..ART.file)
+  t:SetTexCoord(cols[c][1]/ART.tw,cols[c][2]/ART.tw,rows[r][1]/ART.th,rows[r][2]/ART.th)
+  t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",colX[c],-rowY[r]);t:SetWidth(colW[c]);t:SetHeight(rowH[r]);t:Show()
+  t.fieldkitRect={colX[c],rowY[r],colX[c]+colW[c],rowY[r]+rowH[r]}
+ end end
+ -- the portrait window: the art-area hole, mapped through the same 3x3 scaling
+ local h=ART.hole
+ local x1=(h[1]-ART.xs[1])*f;local x2=(h[3]-ART.xs[1])*f
+ local y1=(h[2]-ART.ys[1])*f;local y2=height-(ART.ys[4]-h[4])*f
+ return {x1,y1,x2,y2}
+end
+function P.HideArt(frame) for _,t in ipairs(frame.artTiles or {}) do t:Hide() end end
 local function Box(fs,frame,left,right,y,h,size,justify)
  fs:ClearAllPoints();fs:SetPoint("TOPLEFT",frame,"TOPLEFT",left,-y);fs:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-y)
  fs:SetHeight(h);fs:SetJustifyH(justify or "LEFT");FieldKitTheme.Font(fs,size,FieldKitTheme.text)
 end
 -- Lays the card out and fills it. d holds only values the client reported (nil = unavailable). The geometry depends on the
--- detail level and the card width only, never on the data: all cards are identical.
+-- detail level, the card width and the zone style only, never on the data: all cards are identical.
 function P.Compact(frame,d)
- local spec=DETAIL[P.Detail()]
+ local art=P.UsesArt()
+ local spec=(art and ART_DETAIL or DETAIL)[P.Detail()]
  local width=FieldKitCardLayout.Width(frame,P.cardWidth);local height=spec.h
  frame:SetWidth(width);frame:SetHeight(height)
- FieldKitTheme.Update(frame) -- the border art follows the new size
+ frame.fieldkitArtOnly=art and true or nil
+ FieldKitTheme.State(frame,false);FieldKitTheme.Update(frame) -- skin hidden under the art, or resized to the new size
  for _,row in ipairs(frame.rows or {}) do row:Hide() end
- local layout={width=width,height=height,pad=PAD}
+ local layout={width=width,height=height,art=art}
  frame.fieldkitLayout=layout
- local s=spec.socket
- -- portrait: a square socket flush inside the border, the same height as the content
- frame.portraitBack:ClearAllPoints();frame.portraitBack:SetPoint("TOPLEFT",frame,"TOPLEFT",PAD,-PAD);frame.portraitBack:SetWidth(s);frame.portraitBack:SetHeight(s)
- frame.portraitInner:ClearAllPoints();frame.portraitInner:SetPoint("TOPLEFT",frame,"TOPLEFT",PAD+2,-(PAD+2));frame.portraitInner:SetWidth(s-4);frame.portraitInner:SetHeight(s-4)
- frame.portrait:ClearAllPoints();frame.portrait:SetPoint("TOPLEFT",frame,"TOPLEFT",PAD+2,-(PAD+2));frame.portrait:SetWidth(s-4);frame.portrait:SetHeight(s-4)
- frame.portraitBack:Show();frame.portraitInner:Show()
+ local hole,box
+ if art then
+  hole=P.Art(frame,width,height)
+  box={ART.contentLeft,width-ART.contentRight,ART.contentTop,height-ART.contentBottom}
+  frame.portraitBack:Hide()
+ else
+  P.HideArt(frame)
+  local s=spec.socket
+  hole={PAD,PAD,PAD+s,PAD+s}
+  box={PAD+s+8,width-PAD,PAD,height-PAD}
+  frame.portraitBack:ClearAllPoints();frame.portraitBack:SetPoint("TOPLEFT",frame,"TOPLEFT",PAD,-PAD);frame.portraitBack:SetWidth(s);frame.portraitBack:SetHeight(s);frame.portraitBack:Show()
+  hole={PAD+2,PAD+2,PAD+s-2,PAD+s-2}
+ end
+ layout.box=box;layout.portrait=hole
+ -- portrait: fills the window; a square face is cropped (not stretched) when the window is wider than tall
+ local pw,ph=hole[3]-hole[1],hole[4]-hole[2]
+ frame.portraitInner:ClearAllPoints();frame.portraitInner:SetPoint("TOPLEFT",frame,"TOPLEFT",hole[1],-hole[2]);frame.portraitInner:SetWidth(pw);frame.portraitInner:SetHeight(ph);frame.portraitInner:Show()
+ frame.portrait:ClearAllPoints();frame.portrait:SetPoint("TOPLEFT",frame,"TOPLEFT",hole[1],-hole[2]);frame.portrait:SetWidth(pw);frame.portrait:SetHeight(ph)
+ frame.fieldkitPortraitCrop=ph<pw and (ph/pw) or 1
  if d.preview then frame.portrait:Hide() else P.Portrait(frame,frame.unit,d.token or d.name) end
  if frame.portrait.SetVertexColor then if d.muted then frame.portrait:SetVertexColor(.5,.5,.5) else frame.portrait:SetVertexColor(1,1,1) end end
- layout.portrait={PAD,PAD,PAD+s,PAD+s}
- local x=PAD+s+8;local right=PAD;local stateWidth=60
+ local x,right=box[1],width-box[2];local stateWidth=60
  -- name (left) and state tag (right) share the first line; the name box ends before the tag
- Box(frame.nameText,frame,x,right+stateWidth+4,PAD+spec.name,13,12)
+ Box(frame.nameText,frame,x,right+stateWidth+4,box[3]+spec.name,13,12)
  frame.nameText:SetText(d.name);if d.muted then frame.nameText:SetTextColor(.7,.7,.7) else frame.nameText:SetTextColor(1,.93,.75) end;frame.nameText:Show()
- frame.stateText:ClearAllPoints();frame.stateText:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(PAD+spec.name+1));frame.stateText:SetWidth(stateWidth);frame.stateText:SetHeight(11);frame.stateText:SetJustifyH("RIGHT")
+ frame.stateText:ClearAllPoints();frame.stateText:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(box[3]+spec.name+1));frame.stateText:SetWidth(stateWidth);frame.stateText:SetHeight(11);frame.stateText:SetJustifyH("RIGHT")
  FieldKitTheme.Font(frame.stateText,10,FieldKitTheme.text)
  frame.stateText:SetText(d.state or "");if d.state then frame.stateText:SetTextColor(.95,.3,.25) end;frame.stateText:Show()
- layout.name={x,width-(right+stateWidth+4),PAD+spec.name,13};layout.state={width-right-stateWidth,width-right,PAD+spec.name+1,11}
+ layout.name={x,width-(right+stateWidth+4),box[3]+spec.name,13};layout.state={width-right-stateWidth,width-right,box[3]+spec.name+1,11}
  -- secondary line (class and level) leaves room for five 12 px icons
- local iconsWidth=5*14
  if spec.info then
-  Box(frame.infoText,frame,x,right+iconsWidth,PAD+spec.info,11,10)
+  Box(frame.infoText,frame,x,right+5*14,box[3]+spec.info,11,10)
   frame.infoText:SetText(d.detail);frame.infoText:SetTextColor(d.color[1],d.color[2],d.color[3]);frame.infoText:Show()
-  layout.info={x,width-(right+iconsWidth),PAD+spec.info,11}
+  layout.info={x,width-(right+5*14),box[3]+spec.info,11}
  else frame.infoText:Hide() end
  local shown=0
  if spec.info and d.icons then
   for n=1,table.getn(frame.historyIcons) do
    local t=frame.historyIcons[n];local texture=d.icons[n]
-   if texture then t:ClearAllPoints();t:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right-(n-1)*14,-(PAD+spec.info-.5));t:SetTexture(texture);t:Show();shown=shown+1 else t:Hide() end
+   if texture then t:ClearAllPoints();t:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right-(n-1)*14,-(box[3]+spec.info-.5));t:SetTexture(texture);t:Show();shown=shown+1 else t:Hide() end
   end
-  layout.icons={width-right-5*14,width-right,PAD+spec.info-.5,12}
+  layout.icons={width-right-5*14,width-right,box[3]+spec.info-.5,12}
  else for _,t in ipairs(frame.historyIcons) do t:Hide() end end
  -- life bar: anchored to both edges, so it ends exactly at the content box
- local bar=frame.hpBar;bar:ClearAllPoints();bar:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(PAD+spec.hp));bar:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(PAD+spec.hp));bar:SetHeight(spec.hpH)
+ local bar=frame.hpBar;bar:ClearAllPoints();bar:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(box[3]+spec.hp));bar:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(box[3]+spec.hp));bar:SetHeight(spec.hpH)
  if d.fraction then bar:SetValue(d.fraction);bar:SetStatusBarColor(d.barColor[1],d.barColor[2],d.barColor[3],.95);bar.fieldkitColor=d.barColor else bar:SetValue(0) end
  bar:Show();FieldKitTheme.Font(bar.text,10,{1,1,1});bar.text:SetText(d.hpText)
- layout.hp={x,width-right,PAD+spec.hp,spec.hpH}
+ layout.hp={x,width-right,box[3]+spec.hp,spec.hpH}
  local res=frame.mpBar
  local hasResource=spec.res and d.mana~=nil and d.manaMax~=nil and d.manaMax>0 and not d.muted
  if hasResource then
-  res:ClearAllPoints();res:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(PAD+spec.res));res:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(PAD+spec.res));res:SetHeight(spec.resH)
+  res:ClearAllPoints();res:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(box[3]+spec.res));res:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(box[3]+spec.res));res:SetHeight(spec.resH)
   res:SetValue(math.min(d.mana/d.manaMax,1));res:SetStatusBarColor(d.powerColor[1],d.powerColor[2],d.powerColor[3],.9);res.fieldkitColor=d.powerColor
   for _,t in ipairs(res.edge) do if spec.resH>=6 then t:Show() else t:Hide() end end
   if spec.resH>=9 then FieldKitTheme.Font(res.text,9,{1,1,1});res.text:SetText(string.format("%.0f / %.0f",d.mana,d.manaMax)) else res.text:SetText("") end
-  res:Show();layout.res={x,width-right,PAD+spec.res,spec.resH}
+  res:Show();layout.res={x,width-right,box[3]+spec.res,spec.resH}
  else res:Hide() end
  frame.fieldkitIconCount=shown
 end

@@ -6,6 +6,19 @@ local H=FieldKitThemeHUD
 local T=FieldKitTheme
 local slots={1,2,3,4,5,6,12}
 local function Short(n) if not n then return "?" end;if math.abs(n)>=1000000 then return string.format("%.1f m",n/1000000) elseif math.abs(n)>=1000 then return string.format("%.1f k",n/1000) else return string.format("%.0f",n) end end
+-- Compact amounts: exact below 10 000 (grouped), then one decimal in thousands (k) or millions (M); the decimal and group
+-- separators follow the language. nil in, "?" out: a missing value is never turned into a number.
+function R.Amount(n)
+ if type(n)~="number" then return "?" end
+ local fr=FieldKitDB and FieldKitDB.language=="fr"
+ local dec=fr and "," or ".";local group=fr and " " or ","
+ local a=math.abs(n);local sign=n<0 and "-" or ""
+ if a>=1000000 then return sign..string.gsub(string.format("%.1f",a/1000000),"%.",dec).." M" end
+ if a>=10000 then return sign..string.gsub(string.format("%.1f",a/1000),"%.",dec).." k" end
+ local text=string.format("%d",math.floor(a+.5))
+ if string.len(text)==4 then text=string.sub(text,1,1)..group..string.sub(text,2) end
+ return sign..text
+end
 function R.Has(zone,variant) return FieldKitReferenceArt[zone.."_"..variant]~=nil end
 local function Blank(frame)
  frame.fieldkitArtOnly=true;T.State(frame,false)
@@ -419,6 +432,18 @@ end
 -- re-anchoring a button on every refresh can cancel a click that is in progress in this client.
 function R.DamageTabs(f,a,zone,index)
  local tabW=(a[3]-48)/3;local top=zone=="naxx" and 92 or 46
+ -- Header banner: a gold rule under the title row, a darker navigation strip behind the six categories and a rule under
+ -- it; drawn once per geometry. The active category also gets a soft gold tile (plus the gold underline and text).
+ local bandKey=table.concat({a[3],zone,top},":")
+ if f.bandKey~=bandKey then
+  f.bandKey=bandKey
+  if not f.navBand then
+   f.navBand=f:CreateTexture(nil,"ARTWORK");f.headRule=f:CreateTexture(nil,"ARTWORK");f.navRule=f:CreateTexture(nil,"ARTWORK")
+  end
+  T.Solid(f.navBand,{0,0,0},.32);f.navBand:ClearAllPoints();f.navBand:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2));f.navBand:SetWidth(a[3]-40);f.navBand:SetHeight(54);f.navBand:Show()
+  T.Solid(f.navRule,{1,.82,.12},.55);f.navRule:ClearAllPoints();f.navRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top+52));f.navRule:SetWidth(a[3]-40);f.navRule:SetHeight(1);f.navRule:Show()
+  if zone=="elwynn" then T.Solid(f.headRule,{1,.82,.12},.55);f.headRule:ClearAllPoints();f.headRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-4));f.headRule:SetWidth(a[3]-40);f.headRule:SetHeight(1);f.headRule:Show() else f.headRule:Hide() end
+ end
  for i,b in ipairs(R.tabs) do
   local key=table.concat({a[3],zone,index==i and 1 or 0,tostring(FieldKitDB.language),tostring(f:GetFrameLevel())},":")
   if b.layoutKey~=key then
@@ -427,6 +452,8 @@ function R.DamageTabs(f,a,zone,index)
    b.fieldkitLabel:SetWidth(tabW-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b)
    if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",3,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-3,1) end
    T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end
+   if not b.activeTile then b.activeTile=b:CreateTexture(nil,"BACKGROUND") end
+   T.Solid(b.activeTile,{1,.82,.12},.14);b.activeTile:ClearAllPoints();b.activeTile:SetPoint("TOPLEFT",b,"TOPLEFT",2,-1);b.activeTile:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-2,2);if index==i then b.activeTile:Show() else b.activeTile:Hide() end
   end
   b:Show()
  end
@@ -968,12 +995,18 @@ function R.Panels(variant,zone)
     if f.liveBody then f.liveBody:Hide();f.liveGrain:Hide() end
     FieldKit_Text(f.more,"All spells");f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →");local view,index=FieldKitMeterSuite.View();local lines,total,rate,known=FieldKitMeterLedger.Read(view)
     FieldKit_Text(f.title,({"DAMAGE","HEALING","BOSS DAMAGE","DAMAGE TAKEN","PARTY DPS","KILLS"})[index] or "DAMAGE")
-    f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-11);f.total:SetWidth(a[3]-200);f.total:SetHeight(25);f.total:SetJustifyH("RIGHT");if index==6 then FieldKit_Text(f.title,"Kills short") end;f.total:SetText(Short(total)..(rate and (" · "..Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS"))) or ""));f.total:Show();f.title:SetWidth(125)
+    f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-11);f.total:SetWidth(a[3]-200);f.total:SetHeight(25);f.total:SetJustifyH("RIGHT");if index==6 then FieldKit_Text(f.title,"Kills short") end;f.total:SetText(R.Amount(total));f.total:Show();f.title:SetWidth(125)
+    local unit=index==2 and " HPS" or (index==6 and " /s" or " DPS");local rateText=rate and (R.Amount(rate)..unit) or nil
     if zone=="naxx" then
-     f.total:ClearAllPoints();f.total:SetPoint("TOPLEFT",f,"TOPLEFT",29,-53);f.total:SetWidth(155);f.total:SetHeight(34);f.total:SetJustifyH("LEFT");f.total:SetText(Short(total));T.Font(f.total,30,R.body,true)
-     f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(Short(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
+     f.total:ClearAllPoints();f.total:SetPoint("TOPLEFT",f,"TOPLEFT",29,-53);f.total:SetWidth(155);f.total:SetHeight(34);f.total:SetJustifyH("LEFT");f.total:SetText(R.Amount(total));T.Font(f.total,30,R.body,true)
+     f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(R.Amount(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
      f.title:SetWidth(a[3]-100);f.more:Hide()
-    else T.Font(f.total,16,R.color,true) end
+    else
+     -- Elwynn header: amount (gold) on the first line, rate (muted) under it, both right-aligned inside the banner
+     f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-8);f.total:SetWidth(a[3]-200);f.total:SetHeight(24);f.total:SetJustifyH("RIGHT");T.Font(f.total,20,R.color,true)
+     f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-30);f.rateLabel:SetWidth(a[3]-200);f.rateLabel:SetHeight(14);f.rateLabel:SetJustifyH("RIGHT");T.Font(f.rateLabel,11,T.muted)
+     f.rateLabel:SetText(rateText or "");if rateText then f.rateLabel:Show() end
+    end
     R.DamageTabs(f,a,zone,index)
     -- Content area ends above the foot button: 3 rows on Elwynn (4 on Naxx, which has no foot); longer lists scroll.
     local capacity=6;local offset=R.Window(f,"Damage",table.getn(lines),capacity)
@@ -982,9 +1015,17 @@ function R.Panels(variant,zone)
      f.pager:Hide();local count=table.getn(lines)
      if count>capacity then f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →   "..(offset+1).."-"..math.min(count,offset+capacity).." / "..count) end
     end
-    for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 144 or 98)+(i-1)*(zone=="naxx" and 30 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end
-     r.label:SetWidth(a[3]-165);r.value:SetWidth(55);r.label:SetHeight(19)
-     r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""));r.value:SetText(e and e.share and string.format("%.0f%%",e.share*100) or "")
+    local rowValueW=nil;local shownRows={}
+    for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 144 or 98)+(i-1)*(zone=="naxx" and 30 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end;table.insert(shownRows,r)
+     r.label:SetHeight(19)
+     r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""))
+     -- "42 % · 12,4 k": share of the total and the real amount, both from the existing ledger line (nothing recomputed);
+     -- a missing amount leaves only the percentage, a missing share only the amount.
+     local pct=e and e.share and string.format("%.0f %%",e.share*100) or nil;local amount=e and type(e.dmg)=="number" and R.Amount(e.dmg) or nil
+     r.value:SetText((pct and amount) and (pct.." · "..amount) or (pct or amount or ""))
+     if e then r.fontSize=16;r.fontMin=12 end
+     local want=(r.value.GetStringWidth and r.value:GetStringWidth() or 90)+10 -- R.Fit keeps an 8 px margin
+     rowValueW=math.max(rowValueW or 0,math.min((a[3]-100)*.5,math.max(58,want)))
      if e then r.fieldkitLine=e;r.fieldkitSpell=e.name end
      if e or i==1 then r:SetHitRectInsets(-48,0,0,0) end
      if not e then r.icon:Hide() end
@@ -993,6 +1034,8 @@ function R.Panels(variant,zone)
       r.trough:ClearAllPoints();r.trough:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.trough:SetWidth(a[3]-160);r.trough:SetHeight(8);T.Solid(r.trough,{.12,.14,.08});r.trough:Show()
       R.RowIcon(r,e.icon or FieldKitLoadout.Icon(e.name));r.bar:ClearAllPoints();r.bar:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.bar:SetWidth(a[3]-160);r.bar:SetMinMaxValues(0,1);r.bar:SetValue(0);r.bar:SetValue(math.max(0,math.min(1,e.share or 0)));r.bar:SetStatusBarColor(zone=="elwynn" and .65 or .1,zone=="elwynn" and .55 or .75,zone=="elwynn" and .18 or .85);r.bar:Show() end
     end
+    -- one value column for every row (right-aligned), the name takes the rest of the row
+    for _,r in ipairs(shownRows) do if r.fieldkitLine then r.value:SetWidth(rowValueW or 58);r.label:SetWidth((a[3]-100)-(rowValueW or 58)-10);if R.Fit then R.Fit(r.value,15,11) end end end
     if not lines[1] then
      -- Empty state: centred in the content area between the tab rows and the card foot, not in the whole frame.
      local top=zone=="naxx" and 144 or 98;local bottom=zone=="naxx" and a[4]-30 or a[4]-52

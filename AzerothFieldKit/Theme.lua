@@ -67,8 +67,13 @@ function T.Update(frame)
  local style=T.Style(frame)
  if skin.width==w and skin.height==h and skin.style==style then return end
  skin.width=w;skin.height=h;skin.style=style
- skin.base:SetWidth(w);skin.base:SetHeight(h);skin.grain:SetWidth(w);skin.grain:SetHeight(h)
  local c=math.min(T.Style(frame)==3 and 12 or (skin.kind=="window" and 24 or (skin.kind=="card" and 16 or 8)),w/3,h/3)
+ -- The corners of the zone material are cut diagonally (transparent triangles): a full-size fill would show as a dark halo
+ -- outside the gold border. In the reference style the fill covers only the INSIDE of the frame (inside the corner cut).
+ local inset=style==3 and c or 0
+ skin.base:ClearAllPoints();skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",inset,-inset);skin.base:SetWidth(math.max(1,w-2*inset));skin.base:SetHeight(math.max(1,h-2*inset))
+ skin.grain:ClearAllPoints();skin.grain:SetPoint("TOPLEFT",frame,"TOPLEFT",inset,-inset);skin.grain:SetWidth(math.max(1,w-2*inset));skin.grain:SetHeight(math.max(1,h-2*inset))
+ skin.inset=inset
  local xs,ys={0,c,w-c},{0,c,h-c}
  if style==2 then
   -- Four one-pixel solid edges; remaining ornate slices stay hidden.

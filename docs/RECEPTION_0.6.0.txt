@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.34 - CADRE AETHUS, ENTETE DEGATS, FOND DU CHAT
+Cartes de groupe avec le cadre Aethus, entete Degats et montants reels, fond du chat contenu. A recetter en jeu.
+
 ALPHA.33 - CARTES DE GROUPE SANS DEBORDEMENT, SURVOL CONFIRME/OBSERVE/INCONNU
 La barre ne depasse plus du cadre dore ; survol : sorts et accessoires avec leur source. A recetter en jeu.
 

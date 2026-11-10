@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.34 - 2026-11-10 (Aethus group cards, Damage header and amounts, chat fill, unreleased)
+
+- Group cards, Elwynn: the card frame is now the approved Aethus art (`elwynn_complete_vitality_1.tga`: portrait window with cut corners, gold border, corner studs, dark green body) cut into a 3x3 grid at scale 0.5 (corners and the portrait window keep their proportions, only the plain bands stretch), so the border, corners, background and portrait window are the player frame's own. The portrait is drawn BEHIND the art, in the real window (a square face is cropped, never stretched, when the window is wider than tall). Naxx keeps the zone material. Card heights shrink: Compact 40, Standard 57, Full 63 (Naxx 52 / 68 / 76). Nothing removed: name, class and level, HP / max and percentage, life bar, resource bar, DEAD / GHOST / OFFLINE / 0 HP tag, spell icons. All four cards use the same component and have identical structure.
+- Damage card header: gold rule under the title row, amount (gold) and rate (muted) right-aligned, darker navigation strip behind the six categories with a rule under it, soft gold tile + gold underline + gold text on the active category. The six hit areas are unchanged (contiguous, clickable on the first try).
+- Damage rows: `42 % · 12,4 k` (share and real amount from the existing ledger line, nothing recomputed), right-aligned in one value column, long names fitted without rewriting data, bar width kept, six lines visible, All spells kept. New `R.Amount`: exact below 10 000 (grouped: 1 250 / 1,250), then k and M with the language's decimal separator (12,4 k / 12.4 k, 1,2 M / 1.2 M); a missing value shows nothing (never a made-up number). Exact totals stay in the tooltip.
+- Chat: the dark fill overflowed the gold border because the zone material's corners are cut diagonally (transparent triangles: 6 px Elwynn, ~11 px Naxx) while the fill was a full rectangle. In the reference style the fill (and the grain) now covers only the inside of the frame (inset = corner size). Applies to every card drawn with the zone material.
+
 ## 0.6.0-alpha.33 - 2026-11-10 (group card geometry, provenance tooltip, unreleased)
 
 - ROOT CAUSE of the life bar sticking out of the gold border (native capture of alpha.32): the border art is the card's skin and is only resized by `FieldKitTheme.Update`; the compact card set its width and height but never called it, so the skin kept the size of the previous layout (reproduced by the test: skin 280x90 on a 300x52 card) while the bars were sized for the new one.
