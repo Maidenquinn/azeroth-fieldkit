@@ -1,3 +1,5 @@
+-- the AzerothHub gear as the client builds it: 32 x 32
+function NewGear() local g=CreateFrame("Button","AzerothHubMinimapButton",Minimap);g:SetWidth(32);g:SetHeight(32);return g end
 -- Synthetic behavioral acceptance only: does not certify the native renderer.
 TARGET=nil
 fire(FieldKitFrame,"VARIABLES_LOADED")
@@ -533,12 +535,12 @@ do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
  local M=FieldKitThemeMinimap
  FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local gear=NewGear();gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local hidden=CreateFrame("Button","AzerothStatsMinimap",Minimap);hidden:SetAlpha(0)
  local shownOne=CreateFrame("Button","AzerothOneMinimapButton",Minimap);shownOne:SetAlpha(1)
  local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear,hidden,shownOne end
  C.Refresh(true)
- local _,rel,_,gx,gy=gear:GetPoint();assert(rel==Minimap and gx>80,"AzerothHub gear is moved out to the edge of the opening, same angle")
+ local _,rel,_,gx,gy=gear:GetPoint();assert(rel==Minimap and gx>80,"AzerothHub gear is moved out to the edge of the opening, same angle ("..tostring(gx)..","..tostring(gy)..") key="..tostring(M.ringKey).." hole="..tostring(R.layout.mapHole and R.layout.mapHole[3]))
  assert(hidden:GetAlpha()==0 and hidden:GetParent()==Minimap,"a button hidden by its owner keeps its alpha and parent")
  assert(M.launcherProxies[2] and not M.launcherProxies[2]:IsShown(),"no proxy for a button its owner hid")
  assert(M.launcherProxies[3] and M.launcherProxies[3]:IsShown(),"proxy shown for a button its owner left visible")
@@ -594,7 +596,7 @@ do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
  local M=FieldKitThemeMinimap
  FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap)
+ local gear=NewGear()
  local parkedOne=CreateFrame("Button","AzerothStatsMinimap",Minimap);parkedOne:SetPoint("CENTER",Minimap,"CENTER",70,20)
  -- this client may return the relative frame as a name
  local rawGet=parkedOne.GetPoint;parkedOne.GetPoint=function(self) local p,rel,rp,x,y=rawGet(self);if type(rel)=="table" and rel.GetName then rel=rel:GetName() end;return p,rel,rp,x,y end
@@ -605,7 +607,10 @@ do
   C.Refresh(true)
   for step=1,6 do lastAngle=lastAngle+37;Owner(lastAngle) -- the owner places the button on every drag frame
    local _,_,_,gx,gy=gear:GetPoint();local radius=math.sqrt(gx*gx+gy*gy);assert(radius>85,"cycle "..cycle..": dragged gear is placed at the edge at once, not pulled to the centre ("..radius..")")
-   local want=math.rad(lastAngle);assert(math.abs(math.atan2(gy,gx)-math.atan2(math.sin(want),math.cos(want)))<1e-6,"cycle "..cycle..": angle preserved") end
+   local want=math.rad(lastAngle);local ex,ey=M.Edge(math.cos(want)*80,math.sin(want)*80,32)
+   assert(math.abs(ex-gx)<1e-6 and math.abs(ey-gy)<1e-6,"cycle "..cycle..": the owner's own placement is mapped by the ring geometry")
+   local diff=math.abs(math.atan2(gy,gx)-math.atan2(math.sin(want),math.cos(want)));if diff>math.pi then diff=2*math.pi-diff end
+   assert(diff<math.rad(75),"cycle "..cycle..": the direction is kept, at most slid along the border past a keep-out ("..math.deg(diff)..")") end
   C.Set("zoneThemes",false)
   local _,_,_,gx,gy=gear:GetPoint();local a=math.rad(lastAngle);assert(math.abs(gx-math.cos(a)*80)<1e-6 and math.abs(gy-math.sin(a)*80)<1e-6,"cycle "..cycle..": exact owner position after theme off")
   assert(rawget(gear,"SetPoint")==nil,"cycle "..cycle..": button method unwrapped")
@@ -712,11 +717,12 @@ do
  assert(M.dragHandle==nil,"no FieldKit frame covers the map and its buttons")
  assert(Minimap:IsMouseEnabled()==M.before.mouse,"the native map keeps its own mouse state while themed (FieldKit no longer switches it off)")
  FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local gear=NewGear();gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end;C.Refresh(true)
  for _,angle in ipairs({0,90,180,270,45,225}) do local a=math.rad(angle);gear:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80)
   local _,_,_,gx,gy=gear:GetPoint();local hw,hh=R.layout.mapHole[3]/2,R.layout.mapHole[4]/2
-  assert((gx*gx)/(hw*hw)+(gy*gy)/(hh*hh)<1.6 and math.abs(gx)<=hw and math.abs(gy)<=hh,"gear stays inside the opening at "..angle.." degrees ("..gx..","..gy..")") end
+  local band=R.RingGeometry(R.layout,R.layout.mapHole)
+  assert(math.abs(gx)<=hw+band/2+1e-6 and math.abs(gy)<=hh+band/2+1e-6 and math.abs(gx)>=hw-1 or math.abs(gy)>=hh-1,"gear rides the border of the opening at "..angle.." degrees ("..gx..","..gy..")") end
  FieldKitZoneThemes.Command("mapdiag");FieldKitZoneThemes.Command("clickdiag")
  C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
 end
@@ -981,7 +987,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  assert(M.root:IsMouseEnabled()==(M.GroupOwner()==M.root),zone..": the map container takes the pointer only when it is the art frame")
  -- a third-party button on the map keeps its own clicks and drags
  local clicked,dragged=0,0
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetScript("OnClick",function() clicked=clicked+1 end);gear:SetScript("OnDragStart",function() dragged=dragged+1 end)
+ local gear=NewGear();gear:SetScript("OnClick",function() clicked=clicked+1 end);gear:SetScript("OnDragStart",function() dragged=dragged+1 end)
  click(gear);gear.scripts.OnDragStart();assert(clicked==1 and dragged==1,zone..": third-party button keeps its handlers")
  assert(not H.identity.azsMoving and not M.root.azsMoving,zone..": using it never moves the map")
  C.Set("zoneThemes",false)
@@ -1031,7 +1037,7 @@ end
 do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
  local M=FieldKitThemeMinimap
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local gear=NewGear();gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end
  M.probe.ring=false;C.Refresh(true);local _,_,_,gx,gy=gear:GetPoint();assert(gx==80 and gy==0 and rawget(gear,"SetPoint")==nil,"default: the gear keeps its native position and method")
  C.Command("mapprobe ring on");_,_,_,gx,gy=gear:GetPoint();assert(M.probe.ring and math.sqrt(gx*gx+gy*gy)>85,"probe ring on: edge placement")
@@ -1088,7 +1094,7 @@ end
 -- the gear diagnostics only read state: nothing about the gear changes
 do
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local gear=NewGear();gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
  local before={gear:GetPoint()};local messages={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(messages,m) end
  C.Command("mapprobe state");local after={gear:GetPoint()}
  assert(table.getn(messages)>=3 and string.find(messages[1],"gear:",1,true) and string.find(messages[2],"wrapped by FieldKit: false",1,true),"mapprobe state describes the gear without touching it")
@@ -1102,7 +1108,7 @@ do
  local opened=0;local toggle=FieldKitUI.Toggle;FieldKitUI.Toggle=function(...) opened=opened+1;return toggle(unpack(arg)) end
  local messages={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(messages,tostring(m)) end
  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
- local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetScript("OnClick",function() end)
+ local gear=NewGear();gear:SetScript("OnClick",function() end)
  for _,line in ipairs({"mapprobe state","mapprobe events on","mapprobe events off","mapstack 5","mapstack","mapfocus","mapdiag","cardprobe","clickdiag","dragdiag on","dragdiag off","mapprobe","MAPPROBE State","  mapprobe state  ","mapprobe nonsense"}) do
   local before=table.getn(messages);SlashCmdList.FieldKit(line)
   assert(opened==0,"'/fieldkit "..line.."' must not open the settings window")
@@ -1138,7 +1144,7 @@ do
   local zone=case[1]
   C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete")
   Minimap:SetFrameLevel(2)
-  local gear=getglobal("AzerothHubMinimapButton") or CreateFrame("Button","AzerothHubMinimapButton",Minimap)
+  local gear=getglobal("AzerothHubMinimapButton") or NewGear()
   gear:SetFrameLevel(2);gear:EnableMouse(true);gear:SetScript("OnClick",function() end);local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end
   C.Set("zoneThemes",true);C.Refresh(true);C.Refresh(true)
   local M=FieldKitThemeMinimap;local owner=M.GroupOwner()
@@ -1163,3 +1169,44 @@ do
  end
 end
 print("Map group mouse stacking (gear above map above owner) passed (synthetic)")
+
+-- alpha.26: ring geometry from the real art: centred on the gold border, never over the title, the foot or the zoom buttons; on by default.
+for _,case in ipairs({{"elwynn",9},{"naxx",15}}) do
+ local zone,expectedBand=case[1],case[2]
+ C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete")
+ local M=FieldKitThemeMinimap;M.probe.ring=true
+ local gear=NewGear();gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end
+ -- no command: the ring is on when the theme loads
+ C.Set("zoneThemes",true);C.Refresh(true)
+ local _,_,_,gx,gy=gear:GetPoint();assert(M.probe.ring and rawget(gear,"SetPoint")~=nil and gx>100,zone..": the ring is active as soon as the theme is ("..tostring(gx)..")")
+ local hole=R.layout.mapHole;local hw,hh=hole[3]/2,hole[4]/2
+ local band,keep=R.RingGeometry(R.layout,hole)
+ assert(band==expectedBand,zone..": border thickness measured from the art ("..band.." expected "..expectedBand..")")
+ local slid=0
+ for angle=0,355,5 do
+  local a=math.rad(angle);gear:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80);_,_,_,gx,gy=gear:GetPoint()
+  -- centred on the border: along its own direction the button sits exactly band/2 beyond the opening edge
+  local dist=math.sqrt(gx*gx+gy*gy);local dx,dy=gx/dist,gy/dist;local edge=1/math.max(math.abs(dx)/hw,math.abs(dy)/hh)
+  assert(math.abs(dist-edge-band/2)<1e-6,zone..": on the gold border at "..angle.." degrees ("..(dist-edge)..")")
+  for _,k in ipairs(keep) do assert(not (gx-16<k.r and gx+16>k.l and gy-16<k.top and gy+16>k.bottom),zone..": never over the title, the foot or a zoom button at "..angle.." degrees") end
+  local want=math.atan2(math.sin(a),math.cos(a));local diff=math.abs(math.atan2(gy,gx)-want);if diff>math.pi then diff=2*math.pi-diff end
+  if diff>1e-6 then slid=slid+1 end
+ end
+ -- left and right sides (no keep-out in the way) are exact; the top centre (title) and bottom centre (foot) are the ones that slide when the map has them
+ gear:SetPoint("CENTER",Minimap,"CENTER",-80,0);_,_,_,gx,gy=gear:GetPoint();assert(math.abs(gx+(hw+band/2))<1e-6 and math.abs(gy)<1e-6,zone..": left side: centred on the border, not inside the map ("..gx..")")
+ if zone=="elwynn" then
+  assert(slid>0,"Elwynn: some directions slide (title above, foot below, zoom buttons)")
+  gear:SetPoint("CENTER",Minimap,"CENTER",0,80);_,_,_,gx,gy=gear:GetPoint();assert(math.abs(gx)>1,"Elwynn: the top centre (title) is avoided")
+ end
+ -- stable: repeated refreshes do not re-place the button
+ local calls=0;local original=gear.fieldkitRingOriginal;gear.fieldkitRingOriginal=function(...) calls=calls+1;return original(unpack(arg)) end
+ for n=1,6 do C.Refresh(true) end;assert(calls==0,zone..": the button is not re-anchored on every refresh ("..calls..")");gear.fieldkitRingOriginal=original
+ -- click, drag and zoom are untouched; theme off restores the native position
+ local clicked,dragged=0,0;gear:SetScript("OnClick",function() clicked=clicked+1 end);gear:SetScript("OnDragStart",function() dragged=dragged+1 end)
+ click(gear);gear.scripts.OnDragStart();assert(clicked==1 and dragged==1 and not H.identity.azsMoving and not M.root.azsMoving,zone..": click and drag reach the gear, the map does not move")
+ click(M.zoomIn);click(M.zoomOut)
+ gear:SetPoint("CENTER",Minimap,"CENTER",80,0);C.Set("zoneThemes",false);_,_,_,gx,gy=gear:GetPoint();assert(gx==80 and gy==0 and rawget(gear,"SetPoint")==nil,zone..": native position and method restored with the theme")
+ Minimap.GetChildren=oldChildren
+end
+print("Ring geometry from the art (gold border, keep-outs) and default activation passed (synthetic)")

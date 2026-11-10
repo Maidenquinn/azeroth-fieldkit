@@ -1,8 +1,8 @@
 -- Own the native map geometry reversibly, never substitute a painted fake map.
 FieldKitThemeMinimap={active=false,hidden={}}
 -- Runtime-only switches for /fieldkit mapprobe (never saved): ring = edge placement of ring-style buttons through a SetPoint
--- interception (OFF by default: third-party buttons keep their native positioning), rim/proxies/follower = FieldKit parts.
-FieldKitThemeMinimap.probe={ring=false,rim=true,proxies=true,follower=true}
+-- interception (ON by default since the mouse stacking fix: gear and other ring buttons ride the gold border), rim/proxies/follower = FieldKit parts.
+FieldKitThemeMinimap.probe={ring=true,rim=true,proxies=true,follower=true}
 local M=FieldKitThemeMinimap
 local borderNames={"MinimapBorder","MinimapBorderTop","MinimapZoneTextButton","MinimapToggleButton","MinimapBackdrop"}
 function M.Rotate(x,y)
@@ -37,22 +37,38 @@ end
 -- SetPoint calls are intercepted on that button instance, so the correction is applied in the same call (no frame-order
 -- race with the owner's drag OnUpdate) and the owner's raw offsets are always known for an exact restoration.
 local ringProxied={FieldKitMinimapButton=true,AzerothStatsMinimap=true,AzerothOneMinimapButton=true}
-local function Edge(x,y)
- local half=M.ringHalf;if not half then return nil end
+-- Ring placement from the REAL geometry: the point where the pointer's direction crosses the border of the map opening, plus half
+-- the thickness of the decorative border there (the button is centred ON the gold border: half over the map, half over the frame).
+-- geometry = {holeHalfWidth,holeHalfHeight,borderThickness,keepOutRectangles}; a keep-out rectangle (title, foot, zoom buttons) is
+-- never covered: the button slides along the border, nearest allowed direction first (counter-clockwise on a tie).
+local function Edge(x,y,size)
+ local geometry=M.ringHalf;if not geometry then return nil end
  local radius=math.sqrt(x*x+y*y)
  if radius<55 or radius>100 then return nil end
- local dx,dy=x/radius,y/radius
- -- Ride just INSIDE the visible opening (button centre 14 px in): never over the rim art or the labels under the map.
- local reach=1/math.max(math.abs(dx)/half[1],math.abs(dy)/half[2])-14
- return dx*reach,dy*reach
+ local half=(size or 32)/2;local theta=math.atan2(y,x)
+ local function Place(t)
+  local dx,dy=math.cos(t),math.sin(t)
+  local reach=1/math.max(math.abs(dx)/geometry[1],math.abs(dy)/geometry[2])+(geometry[3] or 0)/2
+  return dx*reach,dy*reach
+ end
+ local function Blocked(px,py)
+  for _,k in ipairs(geometry[4] or {}) do if px-half<k.r and px+half>k.l and py-half<k.top and py+half>k.bottom then return true end end
+  return false
+ end
+ local px,py=Place(theta)
+ if not Blocked(px,py) then return px,py end
+ local step=math.pi/180
+ for n=1,180 do for _,sign in ipairs({1,-1}) do local qx,qy=Place(theta+sign*n*step);if not Blocked(qx,qy) then return qx,qy end end end
+ return px,py
 end
+M.Edge=Edge -- exposed for the tests and the diagnostics
 function M.Wrap(f)
  if f.fieldkitRingOriginal then return end
  local original=f.SetPoint;f.fieldkitRingOriginal=original
  M.wrapped=M.wrapped or {};table.insert(M.wrapped,f)
  f.SetPoint=function(self,point,rel,relPoint,x,y)
   if M.active and point=="CENTER" and rel==Minimap and relPoint=="CENTER" and type(x)=="number" and type(y)=="number" then
-   local ax,ay=Edge(x,y)
+   local ax,ay=Edge(x,y,self.GetWidth and self:GetWidth())
    if ax then
     M.ring[self]={rx=x,ry=y,ax=ax,ay=ay}
     M.log=M.log or {};table.insert(M.log,string.format("%s raw %.1f,%.1f -> %.1f,%.1f",tostring(self:GetName()),x,y,ax,ay));if table.getn(M.log)>8 then table.remove(M.log,1) end
@@ -63,10 +79,12 @@ function M.Wrap(f)
   return original(self,point,rel,relPoint,x,y)
  end
 end
-function M.Ring(halfW,halfH)
+function M.Ring(halfW,halfH,band,keep)
  M.ring=M.ring or {}
- local changed=not M.ringHalf or M.ringHalf[1]~=halfW or M.ringHalf[2]~=halfH
- M.ringHalf={halfW,halfH}
+ local key=halfW..":"..halfH..":"..tostring(band)
+ for _,k in ipairs(keep or {}) do key=key..":"..k.l..","..k.r..","..k.top..","..k.bottom end
+ local changed=M.ringKey~=key
+ M.ringKey=key;M.ringHalf={halfW,halfH,band or 0,keep or {}}
  if not Minimap or not Minimap.GetChildren then return end
  M.alphaSeen=M.alphaSeen or {}
  for _,f in ipairs({Minimap:GetChildren()}) do
@@ -79,17 +97,17 @@ function M.Ring(halfW,halfH)
   end
   if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and not string.find(name,"^FieldKit") and not f.fieldkitRingOriginal then
    local points=FieldKitThemeHUD.Points(f);local p=points[1]
-   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5]) then
+   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5],f.GetWidth and f:GetWidth()) then
     M.Wrap(f);f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",p[4],p[5]) -- goes through the wrapper: edge position, raw remembered
    end
   end
  end
- if changed then for f,r in pairs(M.ring) do local ax,ay=Edge(r.rx,r.ry);if ax then r.ax,r.ay=ax,ay;f.fieldkitRingOriginal(f,"CENTER",Minimap,"CENTER",ax,ay) end end end
+ if changed then for f,r in pairs(M.ring) do local ax,ay=Edge(r.rx,r.ry,f.GetWidth and f:GetWidth());if ax then r.ax,r.ay=ax,ay;f.fieldkitRingOriginal(f,"CENTER",Minimap,"CENTER",ax,ay) end end end
 end
 function M.RingRestore()
  for _,f in ipairs(M.wrapped or {}) do f.SetPoint=nil;f.fieldkitRingOriginal=nil end
  for f,r in pairs(M.ring or {}) do f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
- M.ring={};M.wrapped={};M.ringHalf=nil
+ M.ring={};M.wrapped={};M.ringHalf=nil;M.ringKey=nil
 end
 -- The frame that owns the map group: the identity card when the map has no art of its own, else the art frame.
 function M.GroupOwner()

@@ -389,12 +389,10 @@ function R.Map()
   end
  end
  M.root:SetMovable(M.GroupOwner()==M.root);M.Layers()
- if M.probe.ring then M.Ring(hole[3]/2,hole[4]/2) else M.RingRestore() end
+ if M.probe.ring then local band,keep=R.RingGeometry(R.layout,hole);M.Ring(hole[3]/2,hole[4]/2,band,keep) else M.RingRestore() end
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
-  local x,y=a[1]+a[3]-29,a[2]+a[3]-(i==1 and 28 or 60)
-  if T.zone=="elwynn" and R.key=="elwynn_minimal" then x=a[1]+a[3]-16 end
-  if T.zone=="elwynn" and R.key=="elwynn_complete" then x=a[1]+a[3]-24;y=a[2]+a[3]-(i==1 and 42 or 74) end
+  local x,y=R.ZoomXY(i,a)
   R.Child(b,M.root,{x,y,24,25});R.Stable(b,"z"..R.key..":"..M.root:GetFrameLevel(),function() b:SetFrameStrata("DIALOG");b:SetFrameLevel(80);b:Hide();b:Show() end);Blank(b);T.Font(b.fieldkitLabel,18,T.gold,true);b.fieldkitLabel:SetText((R.key=="elwynn_minimal" or R.key=="elwynn_complete") and "" or (i==1 and "-" or "+"))
   if T.zone=="elwynn" or over then if not b:IsShown() then b:Show() end else b:Hide() end
  end
@@ -508,6 +506,29 @@ function R.CardVisible(kind,d)
  return d.rects[kind] and FieldKitDB[PREFS[kind]] and not folded and not (kind=="Damage" and FieldKitZoneThemes.nativeMeterOpen)
 end
 -- Preferred rectangle in canvas reference px, with the same corner rule as R.Geometry.
+-- Geometry of the ring around the map opening, from the real art (layout rectangles): the thickness of the decorative border
+-- is the smallest gap between the opening and the opaque edge of the frame that holds it (the title and foot are far larger
+-- gaps, so the minimum is the border itself), and the title, the foot and the zoom buttons are keep-out rectangles.
+function R.ZoomXY(i,a)
+ local x,y=a[1]+a[3]-29,a[2]+a[3]-(i==1 and 28 or 60)
+ if T.zone=="elwynn" and R.key=="elwynn_minimal" then x=a[1]+a[3]-16 end
+ if T.zone=="elwynn" and R.key=="elwynn_complete" then x=a[1]+a[3]-24;y=a[2]+a[3]-(i==1 and 42 or 74) end
+ return x,y
+end
+function R.RingGeometry(d,hole)
+ local name=d.rects.mapArt and "mapArt" or "identity";local r=d.rects[name];local band=1000000
+ if r then
+  local n=Inset(name);local l,t,rr,b=r[1]+n[1],r[2]+n[2],r[1]+r[3]-n[3],r[2]+r[4]-n[4]
+  for _,gap in ipairs({hole[1]-l,hole[2]-t,rr-(hole[1]+hole[3]),b-(hole[2]+hole[4])}) do if gap>0 and gap<band then band=gap end end
+ end
+ if band>=1000000 then band=0 end
+ local cx,cy=hole[1]+hole[3]/2,hole[2]+hole[4]/2;local keep={}
+ local function Add(x,y,w,h) table.insert(keep,{l=x-cx,r=x+w-cx,top=cy-y,bottom=cy-(y+h)}) end
+ if d.zone then Add(d.zone[1],d.zone[2],d.zone[3],d.zone[4]) end
+ if d.mode then Add(d.mode[1],d.mode[2],d.mode[3],d.mode[4]) end
+ for i=1,2 do local x,y=R.ZoomXY(i,d.map);Add(x,y,24,25) end
+ return band,keep
+end
 function R.Preferred(kind,d)
  local rect=R.CardRect(kind,d,true);local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanel"..kind) or 1
  local w,h=rect[3]*s,rect[4]*s;local cx,cy=rect[1]+rect[3]/2,rect[2]+rect[4]/2

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0-alpha.26 - 2026-11-10 (map ring geometry, unreleased)
+
+- Map button ring: now ON by default when the theme loads (no command after /reload; `/fieldkit mapprobe ring off` still restores the native position and method). A third-party map button is centred on the gold border: reach = opening edge along its own direction + half the border thickness, the thickness being measured from the art (smallest gap between the map opening and the opaque edge of the frame: Elwynn 9, Naxx 15 reference px). Title, foot and zoom buttons are keep-out rectangles taken from the layout; when the button would touch one it slides along the border to the nearest free angle (deterministic). No arbitrary offset; frame levels (alpha.25 M.Layers), clicks, drag and zoom unchanged.
+
 ## 0.6.0-alpha.25 - 2026-11-10 (map mouse stacking, unreleased)
 
 - AzerothHub gear / map buttons: root cause shown by the native `/fkmapstack`: the map group owner (FieldKitThemeIdentity, or the art frame) was at frame level 3 (canvas level + 2, set by R.Geometry) while the native Minimap and its buttons kept level 2 (this client does not re-level a reparented subtree; the gear is MEDIUM/2 although AzerothHub asked for HIGH), all in the MEDIUM strata, so the owner sat above the map and received every press meant for the map and its buttons; the gear's own handlers never ran. New `M.Layers`: the owner goes to level 0, the native map just under its lowest mouse-taking child (map level = lowest child level - 1, at least 1). Levels only: no hit area changed, no position computation, no third-party frame touched; applied again only when a level changed; the map's original level is restored with the theme. The identity card keeps its own drag areas (title, foot, rim outside the map rectangle).
