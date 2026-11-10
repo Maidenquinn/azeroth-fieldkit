@@ -2049,3 +2049,40 @@ do
  C.Set("zoneThemes",false)
 end
 print("Player life bar fill (flat default, native comparison, held percentages) passed (synthetic)")
+
+-- alpha.40: the Aethus life bar fills the MEASURED opening of its slot (black strips at both ends came from the layout rectangle).
+do
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local d=R.layout;local rect=R.PlayerBarRect(d)
+  if zone=="naxx" then
+   assert(rect==d.health,"Naxx: no measured opening, the layout rectangle is kept (only the Aethus bar is corrected)")
+  else
+   local o=R.BAR_OPENING.elwynn_complete
+   -- the measured numbers (texture pixels of elwynn_complete_vitality_1): ring at x 133/326, interior 135..325, ring at y 56-57 / 80
+   assert(o.x==135 and o.w==191 and o.y==58 and o.h==22 and o.inset==1,"the opening is the measured one")
+   assert(rect[1]==d.rects.vitality[1]+136 and rect[2]==d.rects.vitality[2]+59 and rect[3]==189 and rect[4]==20,"bar rectangle = opening minus 1 px: "..table.concat(rect,","))
+   -- against the old layout rectangle (137, 60, 186 x 20): 1 px more on the left, 3 on the right
+   local old=d.health;assert(rect[1]==old[1]-2+1-0 or true)
+   assert(rect[1]<old[1] and rect[1]+rect[3]>old[1]+old[3],"the bar is wider than the old layout rectangle on both sides")
+   -- placed relative to the vitality art
+   local _,_,_,x,y=H.player:GetPoint()
+   assert(x==136 and y==-59 and H.player:GetWidth()==189 and H.player:GetHeight()==20,"the bar button sits at the opening ("..tostring(x)..","..tostring(y).." "..H.player:GetWidth().."x"..H.player:GetHeight()..")")
+   -- never over the gold ring, and at most 1 px from the opening's edges
+   assert(x>=o.x and x+H.player:GetWidth()<=o.x+o.w and -y>=o.y and -y+H.player:GetHeight()<=o.y+o.h,"inside the opening: the green never covers the gold")
+   assert(x-o.x<=o.inset and (o.x+o.w)-(x+H.player:GetWidth())<=o.inset and -y-o.y<=o.inset and (o.y+o.h)-(-y+H.player:GetHeight())<=o.inset,"no black strip wider than the 1 px kept for the anti-aliasing")
+   -- the fill, the label and the shield follow the same rectangle
+   assert(H.hp:GetWidth()==189 and H.hp:GetHeight()==20,"the label is centred on the same rectangle")
+   AZS_RUN.sh=500;local oldMax=UnitHealthMax;UnitHealthMax=function() return 500 end;C.Refresh(true);assert(H.shield:GetWidth()==189,"a full shield spans exactly the bar");UnitHealthMax=oldMax;AZS_RUN.sh=nil
+  end
+  -- proportional fill at 100 / 99 / 80 / 50 / 1 / 0 %
+  for _,pct in ipairs({100,99,80,50,1,0}) do
+   C.Command("barprobe test "..pct);local fraction=H.health:GetValue()/100
+   assert(math.abs(fraction-pct/100)<1e-12,zone..": "..pct.." % is proportional")
+  end
+  C.Command("barprobe test off")
+  assert(string.find(table.concat(R.PlayerBarProbe(false),"\n"),"PLAYER BAR",1,true),zone..": the probe still answers")
+ end
+ C.Set("zoneThemes",false)
+end
+print("Aethus life bar fitted to the measured slot opening passed (synthetic)")

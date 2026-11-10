@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.40 - 2026-11-10 (Aethus life bar fitted to the art opening, unreleased)
+
+- Root cause of the black strips between the green and the gold at 100 %: not the fill, the value or the texture (all verified natively: fraction 1.000000, StatusBar at maximum, edges identical, opaque fill) but the RECTANGLE of the bar. It came from the layout (`d.health` = 137, 60, 186 x 20 in vitality-art pixels) and the slot's real inner opening, measured on `elwynn_complete_vitality_1.tga`, is larger: row y = 70 has the gold ring at x 133 (anti-aliasing 134) and x 326 (327), interior x 135..325; column x = 230 has the ring at y 56-57, interior y 58..79, ring from y 80. The bar was 2 px short on the left, 3 px on the right and 2 px below the top of the opening: the dark interior of the art showed through at both ends.
+- Fix (only the player's Aethus bar): the bar rectangle is derived from the measured opening, kept 1 px inside the ring for anti-aliasing and the rounded corners: x 136, y 59, 189 x 20 (`R.BAR_OPENING`, `R.PlayerBarRect`). The label (centred on the same rectangle) and the shield follow it. No texture, value, scale or anchor logic changed; the layout data and the other layouts (Naxx) are untouched; nothing is computed per refresh beyond the existing placement.
+- `/fieldkit barprobe` prints an OPENING line: the art opening against the real bar in art pixels with the gap on each side (negative = over the gold).
+
 ## 0.6.0-alpha.39 - 2026-11-10 (Aethus player life bar fill, unreleased)
 
 - Reading of the alpha.38 native probe: the geometry is right (hp 828 / 828, fraction 1.000000, StatusBar at its maximum, anchored to both edges, bar and fill edges identical, gap 0). The "missing 73.80" compared the fill texture's `GetWidth()` (64, its INTRINSIC size) with the bar width and is not evidence of anything drawn. What remains is the CONTENT of the stock texture `Interface\TargetingFrame\UI-StatusBar` (alpha / gradient), or something drawn over the bar.

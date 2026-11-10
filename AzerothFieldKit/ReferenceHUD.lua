@@ -265,13 +265,13 @@ function R.Update(variant,zone)
  if zone=="naxx" and variant=="alternative" then local b=FieldKitNativeTools.NextBoss();H.next:SetText(b and FieldKit_L("Next").."\n"..b.name.."\n"..FieldKitNative.Clock(b.left) or FieldKit_L("No upcoming boss"));H.next:SetJustifyH("CENTER") end
  Label(H.name,H.healthRoot,d.name,23,true)
  if d.level then Label(R.level,H.healthRoot,d.level,30,true,"CENTER");R.level:SetText(tostring(UnitLevel("player") or "?"));H.name:SetText(UnitName("player") or "?") else R.level:Hide() end
- Button(H.player,H.healthRoot,d.health);H.health:ClearAllPoints();H.health:SetAllPoints(H.player);H.health:SetFrameLevel(H.player:GetFrameLevel()+1)
- H.hp:SetParent(H.health);H.hp:ClearAllPoints();H.hp:SetPoint("CENTER",H.health,"CENTER",0,0);H.hp:SetWidth(d.health[3]);H.hp:SetHeight(d.health[4]);T.Font(H.hp,18,R.body,true)
+ local barRect=R.PlayerBarRect(d);Button(H.player,H.healthRoot,barRect);H.health:ClearAllPoints();H.health:SetAllPoints(H.player);H.health:SetFrameLevel(H.player:GetFrameLevel()+1)
+ H.hp:SetParent(H.health);H.hp:ClearAllPoints();H.hp:SetPoint("CENTER",H.health,"CENTER",0,0);H.hp:SetWidth(barRect[3]);H.hp:SetHeight(barRect[4]);T.Font(H.hp,18,R.body,true)
  R.Child(H.resource,H.healthRoot,d.resource);H.resourceText:SetParent(H.resource);H.resourceText:ClearAllPoints();H.resourceText:SetPoint("CENTER",H.resource,"CENTER",0,0);H.resourceText:SetWidth(d.resource[3]);H.resourceText:SetHeight(18);T.Font(H.resourceText,15,R.body,true)
  H.resource:EnableMouse(true);H.resource:SetScript("OnEnter",function() H.Tip(this,FieldKit_L("Resource"),{R.resourceDetail or "?"}) end);H.resource:SetScript("OnLeave",H.HideTip);H.resource:SetScript("OnMouseDown",function() H.Tip(this,FieldKit_L("Resource"),{R.resourceDetail or "?"},true) end)
  R.resourceDetail=H.resourceText:GetText();H.resourceText:SetText(string.gsub(R.resourceDetail or ""," / .*$",""))
  local max=FieldKit.Number(UnitHealthMax("player"));local shield=type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.sh)
- if shield and shield>0 and max and max>0 and FieldKitDB.playerShield then H.shield:SetWidth(d.health[3]*math.min(1,shield/max));H.shield:SetHeight(d.health[4]);H.shield:Show() else H.shield:Hide() end
+ if shield and shield>0 and max and max>0 and FieldKitDB.playerShield then H.shield:SetWidth(barRect[3]*math.min(1,shield/max));H.shield:SetHeight(barRect[4]);H.shield:Show() else H.shield:Hide() end
  R.BarTestApply()
  if d.portrait then
   local a=d.portrait;local p=d.rects.vitality
@@ -887,6 +887,18 @@ function R.BarTest(pct)
  R.barTest={pct=math.max(0,math.min(100,pct)),untilAt=GetTime()+30};R.BarTestApply()
  return string.format("player bar held at %d %% for 30 s (fill %s); the label still shows the real health",R.barTest.pct,tostring(H.health and H.health.fieldkitFillMode))
 end
+-- Inner opening of the life-bar slot in the vitality art, MEASURED on the texture (not taken from the layout rectangle):
+-- elwynn_complete_vitality_1.tga, row y = 70: the gold ring is at x 133 (+ anti-aliasing 134) on the left and x 326 (+ 327) on the
+-- right, the dark interior spans x 135..325; column x = 230: ring at y 56-57, interior y 58..79, ring from y 80. The layout
+-- rectangle d.health (137, 60, 186 x 20) is narrower than that opening (2 px on the left, 3 on the right, 2 above), so the dark
+-- interior of the art showed as black strips between the green and the gold. The bar is fitted to the opening, kept 1 px inside
+-- the ring for the anti-aliasing and the rounded corners (never over the gold). Coordinates are relative to the vitality art.
+R.BAR_OPENING={elwynn_complete={x=135,y=58,w=191,h=22,inset=1}}
+function R.PlayerBarRect(d)
+ local o=R.BAR_OPENING[R.key];local v=d.rects and d.rects.vitality
+ if not o or not v then return d.health end
+ return {v[1]+o.x+o.inset,v[2]+o.y+o.inset,o.w-2*o.inset,o.h-2*o.inset}
+end
 -- /fieldkit barprobe: the PLAYER's own life bar in the Aethus frame (H.health, a StatusBar anchored on H.player inside
 -- H.healthRoot). Read-only: nothing is moved, resized or re-filled. Works without a group, with the local character only.
 local function Num(v,decimals) if type(v)~="number" then return tostring(v) end return string.format("%."..(decimals or 2).."f",v) end
@@ -931,7 +943,7 @@ function R.PlayerBarProbe(refill)
  local barFrac=(type(value)=="number" and type(hi)=="number" and hi>lo) and (value-lo)/(hi-lo) or nil
  Add(string.format("data    : UnitHealth %s / %s | fraction %s | bar min %s max %s value %s -> bar fraction %s | label \"%s\"",tostring(cur),tostring(max),Num(frac,6),tostring(lo),tostring(hi),tostring(value),Num(barFrac,6),tostring(H.hp and H.hp:GetText())))
  -- sizes and scales
- local expected=d and d.health and d.health[3];local expectedH=d and d.health and d.health[4]
+ local barRectNow=d and d.health and R.PlayerBarRect(d);local expected=barRectNow and barRectNow[3];local expectedH=barRectNow and barRectNow[4]
  Add("sizes   : root "..Size(H.healthRoot).." | player "..Size(H.player).." | bar "..Size(bar).." | layout slot "..tostring(expected).." x "..tostring(expectedH).." (reference px)")
  Add("scales  : canvas "..(R.canvas and Scale(R.canvas) or "none").." | root "..Scale(H.healthRoot).." | player "..Scale(H.player).." | bar "..Scale(bar))
  local barPx=(bar:GetWidth() or 0)*(bar.GetEffectiveScale and bar:GetEffectiveScale() or 1)
@@ -978,6 +990,14 @@ function R.PlayerBarProbe(refill)
  -- the art slot this bar must fill, from the approved layout (reference px, relative to the vitality art)
  if d and d.health and d.rects and d.rects.vitality then
   local v=d.rects.vitality;Add(string.format("art slot: x %s..%s y %s..%s inside the vitality art %s x %s (slot width %s ref px)",tostring(d.health[1]-v[1]),tostring(d.health[1]-v[1]+d.health[3]),tostring(d.health[2]-v[2]),tostring(d.health[2]-v[2]+d.health[4]),tostring(v[3]),tostring(v[4]),tostring(d.health[3])))
+ end
+ -- art opening against the real bar (both in vitality-art pixels): the gaps are the black strips
+ local o=R.BAR_OPENING[R.key];local v=d and d.rects and d.rects.vitality
+ if o and v and bar.GetLeft and H.healthRoot.GetLeft and bar:GetLeft() and H.healthRoot:GetLeft() then
+  local es=(bar.GetEffectiveScale and bar:GetEffectiveScale() or 1)/(H.healthRoot.GetEffectiveScale and H.healthRoot:GetEffectiveScale() or 1)
+  local bx=(bar:GetLeft()-H.healthRoot:GetLeft())*es;local by=(H.healthRoot:GetTop()-bar:GetTop())*es
+  local bw=(bar:GetWidth() or 0)*es;local bh=(bar:GetHeight() or 0)*es
+  Add(string.format("OPENING : art opening x %s..%s y %s..%s | bar x %s..%s y %s..%s (art px) | gaps left %s right %s top %s bottom %s (negative = over the gold)",o.x,o.x+o.w,o.y,o.y+o.h,Num(bx),Num(bx+bw),Num(by),Num(by+bh),Num(bx-o.x),Num(o.x+o.w-(bx+bw)),Num(by-o.y),Num(o.y+o.h-(by+bh))))
  end
  -- opt-in: force the fill to be recomputed at the current size and read again (the value is restored by the next update)
  if refill and bar.SetValue then
