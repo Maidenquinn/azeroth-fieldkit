@@ -205,12 +205,14 @@ P.detail=DETAIL;P.cardWidth=300;P.pad=PAD
 function P.Detail() return math.floor(FieldKit.Number(FieldKitDB and FieldKitDB.partyDetail,2,1,3)) end
 local function MakeBar(frame)
  local bar=CreateFrame("StatusBar",nil,frame)
- bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");bar:SetMinMaxValues(0,1);bar:SetValue(0)
+ -- A flat white fill (tinted by SetStatusBarColor): the stock UI-StatusBar texture is a 128x16 gradient strip whose tiling and
+ -- soft ends show as small interruptions in a full bar at some scales. Flat = one uniform fill at 100 %, exact at any value.
+ bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8");bar.fieldkitTexture="Interface\\Buttons\\WHITE8X8";bar:SetMinMaxValues(0,1);bar:SetValue(0)
  bar.back=bar:CreateTexture(nil,"BACKGROUND");bar.back:SetAllPoints(bar);bar.back:SetTexture(0,0,0,.6)
  -- thin gold outline drawn on the bar itself (anchored to its edges, so it can never leave the bar)
  bar.edge={}
  for n,def in ipairs({{"TOPLEFT","TOPRIGHT",true},{"BOTTOMLEFT","BOTTOMRIGHT",true},{"TOPLEFT","BOTTOMLEFT",false},{"TOPRIGHT","BOTTOMRIGHT",false}}) do
-  local t=bar:CreateTexture(nil,"BORDER");t:SetTexture(FieldKitTheme.gold[1],FieldKitTheme.gold[2],FieldKitTheme.gold[3],.85)
+  local t=bar:CreateTexture(nil,"OVERLAY");t.fieldkitLayer="OVERLAY";t:SetTexture(FieldKitTheme.gold[1],FieldKitTheme.gold[2],FieldKitTheme.gold[3],.85) -- outline ABOVE the fill: identical at every value
   t:SetPoint(def[1],bar,def[1],0,0);t:SetPoint(def[2],bar,def[2],0,0);if def[3] then t:SetHeight(1) else t:SetWidth(1) end
   bar.edge[n]=t
  end

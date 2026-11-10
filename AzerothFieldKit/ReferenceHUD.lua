@@ -19,6 +19,21 @@ function R.Amount(n)
  if string.len(text)==4 then text=string.sub(text,1,1)..group..string.sub(text,2) end
  return sign..text
 end
+-- Chat tools of the themed chat card. Nothing is re-implemented: they call the native chat frame's own scroll methods (the
+-- native buttons are masked, so their own handlers, which act on their parent, cannot be used) and FieldKit's copy window.
+R.chatToolDefs={{key="copy",label="C",tip="Open chat copy"},{key="up",label="^",tip="Scroll up (Shift: top)",icon="ChatFrame1UpButton"},
+ {key="down",label="v",tip="Scroll down (Shift: bottom)",icon="ChatFrame1DownButton"},{key="bottom",label="v|",tip="Jump to the latest message",icon="ChatFrame1BottomButton"}}
+function R.ChatTool(key)
+ if key=="copy" then if FieldKit.OpenChatCopy then FieldKit.OpenChatCopy() end;return end
+ local chat=getglobal("ChatFrame1");if not chat then return end
+ local shift=type(IsShiftKeyDown)=="function" and IsShiftKeyDown()
+ if key=="up" then if shift and chat.ScrollToTop then chat:ScrollToTop() elseif chat.PageUp then chat:PageUp() end
+ elseif key=="down" then if shift and chat.ScrollToBottom then chat:ScrollToBottom() elseif chat.PageDown then chat:PageDown() end
+ elseif key=="bottom" then if chat.ScrollToBottom then chat:ScrollToBottom() end end
+end
+-- Info icon baked into the Elwynn foot art, measured on elwynn_complete_identity_1.tga (ring pixels x 227..246 of the tile): button-local
+-- x 204..224 (the button is the 252 px foot). textLeft = right edge of the art's left cap.
+R.MODE_ICON={elwynn_complete={left=204,right=224,margin=6,textLeft=14}}
 function R.Has(zone,variant) return FieldKitReferenceArt[zone.."_"..variant]~=nil end
 local function Blank(frame)
  frame.fieldkitArtOnly=true;T.State(frame,false)
@@ -220,7 +235,13 @@ function R.Update(variant,zone)
  Button(H.mode,H.identity,d.mode);Label(H.mode.fieldkitLabel,H.mode,d.mode,17,true,"CENTER")
  if d.heroic then Label(R.heroic,H.identity,d.heroic,variant=="alternative" and 18 or 19,true,nil,variant=="alternative" and "NotoSerif-Regular.ttf" or nil);R.heroic:SetText((FieldKit.GetHeroicLabel() or "?")..(variant=="alternative" and " · "..FieldKit_L("Mode") or ""));H.mode.fieldkitLabel:SetText(variant=="alternative" and "" or FieldKit_L("Mode"))
  else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and " · "..FieldKit_L("Mode") or "")) end
- if zone=="elwynn" and variant~="alternative" then local a=d.mode;Label(H.mode.fieldkitLabel,H.mode,{a[1]+3,a[2],a[3]-30,a[4]},14,true,"CENTER","NotoSerif-Regular.ttf") end
+ if zone=="elwynn" and variant~="alternative" then
+  local a=d.mode;local icon=R.MODE_ICON[R.key]
+  -- The info icon ("i" in a gold ring) is part of the foot art, at the right end of the button: the label stays in the free
+  -- area to its left (art left cap .. icon - margin) instead of running under it. The whole button stays the click target.
+  if icon then Label(H.mode.fieldkitLabel,H.mode,{a[1]+icon.textLeft,a[2],icon.left-icon.margin-icon.textLeft,a[4]},14,true,"CENTER","NotoSerif-Regular.ttf")
+  else Label(H.mode.fieldkitLabel,H.mode,{a[1]+3,a[2],a[3]-30,a[4]},14,true,"CENTER","NotoSerif-Regular.ttf") end
+ end
  H.mode:SetScript("OnEnter",function() if not H.micro:IsShown() then H.ModeTip(this,false) end end);H.mode:RegisterForClicks("LeftButtonUp","RightButtonUp");H.mode.callback=function() if arg1=="RightButton" then H.pinned=false;H.HideTip(); if H.micro:IsShown() then H.micro:Hide() else H.micro:Show() end else H.ModeTip(H.mode,true) end end
  local clockRect=d.clock;local nextRect=d.next;if key=="elwynn_complete" then clockRect={d.clock[1]-45,d.clock[2],d.clock[3]+10,d.clock[4]};nextRect={d.next[1],d.next[2],d.next[3]+85,d.next[4]} end
  Button(H.timeline,H.header,clockRect);Label(H.clock,H.timeline,clockRect,25,true)
@@ -314,6 +335,14 @@ function R.Update(variant,zone)
   local callbacks={function() if type(ChatFrame_OpenChat)=="function" then ChatFrame_OpenChat("") end end,function() FieldKit.OpenChatCopy() end,function() SlashCmdList.FieldKit("");if FieldKitUI then FieldKitUI.Select("chat") end end}
   for i,key in ipairs({"Chat","Copy","Settings"}) do R.chatActions[i]=T.Button(R.chat,nil,key,0,0,90,28,callbacks[i]);Blank(R.chatActions[i]) end
   R.chatEntry=T.Button(R.chat,nil,"",0,0,300,35,callbacks[1]);Blank(R.chatEntry)
+  R.chatTools={}
+  for i,def in ipairs(R.chatToolDefs) do
+   local tool=def
+   local b=T.Button(R.chat,nil,def.label,0,0,22,19,function() R.ChatTool(tool.key) end);b.fieldkitChatTool=def.key;R.chatTools[i]=b
+   b.fieldkitLabel:ClearAllPoints();b.fieldkitLabel:SetPoint("CENTER",b,"CENTER",0,0);b.fieldkitLabel:SetWidth(22);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,12,T.gold,true)
+   b:SetScript("OnEnter",function() T.State(this,true);GameTooltip:SetOwner(this,"ANCHOR_LEFT");GameTooltip:SetText(FieldKit_L(tool.tip));GameTooltip:Show() end)
+   b:SetScript("OnLeave",function() T.State(this,this.fieldkitSelected);GameTooltip:Hide() end)
+  end
  end
  R.Geometry(R.chat,d.rects.chat);R.Art(R.chat,"none");R.chat.fieldkitArtOnly=nil;T.Surface(R.chat,"card",true);T.State(R.chat,false);R.chat:Show()
  for i,b in ipairs(R.chatActions) do if zone=="naxx" and variant=="complete" then b:SetFrameLevel(R.chat:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",R.chat,"TOPLEFT",14+(i-1)*98,-3);b:SetWidth(90);b.fieldkitLabel:SetWidth(80);T.Font(b.fieldkitLabel,14,R.body);b:Show() else b:Hide() end end
@@ -321,8 +350,22 @@ function R.Update(variant,zone)
  if d.rate then Label(R.rate,R.chat,d.rate,18,true) end
  if zone=="naxx" and variant=="alternative" then R.Child(R.counts[1],R.chat,d.counts[1]);R.Child(R.counterButtons[1],R.chat,d.counts[1]) end
  local chat=getglobal("ChatFrame1")
+ -- The four chat controls come back inside the Elwynn chat card: one column when the card is tall enough, else two columns.
+ local toolCols=0
+ if zone=="elwynn" and d.rects.chat then
+  local inner=d.rects.chat[4]-24;toolCols=(inner>=4*19+6) and 1 or 2
+ end
+ R.chatToolCols=toolCols
+ for i,b in ipairs(R.chatTools or {}) do
+  if toolCols>0 then
+   local rows=math.ceil(4/toolCols);local col,row=math.floor((i-1)/rows),math.mod(i-1,rows)
+   local x=d.rects.chat[3]-12-4-22-(toolCols-1-col)*24;local y=12+row*21
+   b:SetFrameLevel(R.chat:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",R.chat,"TOPLEFT",x,-y);b:SetWidth(22);b:SetHeight(19);b:Show()
+   R.chatToolRects=R.chatToolRects or {};R.chatToolRects[i]={x,y,x+22,y+19}
+  else b:Hide() end
+ end
  if chat and d.chatText then
-  H.Save(chat);local a=d.chatText;if zone=="elwynn" then a={d.rects.chat[1]+14,d.rects.chat[2]+9,d.rects.chat[3]-28,d.rects.chat[4]-18} end;chat:SetParent(R.chat);if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(T.media.."AzerothSans.ttf",12,"") end
+  H.Save(chat);local a=d.chatText;if zone=="elwynn" then a={d.rects.chat[1]+14,d.rects.chat[2]+9,d.rects.chat[3]-28-toolCols*24,d.rects.chat[4]-18} end;chat:SetParent(R.chat);if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(T.media.."AzerothSans.ttf",12,"") end
   if FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(a[3],a[4]) end
   chat:ClearAllPoints();chat:SetPoint("TOPLEFT",R.chat,"TOPLEFT",a[1]-d.rects.chat[1],d.rects.chat[2]-a[2])
  end
@@ -421,39 +464,61 @@ function R.Map()
  end
  return true
 end
+function R.AmountParts(r)
+ if r.amount then return end
+ r.amount=r:CreateFontString(nil,"OVERLAY","GameFontNormal");T.Font(r.amount,14,T.muted)
+ r.amountSep=r:CreateTexture(nil,"ARTWORK");T.Solid(r.amountSep,{1,.82,.12},.3)
+end
 local function Row(f,i,x,y,w,h,hidden)
  local r=f.rows[i];r.label:SetJustifyH("LEFT");r.label:SetJustifyV("MIDDLE");r.value:SetJustifyH("RIGHT");r.fieldkitLine=nil;r.fieldkitSpell=nil;r.fontSize=nil;r.fontMin=nil;r.labelTint=nil;r.valueTint=nil;r.buffIndex=nil;r.fieldkitUsed=true
  -- Re-levelling / re-anchoring a button on every refresh can cancel a click in progress: only when it changes.
  R.Stable(r,table.concat({x,y,w,h,f:GetFrameLevel()},":"),function() r:SetFrameLevel(f:GetFrameLevel()+5);r.bar:SetFrameLevel(r:GetFrameLevel()+1);r:ClearAllPoints();r:SetPoint("TOPLEFT",f,"TOPLEFT",x,-y);r:SetWidth(w);r:SetHeight(h) end)
  r:SetAlpha(1);if not hidden then r:Show() end;r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end;if r.lamp then r.lamp:Hide() end;r.entry=nil
+ if r.amount then r.amount:SetText("");r.amountSep:Hide() end
  r.label:ClearAllPoints();r.label:SetPoint("TOPLEFT",r,"TOPLEFT",0,0);r.label:SetWidth(w-96);r.label:SetHeight(h);r.value:ClearAllPoints();r.value:SetPoint("TOPRIGHT",r,"TOPRIGHT",0,0);r.value:SetWidth(94);r.value:SetHeight(h);return r
 end
 -- Damage categories: 3x2 grid of contiguous hit areas. Layout is applied only when it changes: re-levelling or
 -- re-anchoring a button on every refresh can cancel a click that is in progress in this client.
+R.listTop=90 -- Elwynn: first list row (below the navigation row)
+R.tabTips={"Damage","Healing","Boss","Damage taken","Groups","Kills"}
 function R.DamageTabs(f,a,zone,index)
- local tabW=(a[3]-48)/3;local top=zone=="naxx" and 92 or 46
- -- Header banner: a gold rule under the title row, a darker navigation strip behind the six categories and a rule under
- -- it; drawn once per geometry. The active category also gets a soft gold tile (plus the gold underline and text).
- local bandKey=table.concat({a[3],zone,top},":")
+ local elwynn=zone=="elwynn"
+ local top=elwynn and 50 or 92
+ local cols=elwynn and 6 or 3
+ local tabW=(a[3]-48)/cols;local tabH=elwynn and 30 or 25
+ local x0=24
+ if elwynn then tabW=math.floor(tabW);x0=24+math.floor((a[3]-48-cols*tabW)/2) end -- whole pixels: contiguous cells, no sub-pixel gaps
+ -- Banner structure (drawn once per geometry): thin separator under the title row, darker navigation strip behind the
+ -- categories, thin rule under it, hairline dividers between the six cells.
+ local bandKey=table.concat({a[3],zone,top,x0,tabW},":")
  if f.bandKey~=bandKey then
   f.bandKey=bandKey
-  if not f.navBand then
-   f.navBand=f:CreateTexture(nil,"ARTWORK");f.headRule=f:CreateTexture(nil,"ARTWORK");f.navRule=f:CreateTexture(nil,"ARTWORK")
+  if not f.navBand then f.navBand=f:CreateTexture(nil,"ARTWORK");f.headRule=f:CreateTexture(nil,"ARTWORK");f.navRule=f:CreateTexture(nil,"ARTWORK");f.navDividers={} end
+  local bandH=elwynn and tabH+4 or 54
+  T.Solid(f.navBand,{0,0,0},.30);f.navBand:ClearAllPoints();f.navBand:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2));f.navBand:SetWidth(a[3]-40);f.navBand:SetHeight(bandH);f.navBand:Show()
+  T.Solid(f.navRule,{1,.82,.12},.45);f.navRule:ClearAllPoints();f.navRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2+bandH));f.navRule:SetWidth(a[3]-40);f.navRule:SetHeight(1);f.navRule:Show()
+  if elwynn then T.Solid(f.headRule,{1,.82,.12},.55);f.headRule:ClearAllPoints();f.headRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-4));f.headRule:SetWidth(a[3]-40);f.headRule:SetHeight(1);f.headRule:Show() else f.headRule:Hide() end
+  for n=1,5 do
+   local d=f.navDividers[n];if not d then d=f:CreateTexture(nil,"ARTWORK");f.navDividers[n]=d end
+   if elwynn then T.Solid(d,{1,.82,.12},.22);d:ClearAllPoints();d:SetPoint("TOPLEFT",f,"TOPLEFT",x0+n*tabW,-(top+4));d:SetWidth(1);d:SetHeight(tabH-8);d:Show() else d:Hide() end
   end
-  T.Solid(f.navBand,{0,0,0},.32);f.navBand:ClearAllPoints();f.navBand:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2));f.navBand:SetWidth(a[3]-40);f.navBand:SetHeight(54);f.navBand:Show()
-  T.Solid(f.navRule,{1,.82,.12},.55);f.navRule:ClearAllPoints();f.navRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top+52));f.navRule:SetWidth(a[3]-40);f.navRule:SetHeight(1);f.navRule:Show()
-  if zone=="elwynn" then T.Solid(f.headRule,{1,.82,.12},.55);f.headRule:ClearAllPoints();f.headRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-4));f.headRule:SetWidth(a[3]-40);f.headRule:SetHeight(1);f.headRule:Show() else f.headRule:Hide() end
  end
  for i,b in ipairs(R.tabs) do
   local key=table.concat({a[3],zone,index==i and 1 or 0,tostring(FieldKitDB.language),tostring(f:GetFrameLevel())},":")
   if b.layoutKey~=key then
-   b.layoutKey=key;local col,row=math.mod(i-1,3),math.floor((i-1)/3)
-   b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",24+col*tabW,-(top+row*25));b:SetWidth(tabW);b:SetHeight(25)
-   b.fieldkitLabel:SetWidth(tabW-10);b.fieldkitLabel:SetJustifyH("CENTER");T.Font(b.fieldkitLabel,13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b)
+   b.layoutKey=key;local col,row=math.mod(i-1,cols),math.floor((i-1)/cols)
+   b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",f,"TOPLEFT",x0+col*tabW,-(top+row*25));b:SetWidth(tabW);b:SetHeight(tabH)
+   b.fieldkitLabel:ClearAllPoints();b.fieldkitLabel:SetPoint("CENTER",b,"CENTER",0,elwynn and 1 or 0);b.fieldkitLabel:SetWidth(tabW-6);b.fieldkitLabel:SetHeight(tabH-4);b.fieldkitLabel:SetJustifyH("CENTER")
+   T.Font(b.fieldkitLabel,elwynn and 12 or 13,index==i and {1,.82,.12} or R.body,true);b.fieldkitSelected=index==i;Blank(b)
+   if elwynn and R.Fit then R.Fit(b.fieldkitLabel,12,9) end
    if not b.underline then b.underline=b:CreateTexture(nil,"ARTWORK");b.underline:SetHeight(2);b.underline:SetPoint("BOTTOMLEFT",b,"BOTTOMLEFT",3,1);b.underline:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-3,1) end
    T.Solid(b.underline,{1,.82,.12});if index==i then b.underline:Show() else b.underline:Hide() end
    if not b.activeTile then b.activeTile=b:CreateTexture(nil,"BACKGROUND") end
    T.Solid(b.activeTile,{1,.82,.12},.14);b.activeTile:ClearAllPoints();b.activeTile:SetPoint("TOPLEFT",b,"TOPLEFT",2,-1);b.activeTile:SetPoint("BOTTOMRIGHT",b,"BOTTOMRIGHT",-2,2);if index==i then b.activeTile:Show() else b.activeTile:Hide() end
+   -- full category name in the tooltip (the sixth label is an abbreviation in the narrow cell)
+   local tip=R.tabTips[i];local base=b:GetScript("OnEnter")
+   b:SetScript("OnEnter",function() T.State(this,true);if GameTooltip then GameTooltip:SetOwner(this,"ANCHOR_TOP");GameTooltip:SetText(FieldKit_L(tip));GameTooltip:Show() end end)
+   b:SetScript("OnLeave",function() T.State(this,this.fieldkitSelected);if GameTooltip then GameTooltip:Hide() end end)
   end
   b:Show()
  end
@@ -1001,11 +1066,17 @@ function R.Panels(variant,zone)
      f.total:ClearAllPoints();f.total:SetPoint("TOPLEFT",f,"TOPLEFT",29,-53);f.total:SetWidth(155);f.total:SetHeight(34);f.total:SetJustifyH("LEFT");f.total:SetText(R.Amount(total));T.Font(f.total,30,R.body,true)
      f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-23,-58);f.rateLabel:SetWidth(110);f.rateLabel:SetHeight(27);f.rateLabel:SetJustifyH("RIGHT");f.rateLabel:SetText(R.Amount(rate)..(index==2 and " HPS" or (index==6 and " /s" or " DPS")));T.Font(f.rateLabel,17,R.body);f.rateLabel:Show();R.Fit(f.rateLabel,17,12)
      f.title:SetWidth(a[3]-100);f.more:Hide()
+     if not (type(total)=="number" and total>0) then f.total:Hide();f.rateLabel:Hide() end
     else
      -- Elwynn header: amount (gold) on the first line, rate (muted) under it, both right-aligned inside the banner
-     f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-8);f.total:SetWidth(a[3]-200);f.total:SetHeight(24);f.total:SetJustifyH("RIGHT");T.Font(f.total,20,R.color,true)
-     f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-30);f.rateLabel:SetWidth(a[3]-200);f.rateLabel:SetHeight(14);f.rateLabel:SetJustifyH("RIGHT");T.Font(f.rateLabel,11,T.muted)
-     f.rateLabel:SetText(rateText or "");if rateText then f.rateLabel:Show() end
+     -- First line: title (left, art icon at its left) and, on the SAME line at the right, the amount (gold) then the rate (muted).
+     -- With no data nothing is written there (no lone "0" over "0 DPS"): the list below says "No combat data".
+     local hasData=type(total)=="number" and total>0
+     local rateW=rateText and 92 or 0
+     f.total:ClearAllPoints();f.total:SetPoint("TOPRIGHT",f,"TOPRIGHT",-(30+rateW),-12);f.total:SetWidth(90);f.total:SetHeight(24);f.total:SetJustifyH("RIGHT");T.Font(f.total,20,R.color,true)
+     f.rateLabel:ClearAllPoints();f.rateLabel:SetPoint("TOPRIGHT",f,"TOPRIGHT",-30,-16);f.rateLabel:SetWidth(88);f.rateLabel:SetHeight(18);f.rateLabel:SetJustifyH("RIGHT");T.Font(f.rateLabel,12,T.muted)
+     f.rateLabel:SetText(rateText or "")
+     if hasData then f.total:Show();if rateText then f.rateLabel:Show() else f.rateLabel:Hide() end else f.total:Hide();f.rateLabel:Hide() end
     end
     R.DamageTabs(f,a,zone,index)
     -- Content area ends above the foot button: 3 rows on Elwynn (4 on Naxx, which has no foot); longer lists scroll.
@@ -1015,17 +1086,18 @@ function R.Panels(variant,zone)
      f.pager:Hide();local count=table.getn(lines)
      if count>capacity then f.more.fieldkitLabel:SetText(FieldKit_L("All spells").." →   "..(offset+1).."-"..math.min(count,offset+capacity).." / "..count) end
     end
-    local rowValueW=nil;local shownRows={}
-    for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 144 or 98)+(i-1)*(zone=="naxx" and 30 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end;table.insert(shownRows,r)
+    local pctW,amountW=nil,nil;local shownRows={}
+    for i=1,capacity do local e=lines[offset+i];local r=Row(f,i,82,(zone=="naxx" and 144 or R.listTop)+(i-1)*(zone=="naxx" and 30 or 29),a[3]-100,28,not e and i>1);if not e and i>1 then r:Hide() end;table.insert(shownRows,r)
      r.label:SetHeight(19)
      r.label:SetText(e and (e.displayName or e.name) or (i==1 and FieldKit_L("No combat data") or ""))
-     -- "42 % · 12,4 k": share of the total and the real amount, both from the existing ledger line (nothing recomputed);
-     -- a missing amount leaves only the percentage, a missing share only the amount.
+     -- Two distinct pieces on one right-aligned line: the share (bright, readable) and the real amount (muted) after a thin
+     -- separator. Both come from the existing ledger line (share, dmg), nothing recomputed; a missing one is simply absent.
      local pct=e and e.share and string.format("%.0f %%",e.share*100) or nil;local amount=e and type(e.dmg)=="number" and R.Amount(e.dmg) or nil
-     r.value:SetText((pct and amount) and (pct.." · "..amount) or (pct or amount or ""))
+     R.AmountParts(r);r.value:SetText(pct or "");r.amount:SetText(amount or "")
      if e then r.fontSize=16;r.fontMin=12 end
-     local want=(r.value.GetStringWidth and r.value:GetStringWidth() or 90)+10 -- R.Fit keeps an 8 px margin
-     rowValueW=math.max(rowValueW or 0,math.min((a[3]-100)*.5,math.max(58,want)))
+     local function Wide(fs) return (fs.GetStringWidth and fs:GetStringWidth() or 60)+10 end -- R.Fit keeps an 8 px margin
+     if pct then pctW=math.max(pctW or 0,Wide(r.value)) end
+     if amount then amountW=math.max(amountW or 0,Wide(r.amount)) end
      if e then r.fieldkitLine=e;r.fieldkitSpell=e.name end
      if e or i==1 then r:SetHitRectInsets(-48,0,0,0) end
      if not e then r.icon:Hide() end
@@ -1034,11 +1106,20 @@ function R.Panels(variant,zone)
       r.trough:ClearAllPoints();r.trough:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.trough:SetWidth(a[3]-160);r.trough:SetHeight(8);T.Solid(r.trough,{.12,.14,.08});r.trough:Show()
       R.RowIcon(r,e.icon or FieldKitLoadout.Icon(e.name));r.bar:ClearAllPoints();r.bar:SetPoint("TOPLEFT",r,"TOPLEFT",0,-20);r.bar:SetWidth(a[3]-160);r.bar:SetMinMaxValues(0,1);r.bar:SetValue(0);r.bar:SetValue(math.max(0,math.min(1,e.share or 0)));r.bar:SetStatusBarColor(zone=="elwynn" and .65 or .1,zone=="elwynn" and .55 or .75,zone=="elwynn" and .18 or .85);r.bar:Show() end
     end
-    -- one value column for every row (right-aligned), the name takes the rest of the row
-    for _,r in ipairs(shownRows) do if r.fieldkitLine then r.value:SetWidth(rowValueW or 58);r.label:SetWidth((a[3]-100)-(rowValueW or 58)-10);if R.Fit then R.Fit(r.value,15,11) end end end
+    -- one pair of columns for every row (right-aligned): [name ........ share | amount]; the name takes the rest of the row
+    local rowW=a[3]-100;local colA=math.min(rowW*.3,amountW or 0);local colP=math.min(rowW*.25,pctW or 0)
+    local gap=(colA>0 and colP>0) and 10 or 0
+    for _,r in ipairs(shownRows) do if r.fieldkitLine then
+     r.amount:ClearAllPoints();r.amount:SetPoint("TOPRIGHT",r,"TOPRIGHT",0,0);r.amount:SetWidth(math.max(1,colA));r.amount:SetHeight(r:GetHeight());r.amount:SetJustifyH("RIGHT")
+     r.value:ClearAllPoints();r.value:SetPoint("TOPRIGHT",r,"TOPRIGHT",-(colA+gap),0);r.value:SetWidth(math.max(1,colP));r.value:SetHeight(r:GetHeight());r.value:SetJustifyH("RIGHT")
+     r.amountSep:ClearAllPoints();r.amountSep:SetPoint("TOPRIGHT",r,"TOPRIGHT",-(colA+gap/2),-6);r.amountSep:SetHeight(12);r.amountSep:SetWidth(1)
+     if colA>0 and colP>0 and r.value:GetText()~="" and r.amount:GetText()~="" then r.amountSep:Show() else r.amountSep:Hide() end
+     r.label:SetWidth(rowW-colA-colP-gap-10)
+     if R.Fit then R.Fit(r.value,16,12);R.Fit(r.amount,14,11) end
+    end end
     if not lines[1] then
      -- Empty state: centred in the content area between the tab rows and the card foot, not in the whole frame.
-     local top=zone=="naxx" and 144 or 98;local bottom=zone=="naxx" and a[4]-30 or a[4]-52
+     local top=zone=="naxx" and 144 or R.listTop;local bottom=zone=="naxx" and a[4]-30 or a[4]-52
      local r=Row(f,1,24,top,a[3]-48,bottom-top);r.label:SetWidth(a[3]-48);r.label:SetHeight(bottom-top);r.label:SetJustifyH("CENTER");r.label:SetJustifyV("MIDDLE")
      r.label:SetText(FieldKit_L("No combat data"));r.value:SetText("");r.value:SetWidth(0)
     end

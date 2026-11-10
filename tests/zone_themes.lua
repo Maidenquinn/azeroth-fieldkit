@@ -406,7 +406,7 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   assert(b:IsShown(),zone..": all six damage categories are reachable ("..i..")")
   local _,_,_,x,y=b:GetPoint();assert(x>=0 and x+b:GetWidth()<=a[3] and -y+b:GetHeight()<=a[4]-10,zone..": damage tab inside the card")
   for j=1,i-1 do local o=R.tabs[j];local _,_,_,ox,oy=o:GetPoint();assert(not (x<ox+o:GetWidth() and ox<x+b:GetWidth() and y==oy),zone..": damage tabs collide") end
-  assert(b.fieldkitLabel:GetWidth()>=60,zone..": damage tab label has room")
+  assert(b.fieldkitLabel:GetWidth()>=48,zone..": damage tab label has room ("..b.fieldkitLabel:GetWidth()..")")
  end
  click(R.tabs[3]);local _,index=FieldKitMeterSuite.View();assert(index==3 and R.tabs[3].underline:IsShown() and not R.tabs[1].underline:IsShown(),zone..": category changes immediately and the active tab is marked")
  click(R.tabs[1])
@@ -468,9 +468,9 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  FieldKitNative.Read=oldRead
  -- Damage: empty state centred in the content area; six tabs reachable; layout not re-applied every refresh
  local dm=R.frames.Damage;local dr=R.CardRect("Damage",R.layout)
- for k=1,6 do local b=R.tabs[k];assert(b:IsShown() and b:GetHeight()>=24 and b:GetWidth()>=80,zone..": damage tab hit area "..k) end
+ for k=1,6 do local b=R.tabs[k];assert(b:IsShown() and b:GetHeight()>=24 and b:GetWidth()>=(zone=="elwynn" and 56 or 80),zone..": damage tab hit area "..k.." ("..b:GetWidth().."x"..b:GetHeight()..")") end
  local seenLevel=R.tabs[1]:GetFrameLevel();local key=R.tabs[1].layoutKey;C.Refresh(true);assert(R.tabs[1].layoutKey==key and R.tabs[1]:GetFrameLevel()==seenLevel,zone..": tab layout is stable across refreshes")
- local r1=dm.rows[1];local _,_,_,rx,ry=r1:GetPoint();local top=zone=="naxx" and 144 or 98;local bottom=zone=="naxx" and dr[4]-30 or dr[4]-52
+ local r1=dm.rows[1];local _,_,_,rx,ry=r1:GetPoint();local top=zone=="naxx" and 144 or R.listTop;local bottom=zone=="naxx" and dr[4]-30 or dr[4]-52
  if r1.label:GetText()==FieldKit_L("No combat data") then
   assert(rx==24 and -ry==top and r1:GetHeight()==bottom-top and r1.label:GetWidth()==dr[3]-48,zone..": empty state spans the content area (centred)")
  end
@@ -1508,6 +1508,18 @@ do
   FieldKitDB.partyShow=false;P.Update()
   for i=1,4 do assert(not P.frames[i]:IsShown() and P.stock[i]==nil,zone..": group cards hidden: no card, native hooks released") end
   FieldKitDB.partyShow=true;P.Update();assert(P.frames[1]:IsShown(),zone..": group cards shown again")
+  -- alpha.35: the life bar is a flat fill, proportional and exact at 100 / 99 / 80 / 50 / 1 %, outline above the fill
+  for _,pct in ipairs({100,99,80,50,1}) do
+   members[1].max=800;members[1].hp=members[1].max*pct/100;P.Update()
+   local c1=P.frames[1];local tag=zone.." "..pct.." %"
+   assert(math.abs(c1.hpBar:GetValue()-pct/100)<1e-12,tag..": fill fraction is exact ("..c1.hpBar:GetValue()..")")
+   if pct==100 then assert(c1.hpBar:GetValue()==1,"a full bar is exactly 1") end
+   assert(c1.hpBar.fieldkitTexture=="Interface\\Buttons\\WHITE8X8" and c1.mpBar.fieldkitTexture=="Interface\\Buttons\\WHITE8X8",tag..": flat fill texture (no gradient strip, no tiling seams)")
+   for _,t in ipairs(c1.hpBar.edge) do assert(t.fieldkitLayer=="OVERLAY",tag..": outline above the fill") end
+   local L=c1.fieldkitLayout;assert(L.hp[2]==L.width-(L.width-L.box[2]) and L.hp[2]<=L.box[2],tag..": the bar ends at the content box, never beyond the frame")
+   assert(c1.hpBar.text:GetText()==FieldKit_FormatHealth(members[1].hp,800,3),tag..": text from the same values")
+  end
+  members[1].hp=400;members[1].max=800;P.Update()
   -- theme off: native frames come back, the cards go
   C.Set("zoneThemes",false);P.Update()
   for i=1,4 do assert(not P.frames[i]:IsShown() and P.stock[i]==nil,zone..": theme off: no FieldKit card, native hooks released") end
@@ -1545,18 +1557,21 @@ do
   -- six lines visible, one value column, right-aligned, nothing overflowing
   local shown={};for _,r in ipairs(f.rows) do if r:IsShown() and r.fieldkitLine then table.insert(shown,r) end end
   assert(table.getn(shown)==6,tag..": the six lines stay visible ("..table.getn(shown)..")")
-  assert(shown[1].value:GetText()=="42 % · "..A(12400),tag..": share and real amount ("..tostring(shown[1].value:GetText())..")")
-  assert(shown[2].value:GetText()=="30 % · "..A(1250),tag..": second line")
-  assert(shown[3].value:GetText()=="20 %",tag..": no amount in the data -> only the share, nothing invented")
-  assert(shown[4].value:GetText()==A(500),tag..": no share in the data -> only the amount")
-  assert(shown[5].value:GetText()=="5 % · "..A(1200000),tag..": millions")
-  local w=shown[1].value:GetWidth()
+  assert(shown[1].value:GetText()=="42 %" and shown[1].amount:GetText()==A(12400),tag..": share and real amount as two pieces ("..tostring(shown[1].value:GetText()).." / "..tostring(shown[1].amount:GetText())..")")
+  assert(shown[2].value:GetText()=="30 %" and shown[2].amount:GetText()==A(1250),tag..": second line")
+  assert(shown[3].value:GetText()=="20 %" and shown[3].amount:GetText()=="",tag..": no amount in the data -> only the share, nothing invented")
+  assert(shown[4].value:GetText()=="" and shown[4].amount:GetText()==A(500),tag..": no share in the data -> only the amount")
+  assert(shown[5].value:GetText()=="5 %" and shown[5].amount:GetText()==A(1200000),tag..": millions")
+  -- hierarchy: the share is the bright piece, the amount is the muted one; both right-aligned on the same line
+  local wp,wa=shown[1].value:GetWidth(),shown[1].amount:GetWidth()
   for _,r in ipairs(shown) do
-   assert(r.value:GetWidth()==w,tag..": one value column")
-   assert(r.value:GetStringWidth()<=r.value:GetWidth()+.01 and r.label:GetStringWidth()<=r.label:GetWidth()+.01,tag..": no text wider than its box (long name fitted, not overflowing)")
-   assert(r.label:GetWidth()+r.value:GetWidth()<=r:GetWidth()+1,tag..": name and value columns never overlap")
-   assert(r.value.justify==nil or r.value.justify=="RIGHT" or true)
+   assert(r.value:GetWidth()==wp and r.amount:GetWidth()==wa,tag..": one column per piece")
+   assert(r.value:GetStringWidth()<=r.value:GetWidth()+.01 and r.amount:GetStringWidth()<=r.amount:GetWidth()+.01 and r.label:GetStringWidth()<=r.label:GetWidth()+.01,tag..": no text wider than its box")
+   assert(r.label:GetWidth()+r.value:GetWidth()+r.amount:GetWidth()<=r:GetWidth()+1,tag..": name, share and amount never overlap ("..r.label:GetWidth().."+"..r.value:GetWidth().."+"..r.amount:GetWidth().." in "..r:GetWidth()..")")
+   local _,_,_,ax=r.amount:GetPoint();local _,_,_,vx=r.value:GetPoint()
+   assert(ax==0 and vx<=-(wa)+.01,tag..": amount flush right, share just left of it")
   end
+  assert(shown[1].amountSep:IsShown() and not shown[3].amountSep:IsShown() and not shown[4].amountSep:IsShown(),tag..": thin separator only when both pieces exist")
   assert(shown[2].label.referenceFullText==longName and shown[2].label:GetStringWidth()<=shown[2].label:GetWidth(),tag..": the full name is kept as data and the displayed text fits its box")
   assert(shown[1].bar:IsShown() and shown[1].bar:GetWidth()==a[3]-160,tag..": the proportional bar keeps its width")
   assert(shown[1].icon:IsShown(),tag..": icon")
@@ -1605,3 +1620,136 @@ do
  C.Set("zoneThemes",false)
 end
 print("Compact amounts, real damage per spell, premium Damage header and contained chat fill passed (synthetic)")
+
+-- alpha.35: chat controls, overlap option layout, Damage header, bar fill.
+do
+ local savedLang=FieldKitDB.language
+ FieldKit_SetLanguage("en")
+ local chat=getglobal("ChatFrame1") or CreateFrame("Frame","ChatFrame1",UIParent)
+ local calls={}
+ for _,m in ipairs({"PageUp","PageDown","ScrollToTop","ScrollToBottom"}) do local name=m;chat[m]=function() table.insert(calls,name) end end -- Lua 5.0: copy the loop variable
+ local oldCopy=FieldKit.OpenChatCopy;local copies=0;FieldKit.OpenChatCopy=function() copies=copies+1 end
+ local shiftDown=false;IsShiftKeyDown=function() return shiftDown end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  if zone=="naxx" then
+   for _,b in ipairs(R.chatTools) do assert(not b:IsShown(),"Naxx keeps its own chat actions: no extra tool") end
+  else
+   local W,H=R.layout.rects.chat[3],R.layout.rects.chat[4]
+   assert(table.getn(R.chatTools)==4 and R.chatToolCols==1,"Elwynn: four chat controls in one column ("..tostring(R.chatToolCols)..")")
+   local keys={copy=true,up=true,down=true,bottom=true};for _,b in ipairs(R.chatTools) do assert(b:IsShown() and keys[b.fieldkitChatTool],"tool shown");keys[b.fieldkitChatTool]=nil end;assert(next(keys)==nil,"the four tools are copy, up, down and latest")
+   -- geometry: inside the border, disjoint, beside (not over) the text area
+   local textRight=14+(W-28-R.chatToolCols*24)
+   for i,r in ipairs(R.chatToolRects) do
+    assert(r[1]>=12 and r[3]<=W-12 and r[2]>=12 and r[4]<=H-12,"tool "..i.." is inside the border")
+    assert(r[1]>=textRight-.001,"tool "..i.." sits beside the text area, not over it ("..r[1].." vs "..textRight..")")
+    for j=i+1,4 do local o=R.chatToolRects[j];assert(r[3]<=o[1] or o[3]<=r[1] or r[4]<=o[2] or o[4]<=r[2],"tools "..i.." and "..j.." do not overlap") end
+   end
+   -- alpha.34 clipping is untouched
+   local skin=R.chat.fieldkitSkin;local c=math.min(12,R.chat:GetWidth()/3,R.chat:GetHeight()/3);local _,_,_,bx=skin.base:GetPoint();assert(bx==c,"the fill is still inset by the corner cut")
+   -- clicks on the first try, locked and unlocked; Shift variants; the copy window
+   for _,locked in ipairs({false,true}) do
+    FieldKitDB.windowsLocked=locked;calls={};copies=0
+    for _,b in ipairs(R.chatTools) do assert(b:IsShown() and b:GetWidth()>=22 and b:GetHeight()>=19,"hit area") end
+    local by={};for _,b in ipairs(R.chatTools) do by[b.fieldkitChatTool]=b end
+    click(by.up);click(by.down);click(by.bottom);click(by.copy)
+    assert(table.concat(calls,",")=="PageUp,PageDown,ScrollToBottom" and copies==1,"locked="..tostring(locked)..": up, down, latest and copy run on the first click ("..table.concat(calls,",")..")")
+    shiftDown=true;calls={};click(by.up);click(by.down);shiftDown=false
+    assert(table.concat(calls,",")=="ScrollToTop,ScrollToBottom","Shift jumps to the top / the bottom")
+   end
+   FieldKitDB.windowsLocked=false
+   -- tooltips
+   local text;local oldSet=GameTooltip.SetText;local oldOwner=GameTooltip.SetOwner;local oldShow=GameTooltip.Show
+   GameTooltip.SetText=function(_,t) text=t end;GameTooltip.SetOwner=function() end;GameTooltip.Show=function() end
+   for _,b in ipairs(R.chatTools) do text=nil;this=b;b.scripts.OnEnter();assert(text and text~="","tooltip for "..b.fieldkitChatTool) end
+   GameTooltip.SetText,GameTooltip.SetOwner,GameTooltip.Show=oldSet,oldOwner,oldShow
+   -- another theme and back: still there
+   C.Set("zoneThemes",false);for _,b in ipairs(R.chatTools) do assert(not b:IsShown() or not R.active,"tools follow the theme") end
+   C.Set("zoneThemes",true);C.Refresh(true);for _,b in ipairs(R.chatTools) do assert(b:IsShown(),"tools are back with the theme") end
+  end
+ end
+ FieldKit.OpenChatCopy=oldCopy;IsShiftKeyDown=nil
+
+ -- Options: the overlap control has its own row, full label, state written in the control
+ do
+  local parent=CreateFrame("Frame","FieldKitTestThemePage",UIParent);parent.flow={}
+  local height=FieldKitThemeUI(parent,0);assert(height==885,"page height grew by the new row ("..tostring(height)..")")
+  local page=parent.flow[1].frame;local ob=C.overlapButton
+  assert(ob and ob:GetHeight()==36,"overlap control is 36 px high")
+  for _,w in ipairs({620,810,1000}) do
+   page.Reflow(w);local _,_,_,x,y=ob:GetPoint()
+   assert(ob:GetWidth()==w and x==0 and y==-382,"full-width dedicated row at "..w.." px")
+   assert(ob.fieldkitLabel:GetWidth()==w-32,"the label has the whole row")
+  end
+  FieldKitDB.zoneThemeOverlap=false;C.Refresh(true)
+  assert(ob.fieldkitLabel:GetText()=="Allow card overlap : Disabled","state in the label: "..tostring(ob.fieldkitLabel:GetText()))
+  click(ob);assert(FieldKitDB.zoneThemeOverlap==true and ob.fieldkitLabel:GetText()=="Allow card overlap : Enabled" and ob.fieldkitSelected==true,"immediate effect, label and gold state")
+  FieldKit_SetLanguage("fr");C.Refresh(true);assert(ob.fieldkitLabel:GetText()=="Autoriser le chevauchement : Activé","FR label: "..tostring(ob.fieldkitLabel:GetText()))
+  FieldKit_SetLanguage("en");click(ob);assert(FieldKitDB.zoneThemeOverlap==false,"toggles back")
+  -- nothing else of the page moved on top of it: the toggles stay above, the sliders below
+  local sTitle=C.uiSliders[1].title;local _,_,_,_,sy=sTitle:GetPoint();assert(-sy>=382+36,"sliders are below the overlap row")
+ end
+
+ -- Damage header, both data states and the six categories
+ local read=FieldKitMeterLedger.Read
+ local rows={{name="Whirlwind",share=.53,dmg=12400,dps=120}}
+ for _,zone in ipairs({"elwynn","naxx"}) do for _,lang in ipairs({"en","fr"}) do
+  FieldKit_SetLanguage(lang)
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+  local tag=zone.." "..lang;local f=R.frames.Damage
+  FieldKitMeterLedger.Read=function() return rows,12400,120,true end;C.Refresh(true)
+  if zone=="elwynn" then
+   -- one row of six contiguous cells
+   local x0,y0,prevRight
+   for i,b in ipairs(R.tabs) do
+    local _,_,_,x,y=b:GetPoint();assert(b:IsShown() and b:GetWidth()>=56 and b:GetHeight()>=28,tag..": tab "..i.." hit area "..b:GetWidth().."x"..b:GetHeight())
+    y0=y0 or y;assert(y==y0,tag..": the six categories share one row")
+    if prevRight then assert(x==prevRight,tag..": cells are contiguous ("..x.." vs "..prevRight..")") end;prevRight=x+b:GetWidth()
+    assert(b.underline:IsShown()==(i==1) and b.activeTile:IsShown()==(i==1),tag..": gold indicator on the active category only")
+   end
+   local ranges={f.headRule,f.navBand,f.navRule};for _,t in ipairs(ranges) do assert(t:IsShown(),tag..": banner structure") end
+   assert(table.getn(f.navDividers)==5 and f.navDividers[1]:IsShown(),tag..": hairline dividers")
+   -- first line: amount and rate on the same line, amount left of the rate
+   local _,_,_,tx,ty=f.total:GetPoint();local _,_,_,rx,ry=f.rateLabel:GetPoint()
+   assert(f.total:IsShown() and f.rateLabel:IsShown() and math.abs(ty-ry)<=6,tag..": amount and rate on one line")
+   assert(tx<=-(30+88)+.001,tag..": the amount ends before the rate begins")
+  end
+  local names=lang=="fr" and {"Dégâts","Soins","Boss","Subis","Groupes","Élim."} or {"Damage","Healing","Boss","Taken","Groups","Kills short"}
+  for i,b in ipairs(R.tabs) do assert(b.fieldkitLabel.referenceFullText==names[i] or b.fieldkitLabel:GetText()==names[i],tag..": category "..i.." label ("..tostring(b.fieldkitLabel:GetText())..")") end
+  click(R.tabs[3]);local _,idx=FieldKitMeterSuite.View();assert(idx==3,tag..": first click changes the category");click(R.tabs[1])
+  -- empty counter: no lone zero
+  FieldKitMeterLedger.Read=function() return {},0,0,true end;C.Refresh(true)
+  assert(not f.total:IsShown() and not f.rateLabel:IsShown(),tag..": empty counter: no isolated 0 above 0 DPS")
+  FieldKitMeterLedger.Read=function() return rows,12400,120,true end;C.Refresh(true)
+  assert(f.total:IsShown(),tag..": data back: header back")
+ end end
+ FieldKitMeterLedger.Read=read
+ FieldKit_SetLanguage(savedLang or "en");C.Set("zoneThemes",false)
+end
+print("Chat controls, overlap row, Damage header and amounts pieces passed (synthetic)")
+
+-- alpha.35: the foot label stays clear of the baked info icon (Elwynn), the button stays the click target.
+do
+ local oldHeroic=FieldKit.GetHeroicLabel
+ FieldKit.GetHeroicLabel=function() return "Difficulté normale" end
+ FieldKit_SetLanguage("fr")
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local button=H.mode;local label=button.fieldkitLabel;local a=R.layout.mode
+  assert(button:IsShown(),zone..": the foot button is shown")
+  if zone=="elwynn" then
+   local icon=R.MODE_ICON.elwynn_complete
+   assert(a[3]>=icon.right,"the icon is inside the foot button (clickable)")
+   local lp=label.referenceRect or {}
+   local _,_,_,lx=label:GetPoint();local lw=label:GetWidth()
+   local left=lx;local right=lx+lw
+   assert(left>=icon.textLeft-.001,"label starts after the art's left cap ("..left..")")
+   assert(right<=icon.left-icon.margin+.001,"label ends before the info icon with a margin ("..right.." vs "..(icon.left-icon.margin)..")")
+   assert(label:GetStringWidth()<=label:GetWidth(),"the displayed text fits its box (long FR text is fitted)")
+   assert(label.referenceFullText and string.find(label.referenceFullText,"Difficulté normale",1,true),"the full text is kept")
+  end
+  click(button)
+ end
+ FieldKit.GetHeroicLabel=oldHeroic;FieldKit_SetLanguage("en");C.Set("zoneThemes",false)
+end
+print("Mode foot label clear of the info icon passed (synthetic)")
