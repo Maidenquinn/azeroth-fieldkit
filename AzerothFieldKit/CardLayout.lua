@@ -5,9 +5,9 @@ FieldKitCardLayout={selected=1}
 local C=FieldKitCardLayout
 C.names={"FieldKitModeFrame","FieldKitMeterFrame","FieldKitTakenFrame","FieldKitLairFrame",
  "FieldKitGearFrame","FieldKitStatsFrame","FieldKitMoneyFrame","FieldKitPartyMeterFrame",
- "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings"}
+ "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings","FieldKitPlayerCard"}
 C.labels={"Run mode","Damage","Damage taken","Lairs","Accessories","Statistics","Gold and chest price","Group damage",
- "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings"}
+ "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings","My card"}
 
 function C.ValidName(name)
  for i=1,table.getn(C.names) do if C.names[i]==name then return true end end
@@ -17,7 +17,7 @@ end
 function C.MinimumWidth(name)
  if name=="FieldKitNativeWarnings" then return 300 end
  if name=="FieldKitMeterFrame" or name=="FieldKitPartyMeterFrame" then return FieldKit.MeterWidth(FieldKitDB.meterValues) end
- if string.find(name,"^FieldKitPartyCard[1-4]$") then return 280 end
+ if string.find(name,"^FieldKitPartyCard[1-4]$") or name=="FieldKitPlayerCard" then return 280 end
  return name=="FieldKitMoneyFrame" and 320 or 220
 end
 

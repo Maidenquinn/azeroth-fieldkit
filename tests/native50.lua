@@ -2,7 +2,7 @@
 FieldKitDB=nil
 dofile("tests/mock.lua")
 string.match=nil;string.gmatch=nil
-local files={"Runtime.lua","Diagnostics.lua","Positions.lua","Config.lua","Profiles.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","ZoneThemeRegistry.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","RunMode.lua","NativeData.lua","MeterLedger.lua","MeterSuite.lua","BossTimeline.lua","HudStack.lua","CardLayout.lua","Coop.lua","PartySync.lua","PartyDetails.lua","ScreenLayers.lua","NativeTools.lua","SpellAssets.lua","Loadout.lua","TakenDetails.lua","Preview.lua","PreviewVisibility.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","WorldAnchors.lua","WorldMarkers.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua","ThemeMinimap.lua","ThemeHUD.lua","ThemeTarget.lua","ReferenceArt.lua","ReferenceHUD.lua","ZoneThemes.lua"}
+local files={"Runtime.lua","Diagnostics.lua","Positions.lua","Config.lua","Profiles.lua","Localization.lua","InterfaceStrings.lua","Theme.lua","ZoneThemeRegistry.lua","Seed.lua","PortraitCatalog.lua","Portraits.lua","Settings.lua","GameCompatibility.lua","RunMode.lua","NativeData.lua","MeterLedger.lua","MeterSuite.lua","BossTimeline.lua","HudStack.lua","CardLayout.lua","Coop.lua","GroupHistory.lua","PartySync.lua","PartyDetails.lua","ScreenLayers.lua","NativeTools.lua","SpellAssets.lua","Loadout.lua","TakenDetails.lua","Preview.lua","PreviewVisibility.lua","OptionsSchema.lua","LegacyCrits.lua","Interface.lua","FieldKit.lua","WorldPins.lua","WorldAnchors.lua","WorldMarkers.lua","CombatText.lua","CombatOptions.lua","CopyLog.lua","ThemeMinimap.lua","ThemeHUD.lua","ThemeTarget.lua","ReferenceArt.lua","ReferenceHUD.lua","ZoneThemes.lua"}
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 fire(FieldKitFrame,"VARIABLES_LOADED")
 dofile("tests/security.lua")
@@ -70,6 +70,11 @@ FieldKitDB=nil
 dofile("tests/mock.lua")
 for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
 dofile("tests/party_details.lua")
+
+FieldKitDB=nil
+dofile("tests/mock.lua")
+for i=1,table.getn(files) do dofile("AzerothFieldKit/"..files[i]) end
+dofile("tests/group_history.lua")
 
 FieldKitDB=nil
 dofile("tests/mock.lua")

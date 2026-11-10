@@ -148,16 +148,18 @@ function P.Create(createWindow,fitRows,makeMovable)
  end)
  meter:SetScript("OnLeave",function() GameTooltip:Hide() end)
  for i=1,4 do P.CreateMember(i,createWindow,makeMovable) end
+ P.CreateMember(0,createWindow,makeMovable) -- the player's own card: same component
  P.TrackRun()
 end
 
 function P.CreateMember(index,createWindow,makeMovable)
- local frame=createWindow("FieldKitPartyCard"..index,"Teammate",4)
- frame:SetWidth(280);frame.unit="party"..index;P.frames[index]=frame
- makeMovable(frame,-UIParent:GetWidth()/2+550,UIParent:GetHeight()/2-220-(index-1)*112,true)
+ local frame=createWindow(index==0 and "FieldKitPlayerCard" or "FieldKitPartyCard"..index,index==0 and "My card" or "Teammate",4)
+ frame:SetWidth(280);frame.unit=index==0 and "player" or "party"..index;P.frames[index]=frame
+ makeMovable(frame,-UIParent:GetWidth()/2+550,UIParent:GetHeight()/2-220-((index==0 and 4 or index)-1)*112,true)
  frame:SetScript("OnEnter",function()
-  GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L("Teammate"),1,.85,.55)
+  GameTooltip:SetOwner(this,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L(index==0 and "My card" or "Teammate"),1,.85,.55)
   GameTooltip:AddLine(FieldKit_L("Native party-unit health and resources. Damage and DPS require a fresh group-meter sample. Drag cards directly. Native teammate frames remain interactive unless explicitly hidden."),.8,.8,.8,true)
+  if FieldKitGroupHistory then local who=type(UnitName)=="function" and UnitName(this.unit);if who then FieldKitGroupHistory.Tooltip(GameTooltip,who) end end
   GameTooltip:Show()
  end)
  frame:SetScript("OnLeave",function() GameTooltip:Hide() end)
@@ -184,17 +186,19 @@ function P.HealthColor(fraction,muted)
  if fraction>.5 then return {.22,.72,.3} elseif fraction>.25 then return {.88,.7,.18} end
  return {.82,.2,.16}
 end
--- Compact themed card (290 x 56, 44 without a resource bar). The generic window rows are NOT used here: their stack made the
--- card tall and, worse, a parent's SetFrameLevel does not re-level its children on this client, so rows left at the old level
--- stayed under the card's opaque material. Every child below gets an explicit level above the card.
-local COMPACT_W,COMPACT_H,COMPACT_H_NO_RESOURCE=290,56,44
-P.compactSize={COMPACT_W,COMPACT_H,COMPACT_H_NO_RESOURCE}
+-- One card component for the player and for every teammate: same structure, same size, whatever the data. Own widgets only
+-- (the generic window rows are not used), every child with an explicit level above the card (a parent's SetFrameLevel does
+-- not re-level its children on this client). Detail level (option) picks one of three FIXED sizes.
 local CLASS_ICON={WARRIOR={0,.25,0,.25},MAGE={.25,.5,0,.25},ROGUE={.5,.75,0,.25},DRUID={.75,1,0,.25},HUNTER={0,.25,.25,.5},
  SHAMAN={.25,.5,.25,.5},PRIEST={.5,.75,.25,.5},WARLOCK={.75,1,.25,.5},PALADIN={0,.25,.5,.75}}
+-- detail: 1 compact (name + life), 2 standard (+ class/level + thin resource), 3 full (+ resource values).
+local DETAIL={{h=44,socket=36,info=false,res=false,resH=0},{h=60,socket=44,info=true,res=true,resH=5},{h=66,socket=44,info=true,res=true,resH=10}}
+P.detail=DETAIL;P.cardWidth=300
+function P.Detail() return math.floor(FieldKit.Number(FieldKitDB and FieldKitDB.partyDetail,2,1,3)) end
 local function MakeBar(frame)
  local bar=CreateFrame("StatusBar",nil,frame)
- bar:SetStatusBarTexture("Interface\TargetingFrame\UI-StatusBar");bar:SetMinMaxValues(0,1);bar:SetValue(0)
- bar.back=bar:CreateTexture(nil,"BACKGROUND");bar.back:SetAllPoints(bar);bar.back:SetTexture(0,0,0,.55)
+ bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");bar:SetMinMaxValues(0,1);bar:SetValue(0)
+ bar.back=bar:CreateTexture(nil,"BACKGROUND");bar.back:SetAllPoints(bar);bar.back:SetTexture(0,0,0,.6)
  bar.text=bar:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall");bar.text:SetPoint("CENTER",bar,"CENTER",0,0)
  return bar
 end
@@ -213,18 +217,25 @@ function P.Style(frame,themed)
    frame.portraitInner=frame:CreateTexture(nil,"ARTWORK");frame.portraitInner:SetTexture(0,0,0,1)
    frame.portrait=frame:CreateTexture(nil,"OVERLAY");frame.portrait:SetTexCoord(.08,.92,.08,.92)
    frame.hpBar=MakeBar(frame);frame.mpBar=MakeBar(frame)
+   frame.nameText=frame:CreateFontString(nil,"OVERLAY","GameFontNormal")
+   frame.infoText=frame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+   frame.stateText=frame:CreateFontString(nil,"OVERLAY","GameFontNormalSmall")
+   frame.historyIcons={}
+   for n=1,5 do local t=frame:CreateTexture(nil,"OVERLAY");t:SetWidth(14);t:SetHeight(14);t:SetTexCoord(.07,.93,.07,.93);t:Hide();frame.historyIcons[n]=t end
   end
-  -- children do not follow the parent's level: set them explicitly
   frame.hpBar:SetFrameLevel(level+2);frame.mpBar:SetFrameLevel(level+2)
   if collapse then collapse:Hide() end
+  frame.title:Hide();frame.total:Hide()
   for _,row in ipairs(frame.rows or {}) do row:Hide() end
-  frame.total:ClearAllPoints();frame.total:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-8,-8)
-  frame.title:ClearAllPoints();frame.title:SetPoint("TOPLEFT",frame,"TOPLEFT",58,-7)
  else
   frame:SetFrameStrata("LOW");frame:SetFrameLevel(frame.fieldkitOriginalLevel)
+  frame.title:Show();frame.total:Show()
   frame.title:ClearAllPoints();frame.title:SetPoint("TOPLEFT",frame,"TOPLEFT",9,-7)
   frame.total:ClearAllPoints();frame.total:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-25,-7)
-  if frame.portrait then frame.portrait:Hide();frame.portraitBack:Hide();frame.portraitInner:Hide();frame.hpBar:Hide();frame.mpBar:Hide() end
+  if frame.portrait then
+   frame.portrait:Hide();frame.portraitBack:Hide();frame.portraitInner:Hide();frame.hpBar:Hide();frame.mpBar:Hide()
+   frame.nameText:Hide();frame.infoText:Hide();frame.stateText:Hide();for _,t in ipairs(frame.historyIcons) do t:Hide() end
+  end
   if collapse then collapse:Show() end
  end
 end
@@ -237,61 +248,91 @@ function P.Portrait(frame,unit,token)
  local ok=type(SetPortraitTexture)=="function" and pcall(SetPortraitTexture,frame.portrait,unit)
  if not ok then
   local c=CLASS_ICON[token or ""]
-  if c then frame.portrait:SetTexture("Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes");frame.portrait:SetTexCoord(c[1],c[2],c[3],c[4]);ok=true end
+  if c then frame.portrait:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes");frame.portrait:SetTexCoord(c[1],c[2],c[3],c[4]);ok=true end
  end
  if ok then frame.portrait:Show() else frame.portrait:Hide() end
 end
--- Lays the compact card out and fills it. d holds only values the client reported (nil = unavailable).
+local function Place(fs,frame,x,y,w,h,size,justify)
+ fs:ClearAllPoints();fs:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-y);fs:SetWidth(w);fs:SetHeight(h);fs:SetJustifyH(justify or "LEFT")
+ FieldKitTheme.Font(fs,size,FieldKitTheme.text)
+end
+-- Lays the card out and fills it. d holds only values the client reported (nil = unavailable). The geometry depends on the
+-- detail level only, never on the data: all cards are identical and nothing is truncated (every text has its own box).
 function P.Compact(frame,d)
- local width=FieldKitCardLayout.Width(frame,COMPACT_W)
- local hasResource=d.mana~=nil and d.manaMax~=nil and d.manaMax>0 and not d.muted
- local height=hasResource and COMPACT_H or COMPACT_H_NO_RESOURCE
+ local spec=DETAIL[P.Detail()]
+ local width=FieldKitCardLayout.Width(frame,P.cardWidth);local height=spec.h
  frame:SetWidth(width);frame:SetHeight(height)
  for _,row in ipairs(frame.rows or {}) do row:Hide() end
- frame.portraitBack:ClearAllPoints();frame.portraitBack:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-6);frame.portraitBack:SetWidth(height-12);frame.portraitBack:SetHeight(height-12)
- frame.portraitInner:ClearAllPoints();frame.portraitInner:SetPoint("TOPLEFT",frame,"TOPLEFT",8,-8);frame.portraitInner:SetWidth(height-16);frame.portraitInner:SetHeight(height-16)
- frame.portrait:ClearAllPoints();frame.portrait:SetPoint("TOPLEFT",frame,"TOPLEFT",8,-8);frame.portrait:SetWidth(height-16);frame.portrait:SetHeight(height-16)
+ local s=spec.socket;local top=(height-s)/2
+ frame.portraitBack:ClearAllPoints();frame.portraitBack:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-top);frame.portraitBack:SetWidth(s);frame.portraitBack:SetHeight(s)
+ frame.portraitInner:ClearAllPoints();frame.portraitInner:SetPoint("TOPLEFT",frame,"TOPLEFT",8,-(top+2));frame.portraitInner:SetWidth(s-4);frame.portraitInner:SetHeight(s-4)
+ frame.portrait:ClearAllPoints();frame.portrait:SetPoint("TOPLEFT",frame,"TOPLEFT",8,-(top+2));frame.portrait:SetWidth(s-4);frame.portrait:SetHeight(s-4)
  frame.portraitBack:Show();frame.portraitInner:Show()
  if d.preview then frame.portrait:Hide() else P.Portrait(frame,frame.unit,d.token or d.name) end
- local left=height-12+6+6
- frame.title:SetText(d.name);frame.title:SetWidth(width-left-96);frame.title:SetHeight(14)
- frame.total:SetText(d.detail);frame.total:SetWidth(96);frame.total:SetHeight(14);frame.total:SetJustifyH("RIGHT")
- if frame.total.SetTextColor then frame.total:SetTextColor(d.color[1],d.color[2],d.color[3]) end
- local barWidth=width-left-8
- local bar=frame.hpBar;bar:ClearAllPoints();bar:SetPoint("TOPLEFT",frame,"TOPLEFT",left,-24);bar:SetWidth(barWidth);bar:SetHeight(14)
- if d.fraction then bar:SetValue(d.fraction);bar:SetStatusBarColor(d.barColor[1],d.barColor[2],d.barColor[3],.95);bar.fieldkitColor=d.barColor;bar:Show()
- else bar:SetValue(0);bar:Show() end
- bar.text:SetText(d.hpText);if bar.text.SetTextColor then bar.text:SetTextColor(1,1,1) end
+ local x=6+s+8;local inner=width-x-8
+ local stateWidth=64
+ Place(frame.nameText,frame,x,spec.info and 7 or 6,inner-stateWidth-4,15,12)
+ frame.nameText:SetText(d.name);frame.nameText:SetTextColor(1,.93,.75);frame.nameText:Show()
+ Place(frame.stateText,frame,width-8-stateWidth,spec.info and 8 or 7,stateWidth,13,10,"RIGHT")
+ frame.stateText:SetText(d.state or "");if d.state then frame.stateText:SetTextColor(.95,.3,.25) end;frame.stateText:Show()
+ local barY=spec.info and 36 or 24
+ if spec.info then
+  Place(frame.infoText,frame,x,22,inner-80,12,10)
+  frame.infoText:SetText(d.detail);frame.infoText:SetTextColor(d.color[1],d.color[2],d.color[3]);frame.infoText:Show()
+ else frame.infoText:Hide() end
+ -- last spell icons (only when known), right-aligned on the secondary line
+ local shown=0
+ if spec.info and d.icons then
+  for n=1,table.getn(frame.historyIcons) do
+   local t=frame.historyIcons[n];local texture=d.icons[n]
+   if texture then t:ClearAllPoints();t:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-8-(n-1)*16,-22);t:SetTexture(texture);t:Show();shown=shown+1 else t:Hide() end
+  end
+ else for _,t in ipairs(frame.historyIcons) do t:Hide() end end
+ local bar=frame.hpBar;bar:ClearAllPoints();bar:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-barY);bar:SetWidth(inner);bar:SetHeight(13)
+ if d.fraction then bar:SetValue(d.fraction);bar:SetStatusBarColor(d.barColor[1],d.barColor[2],d.barColor[3],.95);bar.fieldkitColor=d.barColor else bar:SetValue(0) end
+ bar:Show();FieldKitTheme.Font(bar.text,10,{1,1,1});bar.text:SetText(d.hpText)
  local res=frame.mpBar
+ local hasResource=spec.res and d.mana~=nil and d.manaMax~=nil and d.manaMax>0 and not d.muted
  if hasResource then
-  res:ClearAllPoints();res:SetPoint("TOPLEFT",frame,"TOPLEFT",left,-40);res:SetWidth(barWidth);res:SetHeight(9)
+  res:ClearAllPoints();res:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(barY+16));res:SetWidth(inner);res:SetHeight(spec.resH)
   res:SetValue(math.min(d.mana/d.manaMax,1));res:SetStatusBarColor(d.powerColor[1],d.powerColor[2],d.powerColor[3],.9);res.fieldkitColor=d.powerColor
-  res.text:SetText(string.format("%.0f / %.0f",d.mana,d.manaMax));res:Show()
+  if spec.resH>=10 then FieldKitTheme.Font(res.text,9,{1,1,1});res.text:SetText(string.format("%.0f / %.0f",d.mana,d.manaMax)) else res.text:SetText("") end
+  res:Show()
  else res:Hide() end
+ frame.fieldkitIconCount=shown
 end
 
+-- With a themed HUD the cards are the group display. Saved preferences are never modified.
+function P.Themed() local R=FieldKitReferenceHUD;return R and R.active and true or false end
+function P.CardsOn() return FieldKitDB.partyCards or (P.Themed() and FieldKitDB.partyShow~=false) end
+function P.ReplaceOn() return FieldKitDB.replacePartyFrames or (P.Themed() and FieldKitDB.partyShow~=false) end
+-- Health colour from the real fraction; greyed when the unit is dead, a ghost or offline.
+function P.HealthColor(fraction,muted)
+ if muted then return {.45,.45,.45} end
+ if fraction>.5 then return {.22,.72,.3} elseif fraction>.25 then return {.88,.7,.18} end
+ return {.82,.2,.16}
+end
+
+-- index 0 is the player's own card (option), 1-4 the teammates: the same code path.
 function P.UpdateMember(index,active)
  local frame=P.frames[index];if not frame then return end
- local exists=active and UnitExists(frame.unit)
+ local isPlayer=index==0
+ local exists=isPlayer and true or (active and UnitExists(frame.unit))
  local preview=not exists and FieldKit.layoutEditing
  local themed=P.Themed()
- if not P.CardsOn() or (not exists and not preview) then frame:Hide();P.Stock(index,false);return end
+ if isPlayer and not (themed and FieldKitDB.partyShow~=false and FieldKitDB.partyPlayerCard) then frame:Hide();return end
+ if not P.CardsOn() or (not exists and not preview) then frame:Hide();if not isPlayer then P.Stock(index,false) end;return end
  local hp=type(UnitHealth)=="function" and FieldKit.Number(UnitHealth(frame.unit),nil,0)
  local max=type(UnitHealthMax)=="function" and FieldKit.Number(UnitHealthMax(frame.unit),nil,0)
  local known=not preview and hp~=nil and max and max>0
- if not known and not preview then frame:Hide();P.Stock(index,false);return end
+ if not known and not preview then frame:Hide();if not isPlayer then P.Stock(index,false) end;return end
  P.Style(frame,themed)
+ frame:SetScale(math.floor(FieldKit.Number(FieldKitDB.partyCardScale,100,70,130)/5+.5)*5/100)
  local name=preview and FieldKit_L("Teammate").." "..index.." ("..FieldKit_L("Preview")..")" or (UnitName(frame.unit) or "?")
  local class,token
  if not preview and type(UnitClass)=="function" then class,token=UnitClass(frame.unit) end
  local level=not preview and type(UnitLevel)=="function" and FieldKit.Number(UnitLevel(frame.unit),nil,1)
  local color=colors[token] or {.4,.8,.5}
- if not themed then
-  frame:SetWidth(FieldKitCardLayout.Width(frame,280))
-  frame.title:SetText((FieldKit.layoutEditing and not preview and index..". " or "")..name);frame.title:SetWidth(frame:GetWidth()*.55)
-  -- Level and class are shown only when the client provides them.
-  frame.total:SetText(preview and FieldKit_L("Preview") or ((level and (FieldKit_L("Lvl").." "..level.." ") or "")..(class or "?")));frame.total:SetWidth(frame:GetWidth()*.3);frame.total:SetJustifyH("RIGHT")
- end
  local connected
  if not preview and type(UnitIsConnected)=="function" then connected=UnitIsConnected(frame.unit) and true or false end
  -- Dead / ghost only when the client reports it (optional API, never inferred from missing data).
@@ -299,26 +340,31 @@ function P.UpdateMember(index,active)
  local dead=not preview and ghost or (not preview and (type(UnitIsDeadOrGhost)=="function" and UnitIsDeadOrGhost(frame.unit) or (type(UnitIsDead)=="function" and UnitIsDead(frame.unit))) and true or false)
  local muted=dead or connected==false
  local fraction=known and math.min(hp/max,1) or 0
- local barColor=themed and P.HealthColor(fraction,muted) or color
- P.Row(frame,1,"Health",known and FieldKit_FormatHealth(hp,max,FieldKitDB.partyHealthMode) or FieldKit_L("Not provided"),dead and 0 or fraction,barColor)
  local mana=type(UnitMana)=="function" and FieldKit.Number(UnitMana(frame.unit),nil,0)
  local manaMax=type(UnitManaMax)=="function" and FieldKit.Number(UnitManaMax(frame.unit),nil,0)
  if preview then mana=nil;manaMax=nil end
  local power=not preview and type(UnitPowerType)=="function" and UnitPowerType(frame.unit)
- local resource=power==0 and "Mana" or (power==1 and "Rage" or (power==3 and "Energy" or "Resource"))
  local powerColor=muted and {.45,.45,.45} or (power==1 and {.9,.2,.15} or (power==3 and {.9,.8,.15} or {.2,.5,.9}))
- P.Row(frame,2,resource,mana and manaMax and manaMax>0 and string.format("%.0f / %.0f",mana,manaMax) or FieldKit_L("Not provided"),mana and manaMax and manaMax>0 and not dead and math.min(mana/manaMax,1) or 0,powerColor)
-
  if themed then
   local status=connected==false and "Offline" or (ghost and "Ghost" or (dead and "Dead" or (known and hp==0 and "0 HP" or nil)))
-  local hpText
-  if status then hpText=FieldKit_L(status) elseif known then hpText=FieldKit_FormatHealth(hp,max,3) else hpText="" end
-  P.Compact(frame,{name=(FieldKit.layoutEditing and not preview and index..". " or "")..name,preview=preview,token=token,color=color,
+  local icons
+  if FieldKitDB.partyHistory and FieldKitDB.partyHistoryIcons~=false and FieldKitGroupHistory and not preview then
+   icons={};for _,e in ipairs(FieldKitGroupHistory.Recent(name,5)) do local t=FieldKitGroupHistory.Icon(e.spell);if t then table.insert(icons,t) end end
+  end
+  P.Compact(frame,{name=(FieldKit.layoutEditing and not preview and index>0 and index..". " or "")..name,preview=preview,token=token,color=color,
    detail=preview and FieldKit_L("Preview") or ((level and (FieldKit_L("Lvl").." "..level.." ") or "")..(class or "?")),
-   fraction=known and (dead and 0 or fraction) or nil,barColor=barColor,hpText=hpText,muted=muted,
-   mana=mana,manaMax=manaMax,powerColor=powerColor})
-  frame:Show();P.Stock(index,P.ReplaceOn() and known and true or false);return
+   state=status and string.upper(FieldKit_L(status)) or nil,
+   fraction=known and (dead and 0 or fraction) or nil,barColor=P.HealthColor(fraction,muted),
+   hpText=known and FieldKit_FormatHealth(hp,max,3) or "",muted=muted,mana=mana,manaMax=manaMax,powerColor=powerColor,icons=icons})
+  frame:Show();if not isPlayer then P.Stock(index,P.ReplaceOn() and known and true or false) end;return
  end
+ -- legacy (non-themed) card: the original generic window rows
+ frame:SetWidth(FieldKitCardLayout.Width(frame,280))
+ frame.title:SetText((FieldKit.layoutEditing and not preview and index>0 and index..". " or "")..name);frame.title:SetWidth(frame:GetWidth()*.55)
+ frame.total:SetText(preview and FieldKit_L("Preview") or ((level and (FieldKit_L("Lvl").." "..level.." ") or "")..(class or "?")));frame.total:SetWidth(frame:GetWidth()*.3);frame.total:SetJustifyH("RIGHT")
+ P.Row(frame,1,"Health",known and FieldKit_FormatHealth(hp,max,FieldKitDB.partyHealthMode) or FieldKit_L("Not provided"),dead and 0 or fraction,color)
+ local resource=power==0 and "Mana" or (power==1 and "Rage" or (power==3 and "Energy" or "Resource"))
+ P.Row(frame,2,resource,mana and manaMax and manaMax>0 and string.format("%.0f / %.0f",mana,manaMax) or FieldKit_L("Not provided"),mana and manaMax and manaMax>0 and not dead and math.min(mana/manaMax,1) or 0,powerColor)
  local line=P.MemberDamage(name)
  P.Row(frame,3,"Damage / DPS",line and FieldKit_FormatMeterValues(line,2) or FieldKit_L("Waiting for group data"),0,color)
  local status=connected==false and "Offline" or (ghost and "Ghost" or (dead and "Dead" or (known and hp==0 and "0 HP" or (connected and "Online" or "Not provided"))))
@@ -352,7 +398,8 @@ function P.Update()
  local active=P.TrackRun()
  if active then P.ReadParty() else P.party={} end
  P.UpdateMeter(active)
- for i=1,4 do P.UpdateMember(i,active) end
+ for i=0,4 do P.UpdateMember(i,active) end
+ if FieldKitGroupHistory then FieldKitGroupHistory.Sync() end
  -- A card that appeared or disappeared frees / takes its place in the HUD engine at the next tick, not 0.2 s later.
  local sig="";for i=1,4 do sig=sig..(P.frames[i] and P.frames[i]:IsShown() and "1" or "0") end
  if sig~=P.shownSig then P.shownSig=sig;if FieldKitZoneThemes then FieldKitZoneThemes.deadline=nil end end

@@ -1,7 +1,7 @@
 {
   "version": "0.6.0-alpha.31",
   "lua51": true,
-  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty dead state, leave and empty state passed (synthetic)\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)\nElement sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)\nReview feedback: persistent summaries, readable detail rows, clean selection and inset actions passed\nComplete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed\nEndless unnamed boss countdown and fixed equipment typography passed\nEmpty combat state, consistent tab surfaces and measured Elwynn action sockets passed\nClean card materials, flat meter tabs and bounded square minimap passed\nLocked HUD readers remain movable and persistent; localized taken sources and single target surface passed\nEquipment/Spells tabs, bounded effects and lairs, native buff restoration passed (synthetic)\nPortrait layering, damage navigation, tab marks and boss/guardian card passed (synthetic)\nMap fill and rim, portrait socket, header tabs, lair columns, empty damage state and tab stability passed (synthetic)\nDrag across refreshes (simulated), socket-centred icons, Damage foot clearance and third-party map buttons passed (synthetic)\n30-alternation click stability, taller Damage card, lair margins and repeated map-button transitions passed (synthetic)\nSpells indicator in the header tab passed (synthetic)\nBonuses expansion, Damage hover tooltips, map handle and gear placement passed (synthetic)\nPlacement engine, seven spells, damage categories and map follower passed (synthetic)\nMap group owner, zoom buttons and native map scripts passed (synthetic)\nReal screen edges, drop snapping, protected obstacles and map mouse coverage passed (synthetic)\nLive protected obstacles, clamp off and map/card probes passed (synthetic)\nFour real screen edges with a short UIParent measurement, and read-only gear diagnostics passed (synthetic)\nDiagnostic commands are routed before the settings window and always report (synthetic)\nMap group mouse stacking (gear above map above owner) passed (synthetic)\nRing geometry from the art (gold border, keep-outs) and default activation passed (synthetic)\nGear drawn above the art rim, native levels restored (synthetic)\nLauncher proxies: tooltip, first click, hidden state passed (synthetic)\nTeammate cards in the placement engine: 0-4 members, collisions, stability, drag, persistence passed (synthetic)\nThemed teammate cards: states, native replacement, strata, individual moves passed (synthetic)",
+  "nativeLua50": "combat_world: API v1 cursor/project/handler fixtures passed\nmeter_suite: hit ledger and view keys passed\nboss_timeline: schedule markers and clock handoff passed\nNative Lua 5.0 behavioral, privacy, malformed-settings, portrait, combat and UI checks passed\n0.121 compatibility fixtures passed\nRun-mode card and linked HUD stack fixtures passed\nNative edge-anchor persistence fixtures passed\nIndependent cards, group proxies, per-card dimensions and collapse fixtures passed\nCo-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed\nParty dead state, leave and empty state passed (synthetic)\nParty hover provenance, full local list, honest peer fallback, paging and lifetime fixtures passed\nGroup history: formats, kinds, options, bounds, roster, icons, FR/EN, probe and performance passed (synthetic)\nOpt-in party sync boundary, bounded protocol, precision and no-delivery assumptions passed\nDefault gameplay dragging, persistent lock preference and no-panel commands passed\nSimplified window subpages, reversible essential preset, stable option ids and pinned detail identity passed\nNative tools: truthful meters/effects/revives, guarded overlays, affixes, reminders, alert bounds and old-client fallback passed\nContext-free previews: isolation, settings, grouping, placement, scoped reset and cleanup passed\nPreview isolation: live HUD masking, other-UI toggle, input and exact restoration passed\nNative loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed\nReported arena bosses: canonical native identities, explicit TGA paths, and display conflict guards passed\nZone themes: native ownership restoration, map guard, profile roundtrip, routes, unknown-zone fallback and bounded frame pools passed (synthetic)\nSix concept layouts: live HP, XP, map corners, art fallback, choice restoration and detail routes passed (synthetic)\nElement sizes: independent geometry, grouped art, saved anchors, profiles, bounded allocation and long-text fixtures passed (synthetic)\nReview feedback: persistent summaries, readable detail rows, clean selection and inset actions passed\nComplete cards: original textures, equipment names, collapse dock and grouped minimap dragging passed\nEndless unnamed boss countdown and fixed equipment typography passed\nEmpty combat state, consistent tab surfaces and measured Elwynn action sockets passed\nClean card materials, flat meter tabs and bounded square minimap passed\nLocked HUD readers remain movable and persistent; localized taken sources and single target surface passed\nEquipment/Spells tabs, bounded effects and lairs, native buff restoration passed (synthetic)\nPortrait layering, damage navigation, tab marks and boss/guardian card passed (synthetic)\nMap fill and rim, portrait socket, header tabs, lair columns, empty damage state and tab stability passed (synthetic)\nDrag across refreshes (simulated), socket-centred icons, Damage foot clearance and third-party map buttons passed (synthetic)\n30-alternation click stability, taller Damage card, lair margins and repeated map-button transitions passed (synthetic)\nSpells indicator in the header tab passed (synthetic)\nBonuses expansion, Damage hover tooltips, map handle and gear placement passed (synthetic)\nPlacement engine, seven spells, damage categories and map follower passed (synthetic)\nMap group owner, zoom buttons and native map scripts passed (synthetic)\nReal screen edges, drop snapping, protected obstacles and map mouse coverage passed (synthetic)\nLive protected obstacles, clamp off and map/card probes passed (synthetic)\nFour real screen edges with a short UIParent measurement, and read-only gear diagnostics passed (synthetic)\nDiagnostic commands are routed before the settings window and always report (synthetic)\nMap group mouse stacking (gear above map above owner) passed (synthetic)\nRing geometry from the art (gold border, keep-outs) and default activation passed (synthetic)\nGear drawn above the art rim, native levels restored (synthetic)\nLauncher proxies: tooltip, first click, hidden state passed (synthetic)\nTeammate cards in the placement engine: 0-4 members, collisions, stability, drag, persistence passed (synthetic)\nThemed teammate cards: states, native replacement, strata, individual moves passed (synthetic)",
   "persistence": true,
   "securityFixtures": true,
   "freshDefaultsNoCVarOrHudWrites": true,
@@ -50,7 +50,7 @@
     "Config.lua": {
       "maxUpvalues": 1,
       "functions": 2,
-      "sha256": "4d5f6bd8f4dbbbe33413950ba3efe440754cecd7bea15daf23d417307e08d795"
+      "sha256": "24c6b875747ceec5263a71e5377373d4b8d6ad83aa28e456d62a2410ddbf14dc"
     },
     "Profiles.lua": {
       "maxUpvalues": 4,
@@ -65,7 +65,7 @@
     "InterfaceStrings.lua": {
       "maxUpvalues": 0,
       "functions": 1,
-      "sha256": "3330c3bc4847179b2902ac8cfde0422f35a3fd464853f562ed2e97aa2c5c3aa0"
+      "sha256": "0cac9642bc5ae6af7b83a6bb344514793bf67e3620fb5ecc55418c9db924e80c"
     },
     "Theme.lua": {
       "maxUpvalues": 1,
@@ -135,12 +135,17 @@
     "CardLayout.lua": {
       "maxUpvalues": 2,
       "functions": 30,
-      "sha256": "c7635cf7b515beac989f753c514f1a653b6a413e5d30a9b06d572f44aacc10e1"
+      "sha256": "f766e9b564530538ee8497890635f314d506170f62b07fe45709bedc1c8bc7a1"
     },
     "Coop.lua": {
-      "maxUpvalues": 4,
-      "functions": 30,
-      "sha256": "4be621b95c7aa8dedc99ca0234ee765105176ca5a4ffaa3d4b15866974314b51"
+      "maxUpvalues": 3,
+      "functions": 36,
+      "sha256": "afc1d640acb3e7eea261a1cbb75f12823f41e0c63f7dd88e91a21cbf5903585b"
+    },
+    "GroupHistory.lua": {
+      "maxUpvalues": 3,
+      "functions": 28,
+      "sha256": "ba206bcb50a938648fbe1d6f00dd9c2341a6da78377a9d24b2be04292fcbc2e5"
     },
     "PartySync.lua": {
       "maxUpvalues": 1,
@@ -199,8 +204,8 @@
     },
     "Interface.lua": {
       "maxUpvalues": 24,
-      "functions": 185,
-      "sha256": "5a8e5af57c8605b50fd02238129d6857fbbe7369a733ab8c9072bf4a6d6f5bf5"
+      "functions": 205,
+      "sha256": "cffaf4ab101ff441eecfa632346c3ebd17a25a2ebd9d92ead909f6a191c64888"
     },
     "FieldKit.lua": {
       "maxUpvalues": 21,
@@ -260,12 +265,12 @@
     "ReferenceHUD.lua": {
       "maxUpvalues": 8,
       "functions": 127,
-      "sha256": "6f1292fa9d0474d5240a5569e4df9f6710ebec42eb8508339e9e9e5900cbeedb"
+      "sha256": "9fb8a03397cd63a8ee37709ec04ecd6bb2f15322642eaa5f478d1633e126b88f"
     },
     "ZoneThemes.lua": {
       "maxUpvalues": 17,
       "functions": 63,
-      "sha256": "65fdae3e1608103b54110057372c987f8f7841056aa25bf1638aa9c92166f906"
+      "sha256": "77bb9322c4cfe1f8f0b81e60df8b48bb429c7e758c05b3f8f485d8c0aa454024"
     }
   }
 }

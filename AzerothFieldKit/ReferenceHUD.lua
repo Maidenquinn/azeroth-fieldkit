@@ -560,7 +560,7 @@ function R.NoteMoved(name)
  local kind=nil
  for _,k in ipairs(CARDS) do if "FieldKitReferencePanel"..k==name then kind=k end end
  if not kind then
-  local i=nil;for n=1,4 do if name=="FieldKitPartyCard"..n then i=n end end
+  local i=nil;for n=0,4 do if name==(n==0 and "FieldKitPlayerCard" or "FieldKitPartyCard"..n) then i=n end end
   if i then local f=getglobal(name);R.lastParty="Party"..i;if f then f.fieldkitApplied=nil;f.fieldkitDX,f.fieldkitDY=nil,nil end;if R.shift then R.shift["Party"..i]=nil end;if R.shiftX then R.shiftX["Party"..i]=nil end end
   return
  end
@@ -685,7 +685,7 @@ end
 -- already keeps for every movable card (zoneThemePositions[layout][name]); nothing is migrated or rewritten. The engine only
 -- adds a DISPLAY displacement on top of the preferred position, never saved, and never while the card is being dragged.
 local function PartySame(a,b) return a and b and a[1]==b[1] and a[2]==b[2] and math.abs(a[3]-b[3])<.01 and math.abs(a[4]-b[4])<.01 end
-function R.PartyFrames() local out={};for i=1,4 do local f=getglobal("FieldKitPartyCard"..i);if f then table.insert(out,{i,f}) end end;return out end
+function R.PartyFrames() local out={};for i=0,4 do local f=getglobal(i==0 and "FieldKitPlayerCard" or "FieldKitPartyCard"..i);if f then table.insert(out,{i,f}) end end;return out end
 -- Puts the card on its PREFERRED anchor (saved themed position, else wherever the legacy code left it) and returns the
 -- displacement (canvas px) the engine currently applies on top of it.
 function R.PartyPrepare(f)

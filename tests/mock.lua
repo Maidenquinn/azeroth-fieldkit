@@ -13,6 +13,7 @@ function methods:Click(button)
  this=previous;arg1=previousButton
 end
 function methods:RegisterEvent(k) self.events[k]=true end
+function methods:UnregisterEvent(k) self.events[k]=nil end
 function methods:GetName() return self._name end
 function methods:GetObjectType() return self.kind end
 function methods:SetWidth(v) self.width=v end

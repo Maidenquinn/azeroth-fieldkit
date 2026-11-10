@@ -2,7 +2,7 @@
 -- old settings and game saves must not be overwritten by a renamed review build.
 local defaults={zoneThemes=false,zoneThemeMode="auto",zoneThemeVariant="complete",zoneThemeMinimap=true,zoneThemeArt=true,zoneThemeOverlap=false,zoneThemeScale=100,lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,effectBuffs=true,reviveFrame=false,
  nextBossCard=false,nextBossAlert=false,bossTimeline=false,bossTimelineWidth=560,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,partyBannerWarnings=true,
- highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+ highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,partyShow=true,partyPlayerCard=false,partyDetail=2,partyCardScale=100,partyHistory=false,partyHistoryCount=5,partyHistoryBuffs=true,partyHistoryCombat=true,partyHistoryIcons=true,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,bossStyle="classic",statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  meterTabs=true,meterSpellTips=true,meterKeepTakenFrame=false,meterViewKey="damage",
  meterSortKey="dmg",meterSortAsc=false,meterHealDone=false,meterPartyOwner=nil,
@@ -124,6 +124,7 @@ d.language=d.language=="fr" and "fr" or "en"
  for _,key in ipairs({"hideDamage","showCrits","groupCrits","hideGryphons","moneyDetached","hudBossesHidden","hudTallyHidden","hudMeterHidden","statsCollapsed","gearCollapsed"}) do
   if d[key]~=nil and type(d[key])~="boolean" then d[key]=nil end
  end
+ d.partyDetail=math.floor(FieldKit.Number(d.partyDetail,2,1,3));d.partyHistoryCount=math.floor(FieldKit.Number(d.partyHistoryCount,5,1,20));d.partyCardScale=math.floor(FieldKit.Number(d.partyCardScale,100,70,130)/5+.5)*5
  d.chestsOpened=FieldKit.Number(d.chestsOpened,0,0,1e9)
  if type(d.shownStats)~="table" then
   d.shownStats={};for i=1,table.getn(defaultStats) do d.shownStats[defaultStats[i]]=true end

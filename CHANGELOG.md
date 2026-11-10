@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha.32 - 2026-11-10 (group frames redesign, group history, API audit, unreleased)
+
+- Group card: ONE component for the player's own card (option, off by default) and for each teammate. Fixed geometry per detail level (Compact 300x44, Standard 300x60, Full 300x66): all cards identical whatever the data, every text in its own box, nothing truncated. Portrait socket 36-44 px (native portrait, else class icon, else nothing), name, class and level on a secondary line, life bar with values and percentage, thin resource bar (values at Full), Dead / Ghost / Offline / 0 HP tag, last spell icons. An unavailable resource only empties its own bar.
+- New options (Co-op page): show group cards, show my own card, card detail, card size, action history, actions shown (1-20), history: buffs, history: damage and healing, history: spell icons. Defaults: cards on with the theme, history off.
+- New module GroupHistory.lua: bounded per-member history built only from the party combat-log chat events, parsed with the client's own localized format strings (positional forms handled); events registered only while the option is on; nothing kept for people who left; tooltip on the card. Cast start, direct/periodic damage, direct/periodic heals, buffs gained / faded and interruptions when the client prints them. Nothing inferred.
+- New diagnostics: `/fieldkit groupprobe [api | events [seconds] | items [notify] | stats | reset]` reports what THIS client delivers (functions, format strings, unit APIs, events with sample arguments, equipped items of party units).
+- docs/GROUP_API_AUDIT_0.6.0.md: static audit of the executable. Findings: no UNIT_SPELLCAST_* events, no UnitInRange, no INSPECT_READY, no format strings in the executable (they come from game data); item use by another player is not detectable.
+
 ## 0.6.0-alpha.31 - 2026-11-10 (compact teammate cards, unreleased)
 
 - Native recette of alpha.30 failed visually (cards too big, no health bar, no values, no resource bar). Causes: (1) the card used the tall generic window rows (4 stacked rows, ~150 px); (2) alpha.30 raised the card's frame level, and a parent's `SetFrameLevel` does not re-level its children on this client, so the row bars stayed UNDER the card's opaque material: only the card's own texts (name, class, level) were visible.

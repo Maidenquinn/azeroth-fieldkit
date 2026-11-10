@@ -1381,12 +1381,15 @@ do
   assert(P.frames[1]:IsShown() and P.frames[2]:IsShown() and not P.frames[3]:IsShown() and not P.frames[4]:IsShown(),zone..": two members, two cards")
   assert(not natives[1]:IsShown() and not natives[2]:IsShown(),zone..": native frames are not shown together with the cards")
   assert(FieldKitDB.partyCards==false and FieldKitDB.replacePartyFrames==false,zone..": saved preferences are not modified")
-  assert(P.frames[1].title:GetText()=="Denza" and P.frames[1].total:GetText()=="Lvl 12 Mage",zone..": name, level and class ("..tostring(P.frames[1].total:GetText())..")")
+  assert(P.frames[1].nameText:GetText()=="Denza" and P.frames[1].infoText:GetText()=="Lvl 12 Mage",zone..": name, then level and class on the secondary line ("..tostring(P.frames[1].infoText:GetText())..")")
   local c1=P.frames[1]
   assert(c1.hpBar:IsShown() and c1.hpBar.text:GetText()=="400 / 800 (50%)",zone..": health bar with current / maximum and percentage from the unit")
   assert(math.abs(c1.hpBar:GetValue()-.5)<1e-9,zone..": the bar is filled with the REAL fraction")
-  assert(c1.mpBar:IsShown() and c1.mpBar.text:GetText()=="30 / 100" and math.abs(c1.mpBar:GetValue()-.3)<1e-9,zone..": resource bar from the unit")
-  assert(c1:GetWidth()==290 and c1:GetHeight()==56,zone..": compact card "..c1:GetWidth().."x"..c1:GetHeight())
+  assert(c1.mpBar:IsShown() and math.abs(c1.mpBar:GetValue()-.3)<1e-9 and c1.mpBar:GetHeight()==5,zone..": thin resource bar from the unit")
+  FieldKitDB.partyDetail=3;P.Update();assert(c1.mpBar.text:GetText()=="30 / 100" and c1:GetHeight()==66 and P.frames[2]:GetHeight()==66,zone..": full detail: resource values, all cards the same size")
+  FieldKitDB.partyDetail=1;P.Update();assert(c1:GetHeight()==44 and not c1.mpBar:IsShown() and not c1.infoText:IsShown() and c1.hpBar:IsShown() and P.frames[2]:GetHeight()==44,zone..": compact detail: name and life only, all cards the same size")
+  FieldKitDB.partyDetail=2;P.Update()
+  assert(c1:GetWidth()==300 and c1:GetHeight()==60,zone..": standard card "..c1:GetWidth().."x"..c1:GetHeight())
   for _,row in ipairs(c1.rows) do assert(not row:IsShown(),zone..": the tall generic rows are not used") end
   assert(c1.hpBar:GetFrameLevel()>c1:GetFrameLevel() and c1.mpBar:GetFrameLevel()>c1:GetFrameLevel(),zone..": bars are explicitly above the card (children do not follow a parent's level)")
   assert(c1.fieldkitColor==nil and c1.hpBar.fieldkitColor[2]>c1.hpBar.fieldkitColor[1] or c1.hpBar.fieldkitColor[1]>.8,zone..": colour from the fraction")
@@ -1396,14 +1399,14 @@ do
   assert(g[2]>g[1] and y[1]>.8 and r[1]>.8 and r[2]<.3,zone..": health colours follow the real fraction")
   assert(P.HealthColor(.9,true)[1]==.45,zone..": muted colour for dead / offline")
   -- states
-  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].hpBar.text:GetText()=="Dead" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==44,zone..": dead: empty grey bar, no resource bar, still compact")
-  members[1].ghost=true;P.Update();assert(P.frames[1].hpBar.text:GetText()=="Ghost" and P.frames[1]:GetHeight()==44,zone..": ghost")
-  members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].hpBar.text:GetText()=="400 / 800 (50%)" and P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==56,zone..": resurrection")
-  members[1].online=false;P.Update();assert(P.frames[1].hpBar.text:GetText()=="Offline" and P.frames[1]:GetHeight()==44,zone..": offline");members[1].online=true
-  members[2].hp=0;P.Update();assert(P.frames[2].hpBar.text:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
+  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].stateText:GetText()=="DEAD" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==60,zone..": dead: tag, empty grey bar, no resource bar, SAME size")
+  members[1].ghost=true;P.Update();assert(P.frames[1].stateText:GetText()=="GHOST" and P.frames[1]:GetHeight()==60,zone..": ghost")
+  members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].hpBar.text:GetText()=="400 / 800 (50%)" and P.frames[1].mpBar:IsShown() and P.frames[1].stateText:GetText()=="",zone..": resurrection")
+  members[1].online=false;P.Update();assert(P.frames[1].stateText:GetText()=="OFFLINE" and P.frames[1]:GetHeight()==60,zone..": offline");members[1].online=true
+  members[2].hp=0;P.Update();assert(P.frames[2].stateText:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
   members[2].hp=600;members[2].mana=0;members[2].mp=0;P.Update()
-  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==44,zone..": resource unavailable: only that bar disappears and the card stays compact")
-  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==56)
+  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==60 and P.frames[2]:GetHeight()==P.frames[1]:GetHeight(),zone..": resource unavailable: only that bar disappears, the card keeps the SAME size")
+  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==60 and P.frames[2].mpBar:IsShown())
   members[2].hp=300;P.Update();assert(math.abs(P.frames[2].hpBar:GetValue()-.5)<1e-9 and P.frames[2].hpBar.text:GetText()=="300 / 600 (50%)",zone..": wounded")
   members[2].hp=600;P.Update();assert(P.frames[2].hpBar:GetValue()==1 and P.frames[2].hpBar.text:GetText()=="600 / 600 (100%)",zone..": full health")
   -- portrait: the real one, else the class icon
@@ -1412,7 +1415,7 @@ do
   members[2].hp=600
   -- partial data: nothing invented
   local level=members[1].level;members[1].level=nil;members[1].class=nil;members[1].key=nil;P.Update()
-  assert(P.frames[1].total:GetText()=="?",zone..": no level, no class: nothing invented ("..tostring(P.frames[1].total:GetText())..")")
+  assert(P.frames[1].infoText:GetText()=="?",zone..": no level, no class: nothing invented ("..tostring(P.frames[1].infoText:GetText())..")")
   members[1].level=level;members[1].class="Mage";members[1].key="MAGE"
   members[2].max=0;P.Update();assert(not P.frames[2]:IsShown() and natives[2]:IsShown(),zone..": unknown max HP: no invented card, native frame kept");members[2].max=600;P.Update()
   assert(P.frames[2]:IsShown() and not natives[2]:IsShown(),zone..": and back")
@@ -1437,6 +1440,49 @@ do
   local saved=FieldKitDB.zoneThemePositions[layout].FieldKitReferencePanelDamage;assert(saved[3]==spots[1][1] and saved[4]==-spots[1][2],zone..": the engine never rewrites the saved position of the main card")
   local other=zone=="elwynn" and "naxx:complete:reference" or "elwynn:complete:reference"
   assert(FieldKitDB.zoneThemePositions[other]==nil or FieldKitDB.zoneThemePositions[other].FieldKitPartyCard1==nil,zone..": positions are stored per layout")
+  -- alpha.32: one component, fixed geometry, nothing truncated or overlapping, player card, size and visibility options
+  for detail=1,3 do
+   FieldKitDB.partyDetail=detail;P.Update()
+   local spec=P.detail[detail];local w=P.frames[1]:GetWidth()
+   for i=1,4 do
+    local f=P.frames[i]
+    assert(f:GetWidth()==300 and f:GetHeight()==spec.h,zone..": every card has the same size at detail "..detail)
+    local _,_,_,nx=f.nameText:GetPoint();local _,_,_,sx=f.stateText:GetPoint();local _,_,_,hx=f.hpBar:GetPoint()
+    assert(nx+f.nameText:GetWidth()<=sx,zone..": the name box ends before the state tag begins (detail "..detail..")")
+    assert(sx+f.stateText:GetWidth()<=w-8+.001 and hx+f.hpBar:GetWidth()==w-8,zone..": nothing sticks out of the card")
+    if spec.info then
+     local _,_,_,ix=f.infoText:GetPoint();assert(ix+f.infoText:GetWidth()<=w-8-5*16+.001,zone..": the class/level box leaves room for five history icons")
+    end
+    assert(hx==nx,zone..": bar and name share the same left edge")
+    assert(f.portraitBack:GetHeight()<=spec.h-4,zone..": the portrait fits the card")
+   end
+  end
+  FieldKitDB.partyDetail=2;P.Update()
+  -- history icons: only spells of the local spellbook, only at detail 2 and 3
+  local H=FieldKitGroupHistory
+  GetSpellName=function(i) return i==1 and "Frostbolt" or nil end;GetSpellTexture=function(i) return i==1 and "Interface\\Icons\\Spell_Frost_FrostBolt02" or nil end
+  SPELLLOGOTHEROTHER="%s's %s hits %s for %d.";H.formats=nil;H.Clear()
+  FieldKitDB.partyHistory=true;H.Sync();H.icons=nil
+  H.Handle("x","Denza's Frostbolt hits Boar for 40.");H.Handle("x","Denza's Unknown Spell hits Boar for 40.")
+  P.Update();assert(P.frames[1].fieldkitIconCount==1 and P.frames[1].historyIcons[1]:IsShown() and not P.frames[1].historyIcons[2]:IsShown(),zone..": one icon (the other spell is not in the local spellbook)")
+  FieldKitDB.partyHistoryIcons=false;P.Update();assert(P.frames[1].fieldkitIconCount==0 and not P.frames[1].historyIcons[1]:IsShown(),zone..": icons option off")
+  FieldKitDB.partyHistoryIcons=true;FieldKitDB.partyDetail=1;P.Update();assert(P.frames[1].fieldkitIconCount==0,zone..": compact detail has no icon line");FieldKitDB.partyDetail=2
+  FieldKitDB.partyHistory=false;H.Sync();GetSpellName=nil;GetSpellTexture=nil;P.Update()
+  -- the player's own card: same component, same size, optional
+  assert(P.frames[0] and not P.frames[0]:IsShown(),zone..": own card off by default")
+  FieldKitDB.partyPlayerCard=true;Stage1(P.frames[0]);P.Update()
+  assert(P.frames[0]:IsShown() and P.frames[0].unit=="player" and P.frames[0]:GetWidth()==300 and P.frames[0]:GetHeight()==P.frames[1]:GetHeight(),zone..": own card shown with the very same structure and size")
+  assert(P.frames[0].hpBar:IsShown() and P.frames[0].nameText:GetText()~=nil,zone..": own card has its bars")
+  local found=false;for _,e in ipairs(R.PartyFrames()) do if e[2]==P.frames[0] then found=true end end;assert(found,zone..": own card is an element of the placement engine")
+  -- size option
+  FieldKitDB.partyCardScale=130;P.Update();assert(P.frames[1]:GetScale()==1.3 and P.frames[0]:GetScale()==1.3,zone..": card size option")
+  FieldKitDB.partyCardScale=70;P.Update();assert(P.frames[2]:GetScale()==.7)
+  FieldKitDB.partyCardScale=100;P.Update()
+  FieldKitDB.partyPlayerCard=false;P.Update();assert(not P.frames[0]:IsShown(),zone..": own card hidden again")
+  -- show / hide group cards: native frames stay when the cards are hidden
+  FieldKitDB.partyShow=false;P.Update()
+  for i=1,4 do assert(not P.frames[i]:IsShown() and P.stock[i]==nil,zone..": group cards hidden: no card, native hooks released") end
+  FieldKitDB.partyShow=true;P.Update();assert(P.frames[1]:IsShown(),zone..": group cards shown again")
   -- theme off: native frames come back, the cards go
   C.Set("zoneThemes",false);P.Update()
   for i=1,4 do assert(not P.frames[i]:IsShown() and P.stock[i]==nil,zone..": theme off: no FieldKit card, native hooks released") end
