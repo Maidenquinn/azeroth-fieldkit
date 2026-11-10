@@ -343,6 +343,14 @@ function R.MapRim(M,hole)
  M.rim:Show()
  if M.Lift then M.Lift() end
 end
+-- Tooltip title of a launcher proxy: the addon's readable name, never its technical frame name. The parked original is
+-- off screen, so its own tooltip cannot be reused.
+function R.LauncherLabel(name)
+ local label=string.gsub(name or "","MinimapButton$","")
+ label=string.gsub(label,"Minimap$","")
+ if label=="" then label=name or "?" end
+ return label
+end
 function R.Map()
  local M=FieldKitThemeMinimap;local a=R.layout.map
  if R.layout.rects.mapArt then R.Geometry(M.root,R.layout.rects.mapArt) else R.Child(M.root,H.identity,{a[1],a[2],a[3],a[3]}) end;Blank(M.root);R.Art(M.root,"mapArt")
@@ -381,8 +389,9 @@ function R.Map()
    local proxy=M.launcherProxies[i]
    if not proxy then
     proxy=CreateFrame("Button",nil,M.root);proxy:SetWidth(30);proxy:SetHeight(30);proxy.icon=proxy:CreateTexture(nil,"ARTWORK");proxy.icon:SetAllPoints(proxy);proxy:RegisterForClicks("LeftButtonUp","RightButtonUp")
-    local target=original;proxy:SetScript("OnClick",function() local handler=target:GetScript("OnClick");if handler then local old=this;this=target;handler();this=old end end)
-    proxy:SetScript("OnEnter",function() GameTooltip:SetOwner(this,"ANCHOR_LEFT");GameTooltip:AddLine(name);GameTooltip:Show() end);proxy:SetScript("OnLeave",function() GameTooltip:Hide() end)
+    local launcherName=name -- Lua 5.0: a generic-for variable captured by a closure is nil once the loop ends
+    proxy:SetScript("OnClick",function() local target=getglobal(launcherName);local handler=target and target.GetScript and target:GetScript("OnClick");if handler then local old=this;this=target;handler();this=old end end) -- the owner's CURRENT frame, looked up at click time
+    proxy:SetScript("OnEnter",function() GameTooltip:SetOwner(this,"ANCHOR_LEFT");GameTooltip:AddLine(R.LauncherLabel(launcherName),1,.85,.55);GameTooltip:AddLine(FieldKit_L("Click to open"),.8,.8,.8);GameTooltip:Show() end);proxy:SetScript("OnLeave",function() GameTooltip:Hide() end)
     M.launcherProxies[i]=proxy
    end
    local texture=original.icon or original.texture;local path=texture and texture.GetTexture and texture:GetTexture();if not path and original.GetNormalTexture then local n=original:GetNormalTexture();path=type(n)=="string" and n or (n and n.GetTexture and n:GetTexture()) end

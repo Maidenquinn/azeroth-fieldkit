@@ -126,3 +126,24 @@ AZS_RUN.ph=nil;update(FieldKitFrame,.3)
 for i=1,4 do assert(not P.frames[i]:IsShown()) end
 FieldKit_SetLanguage("fr");assert(FieldKit_L("Unattributed (native total)")=="Non attribués (total natif)")
 print("Co-op native taken fallback, party DPS, opt-in frames, native restoration and freshness fixtures passed")
+
+-- alpha.28: dead state is shown only when the client reports it; a member who leaves leaves no ghost card.
+do
+ local cardsOn=FieldKitDB.partyCards
+ FieldKit_SetLanguage("en");AZS_RUN.ph="playing";AZS_RUN.t=1000;P.phase=nil;P.TrackRun()
+ FieldKitDB.partyCards=true;members[1]={name="Denza",hp=400,max=800,mana=30,mp=100,class="Mage",key="MAGE",power=0,online=true}
+ members[2]={name="Lockpin",hp=0,max=600,mana=0,mp=100,class="Priest",key="PRIEST",power=0,online=true}
+ P.Update()
+ assert(P.frames[2].rows[4].value:GetText()=="0 HP","without a dead flag from the client, 0 HP is shown as is")
+ function UnitIsDeadOrGhost(unit) return unit=="party2" end
+ P.Update();assert(P.frames[2].rows[4].value:GetText()=="Dead","client-reported death is shown")
+ assert(P.frames[1].rows[4].value:GetText()=="Online","a living member is not marked dead")
+ FieldKit_SetLanguage("fr");assert(FieldKit_L("Dead")=="Mort");FieldKit_SetLanguage("en")
+ members[2]=nil;P.Update();assert(not P.frames[2]:IsShown(),"a member who left leaves no ghost card")
+ UnitIsDeadOrGhost=nil
+ members[1]=nil;members[2]=nil;members[3]=nil;P.Update()
+ for i=1,4 do assert(not P.frames[i]:IsShown(),"alone: no card") end
+ assert(not P.meter:IsShown(),"alone: group meter hidden")
+ FieldKitDB.partyCards=cardsOn;AZS_RUN.ph=nil;P.Update()
+end
+print("Party dead state, leave and empty state passed (synthetic)")

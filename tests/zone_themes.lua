@@ -1233,3 +1233,25 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
 end
 print("Gear drawn above the art rim, native levels restored (synthetic)")
+
+-- alpha.28: launcher proxies: readable tooltip title, first click reaches the owner's handler, hidden state respected.
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete")
+ local M=FieldKitThemeMinimap
+ local clicks=0
+ local one=CreateFrame("Button","AzerothOneMinimapButton",Minimap);one:SetAlpha(1);one:SetScript("OnClick",function() clicks=clicks+1 end)
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return one end
+ C.Set("zoneThemes",true);C.Refresh(true)
+ local proxy=M.launcherProxies[3];assert(proxy and proxy:IsShown(),zone..": launcher proxy shown")
+ click(proxy);assert(clicks==1,zone..": the first click on the proxy reaches the addon's own handler once ("..clicks..")")
+ assert(R.LauncherLabel("AzerothOneMinimapButton")=="AzerothOne" and R.LauncherLabel("AzerothStatsMinimap")=="AzerothStats" and R.LauncherLabel("FieldKitMinimapButton")=="FieldKit",zone..": readable launcher names")
+ local lines={};local old={SetOwner=GameTooltip.SetOwner,AddLine=GameTooltip.AddLine,Show=GameTooltip.Show}
+ GameTooltip.SetOwner=function() end;GameTooltip.AddLine=function(_,text) table.insert(lines,text) end;GameTooltip.Show=function() end
+ this=proxy;proxy.scripts.OnEnter()
+ GameTooltip.SetOwner,GameTooltip.AddLine,GameTooltip.Show=old.SetOwner,old.AddLine,old.Show
+ assert(lines[1]=="AzerothOne" and lines[2]~=nil,zone..": tooltip shows the readable name and a hint ("..tostring(lines[1])..")")
+ one:SetAlpha(0);C.Refresh(true);assert(not proxy:IsShown(),zone..": a launcher its owner hides gets no proxy")
+ C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
+ assert(one:GetParent()==Minimap and one:GetAlpha()==0,zone..": the third-party button stays under its owner's control")
+end
+print("Launcher proxies: tooltip, first click, hidden state passed (synthetic)")

@@ -201,7 +201,9 @@ function P.UpdateMember(index,active)
  P.Row(frame,3,"Damage / DPS",line and FieldKit_FormatMeterValues(line,2) or FieldKit_L("Waiting for group data"),0,color)
  local connected
  if not preview and type(UnitIsConnected)=="function" then connected=UnitIsConnected(frame.unit) and true or false end
- local status=connected==false and "Offline" or (known and hp==0 and "0 HP" or (connected and "Online" or "Not provided"))
+ -- Dead/ghost only when the client reports it (optional API: never inferred from missing data).
+ local dead=not preview and (type(UnitIsDeadOrGhost)=="function" and UnitIsDeadOrGhost(frame.unit) or (type(UnitIsDead)=="function" and UnitIsDead(frame.unit))) and true or false
+ local status=connected==false and "Offline" or (dead and "Dead" or (known and hp==0 and "0 HP" or (connected and "Online" or "Not provided")))
  P.Row(frame,4,"Status",FieldKit_L(status),0,color)
  P.fitRows(frame,4);frame:Show();P.Stock(index,FieldKitDB.replacePartyFrames and known and true or false)
 end

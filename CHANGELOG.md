@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.28 - 2026-11-10 (launchers and party status, unreleased)
+
+- Launcher proxies (map side buttons for FieldKit / AzerothStats / AzerothOne): the tooltip captured the generic-for variable in a closure, which is nil once the loop ends in Lua 5.0 (found by the native 5.0 test runtime), so it had no title; the click would have failed the same way once made name-based. Each proxy now keeps its own copy of the name, looks up the owner's CURRENT frame at click time, and shows a readable title (`R.LauncherLabel`) plus a localized hint.
+- Party cards: status shows Dead / Mort only when the client reports it (UnitIsDeadOrGhost / UnitIsDead, optional, never inferred); otherwise 0 HP as before. Tests for leave and the alone state.
+- Audit findings with no code change (see COMPTE_RENDU): out-of-range has no documented native API in this client; the party cards (FieldKitPartyCard1-4) are legacy movable windows outside the themed placement engine.
+
 ## 0.6.0-alpha.27 - 2026-11-10 (gear above the gold border, unreleased)
 
 - Render order only: the art rim (frame redrawn over the map edge, map level + 2 = 3) was above the AzerothHub gear (native level 2), so the gold border cut the icon. A map button FieldKit placed on the border is now lifted just above the rim (`M.Lift`); its native level is remembered, `M.Layers` keeps computing the mouse stack from it (alpha.25 levels unchanged: owner 0, map 1) and it is restored with ring off / theme off. No position, SetPoint interception, mouse script or other button touched.
