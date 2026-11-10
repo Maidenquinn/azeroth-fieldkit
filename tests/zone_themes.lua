@@ -522,7 +522,10 @@ for _,zone in ipairs({"elwynn","naxx"}) do
    FieldKitDB.language=lang
    FieldKitMeterLedger.Read=function() local lines={};for i=1,count do table.insert(lines,{name="Spell "..i,share=1/i,icon="Interface\Icons\X"}) end return lines,100,10,true end
    R.scroll.Damage=0;C.Refresh(true);local dm=R.frames.Damage;local dr=R.CardRect("Damage",R.layout)
-   local capacity=6;local shown=0;local lowest=0
+   local capacity=R.dmgN;local room=R.DmgMaxRows(R.layout)
+   assert(capacity==math.max(6,math.min(count,room)) and R.dmgScroll==(count>capacity),zone..": the Damage card holds every line the screen has room for: "..count.." lines, room "..room..", rows "..tostring(capacity))
+   if count<=room then assert(not R.dmgScroll,zone..": no scrolling while the card fits") end
+   local shown=0;local lowest=0
    for _,r in ipairs(dm.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();lowest=math.max(lowest,-y+r:GetHeight()) end end
    assert(shown==math.max(1,math.min(capacity,count)),zone..": Damage shows "..count.." spells in "..shown.." rows")
    local limit=zone=="naxx" and dr[4]-12 or dr[4]-48
@@ -1864,3 +1867,134 @@ do
  C.Set("zoneThemes",false)
 end
 print("Dynamic Equipment / Spells card and Effects margins passed (synthetic)")
+
+-- alpha.37: every spell / Damage line when the screen has room (also for a card the user moved low), Effects geometry from the
+-- measured art, Lairs in three aligned columns.
+do
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+  R.statsOpen=false;FieldKitDB.loadoutTab=1;R.lastMoved=nil
+  local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+  local saved={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local r=R.layout.rects[k];saved[k]={r[1],r[2]} end
+  local oldSpells=FieldKitLoadout.spells
+  local minN=zone=="naxx" and 3 or 1
+  -- (a) default positions: 0, 1, 2, 5, 6, 7, 8, 9, 12 and 24 spells
+  SaveAll(layout,saved);Stage();Relayout()
+  for _,count in ipairs({0,1,2,5,6,7,8,9,12,24}) do
+   FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
+   FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);C.Refresh(true)
+   local acc=R.frames.Accessories;local tag=zone..": "..count.." spells (default position)"
+   local room=R.AccMaxRows(zone,R.layout);local N=R.accN
+   local wanted=math.max(minN,math.min(count,room))
+   assert(N<=wanted and N>=minN and (count>8 or N==wanted),tag..": rows "..N.." for "..count.." spells, room "..room.." (rows are only taken back when the cards below cannot be placed)")
+   assert(R.accScroll==(count>N),tag..": scrolling only when the room is short")
+   local visible=0;for _,r in ipairs(acc.rows) do if r:IsShown() and r.entry then visible=visible+1 end end
+   assert(visible==math.min(count,N),tag..": visible rows ("..visible..") are the rows the card holds ("..N..")")
+   assert(acc:GetHeight()==R.layout.rects.Accessories[4]+R.AccDelta(zone,N),tag..": the frame really has the computed height ("..acc:GetHeight()..")")
+   assert(acc.fieldkitSkin==nil or true,tag)
+   Apart(tag)
+  end
+  -- (b) a card the user moved LOW: it is displayed higher instead of losing rows; the saved position is never rewritten
+  local statsPref,effectsPref=FieldKitDB.statsFrame,FieldKitDB.effectsFrame;FieldKitDB.statsFrame=false;FieldKitDB.effectsFrame=false -- the cards under it are not shown: only the screen limits it
+  local _,_,_,screenBottom=R.ScreenBounds(R.layout)
+  local low={saved.Accessories[1],zone=="naxx" and math.floor(screenBottom-8-(R.layout.rects.Accessories[4]+R.AccDelta(zone,8))+50) or 540} -- 8 rows would reach the screen bottom (Naxx) / the nav (Elwynn); the normal card still fits
+  saved.Accessories=low;SaveAll(layout,saved);Relayout()
+  FieldKitLoadout.spells={};for i=1,8 do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
+  FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);C.Refresh(true)
+  local acc=R.frames.Accessories
+  assert(R.accN==8 and not R.accScroll,zone..": all 8 spells although the card was moved low (rows "..tostring(R.accN)..")")
+  assert((R.shift.Accessories or 0)<0,zone..": the card is displayed higher ("..tostring(R.shift.Accessories)..")")
+  local v=FieldKitDB.zoneThemePositions[layout].FieldKitReferencePanelAccessories;assert(v and v[3]==low[1] and v[4]==-low[2],zone..": the saved position is untouched")
+  Apart(zone..": moved-low Equipment card, 8 spells")
+  FieldKitDB.loadoutTab=1;C.Refresh(true);C.Refresh(true)
+  assert((R.shift.Accessories or 0)==0 and R.frames.Accessories:GetHeight()==R.layout.rects.Accessories[4],zone..": back on Equipment: preferred position and normal height")
+  FieldKitDB.statsFrame,FieldKitDB.effectsFrame=statsPref,effectsPref
+  saved.Accessories={R.layout.rects.Accessories[1],R.layout.rects.Accessories[2]};SaveAll(layout,saved)
+  FieldKitLoadout.spells=oldSpells
+
+  -- (c) Damage: every line when there is room, at the real frame height; fallback scrolling beyond that
+  local oldRead=FieldKitMeterLedger.Read
+  for _,count in ipairs({6,7,8,10,24}) do
+   FieldKitMeterLedger.Read=function() local lines={};for i=1,count do table.insert(lines,{name="Spell "..i,share=1/(i+1),dmg=1000*i,icon="Interface\\Icons\\X"}) end return lines,50000,500,true end
+   R.scroll.Damage=0;C.Refresh(true);C.Refresh(true)
+   local dm=R.frames.Damage;local tag=zone..": Damage "..count.." lines"
+   local room=R.DmgMaxRows(R.layout);local N=R.dmgN
+   assert(N==math.max(6,math.min(count,room)),tag..": rows "..N.." (room "..room..")")
+   local visible=0;for _,r in ipairs(dm.rows) do if r:IsShown() and r.fieldkitLine then visible=visible+1 end end
+   assert(visible==math.min(count,N),tag..": visible lines ("..visible..") = rows the card holds ("..N..")")
+   assert(dm:GetHeight()==R.CardRect("Damage",R.layout)[4],tag..": the frame has the planned height ("..dm:GetHeight()..")")
+   if count<=room then assert(not R.dmgScroll and not dm.pager:IsShown() and not string.find(dm.more.fieldkitLabel:GetText(),"/",1,true),tag..": no counter, nothing hidden")
+   else assert(R.dmgScroll and ((zone=="elwynn" and string.find(dm.more.fieldkitLabel:GetText(),"1-"..N.." / "..count,1,true)) or (zone=="naxx" and dm.pager:IsShown())),tag..": fallback counter shows the position") end
+   Apart(tag)
+  end
+  FieldKitMeterLedger.Read=oldRead
+  Unstage();FieldKitDB.zoneThemePositions[layout]=nil;Relayout()
+ end
+ C.Set("zoneThemes",false)
+end
+
+-- Effects: geometry from the measured art
+do
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+  local effects=FieldKitNativeTools.frames[1];local oldRows=effects.lastRows
+  local oldFrame=BuffFrame;BuffFrame=CreateFrame("Frame","BuffFrame",UIParent);BuffFrame:Show()
+  for _,count in ipairs({0,1,2,5}) do
+   effects.lastRows={};for i=1,count do table.insert(effects.lastRows,{label="Cri de guerre "..i,value="0:09",icon="Interface\\Icons\\Ability_Warrior_BattleShout",buffIndex=i}) end
+   C.Refresh(true);local e=R.frames.Effects;local a=R.CardRect("Effects",R.layout);local box=R.EffectBox(zone,a[4]);local ex=R.EFFECT
+   local tag=zone.." "..count.." effects"
+   local lastBottom=0
+   for i,r in ipairs(e.rows) do if r:IsShown() then
+    local _,_,_,rx,ry=r:GetPoint();local top=-ry;local h=r:GetHeight()
+    assert(top>=box.top and top+h<=box.bottom+.001,tag..": row "..i.." inside the list area ("..top.." .. "..(top+h).." in "..box.top.." .. "..box.bottom..")")
+    assert(h==box.rowH and top==box.top+(i-1)*box.step,tag..": rows share the measured height and a regular step")
+    assert(top>=lastBottom,tag..": rows do not overlap");lastBottom=top+h
+    if r.icon:IsShown() then
+     local _,_,_,ix,iy=r.icon:GetPoint();local size=r.icon:GetWidth()
+     local padTop=-iy;local padBottom=h-size-padTop
+     assert(padTop>=2 and math.abs(padTop-padBottom)<=1,tag..": equal padding above and below the icon ("..padTop.." / "..padBottom..")")
+     assert(top-0+padTop>=box.top+2,tag..": the icon is clear of the header rule")
+     assert(size==r.icon:GetHeight() and ix==-(size+ex.gap),tag..": same size for every icon, regular gap before the name")
+     assert(rx+ix>=30,tag..": clear of the left border ("..(rx+ix)..")")
+    end
+    local _,_,_,vx=r.value:GetPoint();assert(vx==0,tag..": duration flush right")
+    assert(r.label:GetHeight()==h and r.value:GetHeight()==h,tag..": name and duration share the row height (centred with the icon)")
+   end end
+  end
+  effects.lastRows=oldRows;BuffFrame=oldFrame
+ end
+ C.Set("zoneThemes",false)
+end
+
+-- Lairs: three aligned columns, no truncation dots on state or distance
+do
+ local src=getglobal("FieldKitLairFrame");local oldRows=src.rows
+ local function FS(text) local f=CreateFrame("FontString");f:SetText(text);return f end
+ local function RowOf(name,state,dist) local r=CreateFrame("Button");r.label=FS(name);r.value=FS(state);r.dist=FS(dist);r:Show();return r end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+  FieldKitDB.language="fr"
+  local longName="Capitaine Rochenoire de la Légion des Braises Éternelles"
+  src.rows={RowOf("Rochenoire",FieldKit_L("awake"),"125 m"),RowOf(longName,FieldKit_L("back in ").."12:34","1 250 m"),RowOf("Ombrelame",FieldKit_L("asleep"),"87 m"),RowOf("Grand Roi Sombrefeu",FieldKit_L("back in ").."0:09","")}
+  C.Refresh(true);local f=R.frames.Lairs;local a=R.CardRect("Lairs",R.layout);local tag=zone
+  local rows={};for _,r in ipairs(f.rows) do if r:IsShown() and r.label:GetText()~="" then table.insert(rows,r) end end
+  assert(table.getn(rows)==4,tag..": the four guardians stay listed ("..table.getn(rows)..")")
+  local wv,wa=rows[1].value:GetWidth(),rows[1].amount:GetWidth()
+  for i,r in ipairs(rows) do
+   assert(r.value:GetWidth()==wv and r.amount:GetWidth()==wa,tag..": the columns are aligned (same widths) in row "..i)
+   assert(r.label:GetWidth()+r.value:GetWidth()+r.amount:GetWidth()<=r:GetWidth()+.01,tag..": the three columns fit the row ("..r.label:GetWidth().."+"..r.value:GetWidth().."+"..r.amount:GetWidth().." in "..r:GetWidth()..")")
+   local v,m=r.value:GetText(),r.amount:GetText()
+   assert(not string.find(v,"…",1,true) and not string.find(m,"…",1,true) and not string.find(v,"...",1,true) and not string.find(m,"...",1,true),tag..": no truncation dots on the state or the distance ("..v.." / "..m..")")
+   assert(r.value:GetStringWidth()<=r.value:GetWidth()-8+.01 and r.amount:GetStringWidth()<=math.max(0,r.amount:GetWidth()-8)+.01 or m=="",tag..": state and distance fit with R.Fit's margin")
+   local _,_,_,ax=r.amount:GetPoint();local _,_,_,vx=r.value:GetPoint();assert(ax==0 and vx==-(wa+8),tag..": right-aligned, state just left of the distance")
+  end
+  assert(rows[2].amount:GetText()=="1 250 m" and rows[1].amount:GetText()=="125 m",tag..": complete distances")
+  assert(rows[4].amount:GetText()=="","no distance: nothing invented")
+  -- the name gives way, and the full name stays in the tooltip data
+  assert(rows[2].label.referenceFullText==longName and rows[2].label:GetStringWidth()<=rows[2].label:GetWidth(),tag..": long name fitted, full name kept")
+  assert(rows[2].fullLines[1]==longName and rows[2].fullLines[2]~=nil and rows[2].fullLines[3]=="1 250 m",tag..": tooltip lines: full name, state and delay, distance")
+  assert(rows[1].label.referenceFullText=="Rochenoire" and rows[1].label:GetStringWidth()<=rows[1].label:GetWidth() and (zone=="naxx" or rows[1].label:GetText()=="Rochenoire"),tag..": a short name keeps its full text (shortened only if its column is too narrow)")
+ end
+ src.rows=oldRows;FieldKitDB.language="en";C.Set("zoneThemes",false)
+end
+print("Every row when there is room, Effects geometry from the art and Lairs columns passed (synthetic)")

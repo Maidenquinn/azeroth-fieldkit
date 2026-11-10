@@ -525,12 +525,19 @@ end
 -- can be measured in the game instead of guessed.
 function P.BarProbe()
  local out={}
+ local function N(v) if type(v)~="number" then return tostring(v) end return string.format("%.3f",v) end
  for index=0,4 do
   local f=P.frames[index]
   if f and f:IsShown() and f.hpBar then
-   local b=f.hpBar;local tex=b.GetStatusBarTexture and b:GetStatusBarTexture()
-   local tw=tex and type(tex)=="table" and tex.GetWidth and tex:GetWidth() or nil
-   table.insert(out,string.format("card %d %s: bar %sx%s value %s fill texture width %s scale %.2f effective %.3f",index,tostring(f.unit),tostring(b:GetWidth()),tostring(b:GetHeight()),tostring(b:GetValue()),tostring(tw),f:GetScale() or 0,f.GetEffectiveScale and f:GetEffectiveScale() or 0))
+   local b=f.hpBar;local L=f.fieldkitLayout or {}
+   local tex=b.GetStatusBarTexture and b:GetStatusBarTexture()
+   local fillW=tex and type(tex)=="table" and tex.GetWidth and tex:GetWidth() or nil
+   local trackW=b.back and b.back.GetWidth and b.back:GetWidth() or nil
+   local hp=type(UnitHealth)=="function" and UnitHealth(f.unit) or nil;local max=type(UnitHealthMax)=="function" and UnitHealthMax(f.unit) or nil
+   local fe=f.GetEffectiveScale and f:GetEffectiveScale() or 0
+   table.insert(out,string.format("card %d %s: unit hp %s / %s = %s | bar value %s fraction %s",index,tostring(f.unit),tostring(hp),tostring(max),(hp and max and max>0) and N(hp/max) or "?",N(b:GetValue()),N(b.fieldkitFraction)))
+   table.insert(out,string.format("   container(card) %s x %s | content box %s..%s | bar %s x %s (stored %s x %s) | track %s | fill texture %s",N(f:GetWidth()),N(f:GetHeight()),tostring(L.box and L.box[1]),tostring(L.box and L.box[2]),N(b:GetWidth()),N(b:GetHeight()),tostring(b.fieldkitW),tostring(b.fieldkitH),N(trackW),N(fillW)))
+   table.insert(out,string.format("   card scale %s effective %s | bar effective %s | bar pixel width %s | bar left/right %s / %s",N(f:GetScale()),N(fe),N(b.GetEffectiveScale and b:GetEffectiveScale() or 0),N((b:GetWidth() or 0)*fe),N(b.GetLeft and b:GetLeft()),N(b.GetRight and b:GetRight())))
   end
  end
  if table.getn(out)==0 then table.insert(out,"no teammate card shown") end
