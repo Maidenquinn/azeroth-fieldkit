@@ -323,6 +323,7 @@ function C.GearState()
  local gear=getglobal("AzerothHubMinimapButton");local launcher=getglobal("AzerothHubLauncher")
  DEFAULT_CHAT_FRAME:AddMessage("gear: "..FrameState(gear))
  DEFAULT_CHAT_FRAME:AddMessage("gear SetPoint wrapped by FieldKit: "..tostring(gear and rawget(gear,"SetPoint")~=nil).." | hub launcher: "..(launcher and FrameState(launcher) or "not created yet"))
+ if gear then local list="";for _,event in ipairs({"OnEnter","OnLeave","OnMouseDown","OnMouseUp","OnClick","OnDragStart","OnDragStop","OnUpdate"}) do list=list.." "..event.."="..(gear:GetScript(event) and "yes" or "no") end;DEFAULT_CHAT_FRAME:AddMessage("gear scripts:"..list) end
  local x,y=GetCursorPosition();DEFAULT_CHAT_FRAME:AddMessage(string.format("cursor px %.0f,%.0f | map %s",x,y,FrameState(Minimap)))
 end
 function C.GearEvents(on)
@@ -338,6 +339,7 @@ function C.GearEvents(on)
    end)
   elseif not on and C.gearOriginal[event] then gear:SetScript(event,C.gearOriginal[event][1]);C.gearOriginal[event]=nil end
  end
+ DEFAULT_CHAT_FRAME:AddMessage("mapprobe events: gear logging "..(on and "ON (click, right-click and drag the gear now; its own handlers still run)" or "OFF (handlers restored)"))
 end
 function C.Tick()
  if C.stackAt and GetTime()>=C.stackAt then C.stackAt=nil;C.Stack() end
@@ -376,6 +378,22 @@ function C.Open(kind)
  C.placed={};C.Refresh(true)
  local frame=getglobal(route[1]);if C.open[kind] and frame then frame:Show() end
 end
+-- Diagnostic sub-commands (read-only). They are routed from /fieldkit before the settings window can open, and each has an
+-- independent slash command that never opens it either. Every call prints a result, errors included.
+C.diagnostics={cardprobe=true,dragdiag=true,mapprobe=true,mapstack=true,mapfocus=true,mapdiag=true,clickdiag=true}
+function C.Diagnostic(msg)
+ local ok,err=pcall(C.Command,msg)
+ if not ok then DEFAULT_CHAT_FRAME:AddMessage("FieldKit diagnostic error ("..tostring(msg).."): "..tostring(err)) end
+end
+SLASH_FKMAPSTATE1="/fkmapstate";SLASH_FKMAPEVENTS1="/fkmapevents";SLASH_FKMAPSTACK1="/fkmapstack";SLASH_FKMAPFOCUS1="/fkmapfocus";SLASH_FKCARDPROBE1="/fkcardprobe"
+local function Slash(name,command,build)
+ SlashCmdList[name]=function(arg) C.Diagnostic(build(string.lower(arg or ""))) end
+end
+Slash("FKMAPSTATE","/fkmapstate",function() return "mapprobe state" end)
+Slash("FKMAPEVENTS","/fkmapevents",function(a) return "mapprobe events "..(string.find(a,"off",1,true) and "off" or "on") end)
+Slash("FKMAPSTACK","/fkmapstack",function(a) local n=tonumber((string.gsub(a,"%s","")));return "mapstack "..tostring(n or 5) end)
+Slash("FKMAPFOCUS","/fkmapfocus",function() return "mapfocus" end)
+Slash("FKCARDPROBE","/fkcardprobe",function() return "cardprobe" end)
 function C.Command(msg)
  local arg=string.lower(string.gsub(msg or "","^%s*(.-)%s*$","%1"))
  if arg=="status" then
@@ -401,6 +419,7 @@ function C.Command(msg)
   DEFAULT_CHAT_FRAME:AddMessage(line.." (usage: /fieldkit mapprobe <ring|rim|proxies|follower|events> <on|off>)")
  elseif arg=="mapfocus" then C.focusUntil=GetTime()+8;C.focusLog={};C.focusLast=nil;DEFAULT_CHAT_FRAME:AddMessage("mapfocus: move the pointer over the map buttons for 8 seconds")
  elseif arg=="clickdiag" then
+  if table.getn(FieldKitReferenceHUD.diagButtons or {})==0 then DEFAULT_CHAT_FRAME:AddMessage("clickdiag: no tab recorded yet (enable the theme in a Complete layout first)") end
   for _,d in ipairs(FieldKitReferenceHUD.diagButtons or {}) do DEFAULT_CHAT_FRAME:AddMessage(d.label..": down "..d.down.." up "..d.up.." click "..d.click.." hide "..d.hide) end
  elseif arg=="mapdiag" then
   local M=FieldKitThemeMinimap

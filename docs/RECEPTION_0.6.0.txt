@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.24 - COMMANDES DE DIAGNOSTIC
+/fieldkit mapprobe state|events on, mapstack 5 ne les ouvrent plus la fenetre ; /fkmapstate /fkmapevents /fkmapstack.
+
 ALPHA.23 - BORDS HAUT ET DROIT, DIAGNOSTIC ENGRENAGE
 Taille d'ecran reelle mesuree par plusieurs sources ; /fieldkit mapprobe state pour l'engrenage. A recetter.
 

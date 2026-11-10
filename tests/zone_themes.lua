@@ -1096,3 +1096,33 @@ do
  DEFAULT_CHAT_FRAME.AddMessage=oldAdd;C.Set("zoneThemes",false)
 end
 print("Four real screen edges with a short UIParent measurement, and read-only gear diagnostics passed (synthetic)")
+
+-- alpha.24: diagnostic commands are routed before anything can open the settings window; each prints a result.
+do
+ local opened=0;local toggle=FieldKitUI.Toggle;FieldKitUI.Toggle=function(...) opened=opened+1;return toggle(unpack(arg)) end
+ local messages={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(messages,tostring(m)) end
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetScript("OnClick",function() end)
+ for _,line in ipairs({"mapprobe state","mapprobe events on","mapprobe events off","mapstack 5","mapstack","mapfocus","mapdiag","cardprobe","clickdiag","dragdiag on","dragdiag off","mapprobe","MAPPROBE State","  mapprobe state  ","mapprobe nonsense"}) do
+  local before=table.getn(messages);SlashCmdList.FieldKit(line)
+  assert(opened==0,"'/fieldkit "..line.."' must not open the settings window")
+  assert(table.getn(messages)>before,"'/fieldkit "..line.."' prints a result")
+ end
+ C.stackAt=nil
+ -- independent commands
+ for _,case in ipairs({{"FKMAPSTATE","/fkmapstate",""},{"FKMAPEVENTS","/fkmapevents","on"},{"FKMAPEVENTS","/fkmapevents","off"},{"FKMAPSTACK","/fkmapstack","3"},{"FKMAPSTACK","/fkmapstack",""},{"FKMAPFOCUS","/fkmapfocus",""},{"FKCARDPROBE","/fkcardprobe",""}}) do
+  assert(getglobal("SLASH_"..case[1].."1")==case[2],case[2].." is registered")
+  local before=table.getn(messages);SlashCmdList[case[1]](case[3]);assert(opened==0 and table.getn(messages)>before,case[2].." prints and never opens the window")
+ end
+ C.stackAt=nil
+ -- an error is reported, not swallowed and not turned into the settings window
+ local broken=C.Command;C.Command=function() error("boom") end
+ local before=table.getn(messages);SlashCmdList.FKMAPSTATE("");assert(table.getn(messages)==before+1 and string.find(messages[table.getn(messages)],"diagnostic error",1,true) and string.find(messages[table.getn(messages)],"boom",1,true) and opened==0,"a failing diagnostic prints its error")
+ C.Command=broken
+ -- ordinary commands still behave
+ FieldKitDB.windowsLocked=false;SlashCmdList.FieldKit("lock");assert(FieldKitDB.windowsLocked==true,"/fieldkit lock still locks");SlashCmdList.FieldKit("unlock");assert(FieldKitDB.windowsLocked==false,"/fieldkit unlock still unlocks")
+ SlashCmdList.FieldKit("");assert(opened==1,"plain /fieldkit still opens the settings window");SlashCmdList.FieldKit("themes status")
+ SlashCmdList.FieldKit("diag api")
+ FieldKitUI.Toggle=toggle;DEFAULT_CHAT_FRAME.AddMessage=oldAdd;C.Set("zoneThemes",false)
+end
+print("Diagnostic commands are routed before the settings window and always report (synthetic)")

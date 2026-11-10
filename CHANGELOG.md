@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.24 - 2026-11-10 (diagnostic commands routed, unreleased)
+
+- `/fieldkit mapprobe ...`, `mapstack`, `mapfocus`, `mapdiag`, `cardprobe`, `dragdiag`, `clickdiag` opened the settings window instead of running: the main handler only delegated `/fieldkit themes <sub>` to the theme module, and the diagnostics (added in alpha.21-23, documented as `/fieldkit <sub>`) were never routed, so they fell through to the final branch that toggles the window. They are now recognised before anything that can open it, case- and space-insensitively, and every one prints a result (an error is printed too).
+- Independent commands that never open the window: `/fkmapstate`, `/fkmapevents [on|off]`, `/fkmapstack [seconds]`, `/fkmapfocus`, `/fkcardprobe`.
+- The gear state now also lists which mouse/drag scripts the gear has; `events on/off` confirms what it did. No minimap behaviour changed.
+
 ## 0.6.0-alpha.23 - 2026-11-10 (real screen size, gear diagnostics, unreleased)
 
 - Top and right limits: the real screen limits were computed with different sources: left (-canvas left) and bottom (canvas top) never used the UIParent size, top and right used UIParent width/height x UIParent effective scale. On the reporting client the latter came out ~10% short (the right cards were pulled back from x~1610 to x~1422 with a 90% theme size), which is exactly why left and bottom worked and top and right did not. The screen size is now read from several independent sources (UIParent x scale, WorldFrame, GetScreenWidth/Height x scale) and the largest wins; `/fieldkit cardprobe` lists every source and the one used. Generic: the same bounds serve every card, every edge, the drop snap and the automatic placement.

@@ -3129,6 +3129,9 @@ SLASH_FieldKit1 = "/fieldkit"
 SlashCmdList["FieldKit"] = function(msg)
  if msg=="sync" then FieldKitPartySync.Diagnostic();return end
  if msg=="coop" then FieldKitCoop.Diagnostic();return end
+ -- Read-only diagnostics (map, cards, clicks) are recognised BEFORE anything that could open the settings window.
+ do local text=string.lower(msg or "");local _,_,word=string.find(text,"^%s*(%a+)")
+  if word and FieldKitZoneThemes and FieldKitZoneThemes.diagnostics and FieldKitZoneThemes.diagnostics[word] then FieldKitZoneThemes.Diagnostic(text);return end end
 	if ( not DB ) then
 		return
 	end
