@@ -213,8 +213,8 @@ function H.CompositionCreate()
  local bg=H.health:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints(H.health);T.Solid(bg,{.015,.04,.02})
  -- Fill of the player's life bar. The stock Interface\TargetingFrame\UI-StatusBar reports an intrinsic width of 64 whatever the
  -- bar size (the native probe showed identical bar and fill edges), so GetWidth() cannot tell what is drawn: the pixels of that
- -- texture (alpha / gradient) can. The default is a flat, fully opaque fill of the same green; "native" restores the stock
- -- texture for a side-by-side comparison (runtime only, /fieldkit barprobe fill native|flat).
+ -- texture (alpha / gradient) can. The black strips were a geometry problem (see ReferenceHUD R.BAR_OPENING), so the default is the stock
+ -- texture again (its softer colour); "flat" is the opaque alternative (runtime only, /fieldkit barprobe fill native|flat).
  H.FILL_NATIVE="Interface\\TargetingFrame\\UI-StatusBar";H.FILL_FLAT="Interface\\Buttons\\WHITE8X8";H.HEALTH_GREEN={.12,.76,.18}
  function H.SetHealthFill(mode)
   local bar=H.health;if not bar then return end
@@ -225,7 +225,7 @@ function H.CompositionCreate()
   local value=bar:GetValue();bar:SetValue(lo);bar:SetValue(value) -- recompute the fill
   bar.fieldkitFillMode=mode
  end
- H.SetHealthFill("flat")
+ H.SetHealthFill("native") -- the stock texture tinted green: the softer colour of before; "flat" stays available for comparison
  H.hp=T.Label(H.health,"",0,0,430,23,14,T.text);H.hp:SetJustifyH("CENTER")
  H.shield=H.health:CreateTexture(nil,"OVERLAY");H.shield:SetPoint("TOPLEFT",H.health,"TOPLEFT",0,0);H.shield:SetHeight(23);T.Solid(H.shield,{.45,.8,1},.5)
  H.resource:SetParent(H.healthRoot);H.resource:ClearAllPoints();H.resource:SetPoint("TOP",H.healthRoot,"TOP",0,-54);H.resource:SetWidth(408);H.resource:SetHeight(14)

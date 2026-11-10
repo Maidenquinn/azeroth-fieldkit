@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-alpha.41 - 2026-11-10 (Aethus life bar: rounded fit, softer colour, unreleased)
+
+- Native recette of alpha.40: better, but the green is a rectangle in a rounded slot and the colour is more vivid than before. Fixed both, still only on the player's Aethus bar.
+- Rounded fit, from the art itself: the bar now fills the WHOLE measured opening of the slot (x 135, y 58, 191 x 22 art pixels) and a ring overlay is drawn above it: the slot's own pixels (gold ring, anti-aliasing and the real rounded corners) copied unchanged from `elwynn_complete_vitality_1.tga` with only the interior made transparent (`tools/build_bar_slot_overlay.py` -> `elwynn_complete_vitality_slot_overlay.tga`, 256 x 32, registered in `data/theme-assets.json`). Drawn 1:1 above the fill, the art's corner radius clips the green exactly and the gold is always on top; nothing is enlarged and nothing is invented. The rows that only touch the interior through anti-aliased ring pixels are kept opaque (no green speck on the gold). Non-interactive frame, created once.
+- Colour: the default fill is the stock `UI-StatusBar` texture tinted green again (the softer colour of before). The black strips were a geometry problem, not the texture; `/fieldkit barprobe fill flat` stays available for comparison.
+- Label and shield follow the same rectangle; other layouts (Naxx) and everything else untouched.
+
 ## 0.6.0-alpha.40 - 2026-11-10 (Aethus life bar fitted to the art opening, unreleased)
 
 - Root cause of the black strips between the green and the gold at 100 %: not the fill, the value or the texture (all verified natively: fraction 1.000000, StatusBar at maximum, edges identical, opaque fill) but the RECTANGLE of the bar. It came from the layout (`d.health` = 137, 60, 186 x 20 in vitality-art pixels) and the slot's real inner opening, measured on `elwynn_complete_vitality_1.tga`, is larger: row y = 70 has the gold ring at x 133 (anti-aliasing 134) and x 326 (327), interior x 135..325; column x = 230 has the ring at y 56-57, interior y 58..79, ring from y 80. The bar was 2 px short on the left, 3 px on the right and 2 px below the top of the opening: the dark interior of the art showed through at both ends.

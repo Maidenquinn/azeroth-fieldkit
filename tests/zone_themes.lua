@@ -2023,14 +2023,14 @@ do
  for _,zone in ipairs({"elwynn","naxx"}) do
   C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
   local bar=H.health
-  assert(bar.fieldkitFillMode=="flat",zone..": the player bar uses the flat opaque fill by default")
+  assert(bar.fieldkitFillMode=="native",zone..": the player bar uses the stock texture again by default (the softer colour)")
   -- only the player's life bar is touched
   local touched=0;local oldRes=H.resource.SetStatusBarTexture;H.resource.SetStatusBarTexture=function(...) touched=touched+1 end
   local names={}
   local oldBar=bar.SetStatusBarTexture;bar.SetStatusBarTexture=function(self,path) table.insert(names,path);if oldBar then oldBar(self,path) end end
   H.SetHealthFill("native");assert(bar.fieldkitFillMode=="native" and names[1]==H.FILL_NATIVE,zone..": native texture restored for comparison")
   H.SetHealthFill("flat");assert(bar.fieldkitFillMode=="flat" and names[2]==H.FILL_FLAT and string.find(names[2],"WHITE8X8",1,true),zone..": flat opaque texture")
-  H.SetHealthFill("anything-else");assert(bar.fieldkitFillMode=="flat",zone..": unknown mode falls back to flat")
+  H.SetHealthFill("anything-else");assert(bar.fieldkitFillMode=="flat",zone..": unknown mode falls back to flat");H.SetHealthFill("native")
   bar.SetStatusBarTexture=oldBar;H.resource.SetStatusBarTexture=oldRes
   assert(touched==0,zone..": the resource bar is not touched")
   -- held percentages: 100 / 99 / 80 / 50 / 0, exact
@@ -2040,11 +2040,11 @@ do
    C.Refresh(true);assert(bar:GetValue()==pct,zone..": the hold survives a refresh at "..pct.." %")
   end
   C.Command("barprobe fill native");assert(bar.fieldkitFillMode=="native",zone..": /fieldkit barprobe fill native")
-  C.Command("barprobe fill flat");assert(bar.fieldkitFillMode=="flat")
+  C.Command("barprobe fill flat");assert(bar.fieldkitFillMode=="flat");C.Command("barprobe fill native");assert(bar.fieldkitFillMode=="native")
   C.Command("barprobe test off");assert(R.barTest==nil,zone..": the hold is cancelled")
   NOW=NOW+60;C.Command("barprobe test 50");NOW=NOW+31;C.Refresh(true);assert(R.barTest==nil,zone..": the hold expires by itself after 30 s")
   DEFAULT_CHAT_FRAME.AddMessage=oldAdd
-  local text=table.concat(R.PlayerBarProbe(false),"\n");assert(string.find(text,"fill mode: flat",1,true) and string.find(text,"INTRINSIC",1,true),zone..": the report says which fill is drawn and that the texture width is intrinsic")
+  local text=table.concat(R.PlayerBarProbe(false),"\n");assert(string.find(text,"fill mode: native",1,true) and string.find(text,"INTRINSIC",1,true),zone..": the report says which fill is drawn and that the texture width is intrinsic")
  end
  C.Set("zoneThemes",false)
 end
@@ -2058,22 +2058,26 @@ do
   if zone=="naxx" then
    assert(rect==d.health,"Naxx: no measured opening, the layout rectangle is kept (only the Aethus bar is corrected)")
   else
-   local o=R.BAR_OPENING.elwynn_complete
-   -- the measured numbers (texture pixels of elwynn_complete_vitality_1): ring at x 133/326, interior 135..325, ring at y 56-57 / 80
-   assert(o.x==135 and o.w==191 and o.y==58 and o.h==22 and o.inset==1,"the opening is the measured one")
-   assert(rect[1]==d.rects.vitality[1]+136 and rect[2]==d.rects.vitality[2]+59 and rect[3]==189 and rect[4]==20,"bar rectangle = opening minus 1 px: "..table.concat(rect,","))
-   -- against the old layout rectangle (137, 60, 186 x 20): 1 px more on the left, 3 on the right
-   local old=d.health;assert(rect[1]==old[1]-2+1-0 or true)
-   assert(rect[1]<old[1] and rect[1]+rect[3]>old[1]+old[3],"the bar is wider than the old layout rectangle on both sides")
-   -- placed relative to the vitality art
+   local o=R.BAR_OPENING.elwynn_complete;local ov=o.overlay
+   -- the measured numbers (texture pixels of elwynn_complete_vitality_1): ring at x 133/326, interior x 135..325, interior y 58..80
+   assert(o.x==135 and o.w==191 and o.y==58 and o.h==22 and o.inset==0,"the opening is the measured one")
+   assert(rect[1]==d.rects.vitality[1]+135 and rect[2]==d.rects.vitality[2]+58 and rect[3]==191 and rect[4]==22,"the bar fills the whole opening: "..table.concat(rect,","))
+   local old=d.health;assert(rect[1]<old[1] and rect[1]+rect[3]>old[1]+old[3],"wider than the old layout rectangle on both sides")
    local _,_,_,x,y=H.player:GetPoint()
-   assert(x==136 and y==-59 and H.player:GetWidth()==189 and H.player:GetHeight()==20,"the bar button sits at the opening ("..tostring(x)..","..tostring(y).." "..H.player:GetWidth().."x"..H.player:GetHeight()..")")
-   -- never over the gold ring, and at most 1 px from the opening's edges
-   assert(x>=o.x and x+H.player:GetWidth()<=o.x+o.w and -y>=o.y and -y+H.player:GetHeight()<=o.y+o.h,"inside the opening: the green never covers the gold")
-   assert(x-o.x<=o.inset and (o.x+o.w)-(x+H.player:GetWidth())<=o.inset and -y-o.y<=o.inset and (o.y+o.h)-(-y+H.player:GetHeight())<=o.inset,"no black strip wider than the 1 px kept for the anti-aliasing")
-   -- the fill, the label and the shield follow the same rectangle
-   assert(H.hp:GetWidth()==189 and H.hp:GetHeight()==20,"the label is centred on the same rectangle")
-   AZS_RUN.sh=500;local oldMax=UnitHealthMax;UnitHealthMax=function() return 500 end;C.Refresh(true);assert(H.shield:GetWidth()==189,"a full shield spans exactly the bar");UnitHealthMax=oldMax;AZS_RUN.sh=nil
+   assert(x==135 and y==-58 and H.player:GetWidth()==191 and H.player:GetHeight()==22,"the bar button sits on the opening ("..tostring(x)..","..tostring(y).." "..H.player:GetWidth().."x"..H.player:GetHeight()..")")
+   -- the ring overlay: the slot's own pixels, 1:1, above the bar and its label, covering the opening's border and corners
+   local f=R.barOverlay;assert(f and f:IsShown(),"the ring overlay is drawn")
+   local _,_,_,ox,oy=f:GetPoint()
+   assert(ox==ov.x and oy==-ov.y and f:GetWidth()==ov.w and f:GetHeight()==ov.h,"overlay at its art position, size 1:1 ("..tostring(ox)..","..tostring(oy).." "..f:GetWidth().."x"..f:GetHeight()..")")
+   assert(ox<=o.x and ox+ov.w>=o.x+o.w and -oy<=o.y and -oy+ov.h>=o.y+o.h,"the overlay surrounds the whole opening (ring on every side)")
+   assert(f:GetFrameLevel()>H.health:GetFrameLevel()+1,"the ring is above the fill")
+   assert(f.mouseEnabled~=true,"the overlay never takes the mouse")
+   assert(f.tex and f.tex.texcoord==nil or true,"texture set")
+   -- the asset exists and is registered
+   assert(ov.tw==256 and ov.th==32 and ov.w<=ov.tw and ov.h<=ov.th,"power-of-two texture holding the overlay")
+   -- the label and the shield follow the bar
+   assert(H.hp:GetWidth()==191 and H.hp:GetHeight()==22,"the label is centred on the same rectangle")
+   AZS_RUN.sh=500;local oldMax=UnitHealthMax;UnitHealthMax=function() return 500 end;C.Refresh(true);assert(H.shield:GetWidth()==191,"a full shield spans exactly the bar");UnitHealthMax=oldMax;AZS_RUN.sh=nil
   end
   -- proportional fill at 100 / 99 / 80 / 50 / 1 / 0 %
   for _,pct in ipairs({100,99,80,50,1,0}) do

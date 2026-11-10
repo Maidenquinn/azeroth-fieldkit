@@ -760,6 +760,11 @@
       "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587",
       "bytes": 16428,
       "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/elwynn_complete_vitality_slot_overlay.tga": {
+      "sha256": "091f7d7d963985dbca18f11474eec1a344641e4feb3a6bf11a20c34fa48d8696",
+      "bytes": 32812,
+      "source": "Pixels of the approved elwynn_complete_vitality_1 art (slot ring, unchanged); the slot interior is made transparent by tools/build_bar_slot_overlay.py."
     }
   }
 }

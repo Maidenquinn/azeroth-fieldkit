@@ -221,7 +221,7 @@ function R.Stop()
  if R.canvas then R.canvas:Hide() end
  if R.buffDrawer then R.buffDrawer:Hide() end
  -- Benilla caches native status bars independently of a hidden ancestor.
- for _,f in ipairs({H.health,H.resource,H.xp,R.xpArt,R.xpBadge,H.utility}) do if f then f:Hide() end end
+ for _,f in ipairs({H.health,H.resource,H.xp,R.xpArt,R.xpBadge,H.utility,R.barOverlay}) do if f then f:Hide() end end
  for _,f in ipairs({H.identity,H.header,H.healthRoot,H.dock,H.nav,R.xpArt,R.xpBadge,H.utility}) do if f then for _,t in ipairs(f.referenceTiles or {}) do t:Hide() end end end
 end
 function R.Update(variant,zone)
@@ -265,7 +265,7 @@ function R.Update(variant,zone)
  if zone=="naxx" and variant=="alternative" then local b=FieldKitNativeTools.NextBoss();H.next:SetText(b and FieldKit_L("Next").."\n"..b.name.."\n"..FieldKitNative.Clock(b.left) or FieldKit_L("No upcoming boss"));H.next:SetJustifyH("CENTER") end
  Label(H.name,H.healthRoot,d.name,23,true)
  if d.level then Label(R.level,H.healthRoot,d.level,30,true,"CENTER");R.level:SetText(tostring(UnitLevel("player") or "?"));H.name:SetText(UnitName("player") or "?") else R.level:Hide() end
- local barRect=R.PlayerBarRect(d);Button(H.player,H.healthRoot,barRect);H.health:ClearAllPoints();H.health:SetAllPoints(H.player);H.health:SetFrameLevel(H.player:GetFrameLevel()+1)
+ local barRect=R.PlayerBarRect(d);Button(H.player,H.healthRoot,barRect);R.BarOverlay();H.health:ClearAllPoints();H.health:SetAllPoints(H.player);H.health:SetFrameLevel(H.player:GetFrameLevel()+1)
  H.hp:SetParent(H.health);H.hp:ClearAllPoints();H.hp:SetPoint("CENTER",H.health,"CENTER",0,0);H.hp:SetWidth(barRect[3]);H.hp:SetHeight(barRect[4]);T.Font(H.hp,18,R.body,true)
  R.Child(H.resource,H.healthRoot,d.resource);H.resourceText:SetParent(H.resource);H.resourceText:ClearAllPoints();H.resourceText:SetPoint("CENTER",H.resource,"CENTER",0,0);H.resourceText:SetWidth(d.resource[3]);H.resourceText:SetHeight(18);T.Font(H.resourceText,15,R.body,true)
  H.resource:EnableMouse(true);H.resource:SetScript("OnEnter",function() H.Tip(this,FieldKit_L("Resource"),{R.resourceDetail or "?"}) end);H.resource:SetScript("OnLeave",H.HideTip);H.resource:SetScript("OnMouseDown",function() H.Tip(this,FieldKit_L("Resource"),{R.resourceDetail or "?"},true) end)
@@ -888,16 +888,30 @@ function R.BarTest(pct)
  return string.format("player bar held at %d %% for 30 s (fill %s); the label still shows the real health",R.barTest.pct,tostring(H.health and H.health.fieldkitFillMode))
 end
 -- Inner opening of the life-bar slot in the vitality art, MEASURED on the texture (not taken from the layout rectangle):
--- elwynn_complete_vitality_1.tga, row y = 70: the gold ring is at x 133 (+ anti-aliasing 134) on the left and x 326 (+ 327) on the
--- right, the dark interior spans x 135..325; column x = 230: ring at y 56-57, interior y 58..79, ring from y 80. The layout
--- rectangle d.health (137, 60, 186 x 20) is narrower than that opening (2 px on the left, 3 on the right, 2 above), so the dark
--- interior of the art showed as black strips between the green and the gold. The bar is fitted to the opening, kept 1 px inside
--- the ring for the anti-aliasing and the rounded corners (never over the gold). Coordinates are relative to the vitality art.
-R.BAR_OPENING={elwynn_complete={x=135,y=58,w=191,h=22,inset=1}}
+-- elwynn_complete_vitality_1.tga: gold ring at x 133 (+ anti-aliasing 134) and x 326 (+ 327), interior x 135..325; ring at y 56-57,
+-- interior y 58..79. The layout rectangle d.health (137, 60, 186 x 20) was narrower (black strips between the green and the gold).
+-- The bar now fills the whole opening (x 135, y 58, 191 x 22) and a RING OVERLAY is drawn above it: the slot's own pixels
+-- (gold ring, anti-aliasing and rounded corners, copied unchanged from the approved art by tools/build_bar_slot_overlay.py, interior
+-- transparent) at 1:1, so the real corner radius clips the fill exactly and the gold is always on top. Coordinates are art pixels.
+R.BAR_OPENING={elwynn_complete={x=135,y=58,w=191,h=22,inset=0,
+ overlay={file="elwynn_complete_vitality_slot_overlay.tga",x=130,y=53,w=200,h=30,tw=256,th=32}}}
 function R.PlayerBarRect(d)
  local o=R.BAR_OPENING[R.key];local v=d.rects and d.rects.vitality
  if not o or not v then return d.health end
  return {v[1]+o.x+o.inset,v[2]+o.y+o.inset,o.w-2*o.inset,o.h-2*o.inset}
+end
+-- The ring overlay: a non-interactive frame above the bar (and its label), only where an opening was measured.
+function R.BarOverlay()
+ local o=R.BAR_OPENING[R.key];local ov=o and o.overlay
+ if not ov or not H.health or not H.healthRoot then if R.barOverlay then R.barOverlay:Hide() end;return end
+ if not R.barOverlay then
+  local f=CreateFrame("Frame",nil,H.healthRoot);f:EnableMouse(false);f.tex=f:CreateTexture(nil,"ARTWORK");f.tex:SetAllPoints(f);R.barOverlay=f
+ end
+ local f=R.barOverlay
+ f:SetParent(H.healthRoot);f:SetFrameStrata(H.health:GetFrameStrata());f:SetFrameLevel(H.health:GetFrameLevel()+3)
+ f:ClearAllPoints();f:SetPoint("TOPLEFT",H.healthRoot,"TOPLEFT",ov.x,-ov.y);f:SetWidth(ov.w);f:SetHeight(ov.h)
+ f.tex:SetTexture(T.media.."ReferenceHUD\\"..ov.file);f.tex:SetTexCoord(0,ov.w/ov.tw,0,ov.h/ov.th)
+ f:Show()
 end
 -- /fieldkit barprobe: the PLAYER's own life bar in the Aethus frame (H.health, a StatusBar anchored on H.player inside
 -- H.healthRoot). Read-only: nothing is moved, resized or re-filled. Works without a group, with the local character only.
