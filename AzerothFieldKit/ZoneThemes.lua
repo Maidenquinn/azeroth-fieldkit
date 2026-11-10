@@ -404,7 +404,10 @@ function C.Command(msg)
    if f then local p=f:GetParent();DEFAULT_CHAT_FRAME:AddMessage(name.." parent="..tostring(p and p:GetName()).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown())) end
   end
  elseif string.find(arg,"^groupprobe") then FieldKitGroupHistory.Probe(arg)
- elseif arg=="barprobe" then for _,line in ipairs(FieldKitCoop.BarProbe()) do DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..line) end
+ elseif string.find(arg,"^barprobe") then
+  -- the player's own life bar first (works alone), then the teammate cards when there are any; "refill" is an explicit opt-in
+  for _,line in ipairs(FieldKitReferenceHUD.PlayerBarProbe(string.find(arg,"refill",1,true) and true or false)) do DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..line) end
+  for _,line in ipairs(FieldKitCoop.BarProbe()) do DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..line) end
  elseif arg=="cardprobe" then
   for _,line in ipairs(FieldKitReferenceHUD.Probe()) do DEFAULT_CHAT_FRAME:AddMessage(line) end
  elseif string.find(arg,"^dragdiag") then

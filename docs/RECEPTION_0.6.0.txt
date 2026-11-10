@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.38 - DIAGNOSTIC DE MA BARRE DE VIE
+/fieldkit barprobe puis /fieldkit barprobe refill : sortie a envoyer. Aucun changement de rendu.
+
 ALPHA.37 - LIGNES, EFFETS, ANTRES, DIAGNOSTIC BARRE
 Toutes les lignes Sorts/Degats quand la place existe, effets mesures sur l'art, antres en colonnes. /fieldkit barprobe et /fieldkit cardprobe a envoyer. A recetter en jeu.
 

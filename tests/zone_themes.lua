@@ -1998,3 +1998,22 @@ do
  src.rows=oldRows;FieldKitDB.language="en";C.Set("zoneThemes",false)
 end
 print("Every row when there is room, Effects geometry from the art and Lairs columns passed (synthetic)")
+
+-- alpha.38: /fieldkit barprobe covers the player's own Aethus bar, alone, without changing anything.
+do
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local bar=H.health;local before={w=bar:GetWidth(),h=bar:GetHeight(),v=bar:GetValue(),minv=select and nil}
+  local lines=R.PlayerBarProbe(false);local text=table.concat(lines,"\n")
+  for _,key in ipairs({"PLAYER BAR","frame   :","data    :","sizes   :","scales  :","pixels  :","anchors : bar","edges   :","COMPARE","art slot"}) do assert(string.find(text,key,1,true),zone..": the report has the line '"..key.."'") end
+  assert(string.find(text,"UnitHealth",1,true) and string.find(text,"fraction",1,true) and string.find(text,"fill ",1,true),zone..": hp, fraction and fill are reported")
+  assert(bar:GetWidth()==before.w and bar:GetHeight()==before.h and bar:GetValue()==before.v,zone..": the probe changes nothing")
+  local said={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(said,m) end
+  C.Command("barprobe");DEFAULT_CHAT_FRAME.AddMessage=oldAdd
+  local all=table.concat(said,"\n");assert(string.find(all,"PLAYER BAR",1,true) and string.find(all,"no teammate card shown",1,true),zone..": /fieldkit barprobe prints the player bar first and keeps the teammate report (no group needed)")
+  local refill=table.concat(R.PlayerBarProbe(true),"\n");assert(string.find(refill,"REFILL",1,true),zone..": opt-in refill is reported")
+ end
+ C.Set("zoneThemes",false)
+ local off=table.concat(R.PlayerBarProbe(false),"\n");assert(string.find(off,"not active",1,true) or string.find(off,"PLAYER BAR",1,true),"the probe also answers when the theme is off")
+end
+print("Player life bar probe passed (synthetic)")

@@ -872,6 +872,104 @@ function R.DmgMaxRows(d)
  for count=6,24 do if base+R.DmgDelta(count)<=span then best=count else break end end
  return best
 end
+-- /fieldkit barprobe: the PLAYER's own life bar in the Aethus frame (H.health, a StatusBar anchored on H.player inside
+-- H.healthRoot). Read-only: nothing is moved, resized or re-filled. Works without a group, with the local character only.
+local function Num(v,decimals) if type(v)~="number" then return tostring(v) end return string.format("%."..(decimals or 2).."f",v) end
+local function FName(f)
+ if not f then return "nil" end
+ local ok,name=pcall(function() return f.GetName and f:GetName() end)
+ local kind=pcall(function() return f.GetObjectType end) and f.GetObjectType and f:GetObjectType() or "?"
+ return (ok and name or "anonymous").."("..tostring(kind)..")"
+end
+local function Points(f)
+ local out={}
+ for i=1,8 do
+  local ok,p,rel,rp,x,y=pcall(function() return f:GetPoint(i) end)
+  if not ok or not p then break end
+  local relName=type(rel)=="table" and FName(rel) or tostring(rel)
+  table.insert(out,string.format("%s -> %s %s (%s, %s)",tostring(p),relName,tostring(rp),Num(x),Num(y)))
+  if i>1 and out[i]==out[i-1] then table.remove(out);break end
+ end
+ return table.concat(out,"  |  ")
+end
+local function Size(f) if not f then return "nil" end return Num(f:GetWidth()).." x "..Num(f:GetHeight()) end
+local function Call(f,method) if f and f[method] then return f[method](f) end return nil end
+local function Edges(f) if not f or not f.GetLeft then return "n/a" end return "L "..Num(Call(f,"GetLeft")).." R "..Num(Call(f,"GetRight")).." T "..Num(Call(f,"GetTop")).." B "..Num(Call(f,"GetBottom")) end
+local function Scale(f) if not f then return "nil" end return "scale "..Num(f.GetScale and f:GetScale(),3).." effective "..Num(f.GetEffectiveScale and f:GetEffectiveScale(),3) end
+function R.PlayerBarProbe(refill)
+ local out={};local function Add(line) table.insert(out,line) end
+ local d=R.layout
+ Add(string.format("PLAYER BAR | theme %s | layout %s | canvas %s",tostring(R.active),tostring(R.key),R.canvas and Scale(R.canvas) or "none"))
+ local bar=H.health
+ if not bar or not H.player or not H.healthRoot then Add("the themed player frame does not exist (theme never activated)");return out end
+ if not R.active or not bar:IsShown() then Add("the themed player frame is not active/shown now: enable the theme (Elwynn Complete) and run the command again") end
+ -- names
+ Add("frame   : root "..FName(H.healthRoot).." | player button "..FName(H.player).." | bar "..FName(bar).." parent "..FName(bar:GetParent()))
+ Add("levels  : root strata "..tostring(H.healthRoot:GetFrameStrata()).." level "..tostring(H.healthRoot:GetFrameLevel()).." | player level "..tostring(H.player:GetFrameLevel()).." | bar strata "..tostring(bar:GetFrameStrata()).." level "..tostring(bar:GetFrameLevel()))
+ -- data
+ local cur=type(UnitHealth)=="function" and UnitHealth("player") or nil;local max=type(UnitHealthMax)=="function" and UnitHealthMax("player") or nil
+ local frac=(type(cur)=="number" and type(max)=="number" and max>0) and cur/max or nil
+ local lo,hi=0,0;if bar.GetMinMaxValues then lo,hi=bar:GetMinMaxValues() end
+ local value=bar.GetValue and bar:GetValue()
+ local barFrac=(type(value)=="number" and type(hi)=="number" and hi>lo) and (value-lo)/(hi-lo) or nil
+ Add(string.format("data    : UnitHealth %s / %s | fraction %s | bar min %s max %s value %s -> bar fraction %s | label \"%s\"",tostring(cur),tostring(max),Num(frac,6),tostring(lo),tostring(hi),tostring(value),Num(barFrac,6),tostring(H.hp and H.hp:GetText())))
+ -- sizes and scales
+ local expected=d and d.health and d.health[3];local expectedH=d and d.health and d.health[4]
+ Add("sizes   : root "..Size(H.healthRoot).." | player "..Size(H.player).." | bar "..Size(bar).." | layout slot "..tostring(expected).." x "..tostring(expectedH).." (reference px)")
+ Add("scales  : canvas "..(R.canvas and Scale(R.canvas) or "none").." | root "..Scale(H.healthRoot).." | player "..Scale(H.player).." | bar "..Scale(bar))
+ local barPx=(bar:GetWidth() or 0)*(bar.GetEffectiveScale and bar:GetEffectiveScale() or 1)
+ local cs=R.canvas and R.canvas.GetEffectiveScale and R.canvas:GetEffectiveScale() or 1
+ Add(string.format("pixels  : bar %s screen px | expected from the layout %s screen px (%s ref px x canvas scale %s) | ratio %s",Num(barPx),expected and Num(expected*cs) or "?",tostring(expected),Num(cs,3),expected and Num(barPx/(expected*cs),4) or "?"))
+ -- anchors and margins
+ Add("anchors : root  "..Points(H.healthRoot))
+ Add("anchors : player "..Points(H.player))
+ Add("anchors : bar   "..Points(bar))
+ Add("edges   : root "..Edges(H.healthRoot).." | player "..Edges(H.player).." | bar "..Edges(bar))
+ local bl,pl,br,pr,bt,pt,bb,pb=Call(bar,"GetLeft"),Call(H.player,"GetLeft"),Call(bar,"GetRight"),Call(H.player,"GetRight"),Call(bar,"GetTop"),Call(H.player,"GetTop"),Call(bar,"GetBottom"),Call(H.player,"GetBottom")
+ if bl and pl and br and pr and bt and pt and bb and pb then
+  Add(string.format("margins : bar inside player: left %s right %s top %s bottom %s",Num(bl-pl),Num(pr-br),Num(pt-bt),Num(bb-pb)))
+ end
+ -- fill texture
+ local tex=bar.GetStatusBarTexture and bar:GetStatusBarTexture();local fillW
+ if type(tex)=="table" then
+  fillW=tex:GetWidth()
+  local tc={pcall(function() return tex:GetTexCoord() end)}
+  Add("fill    : texture "..tostring(tex.GetTexture and tex:GetTexture()).." | size "..Size(tex).." | edges "..Edges(tex).." | layer "..tostring(tex.GetDrawLayer and tex:GetDrawLayer()))
+  Add("fill    : points "..Points(tex).." | texcoord "..table.concat({tostring(tc[2]),tostring(tc[3]),tostring(tc[4]),tostring(tc[5]),tostring(tc[6]),tostring(tc[7]),tostring(tc[8]),tostring(tc[9])}," "))
+  if tex.GetVertexColor then local r,g,b,a=tex:GetVertexColor();Add(string.format("fill    : color %s %s %s alpha %s | shown %s",Num(r),Num(g),Num(b),Num(a),tostring(tex:IsShown()))) end
+ else Add("fill    : GetStatusBarTexture returned "..tostring(tex)..": the texture object is not exposed by this client") end
+ -- expected vs filled
+ local barW=bar:GetWidth() or 0
+ local wantFill=barFrac and barW*barFrac or nil
+ if fillW and wantFill then
+  Add(string.format("COMPARE : expected fill %s (bar width %s x fraction %s) | real fill %s | missing on the right %s px (%s%% of the bar)%s",Num(wantFill),Num(barW),Num(barFrac,6),Num(fillW),Num(wantFill-fillW),barW>0 and Num((wantFill-fillW)/barW*100,1) or "?",(barFrac and barFrac>=0.9999) and " <- full bar" or ""))
+  local trr,brr=Call(tex,"GetRight"),Call(bar,"GetRight");if trr and brr then Add(string.format("COMPARE : bar right edge %s | fill right edge %s | gap %s (screen units)",Num(brr),Num(trr),Num(brr-trr))) end
+ else Add("COMPARE : not available (no fill width or no fraction)") end
+ -- every other texture / child inside the bar (background, shield, text)
+ local regions={pcall(function() return bar:GetRegions() end)}
+ for i=2,table.getn(regions) do
+  local r=regions[i]
+  if r and r~=tex then
+   local kind=r.GetObjectType and r:GetObjectType() or "?"
+   local line="region  : "..tostring(kind).." "..Size(r).." shown "..tostring(r.IsShown and r:IsShown()).." layer "..tostring(r.GetDrawLayer and r:GetDrawLayer()).." points "..Points(r)
+   if kind=="Texture" and r.GetVertexColor then local rr,gg,bb,aa=r:GetVertexColor();line=line.." color "..Num(rr)..","..Num(gg)..","..Num(bb)..","..Num(aa) end
+   Add(line)
+  end
+ end
+ if H.shield then Add("shield  : "..Size(H.shield).." shown "..tostring(H.shield:IsShown()).." points "..Points(H.shield)) end
+ for _,c in ipairs({pcall(function() return bar:GetChildren() end)}) do if type(c)=="table" then Add("child   : "..FName(c).." "..Size(c).." "..Scale(c)) end end
+ -- the art slot this bar must fill, from the approved layout (reference px, relative to the vitality art)
+ if d and d.health and d.rects and d.rects.vitality then
+  local v=d.rects.vitality;Add(string.format("art slot: x %s..%s y %s..%s inside the vitality art %s x %s (slot width %s ref px)",tostring(d.health[1]-v[1]),tostring(d.health[1]-v[1]+d.health[3]),tostring(d.health[2]-v[2]),tostring(d.health[2]-v[2]+d.health[4]),tostring(v[3]),tostring(v[4]),tostring(d.health[3])))
+ end
+ -- opt-in: force the fill to be recomputed at the current size and read again (the value is restored by the next update)
+ if refill and bar.SetValue then
+  local keep=bar:GetValue();bar:SetValue(lo);bar:SetValue(keep)
+  local tex2=bar.GetStatusBarTexture and bar:GetStatusBarTexture()
+  Add("REFILL  : value toggled "..tostring(lo).." -> "..tostring(keep).." ; fill width before "..Num(fillW).." after "..Num(type(tex2)=="table" and tex2:GetWidth() or nil).." (bar width "..Num(barW)..")")
+ end
+ return out
+end
 -- Text report for /fieldkit cardprobe: what the engine sees (screen bounds, the obstacles it really uses, every card).
 function R.Probe()
  local out={};local d=R.layout;if not d then return {"no reference layout active"} end
