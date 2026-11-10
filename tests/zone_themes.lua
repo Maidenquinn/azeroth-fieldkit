@@ -1210,3 +1210,26 @@ for _,case in ipairs({{"elwynn",9},{"naxx",15}}) do
  Minimap.GetChildren=oldChildren
 end
 print("Ring geometry from the art (gold border, keep-outs) and default activation passed (synthetic)")
+
+-- alpha.27: the gear on the border is drawn above the art rim (render order only; mouse stack, position and scripts unchanged).
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete")
+ local M=FieldKitThemeMinimap;M.probe.ring=true
+ local gear=NewGear();gear:SetPoint("CENTER",Minimap,"CENTER",80,0);gear:SetFrameLevel(2)
+ local other=CreateFrame("Button","SomeOtherMapButton",Minimap);other:SetFrameLevel(2)
+ local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end
+ C.Set("zoneThemes",true);C.Refresh(true);C.Refresh(true)
+ assert(M.rim and M.rim:IsShown(),zone..": rim drawn")
+ assert(gear:GetFrameLevel()>M.rim:GetFrameLevel(),zone..": the gear is drawn above the gold border rim ("..gear:GetFrameLevel().." vs "..M.rim:GetFrameLevel()..")")
+ assert(M.rim:GetFrameLevel()>Minimap:GetFrameLevel(),zone..": the rim still covers the map edge")
+ -- the validated mouse stack is computed from the native level: owner 0, map just under the gear's NATIVE level
+ assert(M.GroupOwner():GetFrameLevel()==0 and Minimap:GetFrameLevel()==1,zone..": alpha.25 levels unchanged (owner "..M.GroupOwner():GetFrameLevel()..", map "..Minimap:GetFrameLevel()..")")
+ local lvl=gear:GetFrameLevel();for n=1,5 do C.Refresh(true) end;assert(gear:GetFrameLevel()==lvl and Minimap:GetFrameLevel()==1,zone..": stable across refreshes")
+ assert(other:GetFrameLevel()==2,zone..": other buttons are not touched")
+ local _,_,_,gx,gy=gear:GetPoint();assert(gx>100,zone..": position unchanged by the lift")
+ C.Command("mapprobe ring off");assert(gear:GetFrameLevel()==2,zone..": ring off gives the native level back");C.Command("mapprobe ring on")
+ C.Set("zoneThemes",false);assert(gear:GetFrameLevel()==2,zone..": theme off gives the native level back")
+ C.Set("zoneThemes",true);C.Refresh(true);assert(gear:GetFrameLevel()>M.rim:GetFrameLevel(),zone..": and again when the theme comes back")
+ C.Set("zoneThemes",false);Minimap.GetChildren=oldChildren
+end
+print("Gear drawn above the art rim, native levels restored (synthetic)")

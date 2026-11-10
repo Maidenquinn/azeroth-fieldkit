@@ -103,8 +103,26 @@ function M.Ring(halfW,halfH,band,keep)
   end
  end
  if changed then for f,r in pairs(M.ring) do local ax,ay=Edge(r.rx,r.ry,f.GetWidth and f:GetWidth());if ax then r.ax,r.ay=ax,ay;f.fieldkitRingOriginal(f,"CENTER",Minimap,"CENTER",ax,ay) end end end
+ M.Lift()
+end
+-- Render order only: the art rim (a frame redrawn over the map edge) sits at map level + 2, i.e. ABOVE a map button at the native
+-- level 2, so the gold border cut the AzerothHub gear. A button FieldKit placed on the border is lifted just above the rim; its
+-- native level is remembered (M.Layers keeps computing the mouse stack from it, so the validated order is unchanged) and put back
+-- with the theme. Nothing else changes: no position, no script, no other frame.
+function M.Lift()
+ if not M.rim or not M.rim.GetFrameLevel then return end
+ M.lifted=M.lifted or {}
+ local want=M.rim:GetFrameLevel()+1
+ for f in pairs(M.ring or {}) do
+  if f.GetFrameLevel and f.SetFrameLevel then
+   if M.lifted[f]==nil then M.lifted[f]=f:GetFrameLevel() end
+   if f:GetFrameLevel()~=want then f:SetFrameLevel(want) end
+  end
+ end
 end
 function M.RingRestore()
+ for f,base in pairs(M.lifted or {}) do if f.SetFrameLevel then f:SetFrameLevel(base) end end
+ M.lifted={}
  for _,f in ipairs(M.wrapped or {}) do f.SetPoint=nil;f.fieldkitRingOriginal=nil end
  for f,r in pairs(M.ring or {}) do f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
  M.ring={};M.wrapped={};M.ringHalf=nil;M.ringKey=nil
@@ -126,7 +144,7 @@ function M.Layers()
  local lowest
  if Minimap.GetChildren then
   for _,child in ipairs({Minimap:GetChildren()}) do
-   if child.GetFrameLevel and child.IsMouseEnabled and child:IsMouseEnabled() then local l=child:GetFrameLevel();if not lowest or l<lowest then lowest=l end end
+   if child.GetFrameLevel and child.IsMouseEnabled and child:IsMouseEnabled() then local l=M.lifted and M.lifted[child] or child:GetFrameLevel();if not lowest or l<lowest then lowest=l end end
   end
  end
  local key=table.concat({Minimap:GetFrameLevel(),owner:GetFrameLevel(),tostring(lowest)},":")

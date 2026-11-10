@@ -341,6 +341,7 @@ function R.MapRim(M,hole)
  end
  for i=used+1,table.getn(M.rimTex) do M.rimTex[i]:Hide() end
  M.rim:Show()
+ if M.Lift then M.Lift() end
 end
 function R.Map()
  local M=FieldKitThemeMinimap;local a=R.layout.map

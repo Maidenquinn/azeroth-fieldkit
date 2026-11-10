@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0-alpha.27 - 2026-11-10 (gear above the gold border, unreleased)
+
+- Render order only: the art rim (frame redrawn over the map edge, map level + 2 = 3) was above the AzerothHub gear (native level 2), so the gold border cut the icon. A map button FieldKit placed on the border is now lifted just above the rim (`M.Lift`); its native level is remembered, `M.Layers` keeps computing the mouse stack from it (alpha.25 levels unchanged: owner 0, map 1) and it is restored with ring off / theme off. No position, SetPoint interception, mouse script or other button touched.
+
 ## 0.6.0-alpha.26 - 2026-11-10 (map ring geometry, unreleased)
 
 - Map button ring: now ON by default when the theme loads (no command after /reload; `/fieldkit mapprobe ring off` still restores the native position and method). A third-party map button is centred on the gold border: reach = opening edge along its own direction + half the border thickness, the thickness being measured from the art (smallest gap between the map opening and the opaque edge of the frame: Elwynn 9, Naxx 15 reference px). Title, foot and zoom buttons are keep-out rectangles taken from the layout; when the button would touch one it slides along the border to the nearest free angle (deterministic). No arbitrary offset; frame levels (alpha.25 M.Layers), clicks, drag and zoom unchanged.

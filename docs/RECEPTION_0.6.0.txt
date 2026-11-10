@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.27 - ENGRENAGE AU-DESSUS DE LA BORDURE
+Ordre de rendu seulement : l'engrenage est dessine au-dessus de la bordure doree. A recetter en jeu apres /reload.
+
 ALPHA.26 - ENGRENAGE SUR LA BORDURE
 Anneau actif par defaut : engrenage centre sur la bordure doree, hors titre/pied/zoom. A recetter en jeu apres /reload.
 
