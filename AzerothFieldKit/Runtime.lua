@@ -1,7 +1,7 @@
 -- Runtime boundary: validate data and centralize the few native setting writes.
 -- This module runs first. It performs no I/O, networking or native writes at load.
 -- FieldKit is an addon-owned namespace; AZS_* tables remain owned by the client.
-FieldKit = { version = "0.6.0-alpha.30", folder = "AzerothFieldKit" }
+FieldKit = { version = "0.6.0-alpha.31", folder = "AzerothFieldKit" }
 
 -- Native level-up/chest choices own the action controls during this phase.
 -- Read the official phase; do not inspect or modify native screen frames.

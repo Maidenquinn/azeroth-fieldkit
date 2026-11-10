@@ -1382,18 +1382,33 @@ do
   assert(not natives[1]:IsShown() and not natives[2]:IsShown(),zone..": native frames are not shown together with the cards")
   assert(FieldKitDB.partyCards==false and FieldKitDB.replacePartyFrames==false,zone..": saved preferences are not modified")
   assert(P.frames[1].title:GetText()=="Denza" and P.frames[1].total:GetText()=="Lvl 12 Mage",zone..": name, level and class ("..tostring(P.frames[1].total:GetText())..")")
-  assert(P.frames[1].rows[1].value:GetText()=="400 / 800 (50%)",zone..": health and percentage from the unit")
+  local c1=P.frames[1]
+  assert(c1.hpBar:IsShown() and c1.hpBar.text:GetText()=="400 / 800 (50%)",zone..": health bar with current / maximum and percentage from the unit")
+  assert(math.abs(c1.hpBar:GetValue()-.5)<1e-9,zone..": the bar is filled with the REAL fraction")
+  assert(c1.mpBar:IsShown() and c1.mpBar.text:GetText()=="30 / 100" and math.abs(c1.mpBar:GetValue()-.3)<1e-9,zone..": resource bar from the unit")
+  assert(c1:GetWidth()==290 and c1:GetHeight()==56,zone..": compact card "..c1:GetWidth().."x"..c1:GetHeight())
+  for _,row in ipairs(c1.rows) do assert(not row:IsShown(),zone..": the tall generic rows are not used") end
+  assert(c1.hpBar:GetFrameLevel()>c1:GetFrameLevel() and c1.mpBar:GetFrameLevel()>c1:GetFrameLevel(),zone..": bars are explicitly above the card (children do not follow a parent's level)")
+  assert(c1.fieldkitColor==nil and c1.hpBar.fieldkitColor[2]>c1.hpBar.fieldkitColor[1] or c1.hpBar.fieldkitColor[1]>.8,zone..": colour from the fraction")
   assert(P.frames[1].portrait and P.frames[1].portrait:IsShown() and portraits>0,zone..": portrait through the native API, inside a square socket")
   assert(P.frames[1]:GetFrameStrata()=="MEDIUM" and P.frames[1]:GetFrameLevel()>R.frames.Damage:GetFrameLevel() and P.frames[1]:GetFrameLevel()>R.frames.Stats:GetFrameLevel(),zone..": drawn above the main cards")
   local g,y,r=P.HealthColor(.9,false),P.HealthColor(.4,false),P.HealthColor(.1,false)
   assert(g[2]>g[1] and y[1]>.8 and r[1]>.8 and r[2]<.3,zone..": health colours follow the real fraction")
   assert(P.HealthColor(.9,true)[1]==.45,zone..": muted colour for dead / offline")
   -- states
-  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Dead",zone..": dead")
-  members[1].ghost=true;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Ghost",zone..": ghost")
-  members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Online",zone..": resurrection")
-  members[1].online=false;P.Update();assert(P.frames[1].rows[4].value:GetText()=="Offline",zone..": offline");members[1].online=true
-  members[2].hp=0;P.Update();assert(P.frames[2].rows[4].value:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
+  members[1].dead=true;members[1].hp=0;P.Update();assert(P.frames[1].hpBar.text:GetText()=="Dead" and P.frames[1].hpBar:GetValue()==0 and not P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==44,zone..": dead: empty grey bar, no resource bar, still compact")
+  members[1].ghost=true;P.Update();assert(P.frames[1].hpBar.text:GetText()=="Ghost" and P.frames[1]:GetHeight()==44,zone..": ghost")
+  members[1].dead=nil;members[1].ghost=nil;members[1].hp=400;P.Update();assert(P.frames[1].hpBar.text:GetText()=="400 / 800 (50%)" and P.frames[1].mpBar:IsShown() and P.frames[1]:GetHeight()==56,zone..": resurrection")
+  members[1].online=false;P.Update();assert(P.frames[1].hpBar.text:GetText()=="Offline" and P.frames[1]:GetHeight()==44,zone..": offline");members[1].online=true
+  members[2].hp=0;P.Update();assert(P.frames[2].hpBar.text:GetText()=="0 HP",zone..": 0 HP without a dead flag stays 0 HP")
+  members[2].hp=600;members[2].mana=0;members[2].mp=0;P.Update()
+  assert(P.frames[2].hpBar:IsShown() and not P.frames[2].mpBar:IsShown() and P.frames[2]:GetHeight()==44,zone..": resource unavailable: only that bar disappears and the card stays compact")
+  members[2].mana=10;members[2].mp=50;P.Update();assert(P.frames[2]:GetHeight()==56)
+  members[2].hp=300;P.Update();assert(math.abs(P.frames[2].hpBar:GetValue()-.5)<1e-9 and P.frames[2].hpBar.text:GetText()=="300 / 600 (50%)",zone..": wounded")
+  members[2].hp=600;P.Update();assert(P.frames[2].hpBar:GetValue()==1 and P.frames[2].hpBar.text:GetText()=="600 / 600 (100%)",zone..": full health")
+  -- portrait: the real one, else the class icon
+  SetPortraitTexture=function() error("no portrait") end;P.frames[1].portraitKey=nil;P.Update()
+  assert(P.frames[1].portrait:IsShown(),zone..": class icon when the portrait is unavailable");SetPortraitTexture=function() end
   members[2].hp=600
   -- partial data: nothing invented
   local level=members[1].level;members[1].level=nil;members[1].class=nil;members[1].key=nil;P.Update()

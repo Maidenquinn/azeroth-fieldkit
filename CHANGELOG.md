@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.31 - 2026-11-10 (compact teammate cards, unreleased)
+
+- Native recette of alpha.30 failed visually (cards too big, no health bar, no values, no resource bar). Causes: (1) the card used the tall generic window rows (4 stacked rows, ~150 px); (2) alpha.30 raised the card's frame level, and a parent's `SetFrameLevel` does not re-level its children on this client, so the row bars stayed UNDER the card's opaque material: only the card's own texts (name, class, level) were visible.
+- New compact themed card, 290 x 56 (44 when there is no resource bar), horizontal: portrait (native `SetPortraitTexture`, else the class icon, else nothing) in a gold-bordered square socket; name; level and class on the same line (class colour); health bar with current / maximum and percentage; resource bar with current / maximum. Dead / Ghost / Offline show in the health bar text with an empty grey bar and no resource bar; an unavailable resource hides only its own bar. Bars and sockets are children with EXPLICIT levels above the card; the generic rows and the collapse button are not used while themed. No value is invented: a bar is filled with the real fraction only. Non-themed cards are unchanged.
+- The compact size is the real collision rectangle used by the common placement engine.
+
 ## 0.6.0-alpha.30 - 2026-11-10 (themed teammate cards, unreleased)
 
 - With a themed HUD the FieldKit teammate cards ARE the group display: they are shown without touching the saved `partyCards` / `replacePartyFrames` preferences, and the native round PartyMemberFrame1-4 are replaced (state saved by `P.Stock`, hook and visibility restored when the theme or the member goes away; never both shown). The cards keep the approved material of the active zone (Elwynn dark green + gold, Naxxramas metal) through the shared window skin.
