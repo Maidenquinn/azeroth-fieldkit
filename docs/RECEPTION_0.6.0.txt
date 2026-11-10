@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.23 - BORDS HAUT ET DROIT, DIAGNOSTIC ENGRENAGE
+Taille d'ecran reelle mesuree par plusieurs sources ; /fieldkit mapprobe state pour l'engrenage. A recetter.
+
 ALPHA.22 - OBSTACLES REELS, DIAGNOSTICS
 Les cartes ne sont plus bloquees par les anciens emplacements des parties deplacees. Engrenage : positionnement natif ;
 /fieldkit cardprobe, dragdiag, mapprobe, mapstack pour diagnostiquer en jeu. A recetter.

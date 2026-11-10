@@ -538,13 +538,27 @@ function R.NoteMoved(name)
 end
 -- The canvas is the reference rectangle fitted into the screen; the real screen can extend past it (other aspect ratios).
 -- Returns left, top, right, bottom of the REAL screen in canvas reference px (the canvas itself when it cannot be measured).
+-- Real screen size in pixels. UIParent:GetWidth()*scale is NOT reliable on this client (the right and top limits it fed were
+-- ~10% short: left/bottom, which do not use it, were correct), so several independent sources are compared and the largest
+-- is used (a limit that is too small blocks cards; one that is a little too large only lets a drop go beyond the edge).
+function R.ScreenSize()
+ local candidates={}
+ local function Add(name,w,h) if type(w)=="number" and type(h)=="number" and w>0 and h>0 then table.insert(candidates,{name=name,w=w,h=h}) end end
+ local us=UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1
+ Add("UIParent*scale",UIParent:GetWidth()*us,UIParent:GetHeight()*us)
+ if WorldFrame and WorldFrame.GetWidth then local es=WorldFrame.GetEffectiveScale and WorldFrame:GetEffectiveScale() or 1;Add("WorldFrame",WorldFrame:GetWidth()*es,WorldFrame:GetHeight()*es) end
+ if type(GetScreenWidth)=="function" and type(GetScreenHeight)=="function" then Add("GetScreen*scale",GetScreenWidth()*us,GetScreenHeight()*us) end
+ local best
+ for _,c in ipairs(candidates) do if not best or c.w*c.h>best.w*best.h then best=c end end
+ return best and best.w or nil,best and best.h or nil,candidates,best
+end
+-- The canvas is the reference rectangle fitted (and scaled by the theme size setting) into the screen: the real screen can
+-- extend past it. Returns left, top, right, bottom of the REAL screen in canvas reference px (the canvas itself if unmeasurable).
 function R.ScreenBounds(d)
  local c=R.canvas
- if c and c.GetLeft and c.GetTop and c:GetLeft() and c:GetTop() and c.GetEffectiveScale and UIParent.GetEffectiveScale then
-  local cs,us=c:GetEffectiveScale(),UIParent:GetEffectiveScale()
-  if cs and cs>0 and us and us>0 then
-   return -c:GetLeft(),(c:GetTop()*cs-UIParent:GetHeight()*us)/cs,(UIParent:GetWidth()*us-c:GetLeft()*cs)/cs,c:GetTop()
-  end
+ if c and c.GetLeft and c.GetTop and c:GetLeft() and c:GetTop() and c.GetEffectiveScale then
+  local cs=c:GetEffectiveScale();local w,h=R.ScreenSize()
+  if cs and cs>0 and w then return -c:GetLeft(),(c:GetTop()*cs-h)/cs,(w-c:GetLeft()*cs)/cs,c:GetTop() end
  end
  return 0,0,d.size[1],d.size[2]
 end
@@ -620,6 +634,9 @@ function R.Probe()
  local out={};local d=R.layout;if not d then return {"no reference layout active"} end
  local l,t,r,b=R.ScreenBounds(d)
  table.insert(out,string.format("layout %s | screen in ref px %.0f,%.0f -> %.0f,%.0f | canvas %dx%d | overlap option %s",tostring(R.key),l,t,r,b,d.size[1],d.size[2],tostring(FieldKitDB.zoneThemeOverlap)))
+ local _,_,cands,best=R.ScreenSize()
+ for _,c in ipairs(cands or {}) do table.insert(out,string.format("  screen source %-16s %.0f x %.0f%s",c.name,c.w,c.h,c==best and "  <- used" or "")) end
+ local cv=R.canvas;if cv and cv.GetEffectiveScale then table.insert(out,string.format("  canvas scale %.3f left %s top %s | UIParent scale %s",cv:GetEffectiveScale() or 0,tostring(cv:GetLeft()),tostring(cv:GetTop()),tostring(UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()))) end
  local obstacles={};FixedObstacles(d,obstacles);for _,line in ipairs(obstacles) do table.insert(out,"  obstacle "..line) end
  for _,kind in ipairs(CARDS) do
   local f=R.frames[kind];local a=FieldKitZoneThemes.Position(f)

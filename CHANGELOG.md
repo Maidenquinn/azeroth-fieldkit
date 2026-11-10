@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0-alpha.23 - 2026-11-10 (real screen size, gear diagnostics, unreleased)
+
+- Top and right limits: the real screen limits were computed with different sources: left (-canvas left) and bottom (canvas top) never used the UIParent size, top and right used UIParent width/height x UIParent effective scale. On the reporting client the latter came out ~10% short (the right cards were pulled back from x~1610 to x~1422 with a 90% theme size), which is exactly why left and bottom worked and top and right did not. The screen size is now read from several independent sources (UIParent x scale, WorldFrame, GetScreenWidth/Height x scale) and the largest wins; `/fieldkit cardprobe` lists every source and the one used. Generic: the same bounds serve every card, every edge, the drop snap and the automatic placement.
+- AzerothHub gear: read-only diagnostics only, NO behaviour change. `/fieldkit mapprobe state` prints the gear's full state (parents, scale, alpha, mouse, strata, level, rectangle, whether FieldKit wraps its SetPoint, the hub launcher); `/fieldkit mapprobe events on` now also prints the hub launcher state right after a click.
+
 ## 0.6.0-alpha.22 - 2026-11-09 (real obstacles, clamp off, map probes, unreleased)
 
 - Cards "returned" from places that were free: the placement engine protected the DEFAULT rectangles of the header, chat, identity card, player block ("Aethus"), navigation and map, but the user moves those parts (the captured SavedVariables place the identity card at 1205,-164 and the player block at 8,-3). A card dropped on one of those old places hit an invisible obstacle and was displaced. Obstacles are now measured on the real frames (R.LiveRect); the default rectangle is only a fallback for a part that is hidden or cannot be measured yet.

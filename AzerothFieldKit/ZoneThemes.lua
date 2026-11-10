@@ -311,13 +311,31 @@ function C.Stack()
  for i=1,math.min(10,table.getn(found)) do local f=found[i];DEFAULT_CHAT_FRAME:AddMessage(string.format("  %d. %s (parent %s) %s/%d",i,f.name,f.parent,f.strata,f.level)) end
 end
 -- /fieldkit mapprobe events on: log the mouse events the AzerothHub gear really receives (its own handlers still run).
+-- Full state of a frame for the diagnostics: where it is, who owns it, whether it can take the pointer.
+local function FrameState(f)
+ if not f then return "none" end
+ local chain,p="",f
+ for n=1,6 do p=p.GetParent and p:GetParent();if not p then break end;chain=chain.." > "..tostring(p.GetName and p:GetName() or p:GetObjectType()) end
+ return string.format("%s shown=%s alpha=%s mouse=%s strata=%s level=%d size=%.0fx%.0f scale=%.2f left=%s top=%s parents%s",tostring(f.GetName and f:GetName()),tostring(f:IsShown()),tostring(f.GetAlpha and f:GetAlpha()),
+  tostring(f.IsMouseEnabled and f:IsMouseEnabled()),tostring(f:GetFrameStrata()),f:GetFrameLevel(),f:GetWidth() or 0,f:GetHeight() or 0,f.GetEffectiveScale and f:GetEffectiveScale() or 0,tostring(f.GetLeft and f:GetLeft()),tostring(f.GetTop and f:GetTop()),chain)
+end
+function C.GearState()
+ local gear=getglobal("AzerothHubMinimapButton");local launcher=getglobal("AzerothHubLauncher")
+ DEFAULT_CHAT_FRAME:AddMessage("gear: "..FrameState(gear))
+ DEFAULT_CHAT_FRAME:AddMessage("gear SetPoint wrapped by FieldKit: "..tostring(gear and rawget(gear,"SetPoint")~=nil).." | hub launcher: "..(launcher and FrameState(launcher) or "not created yet"))
+ local x,y=GetCursorPosition();DEFAULT_CHAT_FRAME:AddMessage(string.format("cursor px %.0f,%.0f | map %s",x,y,FrameState(Minimap)))
+end
 function C.GearEvents(on)
  local gear=getglobal("AzerothHubMinimapButton");if not gear then DEFAULT_CHAT_FRAME:AddMessage("mapprobe events: no AzerothHub gear");return end
  C.gearOriginal=C.gearOriginal or {}
  for _,event in ipairs({"OnEnter","OnLeave","OnMouseDown","OnMouseUp","OnClick","OnDragStart","OnDragStop"}) do
   if on and not C.gearOriginal[event] then
    local original=gear:GetScript(event);C.gearOriginal[event]={original}
-   local name=event;gear:SetScript(event,function() DEFAULT_CHAT_FRAME:AddMessage("gear "..name.." button="..tostring(arg1));if original then original() end end)
+   local name=event;gear:SetScript(event,function()
+    DEFAULT_CHAT_FRAME:AddMessage("gear "..name.." button="..tostring(arg1))
+    if original then original() end
+    if name=="OnClick" then local launcher=getglobal("AzerothHubLauncher");DEFAULT_CHAT_FRAME:AddMessage("  after the click: hub launcher "..(launcher and (FrameState(launcher)) or "not created")) end
+   end)
   elseif not on and C.gearOriginal[event] then gear:SetScript(event,C.gearOriginal[event][1]);C.gearOriginal[event]=nil end
  end
 end
@@ -374,10 +392,11 @@ function C.Command(msg)
   local seconds=tonumber((string.gsub(arg,"^mapstack%s*",""))) or 5
   C.stackAt=GetTime()+seconds;DEFAULT_CHAT_FRAME:AddMessage("mapstack: place the pointer on the gear, report in "..seconds.." s")
  elseif string.find(arg,"^mapprobe") then
-  local _,_,part,state=string.find(arg,"^mapprobe%s+(%a+)%s+(%a+)")
+  local _,_,part,state=string.find(arg,"^mapprobe%s*(%a*)%s*(%a*)")
   local M=FieldKitThemeMinimap
   if part and M.probe[part]~=nil and (state=="on" or state=="off") then M.probe[part]=(state=="on");C.Refresh(true)
-  elseif part=="events" and (state=="on" or state=="off") then C.GearEvents(state=="on") end
+  elseif part=="events" and (state=="on" or state=="off") then C.GearEvents(state=="on")
+  elseif part=="state" then C.GearState() end
   local line="mapprobe:";for _,k in ipairs({"ring","rim","proxies","follower"}) do line=line.." "..k.."="..(M.probe[k] and "on" or "off") end
   DEFAULT_CHAT_FRAME:AddMessage(line.." (usage: /fieldkit mapprobe <ring|rim|proxies|follower|events> <on|off>)")
  elseif arg=="mapfocus" then C.focusUntil=GetTime()+8;C.focusLog={};C.focusLast=nil;DEFAULT_CHAT_FRAME:AddMessage("mapfocus: move the pointer over the map buttons for 8 seconds")

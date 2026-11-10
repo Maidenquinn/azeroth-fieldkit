@@ -1051,3 +1051,48 @@ do
  DEFAULT_CHAT_FRAME.AddMessage=oldAdd;Minimap.GetChildren=oldChildren;C.Set("zoneThemes",false)
 end
 print("Live protected obstacles, clamp off and map/card probes passed (synthetic)")
+
+-- alpha.23: the four real screen edges, with a UIParent measurement that is ~10% short (as the right/top limits were on the client).
+for _,zone in ipairs({"elwynn","naxx"}) do
+ C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+ R.statsOpen=false;FieldKitDB.loadoutTab=1;R.lastMoved=nil
+ local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+ local saved={};for _,k in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local r=R.layout.rects[k];saved[k]={r[1],r[2]} end
+ SaveAll(layout,saved);Stage()
+ -- UIParent reports a scale that makes its width*scale 10% short; WorldFrame reports the real screen
+ local oldScale=UIParent.GetEffectiveScale;UIParent.GetEffectiveScale=function() return .9 end
+ WorldFrame.width=UIW;WorldFrame.height=UIH;WorldFrame.GetEffectiveScale=function() return 1 end
+ local w,h,cands,best=R.ScreenSize();assert(w==UIW and h==UIH and best.name=="WorldFrame",zone..": the real screen size wins over a short UIParent measurement ("..tostring(best and best.name)..")")
+ local sl,st,sr,sb=R.ScreenBounds(R.layout);assert(sr==UIW and sb==UIH and sl==0 and st==0,zone..": the four limits are the real screen's ("..sl..","..st..","..sr..","..sb..")")
+ local hidden={};for _,name in ipairs({"header","chat","identity","nav","vitality","mapArt"}) do local r=R.layout.rects[name];if r then hidden[name]=r;R.layout.rects[name]={-5000,-5000,r[3],r[4]} end end -- isolate the edges from the protected parts
+ Relayout()
+ for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do
+  local n=OP[R.key][kind];local f=R.frames[kind];local rect=R.CardRect(kind,R.layout);local cw,ch=rect[3],rect[4]
+  local function Drop(x,top) FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanel"..kind]={"TOPLEFT","TOPLEFT",x,-top};Relayout();R.NoteMoved("FieldKitReferencePanel"..kind);C.Refresh(true);C.Refresh(true);return Rendered(f) end
+  -- right edge: dropped beyond it -> art flush with the real right edge, and a drop flush with it is left alone
+  local l,t=Drop(UIW-cw+n[3]+60,300);assert(math.abs((l+cw-n[3])-UIW)<.5,zone.." "..kind..": right edge reached ("..(l+cw-n[3])..")")
+  l,t=Drop(UIW-cw+n[3],300);assert(math.abs((l+cw-n[3])-UIW)<.5 and (R.shiftX[kind] or 0)==0,zone.." "..kind..": flush with the right edge stays")
+  -- top edge
+  l,t=Drop(400,-n[2]-60);assert(math.abs((t+n[2])-0)<.5,zone.." "..kind..": top edge reached ("..(t+n[2])..")")
+  l,t=Drop(400,-n[2]);assert(math.abs((t+n[2])-0)<.5 and (R.shift[kind] or 0)==0,zone.." "..kind..": flush with the top edge stays")
+  -- bottom and left edges (unchanged behaviour)
+  l,t=Drop(400,UIH-ch+n[4]+60);assert(math.abs((t+ch-n[4])-UIH)<.5,zone.." "..kind..": bottom edge reached")
+  l,t=Drop(-n[1]-60,300);assert(math.abs((l+n[1])-0)<.5,zone.." "..kind..": left edge reached")
+  -- persistence: the saved position is the snapped one
+  local a=FieldKitDB.zoneThemePositions[layout]["FieldKitReferencePanel"..kind];assert(math.abs(a[3]+n[1])<.5,zone.." "..kind..": the saved position follows the snap ("..a[3]..")")
+ end
+ for name,r in pairs(hidden) do R.layout.rects[name]=r end
+ UIParent.GetEffectiveScale=oldScale;WorldFrame.GetEffectiveScale=nil;WorldFrame.width=nil;WorldFrame.height=nil
+ FieldKitDB.zoneThemePositions[layout]=nil;Unstage();Relayout()
+end
+-- the gear diagnostics only read state: nothing about the gear changes
+do
+ C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+ local gear=CreateFrame("Button","AzerothHubMinimapButton",Minimap);gear:SetPoint("CENTER",Minimap,"CENTER",80,0)
+ local before={gear:GetPoint()};local messages={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(messages,m) end
+ C.Command("mapprobe state");local after={gear:GetPoint()}
+ assert(table.getn(messages)>=3 and string.find(messages[1],"gear:",1,true) and string.find(messages[2],"wrapped by FieldKit: false",1,true),"mapprobe state describes the gear without touching it")
+ for i=1,5 do assert(before[i]==after[i],"mapprobe state does not move the gear") end
+ DEFAULT_CHAT_FRAME.AddMessage=oldAdd;C.Set("zoneThemes",false)
+end
+print("Four real screen edges with a short UIParent measurement, and read-only gear diagnostics passed (synthetic)")
