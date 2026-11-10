@@ -118,10 +118,14 @@ end
 -- Selection/hover only changes the fixed material, never allocates another layer.
 function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
+ -- frame.fieldkitFill = {color={r,g,b},alpha=a}: the card's own interior colour and opacity (the chat preferences), applied to the
+ -- fill and to the centre slice only; the gold border slices keep their own opacity.
+ local fill=frame.fieldkitFill
  if frame.fieldkitArtOnly then skin.base:SetAlpha(0);skin.grain:SetAlpha(0);skin.selected:Hide();for _,part in ipairs(skin.parts) do part.texture:Hide() end;return end
  local alpha=(frame.fieldkitNavigation and not active) and 0 or 1
  local opacity=skin.kind=="button" and 1 or T.Opacity(frame)
- T.Solid(skin.base,skin.kind=="card" and T.panel or T.background)
+ if fill then opacity=fill.alpha end
+ T.Solid(skin.base,fill and fill.color or (skin.kind=="card" and T.panel or T.background))
  skin.base:SetAlpha(alpha*opacity);skin.grain:SetAlpha(T.Style(frame)==2 and 0 or .16*alpha*opacity)
  local plate=skin.kind=="window" and 4 or (skin.kind=="card" and 3 or (active and 2 or 1))
  for i=1,table.getn(skin.parts) do
@@ -134,11 +138,11 @@ function T.State(frame,active)
   else
    if skin.kind=="window" and i==5 then t:Hide() else t:Show() end
    local asset=T.Style(frame)==3 and (T.media.."ReferenceHUD\\"..T.zone.."_material_v3.tga") or (T.media.."ChroniclePlate"..plate..".tga")
-   if T.Style(frame)==3 and i==5 then T.Solid(t,T.panel);t.fieldkitPlate=nil else if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end end
+   if T.Style(frame)==3 and i==5 then T.Solid(t,fill and fill.color or T.panel);t.fieldkitPlate=nil else if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end end
    local part=skin.parts[i];local cuts=T.Style(frame)==3 and {0,12/512,500/512,1} or {0,.07,.93,1}
    local row=part.y;if T.Style(frame)==3 and part.x==2 and part.y==1 then row=3 end
    t:SetTexCoord(cuts[part.x],cuts[part.x+1],cuts[row],cuts[row+1])
-   if T.Style(frame)==3 and i==5 then t:SetVertexColor(T.panel[1],T.panel[2],T.panel[3]) else t:SetVertexColor(1,1,1) end
+   if T.Style(frame)==3 and i==5 then local c=fill and fill.color or T.panel;t:SetVertexColor(c[1],c[2],c[3]) else t:SetVertexColor(1,1,1) end
    t:SetAlpha(alpha*(i==5 and opacity or 1))
   end
  end

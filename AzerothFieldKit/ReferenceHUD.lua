@@ -34,6 +34,48 @@ end
 -- Info icon baked into the Elwynn foot art, measured on elwynn_complete_identity_1.tga (ring pixels x 227..246 of the tile): button-local
 -- x 204..224 (the button is the 252 px foot). textLeft = right edge of the art's left cap.
 R.MODE_ICON={elwynn_complete={left=204,right=224,margin=6,textLeft=14}}
+-- Chat plan: the themed chat card follows the user's chat preferences. Without customization ("Customize main chat" off) the
+-- approved rectangles are used unchanged. With it on, the TEXT area is chatWidth x chatHeight (the same sliders as without a
+-- theme) and the gold card grows around it: the approved margins (left, right incl. the control column, top, bottom) are kept
+-- and the card is anchored by its bottom-left corner (it grows up and to the right). The 9-slice skin keeps its corner size, the
+-- interior and the fill follow the real size. Interior colour and opacity come from the background preferences.
+R.chatRectCache={}
+function R.ChatPlan(d,zone)
+ local base=d.rects.chat
+ local a=d.chatText
+ local cols0=0
+ if zone=="elwynn" then
+  cols0=((base[4]-24)>=4*19+6) and 1 or 2
+  a={base[1]+14,base[2]+9,base[3]-28-cols0*24,base[4]-18}
+ end
+ local plan={cols=cols0,textW=a[3],textH=a[4],textX=a[1]-base[1],textY=a[2]-base[2],base=base}
+ local db=FieldKitDB;local on=db and db.chatStyle
+ local width,height=a[3],a[4]
+ if on then
+  width=math.max(280,math.min(800,math.floor(FieldKit.Number(db.chatWidth,440,280,800)+.5)))
+  height=math.max(100,math.min(450,math.floor(FieldKit.Number(db.chatHeight,180,100,450)+.5)))
+ end
+ local cardH=base[4]+(height-a[4])
+ local cols=cols0
+ if zone=="elwynn" then cols=((cardH-24)>=4*19+6) and 1 or 2 end
+ local cardW=base[3]+(width-a[3])+(cols-cols0)*24
+ plan.cols=cols;plan.textW=width;plan.textH=height
+ local key=table.concat({R.key,cardW,cardH,base[1],base[2]},":")
+ local rect=R.chatRectCache[key]
+ if not rect then rect={base[1],base[2]+base[4]-cardH,cardW,cardH};R.chatRectCache[key]=rect end
+ plan.rect=rect
+ if on then
+  local opacity=math.max(0,math.min(100,FieldKit.Number(db.chatBackgroundOpacity,0,0,100)))
+  plan.fill={color=FieldKit.ChatBackground and FieldKit.ChatBackground(db.chatBackgroundColor) or {.035,.045,.055},alpha=opacity/100}
+ end
+ -- font and size: the user's, when customizing; the theme's own otherwise
+ local path,size=T.media.."AzerothSans.ttf",12
+ if FieldKit.ChatFontWanted then path,size=FieldKit.ChatFontWanted(path,size) end
+ plan.font,plan.fontSize=path,size
+ return plan
+end
+-- Called from the chat module when a preference changes: the plan is applied at once instead of waiting for the next refresh.
+function R.ChatSync() if R.active and FieldKitZoneThemes and FieldKitZoneThemes.Refresh then FieldKitZoneThemes.Refresh(true) end end
 function R.Has(zone,variant) return FieldKitReferenceArt[zone.."_"..variant]~=nil end
 local function Blank(frame)
  frame.fieldkitArtOnly=true;T.State(frame,false)
@@ -351,30 +393,30 @@ function R.Update(variant,zone)
    b:SetScript("OnLeave",function() T.State(this,this.fieldkitSelected);GameTooltip:Hide() end)
   end
  end
- R.Geometry(R.chat,d.rects.chat);R.Art(R.chat,"none");R.chat.fieldkitArtOnly=nil;T.Surface(R.chat,"card",true);T.State(R.chat,false);R.chat:Show()
+ local plan=R.ChatPlan(d,zone);R.chatPlan=plan;R.Geometry(R.chat,plan.rect);R.Art(R.chat,"none");R.chat.fieldkitArtOnly=nil;R.chat.fieldkitFill=plan.fill;T.Surface(R.chat,"card",true);T.State(R.chat,false);R.chat:Show()
  for i,b in ipairs(R.chatActions) do if zone=="naxx" and variant=="complete" then b:SetFrameLevel(R.chat:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",R.chat,"TOPLEFT",14+(i-1)*98,-3);b:SetWidth(90);b.fieldkitLabel:SetWidth(80);T.Font(b.fieldkitLabel,14,R.body);b:Show() else b:Hide() end end
- if zone=="naxx" and variant=="complete" then R.chatEntry:SetFrameLevel(R.chat:GetFrameLevel()+15);R.chatEntry:ClearAllPoints();R.chatEntry:SetPoint("BOTTOMLEFT",R.chat,"BOTTOMLEFT",14,20);R.chatEntry:SetWidth(d.rects.chat[3]-30);R.chatEntry:Show() else R.chatEntry:Hide() end
+ if zone=="naxx" and variant=="complete" then R.chatEntry:SetFrameLevel(R.chat:GetFrameLevel()+15);R.chatEntry:ClearAllPoints();R.chatEntry:SetPoint("BOTTOMLEFT",R.chat,"BOTTOMLEFT",14,20);R.chatEntry:SetWidth(plan.rect[3]-30);R.chatEntry:Show() else R.chatEntry:Hide() end
  if d.rate then Label(R.rate,R.chat,d.rate,18,true) end
  if zone=="naxx" and variant=="alternative" then R.Child(R.counts[1],R.chat,d.counts[1]);R.Child(R.counterButtons[1],R.chat,d.counts[1]) end
  local chat=getglobal("ChatFrame1")
  -- The four chat controls come back inside the Elwynn chat card: one column when the card is tall enough, else two columns.
- local toolCols=0
- if zone=="elwynn" and d.rects.chat then
-  local inner=d.rects.chat[4]-24;toolCols=(inner>=4*19+6) and 1 or 2
- end
+ local toolCols=(zone=="elwynn") and plan.cols or 0
  R.chatToolCols=toolCols
  for i,b in ipairs(R.chatTools or {}) do
   if toolCols>0 then
    local rows=math.ceil(4/toolCols);local col,row=math.floor((i-1)/rows),math.mod(i-1,rows)
-   local x=d.rects.chat[3]-12-4-22-(toolCols-1-col)*24;local y=12+row*21
+   local x=plan.rect[3]-12-4-22-(toolCols-1-col)*24;local y=12+row*21
    b:SetFrameLevel(R.chat:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("TOPLEFT",R.chat,"TOPLEFT",x,-y);b:SetWidth(22);b:SetHeight(19);b:Show()
    R.chatToolRects=R.chatToolRects or {};R.chatToolRects[i]={x,y,x+22,y+19}
   else b:Hide() end
  end
  if chat and d.chatText then
-  H.Save(chat);local a=d.chatText;if zone=="elwynn" then a={d.rects.chat[1]+14,d.rects.chat[2]+9,d.rects.chat[3]-28-toolCols*24,d.rects.chat[4]-18} end;chat:SetParent(R.chat);if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(T.media.."AzerothSans.ttf",12,"") end
-  if FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(a[3],a[4]) end
-  chat:ClearAllPoints();chat:SetPoint("TOPLEFT",R.chat,"TOPLEFT",a[1]-d.rects.chat[1],d.rects.chat[2]-a[2])
+  -- the native geometry is remembered BEFORE the first themed change (additive key), then the frame is driven by the plan
+  if not H.saved[chat] and FieldKit.ChatNativeCapture then FieldKit.ChatNativeCapture() end
+  H.Save(chat);chat:SetParent(R.chat)
+  if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(plan.font,plan.fontSize,"") end
+  if FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(plan.textW,plan.textH) end
+  chat:ClearAllPoints();chat:SetPoint("TOPLEFT",R.chat,"TOPLEFT",plan.textX,plan.textY)
  end
  for _,name in ipairs({"ChatFrame1UpButton","ChatFrame1DownButton","ChatFrame1BottomButton","ChatFrame1MenuButton","ChatFrameMenuButton","FieldKitChatCopyButton"}) do local f=getglobal(name);if f then FieldKitZoneThemes.Mask(f,true) end end
  Label(R.footer,R.canvas,{d.size[1]-305,d.size[2]-27,290,20},11,false,"RIGHT");R.footer:SetText("FIELDKIT "..FieldKit.version.." · "..string.upper(zone))

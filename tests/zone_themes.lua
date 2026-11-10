@@ -2090,3 +2090,125 @@ do
  C.Set("zoneThemes",false)
 end
 print("Aethus life bar fitted to the measured slot opening passed (synthetic)")
+
+-- alpha.42: chat preferences drive the themed chat; the chat is never lost when the theme goes away.
+do
+ local CF=getglobal("ChatFrame1") or CreateFrame("Frame","ChatFrame1",UIParent)
+ local font={"Fonts\\FRIZQT__.TTF",14,""}
+ CF.GetFont=function() return font[1],font[2],font[3] end
+ CF.SetFont=function(self,path,size,flags) font={path,size,flags or ""};return true end
+ CF.GetNumMessages=function() return 0 end;CF.GetMaxLines=function() return 200 end;CF.SetMaxLines=function() end
+ CF.AddMessage=CF.AddMessage or function() end
+ local function Native()
+  CF:SetParent(UIParent);CF:ClearAllPoints();CF:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",32,95);CF:SetWidth(440);CF:SetHeight(180);CF:SetScale(1);font={"Fonts\\FRIZQT__.TTF",14,""}
+ end
+ local function OnScreen() local p,rel,rp,x,y=CF:GetPoint();local l,b,r,t=FieldKit.ChatRect(p,rp,x,y,CF:GetWidth(),CF:GetHeight(),CF:GetScale());return FieldKit.ChatVisible(l,b,r,t),p,x,y end
+ local UIW,UIH=UIParent:GetWidth(),UIParent:GetHeight()
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  FieldKitDB.chatStyle=false;FieldKitDB.chatWidth=440;FieldKitDB.chatHeight=180;FieldKitDB.chatFontFace=1;FieldKitDB.chatFontSize=12;FieldKitDB.chatBackgroundOpacity=0;FieldKitDB.chatBackgroundColor=1;FieldKitDB.chatNative=nil;FieldKitDB.chatAnchor=nil
+  C.Set("zoneThemes",false);Native()
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local d=R.layout;local base=d.rects.chat;local tag=zone
+  -- 1. customization off: the approved rectangles, the theme's font; the native geometry has been remembered
+  assert(R.chat:GetWidth()==base[3] and R.chat:GetHeight()==base[4],tag..": approved chat card when not customizing")
+  assert(CF:GetParent()==R.chat and string.find(font[1],"AzerothSans",1,true) and font[2]==12,tag..": theme font by default")
+  assert(type(FieldKitDB.chatNative)=="table" and FieldKitDB.chatNative.x==32 and FieldKitDB.chatNative.y==95 and FieldKitDB.chatNative.width==440,tag..": native geometry remembered before the first themed change")
+  -- 2. every preference, one at a time, immediately (no refresh in between)
+  FieldKitDB.chatStyle=true
+  local function Apply() FieldKit.ApplyChatStyle() end
+  Apply()
+  local text0W,text0H=CF:GetWidth(),CF:GetHeight()
+  FieldKitDB.chatWidth=520;Apply();assert(CF:GetWidth()==520 and R.chat:GetWidth()==R.chatPlan.rect[3] and R.chat:GetWidth()>520,tag..": width applies at once to the text and the card")
+  FieldKitDB.chatHeight=260;Apply();assert(CF:GetHeight()==260 and R.chat:GetHeight()==R.chatPlan.rect[4] and R.chat:GetHeight()>260,tag..": height applies at once")
+  FieldKitDB.chatFontFace=3;Apply();assert(string.find(font[1],"ARIALN",1,true) and font[2]==12,tag..": font family applies to the themed chat ("..tostring(font[1])..")")
+  FieldKitDB.chatFontSize=17;Apply();assert(font[2]==17 and string.find(font[1],"ARIALN",1,true),tag..": font size applies")
+  FieldKitDB.chatFontFace=1;Apply();assert(string.find(font[1],"AzerothSans",1,true) and font[2]==17,tag..": 'original font' = the theme's own font")
+  -- opacity and colour act on the visible themed interior only (centre slice and fill), never on the gold border
+  local skin=R.chat.fieldkitSkin;local centre=skin.parts[5].texture
+  FieldKitDB.chatBackgroundOpacity=0;Apply();assert(R.chat.fieldkitFill.alpha==0 and centre:GetAlpha()==0 and skin.base:GetAlpha()==0,tag..": opacity 0 = transparent interior")
+  for i=1,9 do if i~=5 then assert(skin.parts[i].texture:GetAlpha()==1,tag..": the gold border slice "..i.." stays opaque at opacity 0") end end
+  FieldKitDB.chatBackgroundOpacity=100;Apply();assert(R.chat.fieldkitFill.alpha==1 and centre:GetAlpha()==1,tag..": opacity 100 = fully opaque interior")
+  FieldKitDB.chatBackgroundOpacity=50;Apply();assert(R.chat.fieldkitFill.alpha==.5 and centre:GetAlpha()==.5,tag..": proportional opacity")
+  local want=FieldKit.ChatBackground(4);FieldKitDB.chatBackgroundColor=4;Apply();local c=R.chat.fieldkitFill.color;assert(c[1]==want[1] and c[2]==want[2] and c[3]==want[3],tag..": background colour applies to the interior")
+  -- the theme refresh never overwrites a preference
+  local keep={FieldKitDB.chatWidth,FieldKitDB.chatHeight,FieldKitDB.chatFontFace,FieldKitDB.chatFontSize,FieldKitDB.chatBackgroundOpacity,FieldKitDB.chatBackgroundColor,FieldKitDB.chatStyle}
+  for i=1,8 do C.Refresh(true) end
+  local now={FieldKitDB.chatWidth,FieldKitDB.chatHeight,FieldKitDB.chatFontFace,FieldKitDB.chatFontSize,FieldKitDB.chatBackgroundOpacity,FieldKitDB.chatBackgroundColor,FieldKitDB.chatStyle}
+  for i=1,7 do assert(keep[i]==now[i],tag..": preference "..i.." is not rewritten by theme refreshes") end
+  assert(CF:GetWidth()==520 and CF:GetHeight()==260,tag..": and the refreshes keep applying them")
+  -- 3. resize several times in both directions: the card follows, the text area never leaves it, the controls never overlap the text
+  FieldKitDB.chatBackgroundOpacity=100
+  for _,size in ipairs({{300,110},{700,400},{280,100},{800,450},{440,180},{300,300},{650,120}}) do
+   FieldKitDB.chatWidth=size[1];FieldKitDB.chatHeight=size[2];Apply()
+   local plan=R.chatPlan;local rect=plan.rect;local st=tag..": "..size[1].."x"..size[2]
+   assert(CF:GetWidth()==size[1] and CF:GetHeight()==size[2],st..": text area exactly the chosen size")
+   assert(R.chat:GetWidth()==rect[3] and R.chat:GetHeight()==rect[4],st..": the card has the planned size")
+   assert(rect[1]==base[1] and rect[2]+rect[4]==base[2]+base[4],st..": anchored by its bottom-left corner (it grows up and to the right)")
+   local _,_,_,cx,cy=CF:GetPoint();assert(cx==plan.textX and cy==plan.textY,st..": the text sits at the same inner margin from the card corner")
+   assert(plan.textX+size[1]+(zone=="elwynn" and (plan.cols*24+14) or 0)<=rect[3]+.001 or zone=="naxx",st..": the text area and the control column fit the card width")
+   assert(-cy+size[2]<=rect[4]-(zone=="elwynn" and 9 or 0)+.001 or zone=="naxx",st..": the text area stays inside the card height")
+   if zone=="elwynn" then
+    local textRight=plan.textX+size[1]
+    for i,r in ipairs(R.chatToolRects) do
+     assert(r[1]>=textRight-.001 and r[3]<=rect[3]-12+.001 and r[2]>=12 and r[4]<=rect[4]-12+.001,st..": tool "..i.." is beside the text and inside the border")
+     for j=i+1,4 do local o=R.chatToolRects[j];assert(r[3]<=o[1] or o[3]<=r[1] or r[4]<=o[2] or o[4]<=r[2],st..": tools "..i.." and "..j.." do not overlap") end
+    end
+    for _,b in ipairs(R.chatTools) do assert(b:IsShown(),st..": the Copy and scroll controls stay") end
+   end
+   -- the fill (a 9-slice interior) never leaves the card: inset by the corner cut and matching the size
+   local cc=math.min(12,rect[3]/3,rect[4]/3);local _,_,_,bx,by=R.chat.fieldkitSkin.base:GetPoint()
+   assert(bx==cc and by==-cc and R.chat.fieldkitSkin.base:GetWidth()==rect[3]-2*cc and R.chat.fieldkitSkin.base:GetHeight()==rect[4]-2*cc,st..": the fill follows the real size inside the frame")
+  end
+  -- out-of-range values are clamped to sensible minimums
+  FieldKitDB.chatWidth=10;FieldKitDB.chatHeight=10;Apply();assert(CF:GetWidth()==280 and CF:GetHeight()==100,tag..": minimum dimensions")
+  FieldKitDB.chatWidth=440;FieldKitDB.chatHeight=180;Apply()
+  -- 4. the card can be put in the four corners (saved per layout, like every card); the preferences and chatAnchor are untouched
+  local anchorBefore=FieldKitDB.chatAnchor
+  for k,corner in ipairs({{0,0},{1,0},{0,1},{1,1}}) do
+   local w,h=R.chat:GetWidth(),R.chat:GetHeight()
+   R.chat:ClearAllPoints();R.chat:SetPoint("TOPLEFT",UIParent,"TOPLEFT",corner[1]*(UIW-w),-corner[2]*(UIH-h));assert(C.Remember(R.chat),tag..": corner "..k.." is stored")
+   C.Refresh(true);C.Refresh(true)
+   local _,_,_,cx,cy=CF:GetPoint();assert(CF:GetParent()==R.chat and cx==R.chatPlan.textX and cy==R.chatPlan.textY and CF:GetWidth()==440,tag..": the chat follows its card in corner "..k)
+  end
+  assert(FieldKitDB.chatAnchor==anchorBefore,tag..": the themed move does not write the native chat anchor")
+  FieldKitDB.zoneThemePositions[C.currentLayout].FieldKitReferenceChat=nil;C.Refresh(true)
+  -- 5/6. theme off: the chat is visible and where it was; ten cycles without drift
+  local reference
+  for cycle=1,10 do
+   C.Set("zoneThemes",false)
+   local visible,p,x,y=OnScreen()
+   assert(visible and CF:GetParent()==UIParent,tag..": cycle "..cycle..": the native chat is visible and back under UIParent")
+   assert(CF:GetWidth()==440 and CF:GetHeight()==180,tag..": cycle "..cycle..": native size ("..CF:GetWidth().."x"..CF:GetHeight()..")")
+   local sig=p..":"..tostring(x)..":"..tostring(y)..":"..CF:GetWidth()..":"..CF:GetHeight()
+   reference=reference or sig;assert(sig==reference,tag..": cycle "..cycle..": no drift ("..sig.." vs "..reference..")")
+   C.Set("zoneThemes",true);C.Refresh(true)
+   assert(CF:GetParent()==R.chat and R.chat:GetWidth()==R.chatPlan.rect[3],tag..": cycle "..cycle..": the themed layout is back")
+  end
+  -- 7. /reload in each state: the client may hand the chat back at a bad place; the remembered geometry rescues it
+  C.Set("zoneThemes",false)
+  CF:ClearAllPoints();CF:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",-900,-700) -- a broken place handed back after a reload
+  H.saved={};C.Set("zoneThemes",true);C.Refresh(true);C.Set("zoneThemes",false)
+  assert(OnScreen(),tag..": theme saved from a broken place, switched off: the chat is still brought back on the screen")
+  Native();C.Set("zoneThemes",true);C.Refresh(true) -- reload with the theme on
+  H.saved={};C.Refresh(true);C.Set("zoneThemes",false);assert(OnScreen(),tag..": reload then theme off: visible")
+  -- the guard alone: a chat left off the screen is brought back, an unmeasurable one too
+  CF:ClearAllPoints();CF:SetPoint("TOPLEFT",UIParent,"TOPLEFT",5000,5000);assert(FieldKit.ChatGuard(CF) and OnScreen(),tag..": the guard rescues a chat that is off the screen")
+  assert(not FieldKit.ChatGuard(CF),tag..": and leaves a visible chat alone")
+  -- 8. profile change while themed: the new profile's chat preferences apply at once
+  C.Set("zoneThemes",true);C.Refresh(true)
+  FieldKitDB.chatWidth=333;FieldKitDB.chatHeight=222;FieldKitDB.chatFontSize=15;FieldKit.ApplyHUDProfileLive()
+  assert(CF:GetWidth()==333 and CF:GetHeight()==222 and font[2]==15,tag..": a profile switch re-applies the chat preferences ("..CF:GetWidth().."x"..CF:GetHeight()..")")
+  -- 9. the controls work (Copy, scroll) at the new size
+  local opened=0;local oldCopy=FieldKit.OpenChatCopy;FieldKit.OpenChatCopy=function() opened=opened+1 end
+  if zone=="elwynn" then for _,b in ipairs(R.chatTools) do if b.fieldkitChatTool=="copy" then click(b) end end;assert(opened==1,tag..": Copy still works") end
+  FieldKit.OpenChatCopy=oldCopy
+  -- 11. FR / EN do not change the geometry
+  FieldKit_SetLanguage("fr");C.Refresh(true);assert(CF:GetWidth()==333 and CF:GetHeight()==222,tag..": FR keeps the chosen size");FieldKit_SetLanguage("en");C.Refresh(true);assert(CF:GetWidth()==333,tag..": EN too")
+  -- customization on, theme off: the chosen size is applied to the native chat at once
+  FieldKitDB.chatWidth=380;FieldKitDB.chatHeight=210;C.Set("zoneThemes",false)
+  assert(CF:GetWidth()==380 and CF:GetHeight()==210 and OnScreen(),tag..": theme off with customization on: the preferences apply to the native chat ("..CF:GetWidth().."x"..CF:GetHeight()..")")
+  C.Set("zoneThemes",true);C.Refresh(true);assert(CF:GetParent()==R.chat and CF:GetWidth()==380,tag..": and back under the theme")
+  C.Set("zoneThemes",false);FieldKitDB.chatStyle=false
+ end
+end
+print("Chat preferences drive the themed chat; the chat survives the theme (cycles, corners, reload, profile) passed (synthetic)")

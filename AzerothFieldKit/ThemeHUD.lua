@@ -37,11 +37,18 @@ function H.RestoreOne(f)
  local reparented=f:GetParent()~=r.parent
   f.fieldkitThemeRevision=nil;if f.SetParent then f:SetParent(r.parent) end;
   if r.strata and f.SetFrameStrata then f:SetFrameStrata(r.strata) end
-  if r.level and f.SetFrameLevel then f:SetFrameLevel(r.level) end;f:ClearAllPoints()
+  if r.level and f.SetFrameLevel then f:SetFrameLevel(r.level) end
+  if f.SetScale then f:SetScale(r.scale) end
+  if f==getglobal("ChatFrame1") and FieldKit.ChatRestoreNative then
+   -- the chat: validated points (the ones saved before the theme, else the remembered native geometry, else the default place),
+   -- size and font, then a guard that keeps it on the screen
+   FieldKit.ChatRestoreNative(f,r);f:SetAlpha(r.alpha)
+  else
+  f:ClearAllPoints()
   for i=1,table.getn(r.points) do local a=r.points[i];f:SetPoint(a[1],a[2],a[3],a[4],a[5]) end
-  if f==getglobal("ChatFrame1") and FieldKit.ResizeChatPreservingHistory then FieldKit.ResizeChatPreservingHistory(r.width,r.height)
-  else if f:GetWidth()~=r.width then f:SetWidth(r.width) end;if f:GetHeight()~=r.height then f:SetHeight(r.height) end end;f:SetAlpha(r.alpha)
-  if r.font and f.SetFont then if f==getglobal("ChatFrame1") and FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(r.font[1],r.font[2],r.font[3]) else pcall(f.SetFont,f,r.font[1],r.font[2],r.font[3]) end end
+  if f:GetWidth()~=r.width then f:SetWidth(r.width) end;if f:GetHeight()~=r.height then f:SetHeight(r.height) end;f:SetAlpha(r.alpha)
+  if r.font and f.SetFont then pcall(f.SetFont,f,r.font[1],r.font[2],r.font[3]) end
+  end
   if f.SetScale then f:SetScale(r.scale) end
   if r.mouse~=nil then f:EnableMouse(r.mouse) end
  -- Benilla keeps a native visibility cache after leaving a hidden parent.

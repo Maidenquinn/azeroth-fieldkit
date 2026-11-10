@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.42 - CHAT : PARAMETRES AVEC LE THEME, RESTAURATION
+Reglages du chat actifs avec le theme, chat jamais perdu a la desactivation. A recetter en jeu.
+
 ALPHA.41 - BARRE AETHUS : COINS ARRONDIS, COULEUR D'AVANT
 Capture a 100 pour cent : le vert epouse la fente aux coins arrondis, couleur plus douce.
 

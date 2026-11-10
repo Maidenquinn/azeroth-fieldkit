@@ -86,7 +86,7 @@ d.language=d.language=="fr" and "fr" or "en"
  d.chatHeight=math.floor(FieldKit.Number(d.chatHeight,180,100,450))
  d.chatFontSize=math.floor(FieldKit.Number(d.chatFontSize,12,10,20))
  d.chatHistoryLines=math.floor(FieldKit.Number(d.chatHistoryLines,200,100,500))
- d.chatBackgroundOpacity=math.floor(FieldKit.Number(d.chatBackgroundOpacity,0,0,85))
+ d.chatBackgroundOpacity=math.floor(FieldKit.Number(d.chatBackgroundOpacity,0,0,100))
  d.chatFontFace=math.floor(FieldKit.Number(d.chatFontFace,1,1,5))
  d.chatBackgroundColor=math.floor(FieldKit.Number(d.chatBackgroundColor,1,1,6))
  d.chatTextColor=math.floor(FieldKit.Number(d.chatTextColor,1,1,6))

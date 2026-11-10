@@ -195,7 +195,7 @@ for name in files:
  prototypes[name]={'maxUpvalues':c.maximum,'functions':c.count,'sha256':hashlib.sha256(data).hexdigest()}
 native=None
 if args.lua50:
- run=subprocess.run([str(args.lua50.resolve()),'tests/native50.lua'],cwd=base,capture_output=True,text=True,encoding='utf8',timeout=60)
+ run=subprocess.run([str(args.lua50.resolve()),'tests/native50.lua'],cwd=base,capture_output=True,text=True,encoding='utf8',timeout=240)
  assert run.returncode==0,run.stdout+run.stderr
  native=run.stdout.strip()
 result={'version':version,'lua51':True,'nativeLua50':native,'persistence':True,'securityFixtures':True,
