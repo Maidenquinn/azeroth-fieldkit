@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0-alpha.25 - 2026-11-10 (map mouse stacking, unreleased)
+
+- AzerothHub gear / map buttons: root cause shown by the native `/fkmapstack`: the map group owner (FieldKitThemeIdentity, or the art frame) was at frame level 3 (canvas level + 2, set by R.Geometry) while the native Minimap and its buttons kept level 2 (this client does not re-level a reparented subtree; the gear is MEDIUM/2 although AzerothHub asked for HIGH), all in the MEDIUM strata, so the owner sat above the map and received every press meant for the map and its buttons; the gear's own handlers never ran. New `M.Layers`: the owner goes to level 0, the native map just under its lowest mouse-taking child (map level = lowest child level - 1, at least 1). Levels only: no hit area changed, no position computation, no third-party frame touched; applied again only when a level changed; the map's original level is restored with the theme. The identity card keeps its own drag areas (title, foot, rim outside the map rectangle).
+
 ## 0.6.0-alpha.24 - 2026-11-10 (diagnostic commands routed, unreleased)
 
 - `/fieldkit mapprobe ...`, `mapstack`, `mapfocus`, `mapdiag`, `cardprobe`, `dragdiag`, `clickdiag` opened the settings window instead of running: the main handler only delegated `/fieldkit themes <sub>` to the theme module, and the diagnostics (added in alpha.21-23, documented as `/fieldkit <sub>`) were never routed, so they fell through to the final branch that toggles the window. They are now recognised before anything that can open it, case- and space-insensitively, and every one prints a result (an error is printed too).

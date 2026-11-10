@@ -388,7 +388,7 @@ function R.Map()
    proxy.icon:SetTexture(path or (i==1 and T.media.."ChronicleSeal.tga" or "Interface\\Icons\\INV_Misc_Book_09"));proxy:ClearAllPoints();local left=a[1]<R.layout.size[1]/2;proxy:SetPoint(left and "TOPLEFT" or "TOPRIGHT",M.root,left and "TOPRIGHT" or "TOPLEFT",left and 5 or -5,-8-(i-1)*36);proxy:SetFrameStrata("HIGH");proxy:SetFrameLevel(M.root:GetFrameLevel()+80);M.Park(original);if original:GetAlpha()>.01 then proxy:Show() else proxy:Hide() end
   end
  end
- M.root:SetMovable(M.GroupOwner()==M.root)
+ M.root:SetMovable(M.GroupOwner()==M.root);M.Layers()
  if M.probe.ring then M.Ring(hole[3]/2,hole[4]/2) else M.RingRestore() end
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do

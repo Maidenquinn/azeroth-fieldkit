@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.25 - EMPILEMENT SOURIS DE LA CARTE
+L'engrenage doit recevoir clic et glisser : /fkmapstack 5 puis /fkmapevents. A recetter en jeu.
+
 ALPHA.24 - COMMANDES DE DIAGNOSTIC
 /fieldkit mapprobe state|events on, mapstack 5 ne les ouvrent plus la fenetre ; /fkmapstate /fkmapevents /fkmapstack.
 

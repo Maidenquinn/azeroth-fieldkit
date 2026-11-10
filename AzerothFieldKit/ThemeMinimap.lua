@@ -97,6 +97,27 @@ function M.GroupOwner()
  if R and R.active and R.layout and not R.layout.rects.mapArt and FieldKitThemeHUD.identity then return FieldKitThemeHUD.identity end
  return M.root
 end
+-- Mouse stacking of the map group. Measured on the client: the group owner (identity card or art frame) is at canvas level + 2 = 3
+-- while the native map and its buttons keep their own level 2 (this client does not re-level a reparented subtree), so in the
+-- same strata the owner is ABOVE the map and takes every press meant for the map and its buttons. Fix: owner at the bottom, the
+-- native map just above it, below its own buttons (the lowest mouse-taking child decides). Levels only; it is applied again only
+-- when a level changed (a click in progress must not be disturbed), and the map's original level is put back with the theme.
+function M.Layers()
+ if not Minimap or not Minimap.SetFrameLevel then return end
+ local owner=M.GroupOwner()
+ local lowest
+ if Minimap.GetChildren then
+  for _,child in ipairs({Minimap:GetChildren()}) do
+   if child.GetFrameLevel and child.IsMouseEnabled and child:IsMouseEnabled() then local l=child:GetFrameLevel();if not lowest or l<lowest then lowest=l end end
+  end
+ end
+ local key=table.concat({Minimap:GetFrameLevel(),owner:GetFrameLevel(),tostring(lowest)},":")
+ if M.layerKey==key then return end
+ owner:SetFrameLevel(0)
+ local want=lowest and math.max(1,lowest-1) or 1
+ if Minimap:GetFrameLevel()~=want then Minimap:SetFrameLevel(want) end
+ M.layerKey=table.concat({Minimap:GetFrameLevel(),owner:GetFrameLevel(),tostring(lowest)},":")
+end
 function M.Restore()
  if not M.active then return end
  M.Unpark();M.RingRestore()
@@ -114,6 +135,8 @@ function M.Restore()
  end
  for f,alpha in pairs(M.hidden) do if f:GetAlpha()==0 then f:SetAlpha(alpha) end end
  for _,name in ipairs({"GameTimeFrame","MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.RestoreOne(f) end end
+ if old.level and Minimap.SetFrameLevel then Minimap:SetFrameLevel(old.level) end
+ M.layerKey=nil
  M.hidden={};M.active=false;M.before=nil
  if M.dragHandle then M.dragHandle:Hide() end
  for _,proxy in pairs(M.launcherProxies or {}) do proxy:Hide() end
@@ -132,7 +155,7 @@ function M.Apply(variant)
   local mask="Textures\\MinimapMask"
   if Minimap.GetMaskTexture then local ok,path=pcall(Minimap.GetMaskTexture,Minimap);if ok and type(path)=="string" then mask=path end end
   local points=FieldKitThemeHUD.Points(Minimap)
-  M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask,scripts={},mouse=Minimap.IsMouseEnabled and Minimap:IsMouseEnabled(),movable=Minimap.IsMovable and Minimap:IsMovable()}
+  M.before={parent=parent,points=points,width=Minimap:GetWidth(),height=Minimap:GetHeight(),mask=mask,level=Minimap.GetFrameLevel and Minimap:GetFrameLevel(),scripts={},mouse=Minimap.IsMouseEnabled and Minimap:IsMouseEnabled(),movable=Minimap.IsMovable and Minimap:IsMovable()}
   for _,event in ipairs({"OnDragStart","OnDragStop","OnMouseDown","OnMouseUp"}) do M.before.scripts[event]=Minimap:GetScript(event) end
   -- FieldKit installs NO script on the native Minimap any more: the map is never moved on its own. The group is moved
   -- from the identity card / art frame, or from the dedicated handle (see FieldKitReferenceHUD.Map).
@@ -179,7 +202,7 @@ function M.Apply(variant)
  Minimap:ClearAllPoints();Minimap:SetPoint("CENTER",M.root,"CENTER",0,0);Minimap:SetWidth(size);Minimap:SetHeight(size)
  local clock=getglobal("GameTimeFrame")
  if clock then FieldKitThemeHUD.Anchor(clock,"TOPRIGHT",M.root,"TOPRIGHT",0,0);clock:SetScale(.75) end
- M.root:SetMovable(true)
+ M.root:SetMovable(true);M.Layers()
  if M.probe.ring then M.Ring(size/2,size/2) else M.RingRestore() end
  FieldKitTheme.Update(M.root);M.root:Show();return true
 end

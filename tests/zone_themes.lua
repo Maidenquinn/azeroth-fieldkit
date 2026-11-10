@@ -1126,3 +1126,40 @@ do
  FieldKitUI.Toggle=toggle;DEFAULT_CHAT_FRAME.AddMessage=oldAdd;C.Set("zoneThemes",false)
 end
 print("Diagnostic commands are routed before the settings window and always report (synthetic)")
+
+-- alpha.25: mouse stacking of the map group, reproduced from the native /fkmapstack (identity 3, Minimap 2, gear 2, all MEDIUM).
+do
+ local STRATA={BACKGROUND=1,LOW=2,MEDIUM=3,HIGH=4,DIALOG=5,FULLSCREEN=6,FULLSCREEN_DIALOG=7,TOOLTIP=8}
+ local function Top(list)
+  table.sort(list,function(p,q) local sp,sq=STRATA[p:GetFrameStrata()] or 0,STRATA[q:GetFrameStrata()] or 0;if sp~=sq then return sp>sq end return p:GetFrameLevel()>q:GetFrameLevel() end)
+  return list
+ end
+ for _,case in ipairs({{"elwynn"},{"naxx"}}) do
+  local zone=case[1]
+  C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete")
+  Minimap:SetFrameLevel(2)
+  local gear=getglobal("AzerothHubMinimapButton") or CreateFrame("Button","AzerothHubMinimapButton",Minimap)
+  gear:SetFrameLevel(2);gear:EnableMouse(true);gear:SetScript("OnClick",function() end);local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear end
+  C.Set("zoneThemes",true);C.Refresh(true);C.Refresh(true)
+  local M=FieldKitThemeMinimap;local owner=M.GroupOwner()
+  local stack=Top({owner,Minimap,gear})
+  assert(stack[1]==gear and stack[2]==Minimap and stack[3]==owner,zone..": the gear is on top of the map and the map above its owner (owner "..owner:GetFrameLevel()..", map "..Minimap:GetFrameLevel()..", gear "..gear:GetFrameLevel()..")")
+  assert(owner:IsMouseEnabled() or owner~=M.root,zone..": the owner keeps its own mouse (it can still be dragged from its own areas)")
+  assert(gear:GetFrameLevel()==2,zone..": the third-party button was not touched")
+  -- stable: no level call once settled (a click in progress must not be disturbed)
+  local calls=0;local m,o=Minimap.SetFrameLevel,owner.SetFrameLevel
+  Minimap.SetFrameLevel=function(self,v) calls=calls+1;return m(self,v) end;owner.SetFrameLevel=function(self,v) calls=calls+1;return o(self,v) end
+  for n=1,6 do C.Refresh(true) end;assert(calls==0,zone..": levels are not re-applied on every refresh ("..calls.." calls)")
+  Minimap.SetFrameLevel=nil;owner.SetFrameLevel=nil
+  -- a re-layout that resets the owner's level is corrected once
+  o(owner,3);C.Refresh(true);assert(Top({owner,Minimap,gear})[1]==gear,zone..": corrected after the owner was re-levelled")
+  -- the interactions that belong to the owner are intact
+  FieldKitDB.windowsLocked=false;this=owner;if owner==M.root then M.root:GetScript("OnDragStart")() else assert(owner:GetScript("OnDragStart"),zone..": the identity card keeps its drag") end
+  if owner==M.root then M.root:GetScript("OnDragStop")() end
+  click(M.zoomIn);click(M.zoomOut)
+  -- theme off: the native map gets its own level back
+  C.Set("zoneThemes",false);assert(Minimap:GetFrameLevel()==2,zone..": the native map level is restored with the theme ("..Minimap:GetFrameLevel()..")")
+  Minimap.GetChildren=oldChildren
+ end
+end
+print("Map group mouse stacking (gear above map above owner) passed (synthetic)")
