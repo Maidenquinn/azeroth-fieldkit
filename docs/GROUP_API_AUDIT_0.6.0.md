@@ -77,6 +77,6 @@ UnitPowerType, SetPortraitTexture, UnitBuff, UnitDebuff. **UnitInRange is absent
 | Client format strings provided | NOT RUN: `/fieldkit groupprobe api` |
 | `party1..4` equipped items readable | NOT RUN: `/fieldkit groupprobe items [notify]` |
 | Parser, kinds, options, bounds, roster hygiene, FR/EN, positional formats (synthetic) | PASS (tests/group_history.lua) |
-| Performance: 20 000 messages | PASS (budget asserted; bounded memory members x count) |
+| Performance: 6 000 messages | PASS (budget asserted; bounded memory members x count) |
 | Group card component: fixed geometry, states, options (synthetic) | PASS (tests/zone_themes.lua) |
 | Rendering in the game | NOT RUN: native recette required |

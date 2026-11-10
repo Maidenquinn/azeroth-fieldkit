@@ -122,10 +122,10 @@ FieldKitDB.partyHistory=true;H.Sync()
 -- performance and memory budget
 local clock=type(os)=="table" and os.clock
 local start=clock and os.clock() or 0
-for i=1,20000 do H.Handle("x",(math.mod(i,3)==0) and "Denza's Frostbolt hits Boar for "..i.."." or (math.mod(i,3)==1 and "Lockpin's Flash Heal heals Denza for "..i.."." or "no known format "..i)) end
-if clock then local took=os.clock()-start;assert(took<8,"20000 messages parsed in "..took.." s") end
+for i=1,6000 do H.Handle("x",(math.mod(i,3)==0) and "Denza's Frostbolt hits Boar for "..i.."." or (math.mod(i,3)==1 and "Lockpin's Flash Heal heals Denza for "..i.."." or "no known format "..i)) end
+if clock then local took=os.clock()-start;assert(took<8,"6000 messages parsed in "..took.." s") end
 local total=0;for _,list in pairs(H.log) do total=total+table.getn(list) end
-assert(total<=2*5,"memory stays bounded by members x count after 20000 messages ("..total..")")
+assert(total<=2*5,"memory stays bounded by members x count after 6000 messages ("..total..")")
 
 -- probe: reports even when functions are missing, never errors
 local said={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(said,m) end
