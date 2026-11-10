@@ -211,6 +211,21 @@ function H.CompositionCreate()
  T.Surface(H.player,"card",true)
  H.health=CreateFrame("StatusBar",nil,H.player);H.health:SetPoint("TOPLEFT",H.player,"TOPLEFT",6,-4);H.health:SetPoint("BOTTOMRIGHT",H.player,"BOTTOMRIGHT",-6,4);H.health:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar");H.health:SetStatusBarColor(.12,.76,.18)
  local bg=H.health:CreateTexture(nil,"BACKGROUND");bg:SetAllPoints(H.health);T.Solid(bg,{.015,.04,.02})
+ -- Fill of the player's life bar. The stock Interface\TargetingFrame\UI-StatusBar reports an intrinsic width of 64 whatever the
+ -- bar size (the native probe showed identical bar and fill edges), so GetWidth() cannot tell what is drawn: the pixels of that
+ -- texture (alpha / gradient) can. The default is a flat, fully opaque fill of the same green; "native" restores the stock
+ -- texture for a side-by-side comparison (runtime only, /fieldkit barprobe fill native|flat).
+ H.FILL_NATIVE="Interface\\TargetingFrame\\UI-StatusBar";H.FILL_FLAT="Interface\\Buttons\\WHITE8X8";H.HEALTH_GREEN={.12,.76,.18}
+ function H.SetHealthFill(mode)
+  local bar=H.health;if not bar then return end
+  mode=mode=="native" and "native" or "flat"
+  bar:SetStatusBarTexture(mode=="native" and H.FILL_NATIVE or H.FILL_FLAT)
+  bar:SetStatusBarColor(H.HEALTH_GREEN[1],H.HEALTH_GREEN[2],H.HEALTH_GREEN[3],1)
+  local lo,hi=0,0;if bar.GetMinMaxValues then lo,hi=bar:GetMinMaxValues() end
+  local value=bar:GetValue();bar:SetValue(lo);bar:SetValue(value) -- recompute the fill
+  bar.fieldkitFillMode=mode
+ end
+ H.SetHealthFill("flat")
  H.hp=T.Label(H.health,"",0,0,430,23,14,T.text);H.hp:SetJustifyH("CENTER")
  H.shield=H.health:CreateTexture(nil,"OVERLAY");H.shield:SetPoint("TOPLEFT",H.health,"TOPLEFT",0,0);H.shield:SetHeight(23);T.Solid(H.shield,{.45,.8,1},.5)
  H.resource:SetParent(H.healthRoot);H.resource:ClearAllPoints();H.resource:SetPoint("TOP",H.healthRoot,"TOP",0,-54);H.resource:SetWidth(408);H.resource:SetHeight(14)

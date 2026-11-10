@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.39 - BARRE DE VIE AETHUS : REMPLISSAGE OPAQUE
+Capture a 100 pour cent, puis /fieldkit barprobe fill native pour comparer. A valider en jeu.
+
 ALPHA.38 - DIAGNOSTIC DE MA BARRE DE VIE
 /fieldkit barprobe puis /fieldkit barprobe refill : sortie a envoyer. Aucun changement de rendu.
 

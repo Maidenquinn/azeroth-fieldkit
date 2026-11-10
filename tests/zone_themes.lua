@@ -2017,3 +2017,35 @@ do
  local off=table.concat(R.PlayerBarProbe(false),"\n");assert(string.find(off,"not active",1,true) or string.find(off,"PLAYER BAR",1,true),"the probe also answers when the theme is off")
 end
 print("Player life bar probe passed (synthetic)")
+
+-- alpha.39: the player's life bar fill (only H.health): flat opaque by default, native for comparison, held percentages.
+do
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);C.Refresh(true)
+  local bar=H.health
+  assert(bar.fieldkitFillMode=="flat",zone..": the player bar uses the flat opaque fill by default")
+  -- only the player's life bar is touched
+  local touched=0;local oldRes=H.resource.SetStatusBarTexture;H.resource.SetStatusBarTexture=function(...) touched=touched+1 end
+  local names={}
+  local oldBar=bar.SetStatusBarTexture;bar.SetStatusBarTexture=function(self,path) table.insert(names,path);if oldBar then oldBar(self,path) end end
+  H.SetHealthFill("native");assert(bar.fieldkitFillMode=="native" and names[1]==H.FILL_NATIVE,zone..": native texture restored for comparison")
+  H.SetHealthFill("flat");assert(bar.fieldkitFillMode=="flat" and names[2]==H.FILL_FLAT and string.find(names[2],"WHITE8X8",1,true),zone..": flat opaque texture")
+  H.SetHealthFill("anything-else");assert(bar.fieldkitFillMode=="flat",zone..": unknown mode falls back to flat")
+  bar.SetStatusBarTexture=oldBar;H.resource.SetStatusBarTexture=oldRes
+  assert(touched==0,zone..": the resource bar is not touched")
+  -- held percentages: 100 / 99 / 80 / 50 / 0, exact
+  local said={};local oldAdd=DEFAULT_CHAT_FRAME.AddMessage;DEFAULT_CHAT_FRAME.AddMessage=function(_,m) table.insert(said,m) end
+  for _,pct in ipairs({100,99,80,50,0}) do
+   C.Command("barprobe test "..pct);assert(bar:GetValue()==pct,zone..": the bar is held at "..pct.." % ("..tostring(bar:GetValue())..")")
+   C.Refresh(true);assert(bar:GetValue()==pct,zone..": the hold survives a refresh at "..pct.." %")
+  end
+  C.Command("barprobe fill native");assert(bar.fieldkitFillMode=="native",zone..": /fieldkit barprobe fill native")
+  C.Command("barprobe fill flat");assert(bar.fieldkitFillMode=="flat")
+  C.Command("barprobe test off");assert(R.barTest==nil,zone..": the hold is cancelled")
+  NOW=NOW+60;C.Command("barprobe test 50");NOW=NOW+31;C.Refresh(true);assert(R.barTest==nil,zone..": the hold expires by itself after 30 s")
+  DEFAULT_CHAT_FRAME.AddMessage=oldAdd
+  local text=table.concat(R.PlayerBarProbe(false),"\n");assert(string.find(text,"fill mode: flat",1,true) and string.find(text,"INTRINSIC",1,true),zone..": the report says which fill is drawn and that the texture width is intrinsic")
+ end
+ C.Set("zoneThemes",false)
+end
+print("Player life bar fill (flat default, native comparison, held percentages) passed (synthetic)")

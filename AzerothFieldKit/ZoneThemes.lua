@@ -406,6 +406,10 @@ function C.Command(msg)
  elseif string.find(arg,"^groupprobe") then FieldKitGroupHistory.Probe(arg)
  elseif string.find(arg,"^barprobe") then
   -- the player's own life bar first (works alone), then the teammate cards when there are any; "refill" is an explicit opt-in
+  local _,_,fillMode=string.find(arg,"fill%s+(%a+)")
+  local _,_,testValue=string.find(arg,"test%s+([%w%.]+)")
+  if fillMode then FieldKitThemeHUD.SetHealthFill(fillMode);DEFAULT_CHAT_FRAME:AddMessage("barprobe: player bar fill = "..(fillMode=="native" and "native UI-StatusBar" or "flat opaque").." (runtime only)") end
+  if testValue then local pct=tonumber(testValue);if testValue=="off" then DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..FieldKitReferenceHUD.BarTest(nil)) else DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..FieldKitReferenceHUD.BarTest(pct or 100)) end end
   for _,line in ipairs(FieldKitReferenceHUD.PlayerBarProbe(string.find(arg,"refill",1,true) and true or false)) do DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..line) end
   for _,line in ipairs(FieldKitCoop.BarProbe()) do DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..line) end
  elseif arg=="cardprobe" then

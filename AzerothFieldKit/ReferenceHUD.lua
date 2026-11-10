@@ -272,6 +272,7 @@ function R.Update(variant,zone)
  R.resourceDetail=H.resourceText:GetText();H.resourceText:SetText(string.gsub(R.resourceDetail or ""," / .*$",""))
  local max=FieldKit.Number(UnitHealthMax("player"));local shield=type(AZS_RUN)=="table" and FieldKit.Number(AZS_RUN.sh)
  if shield and shield>0 and max and max>0 and FieldKitDB.playerShield then H.shield:SetWidth(d.health[3]*math.min(1,shield/max));H.shield:SetHeight(d.health[4]);H.shield:Show() else H.shield:Hide() end
+ R.BarTestApply()
  if d.portrait then
   local a=d.portrait;local p=d.rects.vitality
   R.portraitFrame:SetFrameLevel(math.max(0,H.healthRoot:GetFrameLevel()-1));R.portraitFrame:Show()
@@ -872,6 +873,20 @@ function R.DmgMaxRows(d)
  for count=6,24 do if base+R.DmgDelta(count)<=span then best=count else break end end
  return best
 end
+-- Temporary comparison aid (runtime only, never saved): /fieldkit barprobe test <0-100> holds the player's bar at that percentage
+-- for 30 s (each refresh re-applies it; the label keeps showing the real health) so 100 / 99 / 80 / 50 / 0 % can be compared with
+-- the native texture and with the flat fill (/fieldkit barprobe fill native|flat). /fieldkit barprobe test off cancels it.
+function R.BarTestApply()
+ local t=R.barTest;if not t then return end
+ if GetTime()>t.untilAt then R.barTest=nil;return end
+ local bar=H.health;if not bar then return end
+ bar:SetMinMaxValues(0,100);bar:SetValue(t.pct)
+end
+function R.BarTest(pct)
+ if pct==nil then R.barTest=nil;return "bar test cancelled" end
+ R.barTest={pct=math.max(0,math.min(100,pct)),untilAt=GetTime()+30};R.BarTestApply()
+ return string.format("player bar held at %d %% for 30 s (fill %s); the label still shows the real health",R.barTest.pct,tostring(H.health and H.health.fieldkitFillMode))
+end
 -- /fieldkit barprobe: the PLAYER's own life bar in the Aethus frame (H.health, a StatusBar anchored on H.player inside
 -- H.healthRoot). Read-only: nothing is moved, resized or re-filled. Works without a group, with the local character only.
 local function Num(v,decimals) if type(v)~="number" then return tostring(v) end return string.format("%."..(decimals or 2).."f",v) end
@@ -904,6 +919,8 @@ function R.PlayerBarProbe(refill)
  if not bar or not H.player or not H.healthRoot then Add("the themed player frame does not exist (theme never activated)");return out end
  if not R.active or not bar:IsShown() then Add("the themed player frame is not active/shown now: enable the theme (Elwynn Complete) and run the command again") end
  -- names
+ Add("fill mode: "..tostring(bar.fieldkitFillMode).." (flat = opaque WHITE8X8 tinted green, native = stock UI-StatusBar) | test "..tostring(R.barTest and (R.barTest.pct.." %") or "off"))
+ Add("note    : the fill texture GetWidth() is its INTRINSIC size (64 in the native probe), not what is drawn; compare the edges, and the picture with /fieldkit barprobe fill native|flat")
  Add("frame   : root "..FName(H.healthRoot).." | player button "..FName(H.player).." | bar "..FName(bar).." parent "..FName(bar:GetParent()))
  Add("levels  : root strata "..tostring(H.healthRoot:GetFrameStrata()).." level "..tostring(H.healthRoot:GetFrameLevel()).." | player level "..tostring(H.player:GetFrameLevel()).." | bar strata "..tostring(bar:GetFrameStrata()).." level "..tostring(bar:GetFrameLevel()))
  -- data
