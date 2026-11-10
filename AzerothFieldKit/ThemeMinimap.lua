@@ -172,7 +172,8 @@ function M.Restore()
  for f,alpha in pairs(M.hidden) do if f:GetAlpha()==0 then f:SetAlpha(alpha) end end
  for _,name in ipairs({"GameTimeFrame","MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.RestoreOne(f) end end
  if old.level and Minimap.SetFrameLevel then Minimap:SetFrameLevel(old.level) end
- M.layerKey=nil
+ M.layerKey=nil;M.maskShape=nil
+ if M.roundRing then M.roundRing:Hide() end
  M.hidden={};M.active=false;M.before=nil
  if M.dragHandle then M.dragHandle:Hide() end
  for _,proxy in pairs(M.launcherProxies or {}) do proxy:Hide() end
@@ -180,7 +181,47 @@ function M.Restore()
  if M.root then M.root:Hide() end
  if M.zoomOut then M.zoomOut:Hide();M.zoomIn:Hide() end
 end
+-- Map shape. Three explicit modes (setting zoneThemeMapShape, kept in step with the legacy zoneThemeMinimap switch):
+--  square = square native map (mask replaced) inside the square Elwynn/Naxx frame;
+--  round  = native round map (the client's own mask) with a round ring, only where the frame art is a separate piece (a square
+--           frame can never surround a round map, and the identity-card layouts bake a square opening into the card);
+--  native = the native map exactly as the client draws it, no FieldKit shape dressing.
+-- M.shape is the mode really applied; a round request that this layout cannot honour is applied as native (never a square frame
+-- over a round map) and M.shapeNote says why, so the settings label shows the truth.
+function M.Requested()
+ local db=FieldKitDB or {}
+ if db.zoneThemeMinimap==false or db.zoneThemeMapShape=="native" then return "native" end
+ if db.zoneThemeMapShape=="round" then return "round" end
+ return "square"
+end
+function M.Effective()
+ local want=M.Requested();M.shapeNote=nil
+ if want=="round" then
+  local R=FieldKitReferenceHUD
+  if not (R and R.active and R.layout and R.layout.rects and R.layout.rects.mapArt) then M.shapeNote="round-unavailable";return "native" end
+ end
+ return want
+end
+local SQUARE_MASK="Interface\\Buttons\\WHITE8X8"
+-- The mask is (re)asserted whenever the requested shape differs from what the client reports, so a shape changed behind our back
+-- (another setting, another addon) is brought back in step at the next refresh instead of leaving a round map in a square frame.
+function M.SetMask(shape)
+ if not M.before then return false end
+ local want=shape=="square" and SQUARE_MASK or M.before.mask
+ if M.maskShape==shape and Minimap.GetMaskTexture then
+  local ok,path=pcall(Minimap.GetMaskTexture,Minimap)
+  if ok and type(path)=="string" and string.lower(path)~=string.lower(want) then M.maskShape=nil end
+ end
+ if M.maskShape==shape then return true end
+ local ok,result=pcall(Minimap.SetMaskTexture,Minimap,want)
+ if not ok or result==false then return false end
+ M.maskShape=shape
+ if Minimap:IsShown() then Minimap:Hide();Minimap:Show() end
+ return true
+end
 function M.Apply(variant)
+ local shape=M.Effective();M.shape=shape
+ if shape=="native" then if M.active then M.Restore() end;M.reason=M.shapeNote or "Native map";return false end
  if not Minimap or type(Minimap.SetMaskTexture)~="function" then M.reason="Square map unavailable";return false end
  if not M.active then
   local parent=Minimap:GetParent();local name=parent and parent:GetName()
@@ -220,13 +261,14 @@ function M.Apply(variant)
     if i==1 then M.zoomOut=b else M.zoomIn=b end
    end
   end
-  local ok,result=pcall(Minimap.SetMaskTexture,Minimap,"Interface\\Buttons\\WHITE8X8")
-  if not ok or result==false then M.reason="Square mask rejected";M.before=nil;return false end
+  M.maskShape=nil
+  if not M.SetMask(shape) then M.reason="Square mask rejected";M.before=nil;return false end
   M.active=true;M.reason=nil
   for _,name in ipairs({"MinimapZoomIn","MinimapZoomOut"}) do local f=getglobal(name);if f then FieldKitThemeHUD.Save(f);f:SetParent(FieldKitThemeHUD.Hidden()) end end
   Minimap:SetParent(M.root)
   for i=1,table.getn(borderNames) do local f=getglobal(borderNames[i]);if f and f.SetAlpha then M.hidden[f]=f:GetAlpha();f:SetAlpha(0) end end
  end
+ if not M.SetMask(shape) then M.Restore();M.reason="Square mask rejected";return false end
  if FieldKitReferenceHUD and FieldKitReferenceHUD.active then return FieldKitReferenceHUD.Map() end
  if M.rim then M.rim:Hide() end
  local size=math.min(230,math.max(160,UIParent:GetWidth()*.13))

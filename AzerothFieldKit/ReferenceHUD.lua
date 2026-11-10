@@ -185,6 +185,8 @@ end
 function R.Art(frame,component,layout)
  local tiles=(layout or R.layout).tiles[component]
  if component=="dock" and not FieldKitDB.zoneThemeArt then tiles=nil end
+ -- Round map: the square frame art is not drawn at all (a ring replaces it, see R.MapRound)
+ if component=="mapArt" and FieldKitThemeMinimap and FieldKitThemeMinimap.shape=="round" then tiles=nil end
  if not tiles then for _,t in ipairs(frame.referenceTiles or {}) do t:Hide() end;return end
  frame.referenceTiles=frame.referenceTiles or {}
  local extra=frame.referenceExtra or 0;local split=frame.referenceSplit or 0
@@ -264,7 +266,34 @@ function R.Stop()
  if R.buffDrawer then R.buffDrawer:Hide() end
  -- Benilla caches native status bars independently of a hidden ancestor.
  for _,f in ipairs({H.health,H.resource,H.xp,R.xpArt,R.xpBadge,H.utility,R.barOverlay}) do if f then f:Hide() end end
+ for _,f in pairs(R.plain or {}) do f:Hide() end
  for _,f in ipairs({H.identity,H.header,H.healthRoot,H.dock,H.nav,R.xpArt,R.xpBadge,H.utility}) do if f then for _,t in ipairs(f.referenceTiles or {}) do t:Hide() end end end
+end
+-- Option "Character ornaments" OFF: the baked dock art (character illustrations AND the frame the spell sockets, the XP track and
+-- the counters sit in) is not drawn. The functional parts stay exactly as they are (the native action buttons, XP bar, counters,
+-- same size and clicks) and get a SIMPLIFIED frame instead: plain themed panels behind the button row, the XP track (when it lives in
+-- the dock art) and the counters. Decoration and function are separate: this never moves, hides or replaces a functional element.
+function R.PlainDock(d)
+ local want=not FieldKitDB.zoneThemeArt
+ if not want then for _,f in pairs(R.plain or {}) do f:Hide() end;return end
+ R.plain=R.plain or {}
+ local a=d.actions;local rects={bar={a[1]-6,a[2]-4,6*a[4]+a[3]+12,a[3]+8}}
+ if d.integratedXP and d.xp then rects.xp={d.xp[1]-5,d.xp[2]-5,d.xp[3]+10,d.xp[4]+10} end
+ if d.counts then
+  local x0,y0,x1,y1
+  for i=1,3 do local c=d.counts[i];if c then
+   if not x0 or c[1]<x0 then x0=c[1] end;if not y0 or c[2]<y0 then y0=c[2] end
+   if not x1 or c[1]+c[3]>x1 then x1=c[1]+c[3] end;if not y1 or c[2]+c[4]>y1 then y1=c[2]+c[4] end
+  end end
+  if x0 then rects.counts={x0-34,y0-5,x1-x0+44,y1-y0+10} end
+ end
+ for _,name in ipairs({"bar","xp","counts"}) do
+  local rect=rects[name];local f=R.plain[name]
+  if rect then
+   if not f then f=CreateFrame("Frame",nil,H.dock);f:EnableMouse(false);R.plain[name]=f;T.Surface(f,"card",true) end
+   R.Child(f,H.dock,rect);f:SetFrameLevel(H.dock:GetFrameLevel()+1);T.Surface(f,"card",true);f.fieldkitArtOnly=nil;T.State(f,false);f:Show()
+  elseif f then f:Hide() end
+ end
 end
 function R.Update(variant,zone)
  local key=zone.."_"..variant;local d=FieldKitReferenceArt[key]
@@ -350,7 +379,7 @@ function R.Update(variant,zone)
  H.xpText:SetParent(H.xp);H.xpText:ClearAllPoints();H.xpText:SetPoint("CENTER",H.xp,"CENTER",0,0)
  H.xp:ClearAllPoints();H.xp:SetAllPoints(H.xpRoot);H.xp:SetFrameLevel(H.xpRoot:GetFrameLevel()+1);H.xpText:SetWidth(d.xp[3]);H.xpText:SetHeight(24);T.Font(H.xpText,17,R.body,true)
  if d.rects.xpBadge then R.Child(R.xpBadge,R.xpArt,d.rects.xpBadge);R.Art(R.xpBadge,"xpBadge");R.xpBadge:SetFrameLevel(H.xp:GetFrameLevel()+3);R.xpBadge:Show();H.xpText:SetParent(R.xpBadge);H.xpText:ClearAllPoints();H.xpText:SetPoint("CENTER",R.xpBadge,"CENTER",0,0);H.xpText:SetWidth(d.rects.xpBadge[3]-16) else R.xpBadge:Hide() end
- R.Child(H.counterRoot,H.dock,{0,0,d.size[1],d.size[2]});Blank(H.counterRoot);H.counterRoot:EnableMouse(false);H.counters:Hide()
+ R.Child(H.counterRoot,H.dock,{0,0,d.size[1],d.size[2]});Blank(H.counterRoot);H.counterRoot:EnableMouse(false);H.counters:Hide();R.PlainDock(d)
  local run=type(AZS_RUN)=="table" and AZS_RUN or {}
  local values={tostring(FieldKit.Number(run.kills) or "?").." "..FieldKit_L("victims"),tostring(FieldKit.Number(run.gold) or "?").." "..FieldKit_L("gold"),FieldKit_L("Cache").." : "..tostring(FieldKit.Number(run.chest) or "?")}
  R.counterValues=values
@@ -426,7 +455,7 @@ function R.Update(variant,zone)
 end
 -- Re-draw only the art tiles' strip around the map opening on a non-interactive frame above the native map.
 function R.MapRim(M,hole)
- if M.probe.rim==false then if M.rim then M.rim:Hide() end;return end
+ if M.probe.rim==false or M.shape=="round" then if M.rim then M.rim:Hide() end;return end
  local rects=R.layout.rects;local name=rects.mapArt and "mapArt" or "identity";local comp=rects.mapArt and M.root or H.identity
  local origin=rects[name];local tiles=R.layout.tiles[name]
  if not comp or not origin or not tiles then if M.rim then M.rim:Hide() end;return end
@@ -456,6 +485,19 @@ function R.LauncherLabel(name)
  if label=="" then label=name or "?" end
  return label
 end
+-- Round map: a plain ring (generated, see tools/build_map_round_ring.py) drawn above the native round map, centred on the map.
+-- The ring texture is 256 px with its opening at radius 113, so it is drawn at side*128/113 and the opening equals the map.
+function R.MapRound(M,hole,side)
+ if M.shape~="round" then if M.roundRing then M.roundRing:Hide() end;return end
+ if not M.roundRing then
+  local f=CreateFrame("Frame",nil,M.root);f:EnableMouse(false);f.texture=f:CreateTexture(nil,"OVERLAY");f.texture:SetAllPoints(f)
+  f.texture:SetTexture(T.media.."ReferenceHUD\map_round_ring.tga");M.roundRing=f
+ end
+ local f=M.roundRing;local box=side*128/113;local p=M.root.referenceRect
+ local cx,cy=hole[1]+hole[3]/2,hole[2]+hole[4]/2
+ f:SetParent(M.root);f:ClearAllPoints();f:SetPoint("CENTER",M.root,"TOPLEFT",cx-p[1],p[2]-cy);f:SetWidth(box);f:SetHeight(box)
+ f:SetFrameLevel(Minimap:GetFrameLevel()+2);f:Show()
+end
 function R.Map()
  local M=FieldKitThemeMinimap;local a=R.layout.map
  if R.layout.rects.mapArt then R.Geometry(M.root,R.layout.rects.mapArt) else R.Child(M.root,H.identity,{a[1],a[2],a[3],a[3]}) end;Blank(M.root);R.Art(M.root,"mapArt")
@@ -464,7 +506,7 @@ function R.Map()
  -- art's own rim is redrawn above it (R.MapRim) so any overflow is masked instead of leaving black bands.
  local hole=R.layout.mapHole or {a[1],a[2],a[3],a[3]};local side=math.max(hole[3],hole[4])
  local hx,hy=hole[1]+hole[3]/2-side/2,hole[2]+hole[4]/2-side/2
- Minimap:ClearAllPoints();Minimap:SetPoint("TOPLEFT",M.root,"TOPLEFT",hx-p[1],p[2]-hy);Minimap:SetWidth(side);Minimap:SetHeight(side);R.MapRim(M,hole);local owner=R.layout.rects.mapArt and M.root or H.identity;local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())..":"..tostring(owner:GetEffectiveScale());if M.screenStamp~=stamp then Minimap:Hide();Minimap:Show();M.screenStamp=stamp end
+ Minimap:ClearAllPoints();Minimap:SetPoint("TOPLEFT",M.root,"TOPLEFT",hx-p[1],p[2]-hy);Minimap:SetWidth(side);Minimap:SetHeight(side);R.MapRim(M,hole);R.MapRound(M,hole,side);local owner=R.layout.rects.mapArt and M.root or H.identity;local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())..":"..tostring(owner:GetEffectiveScale());if M.screenStamp~=stamp then Minimap:Hide();Minimap:Show();M.screenStamp=stamp end
  local queue=getglobal("MiniMapBattlefieldFrame");if queue and R.queueClick then FieldKitZoneThemes.Mask(queue,true) end
  local world=getglobal("MiniMapWorldMapButton");if world and R.worldClick then FieldKitZoneThemes.Mask(world,true) end
  local clock=getglobal("GameTimeFrame");if clock then FieldKitZoneThemes.Mask(clock,true) end

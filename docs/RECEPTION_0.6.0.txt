@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.43 - MINICARTE CARREE / RONDE / NATIVE, BARRE DE SORTS SANS HABILLAGE
+Trois formes de carte (la ronde seulement la ou le cadre est une piece separee), barre de sorts, XP et compteurs conserves sans "Habillage et personnages". A recetter en jeu.
+
 ALPHA.42 - CHAT : PARAMETRES AVEC LE THEME, RESTAURATION
 Reglages du chat actifs avec le theme, chat jamais perdu a la desactivation. A recetter en jeu.
 

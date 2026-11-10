@@ -4,7 +4,7 @@ function NewGear() local g=CreateFrame("Button","AzerothHubMinimapButton",Minima
 TARGET=nil
 fire(FieldKitFrame,"VARIABLES_LOADED")
 SlashCmdList.FieldKit("")
-assert(FieldKitZoneThemes.ui and table.getn(FieldKitZoneThemes.ui)==10,"Theme settings must be present in the real options journey")
+assert(FieldKitZoneThemes.ui and table.getn(FieldKitZoneThemes.ui)==12,"Theme settings must be present in the real options journey")
 local C,H,M,T=FieldKitZoneThemes,FieldKitThemeHUD,FieldKitThemeMinimap,FieldKitTheme
 assert(not C.active and not FieldKitDB.zoneThemes)
 FieldKit.zoneThemeReady=false;FieldKitDB.zoneThemes=true;FieldKitDB.zoneThemeMode="naxx"
@@ -2212,3 +2212,113 @@ do
  end
 end
 print("Chat preferences drive the themed chat; the chat survives the theme (cycles, corners, reload, profile) passed (synthetic)")
+
+-- ===== alpha.43: minimap shape (square / round / native) and the dressing option keeping the action bar =====
+do
+ local nativeMask="Textures\\MinimapMask"
+ local SQ="Interface\\Buttons\\WHITE8X8"
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  for _,variant in ipairs({"minimal","complete","alternative"}) do
+   local tag=zone.."_"..variant
+   C.Set("zoneThemes",false)
+   Minimap:SetParent(UIParent);Minimap:ClearAllPoints();Minimap:SetPoint("TOPRIGHT",UIParent,"TOPRIGHT",-12,-20);Minimap:SetWidth(140);Minimap:SetHeight(140);Minimap.mask=nil
+   local level=Minimap:GetFrameLevel()
+   C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemeMapShape","square");phase="playing"
+   C.Set("zoneThemes",true);C.Refresh(true)
+   local hasArt=R.layout.rects.mapArt~=nil
+   -- 1. square: square mask, native map inside the frame, no ring
+   assert(M.active and M.shape=="square" and Minimap.mask==SQ and Minimap:GetParent()==M.root,tag..": square map in the square frame")
+   assert(not M.roundRing or not M.roundRing:IsShown(),tag..": no ring on a square map")
+   assert(C.ShapeLabel()=="Square map" and FieldKitDB.zoneThemeMinimap==true,tag..": label and legacy switch follow the square mode")
+   local squareSide=Minimap:GetWidth()
+   -- 2. round, immediately (no reload): native mask + ring where the frame art is a separate piece, honest native otherwise
+   C.Set("zoneThemeMapShape","round")
+   if hasArt then
+    assert(M.active and M.shape=="round" and Minimap.mask==nativeMask,tag..": round map = the client's own round mask ("..tostring(Minimap.mask)..")")
+    assert(M.roundRing and M.roundRing:IsShown(),tag..": the round ring is drawn")
+    for _,t in ipairs(M.root.referenceTiles or {}) do assert(not t:IsShown(),tag..": no square frame tile under a round map") end
+    assert(not M.rim or not M.rim:IsShown(),tag..": no square rim over a round map")
+    assert(Minimap:GetParent()==M.root and Minimap:GetWidth()==Minimap:GetHeight(),tag..": the round map stays inside its group")
+    assert(C.ShapeLabel()=="Round map",tag..": the label says Round")
+    assert(M.GroupOwner()==M.root,tag..": grouped move owner unchanged")
+   else
+    assert(not M.active and M.shape=="native" and Minimap.mask==nativeMask and Minimap:GetParent()==UIParent,tag..": no art frame to carry a round map: native, never a square frame over a round map")
+    assert(C.ShapeLabel()=="Round map unavailable here: native map",tag..": and the label says so")
+   end
+   -- 3. native: everything the client had
+   C.Set("zoneThemeMapShape","native")
+   assert(not M.active and M.shape=="native" and Minimap.mask==nativeMask and Minimap:GetParent()==UIParent,tag..": native map")
+   assert(Minimap:GetWidth()==140 and Minimap:GetHeight()==140 and Minimap:GetFrameLevel()==level and C.ShapeLabel()=="Native map",tag..": native size, level and label")
+   local point,_,_,x,y=Minimap:GetPoint();assert(point=="TOPRIGHT" and x==-12 and y==-20,tag..": native anchor restored")
+   assert(not M.roundRing or not M.roundRing:IsShown(),tag..": no ring on the native map")
+   assert(not M.root:IsShown(),tag..": no FieldKit map frame left")
+   assert(FieldKitDB.zoneThemeMinimap==false,tag..": the legacy switch follows")
+   -- 4. back to square
+   C.Set("zoneThemeMapShape","square")
+   assert(M.active and Minimap.mask==SQ and Minimap:GetWidth()==squareSide,tag..": square again, same size")
+   -- 5. cycles
+   for cycle=1,6 do
+    C.Set("zoneThemeMapShape","round");C.Set("zoneThemeMapShape","native");C.Set("zoneThemeMapShape","square")
+   end
+   assert(M.active and M.shape=="square" and Minimap.mask==SQ and Minimap:GetWidth()==squareSide,tag..": six shape cycles do not drift")
+   -- 6. a shape changed behind our back is brought back in step at the next refresh
+   Minimap.mask=nativeMask;C.Refresh(true)
+   assert(Minimap.mask==SQ,tag..": an outside change of the mask is corrected (square stays square)")
+   -- 7. theme off: native shape, size, anchor; on again re-applies the selected mode
+   C.Set("zoneThemeMapShape","round")
+   C.Set("zoneThemes",false)
+   assert(not M.active and Minimap.mask==nativeMask and Minimap:GetParent()==UIParent and Minimap:GetWidth()==140 and Minimap:GetFrameLevel()==level,tag..": theme off restores the native map")
+   C.Set("zoneThemes",true);C.Refresh(true)
+   assert(M.shape==(hasArt and "round" or "native"),tag..": theme on again re-applies the selected mode ("..tostring(M.shape)..")")
+   -- 8. the legacy switch still works
+   C.Set("zoneThemeMinimap",false);assert(not M.active and C.ShapeLabel()=="Native map")
+   C.Set("zoneThemeMinimap",true);assert(FieldKitDB.zoneThemeMapShape=="round" or FieldKitDB.zoneThemeMapShape=="square")
+   C.Set("zoneThemeMapShape","square")
+   -- 9. the zoom buttons exist in every mode that dresses the map
+   assert(M.zoomIn and M.zoomOut,tag..": zoom buttons exist")
+   C.Set("zoneThemes",false)
+  end
+ end
+ C.Set("zoneThemeMapShape","square")
+end
+print("Minimap square / round / native: immediate switching, honest round fallback, restoration and cycles passed (synthetic)")
+
+do
+ -- Option "Character ornaments" (zoneThemeArt) only dresses: the action bar, XP bar and counters stay, with a simplified frame.
+ local slotsList={1,2,3,4,5,6,12}
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  for _,variant in ipairs({"minimal","complete","alternative"}) do
+   local tag=zone.."_"..variant
+   C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemeArt",true);phase="playing";C.Set("zoneThemes",true);C.Refresh(true)
+   local before={}
+   for _,slot in ipairs(slotsList) do local b=getglobal("ActionButton"..slot);local _,_,_,x,y=b:GetPoint();before[slot]={b:GetWidth(),b:GetHeight(),x,y} end
+   local xpShown=H.xp:IsShown();local counters=R.counts[1]:IsShown()
+   assert(not R.plain or not (R.plain.bar and R.plain.bar:IsShown()),tag..": no simplified frame while the dressing is on")
+   for pass=1,4 do
+    C.Set("zoneThemeArt",false)
+    for _,slot in ipairs(slotsList) do
+     local b=getglobal("ActionButton"..slot);local _,_,_,x,y=b:GetPoint();local was=before[slot]
+     assert(b:GetWidth()==was[1] and b:GetHeight()==was[2] and x==was[3] and y==was[4],tag..": button "..slot.." keeps its size and place with the dressing off")
+     assert(b:GetParent()==H.dock and b:IsShown() and b:GetAlpha()==1,tag..": button "..slot.." stays visible and native")
+    end
+    for _,t in ipairs(H.dock.referenceTiles or {}) do assert(not t:IsShown(),tag..": the baked dock art (characters) is gone") end
+    assert(R.plain and R.plain.bar and R.plain.bar:IsShown() and R.plain.bar:GetParent()==H.dock,tag..": simplified frame behind the buttons")
+    assert(R.plain.bar:GetWidth()>ActionButton1:GetWidth()*6,tag..": and it spans the whole button row")
+    assert(H.xp:IsShown()==xpShown and H.xpRoot:IsShown(),tag..": XP bar stays")
+    assert(R.counts[1]:IsShown()==counters and R.counts[3]:GetText()~=nil,tag..": kills, gold, chest stay")
+    if R.layout.integratedXP then assert(R.plain.xp and R.plain.xp:IsShown(),tag..": XP track keeps a frame") end
+    C.Set("zoneThemeArt",true)
+    for _,slot in ipairs(slotsList) do local b=getglobal("ActionButton"..slot);local _,_,_,x,y=b:GetPoint();assert(b:GetWidth()==before[slot][1] and x==before[slot][3],tag..": dressing back on: unchanged") end
+    for _,f in pairs(R.plain or {}) do assert(not f:IsShown(),tag..": dressing on again: no simplified frame") end
+   end
+  end
+ end
+ -- the buttons keep their native scripts (click, cooldown) with the dressing off
+ C.Set("zoneThemeArt",false)
+ local clicked=0;ActionButton1:SetScript("OnClick",function() clicked=clicked+1 end);C.Refresh(true)
+ assert(ActionButton1:GetScript("OnClick"))
+ ActionButton1:GetScript("OnClick")();assert(clicked==1,"the native action still fires with the dressing off")
+ C.Set("zoneThemeArt",true);C.Set("zoneThemes",false)
+ for _,f in pairs(R.plain or {}) do assert(not f:IsShown()) end
+end
+print("Character ornaments off: action bar, XP bar and counters stay with a simplified frame; repeated on/off passed (synthetic)")

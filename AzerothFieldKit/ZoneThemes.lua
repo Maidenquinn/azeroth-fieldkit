@@ -206,10 +206,17 @@ function C.Mask(frame,hidden)
  H.Save(frame);frame:SetParent(hidden and H.Hidden() or H.saved[frame].parent);frame:SetAlpha(hidden and 0 or H.saved[frame].alpha)
  if wasStored and not hidden and frame:IsShown() then frame:Hide();frame:Show() end
 end
+-- The label of the map shape in force: the requested mode, or what it became when this layout cannot honour a round map.
+function C.ShapeLabel()
+ local M=FieldKitThemeMinimap;local want=M.Requested();local real=M.shape or want
+ if want==real then return ({square="Square map",round="Round map",native="Native map"})[real] end
+ return "Round map unavailable here: native map"
+end
 function C.Refresh(force)
  if not FieldKit.zoneThemeReady or not FieldKitDB or not getglobal("FieldKitPlayerBar") then return end
  if C.ui then for _,item in ipairs(C.ui) do
   local selected=item.value=="toggle" and FieldKitDB[item.key]==true or FieldKitDB[item.key]==item.value
+  if item.key=="zoneThemeMapShape" then selected=(FieldKitThemeMinimap.shape or FieldKitThemeMinimap.Requested())==item.value end -- the mode really applied
   item.frame.fieldkitSelected=selected;T.State(item.frame,selected)
   if item.stateLabel then item.frame.fieldkitLabel:SetText(FieldKit_L("Allow card overlap").." : "..FieldKit_L(selected and "Enabled" or "Disabled")) end
  end end
@@ -221,7 +228,7 @@ function C.Refresh(force)
  for _,item in ipairs(C.uiSliders or {}) do item.slider:SetValue(FieldKitDB[item.key] or 100);item.title:SetText(FieldKit_L(item.label).." : "..tostring(FieldKitDB[item.key] or 100).." %") end
  C.sliderRefresh=false
  if C.statusLabel then
-  C.statusLabel:SetText(FieldKit_L(FieldKitDB.zoneThemes and "Enabled" or "Disabled").." · "..FieldKit_L(FieldKitDB.zoneThemeMode).." · "..FieldKit_L(FieldKitDB.zoneThemeVariant).."\n"..FieldKit_L("Square minimap")..": "..FieldKit_L(FieldKitDB.zoneThemeMinimap and "Enabled" or "Disabled").." · "..FieldKit_L("Character ornaments")..": "..FieldKit_L(FieldKitDB.zoneThemeArt and "Enabled" or "Disabled"))
+  C.statusLabel:SetText(FieldKit_L(FieldKitDB.zoneThemes and "Enabled" or "Disabled").." · "..FieldKit_L(FieldKitDB.zoneThemeMode).." · "..FieldKit_L(FieldKitDB.zoneThemeVariant).."\n"..FieldKit_L("Minimap")..": "..FieldKit_L(C.ShapeLabel()).." · "..FieldKit_L("Character ornaments")..": "..FieldKit_L(FieldKitDB.zoneThemeArt and "Enabled" or "Disabled"))
  end
  local zone=C.Resolve()
  if not zone then C.Suspend();T.SetZone("classic");if C.RefreshElementUI then C.RefreshElementUI() end;return end
@@ -244,7 +251,7 @@ function C.Refresh(force)
  end
  H.Update(variant,zone);if FieldKitReferenceHUD.Has(zone,variant) then FieldKitReferenceHUD.Update(variant,zone) else FieldKitReferenceHUD.Stop() end;FieldKitThemeTarget.Update(variant)
  C.NativeReplace()
- if FieldKitDB.zoneThemeMinimap then FieldKitThemeMinimap.Apply(variant) else FieldKitThemeMinimap.Restore() end
+ FieldKitThemeMinimap.Apply(variant) -- square / round / native: Apply honours the requested shape (native = restore)
  H.back:Hide()
  local leftY=(variant=="complete" and zone=="elwynn") and -350 or -112
  local rightY=(zone=="naxx" and variant~="alternative") and -312 or -116
@@ -353,9 +360,12 @@ function C.Tick()
  C.deadline=now+.2;C.Refresh()
 end
 function C.Set(key,value)
- local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
+ local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeMapShape=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
+ if key=="zoneThemeMapShape" and value~="square" and value~="round" and value~="native" then return end
  C.Suspend();FieldKitDB[key]=value
+ -- one truth for the map shape: the legacy switch follows the mode (native = off), and switching it alone picks square/native
+ if key=="zoneThemeMapShape" then FieldKitDB.zoneThemeMinimap=(value~="native") elseif key=="zoneThemeMinimap" then FieldKitDB.zoneThemeMapShape=value and ((FieldKitDB.zoneThemeMapShape=="round") and "round" or "square") or "native" end
  if FieldKit.ApplyHUDProfileLive then FieldKit.ApplyHUDProfileLive() end
  C.Refresh(true)
 end
@@ -470,8 +480,10 @@ function FieldKitThemeUI(parent,offset)
  local modes={}
  for i,key in ipairs({"auto","elwynn","naxx"}) do modes[i]=Button("zoneThemeMode",key,FieldKit_L(key),(i-1)*270,286,260) end
  local enabled=Button("zoneThemes","toggle","Enable / disable themes",0,334,260)
- local map=Button("zoneThemeMinimap","toggle","Square minimap",274,334,260)
- local art=Button("zoneThemeArt","toggle","Character ornaments",548,334,260)
+ local shapes={}
+ for i,key in ipairs({"square","round","native"}) do shapes[i]=Button("zoneThemeMapShape",key,({"Square map","Round map","Native map"})[i],274+(i-1)*104,334,100) end
+ C.shapeButtons=shapes
+ local art=Button("zoneThemeArt","toggle","Character ornaments",274+3*104+4,334,260)
  -- Dedicated row (full width, 36 px high) under the three toggles: complete label, state written in the control, big hit area.
  local overlap=Button("zoneThemeOverlap","toggle","Allow card overlap",0,382,950,36)
  C.ui[table.getn(C.ui)].stateLabel=true
