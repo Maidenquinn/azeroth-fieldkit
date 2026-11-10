@@ -381,7 +381,7 @@ function C.Open(kind)
 end
 -- Diagnostic sub-commands (read-only). They are routed from /fieldkit before the settings window can open, and each has an
 -- independent slash command that never opens it either. Every call prints a result, errors included.
-C.diagnostics={groupprobe=true,cardprobe=true,dragdiag=true,mapprobe=true,mapstack=true,mapfocus=true,mapdiag=true,clickdiag=true}
+C.diagnostics={barprobe=true,groupprobe=true,cardprobe=true,dragdiag=true,mapprobe=true,mapstack=true,mapfocus=true,mapdiag=true,clickdiag=true}
 function C.Diagnostic(msg)
  local ok,err=pcall(C.Command,msg)
  if not ok then DEFAULT_CHAT_FRAME:AddMessage("FieldKit diagnostic error ("..tostring(msg).."): "..tostring(err)) end
@@ -404,6 +404,7 @@ function C.Command(msg)
    if f then local p=f:GetParent();DEFAULT_CHAT_FRAME:AddMessage(name.." parent="..tostring(p and p:GetName()).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown())) end
   end
  elseif string.find(arg,"^groupprobe") then FieldKitGroupHistory.Probe(arg)
+ elseif arg=="barprobe" then for _,line in ipairs(FieldKitCoop.BarProbe()) do DEFAULT_CHAT_FRAME:AddMessage("barprobe: "..line) end
  elseif arg=="cardprobe" then
   for _,line in ipairs(FieldKitReferenceHUD.Probe()) do DEFAULT_CHAT_FRAME:AddMessage(line) end
  elseif string.find(arg,"^dragdiag") then

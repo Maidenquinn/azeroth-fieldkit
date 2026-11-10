@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.36 - CARTE SORTS DYNAMIQUE, BARRES, EFFETS
+Hauteur de la carte Equipement/Sorts selon le contenu, remplissage des barres de groupe, marges des effets. /fieldkit barprobe pour mesurer la barre. A recetter en jeu.
+
 ALPHA.35 - FINITIONS UX
 Boutons du chat, option chevauchement, icone info du pied, entete Degats, barres des cartes de groupe. A recetter en jeu.
 

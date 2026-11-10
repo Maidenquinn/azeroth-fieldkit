@@ -1,6 +1,6 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.6.0-alpha.35",
+  "candidate": "0.6.0-alpha.36",
   "runtimeModules": 48,
   "textureCount": 245,
   "forbiddenTokenGatePassed": true,
@@ -8,7 +8,7 @@
   "files": {
     "Runtime.lua": {
       "bytes": 5187,
-      "sha256": "7acb97f7470f388c8f22432ecc92f796909907ab10954cd22cea72db5be0e37a",
+      "sha256": "dd97854c0dce11c527a55d38b3c3e12493ee9269b84a8b88d3579f987652165f",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -977,8 +977,8 @@
       "literalEvents": []
     },
     "Coop.lua": {
-      "bytes": 31717,
-      "sha256": "0489fd91bfdf4f9a417341bac617c107b24211f91b10ea2767f74ed07705f7d3",
+      "bytes": 33409,
+      "sha256": "7e787b0f19c0a2179c67e0b57bd0dd97ce0455214e78f704762ad789e38e2527",
       "namedFunctions": [
         {
           "name": "P.Taken",
@@ -1069,44 +1069,56 @@
           "line": 319
         },
         {
+          "name": "P.SizeBar",
+          "line": 324
+        },
+        {
+          "name": "P.FillBar",
+          "line": 333
+        },
+        {
           "name": "Box",
-          "line": 320
+          "line": 338
         },
         {
           "name": "P.Compact",
-          "line": 326
+          "line": 344
         },
         {
           "name": "P.Themed",
-          "line": 397
+          "line": 415
         },
         {
           "name": "P.CardsOn",
-          "line": 398
+          "line": 416
         },
         {
           "name": "P.ReplaceOn",
-          "line": 399
+          "line": 417
         },
         {
           "name": "P.HealthColor",
-          "line": 401
+          "line": 419
         },
         {
           "name": "P.UpdateMember",
-          "line": 408
+          "line": 426
         },
         {
           "name": "P.UpdateMeter",
-          "line": 466
+          "line": 484
         },
         {
           "name": "P.Update",
-          "line": 488
+          "line": 506
         },
         {
           "name": "P.Diagnostic",
-          "line": 500
+          "line": 518
+        },
+        {
+          "name": "P.BarProbe",
+          "line": 526
         }
       ],
       "literalEvents": []
@@ -3142,8 +3154,8 @@
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 101879,
-      "sha256": "1388e1e82c03155f298a733563c9c1bb35318698fe0ccd842712dfdf32eec539",
+      "bytes": 106297,
+      "sha256": "a2c7d86447100b7facd9774f5e3e3fb216a39a8cb69ae208c14891e584c49441",
       "namedFunctions": [
         {
           "name": "Short",
@@ -3195,278 +3207,306 @@
         },
         {
           "name": "Label",
-          "line": 180
+          "line": 186
         },
         {
           "name": "Button",
-          "line": 184
-        },
-        {
-          "name": "R.Fit",
           "line": 190
         },
         {
+          "name": "R.Fit",
+          "line": 196
+        },
+        {
           "name": "R.Stop",
-          "line": 213
+          "line": 219
         },
         {
           "name": "R.Update",
-          "line": 221
+          "line": 227
         },
         {
           "name": "R.MapRim",
-          "line": 379
+          "line": 385
         },
         {
           "name": "R.LauncherLabel",
-          "line": 404
-        },
-        {
-          "name": "R.Map",
           "line": 410
         },
         {
+          "name": "R.Map",
+          "line": 416
+        },
+        {
+          "name": "R.EffectIcon",
+          "line": 476
+        },
+        {
           "name": "R.AmountParts",
-          "line": 467
+          "line": 481
         },
         {
           "name": "Row",
-          "line": 472
+          "line": 486
         },
         {
           "name": "R.DamageTabs",
-          "line": 484
+          "line": 498
         },
         {
           "name": "R.SocketY",
-          "line": 528
+          "line": 542
         },
         {
           "name": "R.SocketH",
-          "line": 531
-        },
-        {
-          "name": "R.SocketIcon",
-          "line": 532
-        },
-        {
-          "name": "R.DiagHook",
-          "line": 538
-        },
-        {
-          "name": "R.DamageTip",
-          "line": 546
-        },
-        {
-          "name": "Add",
           "line": 552
         },
         {
-          "name": "R.ToggleStats",
+          "name": "R.SocketIcon",
+          "line": 553
+        },
+        {
+          "name": "R.DiagHook",
+          "line": 559
+        },
+        {
+          "name": "R.DamageTip",
+          "line": 567
+        },
+        {
+          "name": "Add",
           "line": 573
         },
         {
+          "name": "R.ToggleStats",
+          "line": 594
+        },
+        {
           "name": "R.StatsCapFor",
-          "line": 574
+          "line": 595
         },
         {
           "name": "R.StatsPlan",
-          "line": 578
+          "line": 599
         },
         {
-          "name": "R.AccPlan",
-          "line": 588
+          "name": "R.AccZone",
+          "line": 615
         },
         {
-          "name": "Inset",
-          "line": 605
+          "name": "R.AccMin",
+          "line": 616
         },
         {
-          "name": "R.CardVisible",
-          "line": 606
+          "name": "R.AccCut",
+          "line": 617
         },
         {
-          "name": "R.ZoomXY",
-          "line": 614
+          "name": "R.AccDelta",
+          "line": 622
         },
         {
-          "name": "R.RingGeometry",
-          "line": 620
-        },
-        {
-          "name": "Add",
+          "name": "R.AccShape",
           "line": 628
         },
         {
-          "name": "R.Preferred",
-          "line": 634
+          "name": "R.AccPlan",
+          "line": 636
         },
         {
-          "name": "R.LiveRect",
-          "line": 642
+          "name": "Inset",
+          "line": 661
         },
         {
-          "name": "R.NoteMoved",
-          "line": 651
+          "name": "R.CardVisible",
+          "line": 662
         },
         {
-          "name": "R.ScreenSize",
-          "line": 671
+          "name": "R.ZoomXY",
+          "line": 670
+        },
+        {
+          "name": "R.RingGeometry",
+          "line": 676
         },
         {
           "name": "Add",
-          "line": 673
-        },
-        {
-          "name": "R.ScreenBounds",
           "line": 684
         },
         {
+          "name": "R.Preferred",
+          "line": 690
+        },
+        {
+          "name": "R.LiveRect",
+          "line": 698
+        },
+        {
+          "name": "R.NoteMoved",
+          "line": 707
+        },
+        {
+          "name": "R.ScreenSize",
+          "line": 727
+        },
+        {
+          "name": "Add",
+          "line": 729
+        },
+        {
+          "name": "R.ScreenBounds",
+          "line": 740
+        },
+        {
           "name": "R.ApplyClamp",
-          "line": 693
+          "line": 749
         },
         {
           "name": "R.ClampToScreen",
-          "line": 701
+          "line": 757
         },
         {
           "name": "FixedObstacles",
-          "line": 718
+          "line": 774
         },
         {
           "name": "R.PreferredAny",
-          "line": 735
+          "line": 791
         },
         {
           "name": "R.StatsRoom",
-          "line": 747
+          "line": 803
+        },
+        {
+          "name": "R.AccMaxRows",
+          "line": 816
         },
         {
           "name": "R.Probe",
-          "line": 760
+          "line": 831
         },
         {
           "name": "PartySame",
-          "line": 779
+          "line": 850
         },
         {
           "name": "R.PartyFrames",
-          "line": 780
+          "line": 851
         },
         {
           "name": "R.PartyPrepare",
-          "line": 783
+          "line": 854
         },
         {
           "name": "R.PartyApply",
-          "line": 795
+          "line": 866
         },
         {
           "name": "R.PartyRestore",
-          "line": 806
-        },
-        {
-          "name": "R.PartyRestoreAll",
-          "line": 810
-        },
-        {
-          "name": "R.PartyPass",
-          "line": 812
-        },
-        {
-          "name": "R.Resolve",
-          "line": 820
-        },
-        {
-          "name": "Opaque",
-          "line": 828
-        },
-        {
-          "name": "Rank",
-          "line": 852
-        },
-        {
-          "name": "Free",
-          "line": 860
-        },
-        {
-          "name": "Hit",
-          "line": 862
-        },
-        {
-          "name": "SearchY",
-          "line": 867
-        },
-        {
-          "name": "Search",
           "line": 877
         },
         {
-          "name": "R.ApplyShift",
-          "line": 905
+          "name": "R.PartyRestoreAll",
+          "line": 881
         },
         {
-          "name": "R.PlanLayout",
-          "line": 916
+          "name": "R.PartyPass",
+          "line": 883
         },
         {
-          "name": "R.RowIcon",
-          "line": 926
+          "name": "R.Resolve",
+          "line": 891
         },
         {
-          "name": "R.Stable",
-          "line": 932
+          "name": "Opaque",
+          "line": 899
         },
         {
-          "name": "R.HideUnwanted",
+          "name": "Rank",
+          "line": 923
+        },
+        {
+          "name": "Free",
+          "line": 931
+        },
+        {
+          "name": "Hit",
           "line": 933
         },
         {
+          "name": "SearchY",
+          "line": 938
+        },
+        {
+          "name": "Search",
+          "line": 948
+        },
+        {
+          "name": "R.ApplyShift",
+          "line": 976
+        },
+        {
+          "name": "R.PlanLayout",
+          "line": 987
+        },
+        {
+          "name": "R.RowIcon",
+          "line": 1003
+        },
+        {
+          "name": "R.Stable",
+          "line": 1009
+        },
+        {
+          "name": "R.HideUnwanted",
+          "line": 1010
+        },
+        {
           "name": "R.CardRect",
-          "line": 937
+          "line": 1014
         },
         {
           "name": "R.Window",
-          "line": 955
+          "line": 1031
         },
         {
           "name": "R.CardTabs",
-          "line": 964
+          "line": 1040
         },
         {
           "name": "R.MaskBuffs",
-          "line": 988
+          "line": 1064
         },
         {
           "name": "R.LairList",
-          "line": 999
+          "line": 1075
         },
         {
           "name": "Tint",
-          "line": 1002
+          "line": 1078
         },
         {
           "name": "R.Panels",
-          "line": 1029
+          "line": 1105
         },
         {
           "name": "Wide",
-          "line": 1098
+          "line": 1174
         },
         {
           "name": "R.Settings",
-          "line": 1215
+          "line": 1291
         },
         {
           "name": "R.Buffs",
-          "line": 1230
+          "line": 1306
         }
       ],
       "literalEvents": []
     },
     "ZoneThemes.lua": {
-      "bytes": 37858,
-      "sha256": "970480a30055ef46b2432c79d2f2bee321908379bea86df377391eafd70295eb",
+      "bytes": 38004,
+      "sha256": "a40f38c321962fe1cb8df2979670512d51805debd175b429525dff4287d21318",
       "namedFunctions": [
         {
           "name": "C.NormalizeScales",
@@ -3602,19 +3642,19 @@
         },
         {
           "name": "FieldKitThemeUI",
-          "line": 444
+          "line": 445
         },
         {
           "name": "Button",
-          "line": 448
+          "line": 449
         },
         {
           "name": "C.CycleElement",
-          "line": 497
+          "line": 498
         },
         {
           "name": "C.RefreshElementUI",
-          "line": 503
+          "line": 504
         }
       ],
       "literalEvents": []
@@ -5610,7 +5650,7 @@
   "inGameTest": false,
   "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.6.0-alpha.35",
+    "version": "0.6.0-alpha.36",
     "maintainerAcceptedForPublication": false,
     "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
@@ -5621,7 +5661,7 @@
     "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
     "maintainerInGameTestingReported": true,
-    "inGameTestScope": "Alpha35: Lua 5.0.3/5.1 synthetic chat controls, overlap row, Damage header and amounts, foot label vs baked icon, flat bar fill; NOT yet observed natively. Previous scope - Alpha34: Lua 5.0.3/5.1 synthetic Aethus-art group card geometry, Damage header/amounts FR-EN, chat fill inset; art composition checked offline from the real texture; NOT yet observed natively. Previous scope - Alpha33: Lua 5.0.3/5.1 synthetic card geometry (skin size, content box, 3 details x 3 scales) and provenance tooltip; NOT yet observed natively; alpha.32 passed its tests and still overflowed natively. Previous scope - Alpha32: Lua 5.0.3/5.1 synthetic group card component, options, history parser, probe; NOT yet observed natively; event delivery to be measured with groupprobe. Previous scope - Alpha31: Lua 5.0.3/5.1 synthetic compact teammate card (bars, values, states, sizes); NOT yet observed natively - alpha.30 passed the same kind of tests and failed natively. Previous scope - Alpha30: Lua 5.0.3/5.1 synthetic themed teammate cards (states, native replacement and restore, strata, individual moves, priority over main cards), both zones; NOT yet observed natively. Previous scope - Alpha29: Lua 5.0.3/5.1 synthetic teammate cards in the placement engine (0-4 members, collisions, drag, persistence, Bonuses expansion), both zones; NOT yet observed natively. Previous scope - Alpha28: Lua 5.0.3/5.1 synthetic launcher proxy click/tooltip, party dead status, leave and empty state; NOT yet observed natively. Previous scope - Alpha27: Lua 5.0.3/5.1 synthetic render order (gear above the art rim, native levels restored), both zones; NOT yet observed natively. Previous scope - Alpha26: Lua 5.0.3/5.1 synthetic ring geometry (border-centred, keep-outs, default on), both zones; NOT yet observed natively. Previous scope - Alpha25: Lua 5.0.3/5.1 synthetic regression reproducing the native mouse stack (owner 3, map 2, gear 2) and the corrected order, both zones; gear click/drag NOT yet observed natively. Previous scope - Alpha24: Lua 5.0.3/5.1 synthetic regression for diagnostic command routing (none opens the settings window, each prints, errors printed) and unchanged ordinary commands; commands in the real client NOT yet run. Previous scope - Alpha23: Lua 5.0.3/5.1 synthetic regression for the four real screen edges with a short UIParent measurement (all five cards, both zones, drop snap, persistence) and read-only gear diagnostics; real edges and the AzerothHub gear NOT observed natively. Previous scope - Alpha22: Lua 5.0.3/5.1 synthetic regression for protected parts measured where they really are, cards dropped on former places, clamp off, map/card probes; real mouse, AzerothHub gear and the clamp behaviour NOT observed natively. Previous scope - Alpha21: Lua 5.0.3/5.1 synthetic regression for real screen bounds (letterboxed canvas), edge-flush manual placement and drop snapping, protected-obstacle limit for Bonuses, no-cascade search, map mouse coverage; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha20: Lua 5.0.3/5.1 synthetic regression bench on RENDERED rectangles with every card saved (captured case), map group owner, zoom buttons, seven permanent sockets; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha19: Lua 5.0.3/5.1 synthetic regression for the vertical placement engine (determinism, drag freeze, pinned neighbours, option), seven spells, six damage categories, tooltip and map follower; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha18: Lua 5.0.3/5.1 synthetic regression for Spells indicator, in-place Bonuses (4/12/29 rows, screen edge, Effects, saved positions), Damage hover tooltips (full and partial data) and gear placement; real mouse interaction and AzerothHub NOT observed natively. Previous scope - Alpha17: Lua 5.0.3/5.1 synthetic regression for 30-alternation click stability (Hide counted, mock fires no OnHide), six damage rows and stretched art, lair margins, repeated theme/map-button transitions; real mouse interaction and AzerothHub NOT observed natively. Previous scope - Alpha16: Lua 5.0.3/5.1 synthetic regression for drag across refreshes (mock does not fire OnHide: Hide calls counted), socket-centred icons, Damage foot clearance and third-party map buttons; drag and map NOT observed natively. Previous scope - Alpha15: Lua 5.0.3/5.1 synthetic regression for map opening fill and rim, header tabs, portrait socket, lair columns, empty damage state and tab stability; NOT observed natively. Previous scope - Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
+    "inGameTestScope": "Alpha36: Lua 5.0.3/5.1 synthetic dynamic Equipment/Spells card (0-12 spells), bar fill at 6 values x 4 scales, Effects margins; art cut points measured offline; NOT yet observed natively; alpha.35 flat fill did not fix the bar in the real client. Previous scope - Alpha35: Lua 5.0.3/5.1 synthetic chat controls, overlap row, Damage header and amounts, foot label vs baked icon, flat bar fill; NOT yet observed natively. Previous scope - Alpha34: Lua 5.0.3/5.1 synthetic Aethus-art group card geometry, Damage header/amounts FR-EN, chat fill inset; art composition checked offline from the real texture; NOT yet observed natively. Previous scope - Alpha33: Lua 5.0.3/5.1 synthetic card geometry (skin size, content box, 3 details x 3 scales) and provenance tooltip; NOT yet observed natively; alpha.32 passed its tests and still overflowed natively. Previous scope - Alpha32: Lua 5.0.3/5.1 synthetic group card component, options, history parser, probe; NOT yet observed natively; event delivery to be measured with groupprobe. Previous scope - Alpha31: Lua 5.0.3/5.1 synthetic compact teammate card (bars, values, states, sizes); NOT yet observed natively - alpha.30 passed the same kind of tests and failed natively. Previous scope - Alpha30: Lua 5.0.3/5.1 synthetic themed teammate cards (states, native replacement and restore, strata, individual moves, priority over main cards), both zones; NOT yet observed natively. Previous scope - Alpha29: Lua 5.0.3/5.1 synthetic teammate cards in the placement engine (0-4 members, collisions, drag, persistence, Bonuses expansion), both zones; NOT yet observed natively. Previous scope - Alpha28: Lua 5.0.3/5.1 synthetic launcher proxy click/tooltip, party dead status, leave and empty state; NOT yet observed natively. Previous scope - Alpha27: Lua 5.0.3/5.1 synthetic render order (gear above the art rim, native levels restored), both zones; NOT yet observed natively. Previous scope - Alpha26: Lua 5.0.3/5.1 synthetic ring geometry (border-centred, keep-outs, default on), both zones; NOT yet observed natively. Previous scope - Alpha25: Lua 5.0.3/5.1 synthetic regression reproducing the native mouse stack (owner 3, map 2, gear 2) and the corrected order, both zones; gear click/drag NOT yet observed natively. Previous scope - Alpha24: Lua 5.0.3/5.1 synthetic regression for diagnostic command routing (none opens the settings window, each prints, errors printed) and unchanged ordinary commands; commands in the real client NOT yet run. Previous scope - Alpha23: Lua 5.0.3/5.1 synthetic regression for the four real screen edges with a short UIParent measurement (all five cards, both zones, drop snap, persistence) and read-only gear diagnostics; real edges and the AzerothHub gear NOT observed natively. Previous scope - Alpha22: Lua 5.0.3/5.1 synthetic regression for protected parts measured where they really are, cards dropped on former places, clamp off, map/card probes; real mouse, AzerothHub gear and the clamp behaviour NOT observed natively. Previous scope - Alpha21: Lua 5.0.3/5.1 synthetic regression for real screen bounds (letterboxed canvas), edge-flush manual placement and drop snapping, protected-obstacle limit for Bonuses, no-cascade search, map mouse coverage; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha20: Lua 5.0.3/5.1 synthetic regression bench on RENDERED rectangles with every card saved (captured case), map group owner, zoom buttons, seven permanent sockets; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha19: Lua 5.0.3/5.1 synthetic regression for the vertical placement engine (determinism, drag freeze, pinned neighbours, option), seven spells, six damage categories, tooltip and map follower; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha18: Lua 5.0.3/5.1 synthetic regression for Spells indicator, in-place Bonuses (4/12/29 rows, screen edge, Effects, saved positions), Damage hover tooltips (full and partial data) and gear placement; real mouse interaction and AzerothHub NOT observed natively. Previous scope - Alpha17: Lua 5.0.3/5.1 synthetic regression for 30-alternation click stability (Hide counted, mock fires no OnHide), six damage rows and stretched art, lair margins, repeated theme/map-button transitions; real mouse interaction and AzerothHub NOT observed natively. Previous scope - Alpha16: Lua 5.0.3/5.1 synthetic regression for drag across refreshes (mock does not fire OnHide: Hide calls counted), socket-centred icons, Damage foot clearance and third-party map buttons; drag and map NOT observed natively. Previous scope - Alpha15: Lua 5.0.3/5.1 synthetic regression for map opening fill and rim, header tabs, portrait socket, lair columns, empty damage state and tab stability; NOT observed natively. Previous scope - Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

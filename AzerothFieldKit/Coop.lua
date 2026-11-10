@@ -208,7 +208,7 @@ local function MakeBar(frame)
  -- A flat white fill (tinted by SetStatusBarColor): the stock UI-StatusBar texture is a 128x16 gradient strip whose tiling and
  -- soft ends show as small interruptions in a full bar at some scales. Flat = one uniform fill at 100 %, exact at any value.
  bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8");bar.fieldkitTexture="Interface\\Buttons\\WHITE8X8";bar:SetMinMaxValues(0,1);bar:SetValue(0)
- bar.back=bar:CreateTexture(nil,"BACKGROUND");bar.back:SetAllPoints(bar);bar.back:SetTexture(0,0,0,.6)
+ bar.back=bar:CreateTexture(nil,"BACKGROUND");bar.back:SetAllPoints(bar);bar.back:SetTexture(.02,.03,.025,.92)
  -- thin gold outline drawn on the bar itself (anchored to its edges, so it can never leave the bar)
  bar.edge={}
  for n,def in ipairs({{"TOPLEFT","TOPRIGHT",true},{"BOTTOMLEFT","BOTTOMRIGHT",true},{"TOPLEFT","BOTTOMLEFT",false},{"TOPRIGHT","BOTTOMRIGHT",false}}) do
@@ -317,6 +317,24 @@ function P.Art(frame,width,height)
  return {x1,y1,x2,y2}
 end
 function P.HideArt(frame) for _,t in ipairs(frame.artTiles or {}) do t:Hide() end end
+-- A status bar with an explicit whole-pixel size, one anchor, and a fill that is recomputed whenever its geometry changes. The
+-- fill of a StatusBar is computed when the value is set; with two anchors the width is only resolved at the next layout pass,
+-- so a fill computed at set-value time could be shorter than the bar that finally exists (a transparent strip at 100 %).
+-- Toggling the value after a size change forces the fill to be recomputed at the real width.
+function P.SizeBar(bar,frame,x,y,w,h)
+ w=math.floor(w+.5);h=math.floor(h+.5)
+ bar:ClearAllPoints();bar:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-y);bar:SetWidth(w);bar:SetHeight(h)
+ local key=w.."x"..h
+ if bar.fieldkitSize~=key then
+  bar.fieldkitSize=key;bar.fieldkitW,bar.fieldkitH=w,h
+  bar:SetStatusBarTexture(bar.fieldkitTexture);bar:SetMinMaxValues(0,1);bar:SetValue(0)
+ end
+end
+function P.FillBar(bar,fraction,r,g,b)
+ fraction=math.max(0,math.min(1,fraction or 0))
+ bar:SetValue(fraction);bar.fieldkitFraction=fraction
+ if r then bar:SetStatusBarColor(r,g,b,1) end -- fully opaque fill: nothing of the card shows through the filled part
+end
 local function Box(fs,frame,left,right,y,h,size,justify)
  fs:ClearAllPoints();fs:SetPoint("TOPLEFT",frame,"TOPLEFT",left,-y);fs:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-y)
  fs:SetHeight(h);fs:SetJustifyH(justify or "LEFT");FieldKitTheme.Font(fs,size,FieldKitTheme.text)
@@ -377,15 +395,15 @@ function P.Compact(frame,d)
   layout.icons={width-right-5*14,width-right,box[3]+spec.info-.5,12}
  else for _,t in ipairs(frame.historyIcons) do t:Hide() end end
  -- life bar: anchored to both edges, so it ends exactly at the content box
- local bar=frame.hpBar;bar:ClearAllPoints();bar:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(box[3]+spec.hp));bar:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(box[3]+spec.hp));bar:SetHeight(spec.hpH)
- if d.fraction then bar:SetValue(d.fraction);bar:SetStatusBarColor(d.barColor[1],d.barColor[2],d.barColor[3],.95);bar.fieldkitColor=d.barColor else bar:SetValue(0) end
+ local bar=frame.hpBar;P.SizeBar(bar,frame,x,box[3]+spec.hp,width-right-x,spec.hpH)
+ if d.fraction then P.FillBar(bar,d.fraction,d.barColor[1],d.barColor[2],d.barColor[3]);bar.fieldkitColor=d.barColor else P.FillBar(bar,0) end
  bar:Show();FieldKitTheme.Font(bar.text,10,{1,1,1});bar.text:SetText(d.hpText)
  layout.hp={x,width-right,box[3]+spec.hp,spec.hpH}
  local res=frame.mpBar
  local hasResource=spec.res and d.mana~=nil and d.manaMax~=nil and d.manaMax>0 and not d.muted
  if hasResource then
-  res:ClearAllPoints();res:SetPoint("TOPLEFT",frame,"TOPLEFT",x,-(box[3]+spec.res));res:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-right,-(box[3]+spec.res));res:SetHeight(spec.resH)
-  res:SetValue(math.min(d.mana/d.manaMax,1));res:SetStatusBarColor(d.powerColor[1],d.powerColor[2],d.powerColor[3],.9);res.fieldkitColor=d.powerColor
+  P.SizeBar(res,frame,x,box[3]+spec.res,width-right-x,spec.resH)
+  P.FillBar(res,d.mana/d.manaMax,d.powerColor[1],d.powerColor[2],d.powerColor[3]);res.fieldkitColor=d.powerColor
   for _,t in ipairs(res.edge) do if spec.resH>=6 then t:Show() else t:Hide() end end
   if spec.resH>=9 then FieldKitTheme.Font(res.text,9,{1,1,1});res.text:SetText(string.format("%.0f / %.0f",d.mana,d.manaMax)) else res.text:SetText("") end
   res:Show();layout.res={x,width-right,box[3]+spec.res,spec.resH}
@@ -501,4 +519,20 @@ function P.Diagnostic()
  local _,count=P.Roster();local lines,total,known=P.Taken()
  local raw=type(AZS_TAKEN)=="table" and table.getn(AZS_TAKEN) or 0
  DEFAULT_CHAT_FRAME:AddMessage("FieldKit coop: partyUnits="..count.." partyRows="..table.getn(P.party or {}).." packets="..P.generation.." rawTakenSources="..raw.." nativeTaken="..tostring(type(AZS_RUN)=="table" and AZS_RUN.taken).." shownTaken="..(known and tostring(total) or "unknown"))
+end
+
+-- /fieldkit barprobe: what each teammate life bar really is (size, value, fill texture width) so a transparent strip at 100 %
+-- can be measured in the game instead of guessed.
+function P.BarProbe()
+ local out={}
+ for index=0,4 do
+  local f=P.frames[index]
+  if f and f:IsShown() and f.hpBar then
+   local b=f.hpBar;local tex=b.GetStatusBarTexture and b:GetStatusBarTexture()
+   local tw=tex and type(tex)=="table" and tex.GetWidth and tex:GetWidth() or nil
+   table.insert(out,string.format("card %d %s: bar %sx%s value %s fill texture width %s scale %.2f effective %.3f",index,tostring(f.unit),tostring(b:GetWidth()),tostring(b:GetHeight()),tostring(b:GetValue()),tostring(tw),f:GetScale() or 0,f.GetEffectiveScale and f:GetEffectiveScale() or 0))
+  end
+ end
+ if table.getn(out)==0 then table.insert(out,"no teammate card shown") end
+ return out
 end

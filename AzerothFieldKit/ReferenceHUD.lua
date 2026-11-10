@@ -54,7 +54,7 @@ function R.Create()
   f.total=T.Label(f,nil,0,0,300,30,16,R.body)
   f.rateLabel=T.Label(f,nil,0,0,110,30,17,R.body)
   f.rows={}
-  for i=1,(kind=="Stats" and 30 or (kind=="Accessories" and 7 or 6)) do
+  for i=1,(kind=="Stats" and 30 or (kind=="Accessories" and 24 or 6)) do
    local row=CreateFrame("Button",nil,f);f.rows[i]=row;row:SetWidth(300);row:SetHeight(34)
    row.label=T.Label(row,nil,0,0,210,28,17,R.body);pcall(row.label.SetFont,row.label,T.media.."NotoSerif-Regular.ttf",17,"")
    row.value=T.Label(row,nil,212,0,78,28,17,R.body);row.value:SetJustifyH("RIGHT")
@@ -150,7 +150,13 @@ function R.Art(frame,component,layout)
  for _,a in ipairs(tiles) do
   local dx,dy,iw,ih,tw,th=a[2],a[3],a[4],a[5],a[6],a[7]
   local rep=frame.referenceRepeat;local endTop=rep and rep.at+rep.h
-  if rep and rep.count>0 and endTop>dy and endTop<dy+ih then
+  if rep and rep.cut then
+   -- Fewer rows than the art holds: whole row slices are removed between two separator lines (never stretched): the top part
+   -- ends after a separator, the rest of the art (last row(s) and the foot) follows it directly.
+   local c=rep.cut
+   table.insert(pieces,{a[1],dx,dy,iw,c.topEnd-dy,iw/tw,0,(c.topEnd-dy)/th})
+   table.insert(pieces,{a[1],dx,c.topEnd,iw,dy+ih-c.restFrom,iw/tw,(c.restFrom-dy)/th,ih/th})
+  elseif rep and rep.count>0 and endTop>dy and endTop<dy+ih then
    -- Extra rows: the art row slice [at,at+h) is repeated `count` times, so sockets and separators stay periodic.
    table.insert(pieces,{a[1],dx,dy,iw,endTop-dy,iw/tw,0,(endTop-dy)/th})
    for c=0,rep.count-1 do table.insert(pieces,{a[1],dx,endTop+c*rep.h,iw,rep.h,iw/tw,(rep.at-dy)/th,(endTop-dy)/th}) end
@@ -464,6 +470,14 @@ function R.Map()
  end
  return true
 end
+-- Effects list: one icon size, a regular left padding (37 px from the card edge, 10 px before the name), centred on the row
+-- (the icon used to sit 2 px above the row, 32 px from the edge, on its raw 0..1 texture with the dark rounded border).
+R.EFFECT_ICON={size=25,gap=10}
+function R.EffectIcon(r,texture)
+ local k=R.EFFECT_ICON;local h=r:GetHeight()
+ r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-(k.size+k.gap),-math.floor((h-k.size)/2))
+ r.icon:SetWidth(k.size);r.icon:SetHeight(k.size);r.icon:SetTexCoord(.07,.93,.07,.93);r.icon:SetVertexColor(1,1,1,1);r.icon:SetTexture(texture);r.icon:Show()
+end
 function R.AmountParts(r)
  if r.amount then return end
  r.amount=r:CreateFontString(nil,"OVERLAY","GameFontNormal");T.Font(r.amount,14,T.muted)
@@ -525,7 +539,14 @@ function R.DamageTabs(f,a,zone,index)
 end
 -- Socket geometry measured on the approved Equipment art (reference px, card-local): icons are centred in them.
 local SOCKETS={elwynn={x=32,y=51,step=36,w=28,h=28},naxx={x=32,y=57,step=34.75,w=38,h=30}}
-function R.SocketY(zone,i) local s=SOCKETS[zone] or SOCKETS.elwynn
+function R.SocketY(zone,i,n) local s=SOCKETS[zone] or SOCKETS.elwynn
+ local cut=n and n<5 and R.AccCut(zone,n)
+ if cut then
+  -- shrunk card: the rows kept in the top part keep their place, the rows of the art's tail follow the removed height
+  if i<=cut.rowsTop then return math.floor(s.y+s.step*(i-1)+.5) end
+  if zone=="naxx" then return math.floor(161.5+35*(i-cut.rowsTop-1)+cut.delta+.5) end
+  return math.floor(195+cut.delta+.5)
+ end
  if zone=="naxx" and i>3 then return math.floor(126.5+35*(i-3)+.5) end -- rows 4+ come from the repeated 35 px art slice
  return math.floor(s.y+s.step*(i-1)+.5) end
 function R.SocketH(zone) return (SOCKETS[zone] or SOCKETS.elwynn).h end
@@ -585,8 +606,43 @@ function R.StatsPlan(zone,d)
  R.statsExtra=math.max(0,head+n*step+foot-base[4]);R.statsCap=R.StatsCapFor(zone,base,R.statsExtra)
 end
 -- Spells tab: up to seven rows; the card grows by the missing socket rows (art slice repeated).
-function R.AccPlan()
- R.accRows=FieldKitDB.loadoutTab==2 and 2 or 0 -- the Spells tab always shows seven sockets, whatever the number of spells
+-- Equipment / Spells: the card height follows the content of the active tab. The art holds five rows. More rows repeat the
+-- art's row slice (as before); fewer rows remove whole row slices between two separators; corners, ornaments and borders are
+-- never stretched. Cut points were measured on the art (the separator lines): Elwynn keeps rows 1..n-1 in the top part and the
+-- last row in the tail (min 1 row), Naxx keeps rows 1..n-2 and its two tail rows (min 3 rows).
+local ACC_CUT={elwynn={top={[0]=44,[1]=83,[2]=119,[3]=156},restFrom=191,tailRows=1,minRows=1,base=191},
+ naxx={top={[1]=87,[2]=121},restFrom=156,tailRows=2,minRows=3,base=156}}
+function R.AccZone(zone) return zone or (R.key=="naxx_complete" and "naxx" or "elwynn") end
+function R.AccMin(zone) return ACC_CUT[R.AccZone(zone)].minRows end
+function R.AccCut(zone,n)
+ local c=ACC_CUT[R.AccZone(zone)];local rowsTop=n-c.tailRows;local topEnd=c.top[rowsTop]
+ if not topEnd then return nil end
+ return {topEnd=topEnd,restFrom=c.restFrom,rowsTop=rowsTop,delta=topEnd-c.base}
+end
+function R.AccDelta(zone,n)
+ zone=R.AccZone(zone);local step=zone=="naxx" and 35 or 36
+ if n>5 then return (n-5)*step end
+ if n<5 then local c=R.AccCut(zone,n);return c and c.delta or 0 end
+ return 0
+end
+function R.AccShape(zone,n)
+ zone=R.AccZone(zone);n=n or R.accN or 5
+ if n==5 then R.accShape=nil;return nil end
+ local step=zone=="naxx" and 35 or 36
+ if n>5 then R.accShape={delta=(n-5)*step,rep={at=zone=="naxx" and 121 or 155,h=step,count=n-5}}
+ else local c=R.AccCut(zone,n);R.accShape=c and {delta=c.delta,rep={at=0,h=0,count=0,cut=c}} or nil end
+ return R.accShape
+end
+function R.AccPlan(zone,d)
+ R.accShape=nil;R.accN=5;R.accWanted=5;R.accScroll=false
+ if FieldKitDB.loadoutTab~=2 then return end
+ zone=R.AccZone(zone)
+ local total=table.getn(FieldKitLoadout.spells or {})
+ local want=math.max(R.AccMin(zone),math.min(24,total))
+ R.accWanted=want;R.accN=want
+ if d and d.rects.Accessories then R.accN=math.max(R.AccMin(zone),math.min(want,R.AccMaxRows(zone,d))) end
+ R.accScroll=total>R.accN
+ R.AccShape(zone,R.accN)
 end
 -- ===== Placement: preferred position (default rectangle or the user's saved spot) vs displayed position. =====
 -- Pure function of the preferred layout, the visible card sizes and the protected HUD rectangles: nothing is stored,
@@ -756,6 +812,21 @@ function R.StatsRoom(d)
  local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanelStats") or 1
  return math.max(0,(limit+n[4]-y)/s-d.rects.Stats[4])
 end
+-- Rows that fit between the card's preferred top and the bottom of the screen (or a protected part under it).
+function R.AccMaxRows(zone,d)
+ local was=R.accShape;R.accShape=nil
+ local x,y,w,h=R.PreferredAny("Accessories",d);R.accShape=was
+ if not x then return 5 end
+ local n=Inset("Accessories");local l,r,top=x+n[1],x+w-n[3],y+n[2]
+ local _,_,_,sb=R.ScreenBounds(d);local limit=sb-8
+ for _,o in ipairs(FixedObstacles(d)) do
+  if math.min(r,o[3])-math.max(l,o[1])>0 and o[4]>top and o[2]>top then limit=math.min(limit,o[2]-GAP) end
+ end
+ local s=FieldKitZoneThemes.ElementScale("FieldKitReferencePanelAccessories") or 1
+ local avail=(limit+n[4]-y)/s;local best=R.AccMin(zone)
+ for count=R.AccMin(zone),24 do if d.rects.Accessories[4]+R.AccDelta(zone,count)<=avail then best=count else break end end
+ return best
+end
 -- Text report for /fieldkit cardprobe: what the engine sees (screen bounds, the obstacles it really uses, every card).
 function R.Probe()
  local out={};local d=R.layout;if not d then return {"no reference layout active"} end
@@ -914,12 +985,18 @@ function R.ApplyShift(f,kind)
 end
 -- One layout pass: sizes first, then placement. A Bonuses card that cannot fit loses rows (scrolls) instead of overlapping.
 function R.PlanLayout(zone,d)
- R.StatsPlan(zone,d);R.AccPlan();R.shift=R.shift or {};R.shiftX=R.shiftX or {}
+ R.StatsPlan(zone,d);R.AccPlan(zone,d);R.shift=R.shift or {};R.shiftX=R.shiftX or {}
  if R.statsOpen and R.statsExtra>0 then R.statsExtra=math.min(R.statsExtra,math.floor(R.StatsRoom(d)));R.statsCap=R.StatsCapFor(zone,d.rects.Stats,R.statsExtra) end
  for pass=1,24 do
   R.Resolve(zone,d)
-  if R.overflow<=0 or not R.statsOpen or R.statsExtra<=0 then break end
-  R.statsExtra=math.max(0,R.statsExtra-math.max(R.overflow,24,R.noRoom and math.floor(R.statsExtra/4) or 0));R.statsCap=R.StatsCapFor(zone,d.rects.Stats,R.statsExtra)
+  if R.overflow<=0 then break end
+  if R.statsOpen and R.statsExtra>0 then
+   R.statsExtra=math.max(0,R.statsExtra-math.max(R.overflow,24,R.noRoom and math.floor(R.statsExtra/4) or 0));R.statsCap=R.StatsCapFor(zone,d.rects.Stats,R.statsExtra)
+  elseif (R.accN or 5)>R.AccMin(zone) and FieldKitDB.loadoutTab==2 then
+   -- the grown Equipment / Spells card pushes the cards under it off the screen: take back rows (the list then scrolls)
+   local step=zone=="naxx" and 35 or 36
+   R.accN=math.max(R.AccMin(zone),R.accN-math.max(1,math.ceil(R.overflow/step)));R.accScroll=table.getn(FieldKitLoadout.spells or {})>R.accN;R.AccShape(zone,R.accN)
+  else break end
  end
 end
 -- Fixed icon column: a real icon, or a neutral socket of the same size (never a guessed icon, never a shifted text).
@@ -937,9 +1014,8 @@ local GROW={elwynn_complete={Damage={top=0,extra=68,split=110},Lairs={top=0,extr
 function R.CardRect(kind,d,noShift)
  local base=d.rects[kind];local grow=base and GROW[R.key] and GROW[R.key][kind]
  if base and kind=="Stats" and (R.statsExtra or 0)>0 then grow={top=0,extra=R.statsExtra,split=100}
- elseif base and kind=="Accessories" and (R.accRows or 0)>0 then
-  local step=R.key=="naxx_complete" and 35 or 36
-  grow={top=0,extra=R.accRows*step,split=0,rep={at=R.key=="naxx_complete" and 121 or 155,h=step,count=R.accRows}}
+ elseif base and kind=="Accessories" and R.accShape then
+  local sh=R.accShape;grow={top=0,extra=sh.delta,split=0,rep=sh.rep}
  end
  if not base then return nil,0,0 end
  local pinned=R.frames[kind] and FieldKitZoneThemes.Position(R.frames[kind])
@@ -1149,7 +1225,7 @@ function R.Panels(variant,zone)
     local tab=FieldKitDB.loadoutTab==2 and 2 or 1
     -- The scroll position lives in the Spells tab label (header): the card body keeps every socket row free.
     local spells=FieldKitLoadout.spells or {};local total=table.getn(spells);local offset,range=0,nil
-    if tab==2 then offset=R.Window(f,"Accessories",total,7);if f.pager:IsShown() then range=string.gsub(f.pager:GetText()," / ","/") end;f.pager:Hide() end
+    if tab==2 then offset=R.Window(f,"Accessories",total,R.accN or 5);if f.pager:IsShown() then range=string.gsub(f.pager:GetText()," / ","/") end;f.pager:Hide() end
     R.CardTabs(f,a,tab,{"Equipment","Spells"},function(i) FieldKitDB.loadoutTab=i;R.scroll=R.scroll or {};R.scroll.Accessories=0;FieldKitZoneThemes.Refresh(true) end,{[2]=range})
     if tab==1 then
      local ids={2,13,14,11,12};local names={"Amulet","Trinket 1","Trinket 2","Ring 1","Ring 2"}
@@ -1158,9 +1234,9 @@ function R.Panels(variant,zone)
       r.fontSize=16;r.fontMin=16
      end
     else
-     if total==0 then local r=Row(f,1,72,R.SocketY(zone,1),a[3]-94,R.SocketH(zone));r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
-     for i=1,math.min(7,total-offset) do
-      local e=spells[offset+i];local r=Row(f,i,72,R.SocketY(zone,i),a[3]-94,R.SocketH(zone));r.entry=e
+     if total==0 then local r=Row(f,1,72,R.SocketY(zone,1,R.accN),a[3]-94,R.SocketH(zone));r.label:SetWidth(a[3]-98);r.label:SetText(FieldKit_L("No spells yet"));r.value:SetText("");r.value:SetWidth(0);r.fontSize=16;r.fontMin=12 end
+     for i=1,math.min(R.accN or 5,total-offset) do
+      local e=spells[offset+i];local r=Row(f,i,72,R.SocketY(zone,i,R.accN),a[3]-94,R.SocketH(zone));r.entry=e
       r.label:SetText(e.name or "?");r.value:SetText(e.rank or "");r.value:SetWidth(78);r.label:SetWidth(a[3]-98-82)
       local icon=FieldKitLoadout.Icon(e.name);if icon then R.SocketIcon(r,zone,icon) end
       r.fontSize=16;r.fontMin=12;local cr,cg,cb=FieldKitLoadout.RankColor(e.rankValue);r.valueTint={cr,cg,cb}
@@ -1192,7 +1268,7 @@ function R.Panels(variant,zone)
      r.label:SetText(e.label or "");r.value:SetText(e.value or "");r.buffIndex=e.buffIndex
      if e.buffIndex then R.effectBuffs=true end
      local available=a[3]-99;local vw=r.value:GetText()~="" and math.min(110,math.max(60,(r.value.GetStringWidth and r.value:GetStringWidth() or 100)+4)) or 0;r.value:SetWidth(vw);r.label:SetWidth(available-vw-8)
-     if e.icon and e.icon~="" then r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-40,2);r.icon:SetWidth(24);r.icon:SetHeight(24);r.icon:SetTexture(e.icon);r.icon:Show() end
+     if e.icon and e.icon~="" then R.EffectIcon(r,e.icon) end
      r.fontSize=16;r.fontMin=11
     end
    end

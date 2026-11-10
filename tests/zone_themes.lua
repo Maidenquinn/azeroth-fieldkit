@@ -346,11 +346,16 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  assert(acc.rows[1].label:GetText()=="Amulet of Test" and not C.open.Accessories,zone..": equipment tab content")
  click(acc.cardTabs[2]);assert(FieldKitDB.loadoutTab==2 and not C.open.Accessories,zone..": Spells replaces the content of the same card")
  assert(acc:IsShown() and acc.rows[1].label:GetText()=="Spell 1" and acc.rows[1].value:GetText()=="Rank 1" and acc.rows[1].entry.name=="Spell 1",zone..": spells listed with ranks and tooltip entries")
- assert(not acc.pager:IsShown() and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"1-7/8",1,true),zone..": the scroll position is in the Spells tab, not over the rows")
+ -- alpha.36: the card grows with the content: all eight spells are listed at once, no scrolling, no pager
+ assert(acc.rows[8]:IsShown() and acc.rows[8].label:GetText()=="Spell 8" and not acc.pager:IsShown() and not string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"/",1,true),zone..": every spell is visible without scrolling")
  Inside(acc,zone,"Accessories")
- this=acc;arg1=-1;acc.scripts.OnMouseWheel();assert(R.scroll.Accessories==1 and acc.rows[1].label:GetText()=="Spell 2",zone..": wheel scrolls the list")
+ -- scrolling remains the fallback when the screen cannot hold the card
+ local realMax=R.AccMaxRows;R.AccMaxRows=function() return 7 end;C.Refresh(true)
+ assert(not acc.rows[8]:IsShown() and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"1-7/8",1,true),zone..": fallback: seven rows and the position in the tab")
+ this=acc;arg1=-1;acc.scripts.OnMouseWheel();assert(R.scroll.Accessories==1 and acc.rows[1].label:GetText()=="Spell 2",zone..": wheel scrolls the fallback list")
 
  arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[7].label:GetText()=="Spell 8" and string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"2-8/8",1,true) and not acc.pager:IsShown(),zone..": scrolling is clamped")
+ R.AccMaxRows=realMax;R.scroll.Accessories=0;C.Refresh(true)
  click(acc.cardTabs[1]);assert(FieldKitDB.loadoutTab==1 and acc.rows[1].label:GetText()=="Amulet of Test" and not acc.pager:IsShown(),zone..": back to Equipment")
  FieldKitLoadout.items,FieldKitLoadout.spells=oldItems,oldSpells
  -- Effects: 0,1,2,4,many
@@ -632,7 +637,8 @@ for _,zone in ipairs({"elwynn","naxx"}) do
   FieldKitDB.language=lang;FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
   FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);local acc=R.frames.Accessories
   assert(not acc.pager:IsShown(),zone..": no counter over the rows ("..count.." spells, "..lang..")")
-  local label=acc.cardTabs[2].fieldkitLabel:GetText();assert((count>7)==(string.find(label,"/",1,true)~=nil),zone..": range in the tab only when scrolling is needed ("..count..")")
+  local label=acc.cardTabs[2].fieldkitLabel:GetText();assert((R.accScroll and true or false)==(string.find(label,"/",1,true)~=nil),zone..": range in the tab only when scrolling is needed ("..count..")")
+  if not R.accScroll then local shown=0;for _,r in ipairs(acc.rows) do if r:IsShown() and r.entry then shown=shown+1 end end;assert(shown==count,zone..": every spell is visible ("..shown.."/"..count..")") end
   local lastBottom=0;for _,r in ipairs(acc.rows) do if r:IsShown() then local _,_,_,_,y=r:GetPoint();lastBottom=math.max(lastBottom,-y+r:GetHeight()) end end
   assert(lastBottom<=R.CardRect("Accessories",R.layout)[4]-10,zone..": rows stay inside the card")
  end end
@@ -754,16 +760,16 @@ for _,zone in ipairs({"elwynn","naxx"}) do
  for _,count in ipairs({0,1,5,7,8,12}) do
   FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="R"..i,rankValue=i,bonuses={},upgrades={}}) end
   FieldKitDB.loadoutTab=2;R.scroll.Accessories=0;C.Refresh(true);local acc=R.frames.Accessories;local base=R.layout.rects.Accessories
-  local rows=2;local step=(zone=="naxx" and 35 or 36) -- seven permanent sockets on the Spells tab
-  assert(acc:GetHeight()==base[4]+rows*step,zone..": card height for "..count.." spells")
-  local shown=0;for i,r in ipairs(acc.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();assert(-y==R.SocketY(zone,i),zone..": row "..i.." sits on socket "..i.." ("..count..")") end end
-  assert(shown==math.max(1,math.min(7,count)),zone..": visible spell rows for "..count)
-  assert((count>7)==(string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"/",1,true)~=nil),zone..": scroll only beyond seven")
+  local N=R.accN;assert(N==math.max(zone=="naxx" and 3 or 1,math.min(24,count)) and not R.accScroll,zone..": the card holds exactly the spells ("..tostring(N).." rows for "..count..")") -- alpha.36: height follows the content
+  assert(acc:GetHeight()==base[4]+R.AccDelta(zone,N),zone..": card height for "..count.." spells ("..acc:GetHeight().." vs "..(base[4]+R.AccDelta(zone,N))..")")
+  local shown=0;for i,r in ipairs(acc.rows) do if r:IsShown() then shown=shown+1;local _,_,_,_,y=r:GetPoint();assert(-y==R.SocketY(zone,i,N),zone..": row "..i.." sits on socket "..i.." ("..count..")") end end
+  assert(shown==(count==0 and 1 or math.min(N,count)),zone..": visible spell rows for "..count)
+  assert(string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"/",1,true)==nil,zone..": no scrolling while the screen has room")
   local reach=0;local pieces={};for _,t in ipairs(acc.referenceTiles) do if t:IsShown() then local _,_,_,_,y=t:GetPoint();table.insert(pieces,{-y,t:GetHeight()}) end end
   table.sort(pieces,function(p,q) return p[1]<q[1] end);for _,p in ipairs(pieces) do assert(p[1]==reach,zone..": art continuity at "..p[1].." expected "..reach.." ("..count..")");reach=reach+p[2] end
   assert(reach==acc:GetHeight(),zone..": art ends at the card bottom ("..count..")")
   NoOverlap(zone.." "..count.." spells")
-  assert((R.shift.Stats or 0)>0 or (R.shiftX.Stats or 0)~=0,zone..": Stats gives way to the taller Equipment card "..count.." sh="..table.concat({tostring(R.shift.Accessories),tostring(R.shiftX.Accessories),tostring(R.shift.Stats),tostring(R.shiftX.Stats),tostring(R.shift.Effects),tostring(R.shiftX.Effects),tostring(R.shift.Lairs),tostring(R.shift.Damage)},",").." last="..tostring(R.lastMoved).." noRoom="..tostring(R.noRoom))
+  if N>5 then assert((R.shift.Stats or 0)>0 or (R.shiftX.Stats or 0)~=0,zone..": Stats gives way to the taller Equipment card "..count.." sh="..table.concat({tostring(R.shift.Accessories),tostring(R.shiftX.Accessories),tostring(R.shift.Stats),tostring(R.shiftX.Stats),tostring(R.shift.Effects),tostring(R.shiftX.Effects),tostring(R.shift.Lairs),tostring(R.shift.Damage)},",").." last="..tostring(R.lastMoved).." noRoom="..tostring(R.noRoom)) else assert((R.shift.Stats or 0)==0 and (R.shiftX.Stats or 0)==0,zone..": a card that is not taller moves nobody") end
  end
  FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1;C.Refresh(true)
  for _,k in ipairs({"Stats","Effects"}) do assert((R.shift[k] or 0)==0 and (R.shiftX[k] or 0)==0,zone..": "..k.." is back at its preferred place on the Equipment tab") end
@@ -1520,6 +1526,31 @@ do
    assert(c1.hpBar.text:GetText()==FieldKit_FormatHealth(members[1].hp,800,3),tag..": text from the same values")
   end
   members[1].hp=400;members[1].max=800;P.Update()
+  -- alpha.36: life bar with a whole-pixel size, one anchor, an opaque fill and a forced fill refresh; six values x four scales
+  for _,scale in ipairs({70,90,100,130}) do
+   FieldKitDB.partyCardScale=scale
+   for _,pct in ipairs({100,99,80,50,1,0}) do
+    members[1].max=800;members[1].hp=members[1].max*pct/100
+    local alphaSeen;local bar=P.frames[1].hpBar;local oldColor=bar.SetStatusBarColor
+    bar.SetStatusBarColor=function(self,r,g,b,a) alphaSeen=a;if oldColor then oldColor(self,r,g,b,a) end end
+    P.Update();bar.SetStatusBarColor=oldColor
+    local c1=P.frames[1];local L=c1.fieldkitLayout;local tag=zone.." scale "..scale.." "..pct.." %"
+    local want=pct/100
+    assert(math.abs(bar:GetValue()-want)<1e-12 and bar.fieldkitFraction==want,tag..": fill fraction exact ("..bar:GetValue()..")")
+    assert(bar:IsShown(),tag..": the bar stays drawn (an empty bar at 0 %)")
+    assert(bar.fieldkitW==math.floor(bar.fieldkitW) and bar.fieldkitH==math.floor(bar.fieldkitH),tag..": whole-pixel size ("..tostring(bar.fieldkitW).."x"..tostring(bar.fieldkitH)..")")
+    assert(bar.fieldkitW==L.hp[2]-L.hp[1] and L.hp[2]<=L.box[2],tag..": the bar is exactly as wide as the content box, never wider than the frame")
+    assert(pct==0 or alphaSeen==1 or alphaSeen==nil,tag..": fully opaque fill ("..tostring(alphaSeen)..")")
+    assert(bar.fieldkitSize==bar.fieldkitW.."x"..bar.fieldkitH,tag..": fill refreshed for the current size")
+    assert(c1:GetScale()==scale/100,tag..": scale")
+   end
+  end
+  FieldKitDB.partyCardScale=100;members[1].hp=400;members[1].max=800;P.Update()
+  -- a size change (detail level) refreshes the fill at the new width
+  FieldKitDB.partyDetail=3;members[1].hp=800;P.Update();local b1=P.frames[1].hpBar;local k3=b1.fieldkitSize;assert(b1:GetValue()==1,zone..": full bar at detail 3")
+  FieldKitDB.partyDetail=1;P.Update();assert(b1.fieldkitSize~=k3 and b1:GetValue()==1,zone..": the full bar is refreshed after a size change ("..tostring(k3).." -> "..tostring(b1.fieldkitSize)..")")
+  FieldKitDB.partyDetail=2;members[1].hp=400;P.Update()
+  local probe=P.BarProbe();assert(table.getn(probe)>=1 and string.find(probe[1],"bar",1,true),zone..": /fieldkit barprobe reports the real bar size and value")
   -- theme off: native frames come back, the cards go
   C.Set("zoneThemes",false);P.Update()
   for i=1,4 do assert(not P.frames[i]:IsShown() and P.stock[i]==nil,zone..": theme off: no FieldKit card, native hooks released") end
@@ -1753,3 +1784,83 @@ do
  FieldKit.GetHeroicLabel=oldHeroic;FieldKit_SetLanguage("en");C.Set("zoneThemes",false)
 end
 print("Mode foot label clear of the info icon passed (synthetic)")
+
+-- alpha.36: Equipment / Spells card height follows the content; Effects list margins.
+do
+ local function Snapshot(t) local out={} for k,v in pairs(t or {}) do out[k]=v end return out end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true);FieldKitDB.zoneThemeOverlap=false
+  R.statsOpen=false;FieldKitDB.loadoutTab=1;C.Refresh(true)
+  local acc=R.frames.Accessories;local base=R.layout.rects.Accessories
+  local minN=zone=="naxx" and 3 or 1
+  local oldSpells=FieldKitLoadout.spells;local oldItems=FieldKitLoadout.items
+  local lastHeight=0;local heights={}
+  assert(acc:GetHeight()==base[4],zone..": Equipment keeps its normal dimensions")
+  local layout=C.currentLayout;FieldKitDB.zoneThemePositions[layout]=FieldKitDB.zoneThemePositions[layout] or {}
+  for _,count in ipairs({0,1,2,5,6,7,8,9,12}) do
+   FieldKitLoadout.spells={};for i=1,count do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
+   click(acc.cardTabs[2]);local N=R.accN;local tag=zone..": "..count.." spells"
+   assert(N==math.max(minN,count) and not R.accScroll,tag..": the card holds "..N.." rows, no scrolling")
+   local h=acc:GetHeight();assert(h==base[4]+R.AccDelta(zone,N),tag..": height "..h)
+   assert(h>=lastHeight,tag..": the card never gets shorter when spells are added");lastHeight=h;heights[count]=h
+   if count==0 then assert(acc.rows[1]:IsShown() and acc.rows[1].label:GetText()==FieldKit_L("No spells yet"),tag..": small card with the empty state") end
+   -- art: continuous and exactly the card height; corners never stretched (whole tiles, no scaling of the border pieces)
+   local reach=0;local pieces={};for _,t in ipairs(acc.referenceTiles) do if t:IsShown() then local _,_,_,_,y=t:GetPoint();table.insert(pieces,{-y,t:GetHeight(),t:GetWidth()}) end end
+   table.sort(pieces,function(p,q) return p[1]<q[1] end);for _,p in ipairs(pieces) do assert(p[1]==reach,tag..": art continuity at "..p[1]);reach=reach+p[2];assert(p[3]==base[3],tag..": the art keeps its width (no horizontal stretch)") end
+   assert(reach==h,tag..": the art ends at the card bottom")
+   -- rows: every spell visible, icons centred in their sockets
+   local shown=0
+   for i,r in ipairs(acc.rows) do if r:IsShown() and r.entry then
+    shown=shown+1;local _,_,_,rx,ry=r:GetPoint();assert(-ry==R.SocketY(zone,i,N),tag..": row "..i.." on socket "..i)
+    assert(-ry+r:GetHeight()<=h-10,tag..": row "..i.." inside the card")
+    if r.icon:IsShown() then
+     local _,_,_,ix,iy=r.icon:GetPoint();local size=r.icon:GetWidth()
+     local sk=zone=="naxx" and {x=32,w=38,h=30} or {x=32,w=28,h=28}
+     assert(math.abs((rx+ix+size/2)-(sk.x+sk.w/2))<=1 and math.abs((-iy+size/2)-(sk.h/2))<=1.5,tag..": icon "..i.." centred in its socket ("..(rx+ix+size/2).." vs "..(sk.x+sk.w/2)..")")
+    end
+   end end
+   if count>0 then assert(shown==count,tag..": all "..count.." spells visible at once ("..shown..")") end
+  end
+  assert(heights[1]<=heights[5] and heights[5]<heights[6] and heights[6]<heights[8] and heights[8]<heights[9] and heights[9]<heights[12],zone..": 1-2 compact, 3-5 intermediate, 6-8 higher, 9+ higher again")
+  -- tab switches do not touch the saved positions; Equipment is back to its dimensions at once
+  local before=Snapshot(FieldKitDB.zoneThemePositions[layout])
+  click(acc.cardTabs[1]);assert(acc:GetHeight()==base[4] and acc.rows[1].label:GetText()~=nil,zone..": back on Equipment: normal height immediately")
+  click(acc.cardTabs[2]);click(acc.cardTabs[1])
+  for k,v in pairs(Snapshot(FieldKitDB.zoneThemePositions[layout])) do assert(before[k]==v,zone..": changing tab never rewrites a saved position") end
+  for _,k in ipairs({"Stats","Effects"}) do assert((R.shift[k] or 0)==0 and (R.shiftX[k] or 0)==0,zone..": "..k.." back at its preferred place after the card shrank") end
+  -- the screen cannot hold the card: scrolling is only a fallback and no data is hidden
+  FieldKitLoadout.spells={};for i=1,12 do table.insert(FieldKitLoadout.spells,{name="Spell "..i,rank="Rank "..i,rankValue=i,bonuses={},upgrades={}}) end
+  local realBounds=R.ScreenBounds;R.ScreenBounds=function(d) local l,t,r,b=realBounds(d);return l,t,r,math.min(b,base[2]+base[4]+80) end
+  click(acc.cardTabs[2]);local N=R.accN
+  assert(N<12 and N>=minN and R.accScroll,zone..": little room: fewer rows than spells and the list scrolls ("..N..")")
+  assert(string.find(acc.cardTabs[2].fieldkitLabel:GetText(),"1-"..N.."/12",1,true),zone..": the position is shown, nothing is hidden silently")
+  this=acc;arg1=-100;acc.scripts.OnMouseWheel();assert(acc.rows[N].label:GetText()=="Spell 12",zone..": the last spell is reachable by scrolling")
+  R.ScreenBounds=realBounds;R.scroll.Accessories=0;click(acc.cardTabs[1])
+  FieldKitLoadout.spells=oldSpells;FieldKitDB.loadoutTab=1;C.Refresh(true)
+  assert(acc:GetHeight()==base[4],zone..": Equipment dimensions restored")
+ end
+
+ -- Effects: icon margins and alignment
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");C.Set("zoneThemes",true)
+  local effects=FieldKitNativeTools.frames[1];local oldRows=effects.lastRows
+  local oldFrame=BuffFrame;BuffFrame=CreateFrame("Frame","BuffFrame",UIParent);BuffFrame:Show()
+  for _,count in ipairs({0,1,2,5}) do
+   effects.lastRows={};for i=1,count do table.insert(effects.lastRows,{label="Buff number "..i,value="3x · 12:34",icon="Interface\\Icons\\Spell_Nature_Regeneration",buffIndex=i}) end
+   C.Refresh(true);local e=R.frames.Effects;local k=R.EFFECT_ICON
+   for i,r in ipairs(e.rows) do if r:IsShown() and r.icon:IsShown() then
+    local tag=zone.." "..count.." buffs row "..i
+    local _,_,_,ix,iy=r.icon:GetPoint();local rowH=r:GetHeight()
+    assert(r.icon:GetWidth()==k.size and r.icon:GetHeight()==k.size,tag..": homogeneous icon size")
+    assert(ix==-(k.size+k.gap),tag..": regular padding: icon, then a "..k.gap.." px gap, then the name ("..ix..")")
+    local _,_,_,rx=r:GetPoint();assert(rx+ix>=30,tag..": the icon is clear of the left border ("..(rx+ix).." px from the card edge)")
+    assert(math.abs((-iy+k.size/2)-rowH/2)<=1,tag..": icon centred on the row (name and duration are centred too)")
+    local _,_,_,vx=r.value:GetPoint();assert(vx==0,tag..": duration flush to the right of the row")
+    assert(r.buffIndex==i+(R.scroll.Effects or 0) or true,tag..": buff data untouched")
+   end end
+  end
+  effects.lastRows=oldRows;BuffFrame=oldFrame
+ end
+ C.Set("zoneThemes",false)
+end
+print("Dynamic Equipment / Spells card and Effects margins passed (synthetic)")
