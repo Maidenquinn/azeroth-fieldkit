@@ -460,14 +460,14 @@ function C.Command(msg)
  end
 end
 function FieldKitThemeUI(parent,offset)
- local page=CreateFrame("Frame",nil,parent);page:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-offset);page:SetHeight(885)
+ local page=CreateFrame("Frame",nil,parent);page:SetPoint("TOPLEFT",parent,"TOPLEFT",0,-offset);page:SetHeight(933)
  local note=T.Label(page,"One theme for HUD, windows and tooltips.",0,0,950,30,18,T.text)
  C.ui={};C.previewCards={}
  local function Button(key,value,label,x,y,w,h)
   local button=T.Button(page,nil,label,x,y,w,h or 32,function()
    if value=="toggle" then C.Set(key,not FieldKitDB[key]) else C.Set(key,value) end
   end)
-  table.insert(C.ui,{frame=button,key=key,value=value});return button
+  button.fieldkitChoice=true;table.insert(C.ui,{frame=button,key=key,value=value});return button
  end
  local variants={}
  for i,key in ipairs(FieldKitZoneVariants) do
@@ -480,18 +480,19 @@ function FieldKitThemeUI(parent,offset)
  local modes={}
  for i,key in ipairs({"auto","elwynn","naxx"}) do modes[i]=Button("zoneThemeMode",key,FieldKit_L(key),(i-1)*270,286,260) end
  local enabled=Button("zoneThemes","toggle","Enable / disable themes",0,334,260)
+ local art=Button("zoneThemeArt","toggle","Character ornaments",274,334,260)
+ -- Map shape: its own row, three equal buttons wide enough for the label on ONE line (13 px font, 300 px each)
  local shapes={}
- for i,key in ipairs({"square","round","native"}) do shapes[i]=Button("zoneThemeMapShape",key,({"Square map","Round map","Native map"})[i],274+(i-1)*104,334,100) end
+ for i,key in ipairs({"square","round","native"}) do shapes[i]=Button("zoneThemeMapShape",key,({"Square map","Round map","Native map"})[i],(i-1)*310,382,300,34) end
  C.shapeButtons=shapes
- local art=Button("zoneThemeArt","toggle","Character ornaments",274+3*104+4,334,260)
  -- Dedicated row (full width, 36 px high) under the three toggles: complete label, state written in the control, big hit area.
- local overlap=Button("zoneThemeOverlap","toggle","Allow card overlap",0,382,950,36)
+ local overlap=Button("zoneThemeOverlap","toggle","Allow card overlap",0,430,950,36)
  C.ui[table.getn(C.ui)].stateLabel=true
  C.overlapButton=overlap
  local sliders={}
  for i,key in ipairs({"zoneThemeScale","cardOpacity"}) do
-  local title=T.Label(page,nil,(i-1)*420,434,400,26,18,T.text,true)
-  local slider=CreateFrame("Slider","FieldKitThemeSlider"..key,page,"OptionsSliderTemplate");slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*420+8,-474);slider:SetWidth(390);slider:SetHeight(18);slider:SetMinMaxValues(i==1 and 75 or 30,i==1 and 110 or 100);slider:SetValueStep(5);T.Control(slider,"slider")
+  local title=T.Label(page,nil,(i-1)*420,482,400,26,18,T.text,true)
+  local slider=CreateFrame("Slider","FieldKitThemeSlider"..key,page,"OptionsSliderTemplate");slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*420+8,-522);slider:SetWidth(390);slider:SetHeight(18);slider:SetMinMaxValues(i==1 and 75 or 30,i==1 and 110 or 100);slider:SetValueStep(5);T.Control(slider,"slider")
   for _,suffix in ipairs({"Low","High","Text"}) do local part=getglobal("FieldKitThemeSlider"..key..suffix);if part then part:Hide() end end
   slider:SetValue(FieldKitDB[key] or 100);local pref=key;local label=i==1 and "HUD scale" or "Panel opacity"
   title:SetText(FieldKit_L(label).." : "..tostring(FieldKitDB[key] or 100).." %")
@@ -499,21 +500,21 @@ function FieldKitThemeUI(parent,offset)
   sliders[i]={slider=slider,title=title,key=key,label=label}
  end
  C.uiSliders=sliders
- C.statusLabel=T.Label(page,nil,0,517,950,48,14,T.muted)
- local reset=T.Button(page,nil,"Reset theme positions",0,585,310,32,function()
+ C.statusLabel=T.Label(page,nil,0,565,950,48,14,T.muted)
+ local reset=T.Button(page,nil,"Reset theme positions",0,633,310,32,function()
   if C.currentLayout then FieldKitDB.zoneThemePositions[C.currentLayout]=nil;C.revision=C.revision+1;C.placed={};C.Refresh(true) end
  end)
- local profiles=T.Button(page,nil,"Manage profiles",330,585,260,32,function() FieldKitUI.Select("profiles") end)
- local elementTitle=T.Label(page,"Size by element",0,640,810,28,20,T.text,true)
- local selected=T.Button(page,nil,"",48,680,520,34,function() C.CycleElement(1) end)
- local previous=T.Button(page,nil,"<",0,680,38,34,function() C.CycleElement(-1) end)
- local following=T.Button(page,nil,">",578,680,38,34,function() C.CycleElement(1) end)
- local elementValue=T.Label(page,nil,0,729,810,26,17,T.text)
- local elementSlider=CreateFrame("Slider","FieldKitThemeElementScale",page,"OptionsSliderTemplate");elementSlider:SetPoint("TOPLEFT",page,"TOPLEFT",8,-768);elementSlider:SetWidth(540);elementSlider:SetHeight(18);elementSlider:SetMinMaxValues(50,130);elementSlider:SetValueStep(5);T.Control(elementSlider,"slider")
+ local profiles=T.Button(page,nil,"Manage profiles",330,633,260,32,function() FieldKitUI.Select("profiles") end)
+ local elementTitle=T.Label(page,"Size by element",0,688,810,28,20,T.text,true)
+ local selected=T.Button(page,nil,"",48,728,520,34,function() C.CycleElement(1) end)
+ local previous=T.Button(page,nil,"<",0,728,38,34,function() C.CycleElement(-1) end)
+ local following=T.Button(page,nil,">",578,728,38,34,function() C.CycleElement(1) end)
+ local elementValue=T.Label(page,nil,0,777,810,26,17,T.text)
+ local elementSlider=CreateFrame("Slider","FieldKitThemeElementScale",page,"OptionsSliderTemplate");elementSlider:SetPoint("TOPLEFT",page,"TOPLEFT",8,-816);elementSlider:SetWidth(540);elementSlider:SetHeight(18);elementSlider:SetMinMaxValues(50,130);elementSlider:SetValueStep(5);T.Control(elementSlider,"slider")
  for _,suffix in ipairs({"Low","High","Text"}) do local part=getglobal("FieldKitThemeElementScale"..suffix);if part then part:Hide() end end
  elementSlider:SetScript("OnValueChanged",function() if not C.elementSliderRefresh and C.selectedElement then C.SetElementScale(C.selectedElement,this:GetValue()) end end)
- local elementReset=T.Button(page,nil,"Reset element size",575,756,235,34,function() if C.selectedElement then C.SetElementScale(C.selectedElement,100) end end)
- local sizeNote=T.Label(page,"Each size is saved for this zone, layout and profile. Shared frames resize together. Unlock windows to move them.",0,807,810,64,15,T.muted)
+ local elementReset=T.Button(page,nil,"Reset element size",575,804,235,34,function() if C.selectedElement then C.SetElementScale(C.selectedElement,100) end end)
+ local sizeNote=T.Label(page,"Each size is saved for this zone, layout and profile. Shared frames resize together. Unlock windows to move them.",0,855,810,64,15,T.muted)
  function C.CycleElement(delta)
   local elements=C.Elements();local index=1
   for i,e in ipairs(elements) do if e.name==C.selectedElement then index=i end end
@@ -533,17 +534,17 @@ function FieldKitThemeUI(parent,offset)
  C.RefreshElementUI()
  page.Reflow=function(w)
   page:SetWidth(w);note:SetWidth(w);C.statusLabel:SetWidth(w)
-  for i,item in ipairs(sliders) do local half=(w-26)/2;item.title:ClearAllPoints();item.title:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26),-434);item.title:SetWidth(half);item.slider:ClearAllPoints();item.slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26)+8,-474);item.slider:SetWidth(half-16);T.Update(item.slider) end
+  for i,item in ipairs(sliders) do local half=(w-26)/2;item.title:ClearAllPoints();item.title:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26),-482);item.title:SetWidth(half);item.slider:ClearAllPoints();item.slider:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(half+26)+8,-522);item.slider:SetWidth(half-16);T.Update(item.slider) end
   local bw=(w-26)/3
   for i,b in ipairs(variants) do
    b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),-45);b:SetWidth(bw);b.preview:SetWidth(bw-16);b.preview:SetHeight(122);b.fieldkitLabel:SetWidth(bw-30);b.hint:SetWidth(bw-24);b.badge:ClearAllPoints();b.badge:SetPoint("TOPRIGHT",b,"TOPRIGHT",-10,-18);T.Update(b)
   end
-  for _,group in ipairs({modes,{enabled,map,art}}) do for i,b in ipairs(group) do local _,_,_,_,y=b:GetPoint(1);b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),y);b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-20);T.Update(b) end end
-  overlap:ClearAllPoints();overlap:SetPoint("TOPLEFT",page,"TOPLEFT",0,-382);overlap:SetWidth(w);overlap:SetHeight(36);overlap.fieldkitLabel:ClearAllPoints();overlap.fieldkitLabel:SetPoint("LEFT",overlap,"LEFT",16,0);overlap.fieldkitLabel:SetWidth(w-32);T.Update(overlap)
+  for _,group in ipairs({modes,{enabled,art},shapes}) do for i,b in ipairs(group) do local _,_,_,_,y=b:GetPoint(1);b:ClearAllPoints();b:SetPoint("TOPLEFT",page,"TOPLEFT",(i-1)*(bw+13),y);b:SetWidth(bw);b.fieldkitLabel:SetWidth(bw-20);T.Update(b) end end
+  overlap:ClearAllPoints();overlap:SetPoint("TOPLEFT",page,"TOPLEFT",0,-430);overlap:SetWidth(w);overlap:SetHeight(36);overlap.fieldkitLabel:ClearAllPoints();overlap.fieldkitLabel:SetPoint("LEFT",overlap,"LEFT",16,0);overlap.fieldkitLabel:SetWidth(w-32);T.Update(overlap)
   elementTitle:SetWidth(w);elementValue:SetWidth(w);sizeNote:SetWidth(w)
-  selected:SetWidth(w-96);selected.fieldkitLabel:SetWidth(w-120);following:ClearAllPoints();following:SetPoint("TOPLEFT",page,"TOPLEFT",w-38,-680)
-  elementSlider:SetWidth(w-278);elementReset:ClearAllPoints();elementReset:SetPoint("TOPRIGHT",page,"TOPRIGHT",0,-756);elementReset:SetWidth(235)
+  selected:SetWidth(w-96);selected.fieldkitLabel:SetWidth(w-120);following:ClearAllPoints();following:SetPoint("TOPLEFT",page,"TOPLEFT",w-38,-728)
+  elementSlider:SetWidth(w-278);elementReset:ClearAllPoints();elementReset:SetPoint("TOPRIGHT",page,"TOPRIGHT",0,-804);elementReset:SetWidth(235)
  end
  table.insert(parent.flow,{frame=page,y=offset})
- return offset+885
+ return offset+933
 end

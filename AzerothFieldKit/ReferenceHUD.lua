@@ -210,7 +210,8 @@ function R.Art(frame,component,layout)
    table.insert(pieces,{a[1],dx,split,iw,extra,iw/tw,(split-dy-4)/th,(split-dy+4)/th})
    table.insert(pieces,{a[1],dx,split+extra,iw,dy+ih-split,iw/tw,(split-dy)/th,ih/th})
   else
-   table.insert(pieces,{a[1],dx,(extra>0 and dy>=split) and dy+extra or dy,iw,ih,iw/tw,0,ih/th})
+   local v0=(a[8] or 0)/th -- optional: the slice starts a[8] px down the texture (cut-away art)
+   table.insert(pieces,{a[1],dx,(extra>0 and dy>=split) and dy+extra or dy,iw,ih,iw/tw,v0,v0+ih/th})
   end
  end
  for i=1,math.max(table.getn(pieces),table.getn(frame.referenceTiles)) do
@@ -295,25 +296,65 @@ function R.PlainDock(d)
   elseif f then f:Hide() end
  end
 end
+-- Cut-away identity card of Elwynn Complete for the round and native maps (nil for the square map and every other layout).
+-- Slices of elwynn_complete_identity_1 (302 x 350 art px): the zone banner (rows 0-52) and the mode banner (rows 296-350). Round:
+-- both stay where they are (the ring sits between them). Native: the mode banner is moved up under the zone banner, so the card
+-- is a small two-banner block and the native map is not held by any frame.
+R.idCut={}
+function R.IdentityCut(d,zone,shape)
+ if zone~="elwynn" or R.key~="elwynn_complete" or (shape~="round" and shape~="native") then return nil end
+ local c=R.idCut[shape]
+ if not c then
+  local file=d.tiles.identity[1][1];local r=d.rects.identity
+  local top,foot=52,54;local footAt=shape=="native" and top or 296
+  c={shift=296-footAt,rect={r[1],r[2],r[3],shape=="native" and top+foot or r[4]},
+     layout={tiles={identity={{file,0,0,302,top,512,512,0},{file,0,footAt,302,foot,512,512,296}}}}}
+  R.idCut[shape]=c
+ end
+ return c
+end
+-- Round map geometry: the diameter of the native map and the centre of its ring. The ring (texture 256 px, opening radius 113) is drawn
+-- at side*128/113; it fits the map frame piece when there is one, else the opening of the identity card.
+function R.RoundGeometry(d,hole)
+ local r=d.rects.mapArt;local box
+ if r then box=math.min(r[3],r[4])-6 else box=math.min(hole[3],hole[4]) end
+ return box*113/128,hole[1]+hole[3]/2,hole[2]+hole[4]/2
+end
+-- The two zoom buttons of a round map sit ON the ring, lower right (+ above -): top-left of a 24 x 25 button.
+function R.RoundZoom(i,d,hole)
+ local side,cx,cy=R.RoundGeometry(d,hole);local radius=(side/2+side/2*128/113)/2
+ local a=math.rad(i==1 and -62 or -30)
+ return cx+radius*math.cos(a)-12,cy-radius*math.sin(a)-12.5
+end
 function R.Update(variant,zone)
  local key=zone.."_"..variant;local d=FieldKitReferenceArt[key]
  if not d then R.Stop();return end
  R.Create();R.active=true;R.layout=d;R.key=key;H.health:Show();H.xp:Show()
  local scale=math.min(UIParent:GetWidth()/d.size[1],UIParent:GetHeight()/d.size[2])
  R.canvas:SetAlpha(1);R.canvas:SetWidth(d.size[1]);R.canvas:SetHeight(d.size[2]);local inherited=UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1;R.canvas:SetScale(scale/math.max(.1,inherited)*(FieldKit.Number(FieldKitDB.zoneThemeScale,100,75,110)/100));R.canvas:ClearAllPoints();R.canvas:SetPoint("CENTER",UIParent,"CENTER",0,0);R.canvas:Show()
+ local M=FieldKitThemeMinimap;M.shape=M.Effective()
+ -- Elwynn Complete: the map sits INSIDE the identity card, whose square frame is baked into the art. Round and native maps must not
+ -- keep that frame: only the two banners (zone name above, mode below) are drawn, from the same art, cut away from the card.
+ local cut=R.IdentityCut(d,zone,M.shape)
+ local dm=d.mode
+ if cut then dm={d.mode[1],d.mode[2]-cut.shift,d.mode[3],d.mode[4]} end
  for _,entry in ipairs({{H.identity,"identity"},{H.header,"header"},{H.healthRoot,"vitality"},{H.dock,"dock"},{H.nav,"nav"}}) do
-  if d.rects[entry[2]] then if entry[2]~="vitality" or not d.integratedVitals then R.Geometry(entry[1],d.rects[entry[2]]) end;Blank(entry[1]);if entry[2]~="vitality" or not d.integratedVitals then R.Art(entry[1],entry[2]) else R.Art(entry[1],"none") end;entry[1]:Show() else entry[1]:Hide() end
+  if d.rects[entry[2]] then
+   local rect=d.rects[entry[2]];local layout=nil
+   if entry[2]=="identity" and cut then rect=cut.rect;layout=cut.layout end
+   if entry[2]~="vitality" or not d.integratedVitals then R.Geometry(entry[1],rect) end;Blank(entry[1]);if entry[2]~="vitality" or not d.integratedVitals then R.Art(entry[1],entry[2],layout) else R.Art(entry[1],"none") end;entry[1]:Show()
+  else entry[1]:Hide() end
  end
  if d.integratedVitals then R.Child(H.healthRoot,H.dock,d.rects.vitality);H.healthRoot:EnableMouse(false) else H.healthRoot:EnableMouse(true) end
  if key=="elwynn_complete" then local a=d.rects.header;R.Geometry(H.header,{a[1]-90,a[2],a[3]+180,a[4]}) end
  H.sculpture:Hide();H.left:Hide();H.right:Hide();H.namePlate:Hide();H.schedule:Hide()
  for _,rim in ipairs(H.actionRims) do rim:Hide() end
  Label(H.zone,H.identity,d.zone,variant=="complete" and 23 or 20,true,"CENTER")
- Button(H.mode,H.identity,d.mode);Label(H.mode.fieldkitLabel,H.mode,d.mode,17,true,"CENTER")
+ Button(H.mode,H.identity,dm);Label(H.mode.fieldkitLabel,H.mode,dm,17,true,"CENTER")
  if d.heroic then Label(R.heroic,H.identity,d.heroic,variant=="alternative" and 18 or 19,true,nil,variant=="alternative" and "NotoSerif-Regular.ttf" or nil);R.heroic:SetText((FieldKit.GetHeroicLabel() or "?")..(variant=="alternative" and " · "..FieldKit_L("Mode") or ""));H.mode.fieldkitLabel:SetText(variant=="alternative" and "" or FieldKit_L("Mode"))
  else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and " · "..FieldKit_L("Mode") or "")) end
  if zone=="elwynn" and variant~="alternative" then
-  local a=d.mode;local icon=R.MODE_ICON[R.key]
+  local a=dm;local icon=R.MODE_ICON[R.key]
   -- The info icon ("i" in a gold ring) is part of the foot art, at the right end of the button: the label stays in the free
   -- area to its left (art left cap .. icon - margin) instead of running under it. The whole button stays the click target.
   if icon then Label(H.mode.fieldkitLabel,H.mode,{a[1]+icon.textLeft,a[2],icon.left-icon.margin-icon.textLeft,a[4]},14,true,"CENTER","NotoSerif-Regular.ttf")
@@ -505,6 +546,7 @@ function R.Map()
  -- The native map stays square (no stretching): it covers the whole opening of the frame art, and the
  -- art's own rim is redrawn above it (R.MapRim) so any overflow is masked instead of leaving black bands.
  local hole=R.layout.mapHole or {a[1],a[2],a[3],a[3]};local side=math.max(hole[3],hole[4])
+ local round=M.shape=="round";if round then side=R.RoundGeometry(R.layout,hole) end
  local hx,hy=hole[1]+hole[3]/2-side/2,hole[2]+hole[4]/2-side/2
  Minimap:ClearAllPoints();Minimap:SetPoint("TOPLEFT",M.root,"TOPLEFT",hx-p[1],p[2]-hy);Minimap:SetWidth(side);Minimap:SetHeight(side);R.MapRim(M,hole);R.MapRound(M,hole,side);local owner=R.layout.rects.mapArt and M.root or H.identity;local stamp=tostring(owner:GetLeft())..":"..tostring(owner:GetTop())..":"..tostring(owner:GetEffectiveScale());if M.screenStamp~=stamp then Minimap:Hide();Minimap:Show();M.screenStamp=stamp end
  local queue=getglobal("MiniMapBattlefieldFrame");if queue and R.queueClick then FieldKitZoneThemes.Mask(queue,true) end
@@ -531,7 +573,8 @@ function R.Map()
  M.launcherProxies=M.launcherProxies or {}
  if M.probe.proxies==false then for _,proxy in pairs(M.launcherProxies) do proxy:Hide() end;M.Unpark() end
  for i,name in ipairs({"FieldKitMinimapButton","AzerothStatsMinimap","AzerothOneMinimapButton"}) do
-  local original=M.probe.proxies~=false and getglobal(name)
+  -- FieldKit's own and AzerothStats' buttons are NOT proxied any more (their own drag works, see ThemeMinimap ring)
+  local original=i==3 and M.probe.proxies~=false and getglobal(name)
   if original then
    local proxy=M.launcherProxies[i]
    if not proxy then
@@ -546,11 +589,14 @@ function R.Map()
   end
  end
  M.root:SetMovable(M.GroupOwner()==M.root);M.Layers()
- if M.probe.ring then local band,keep=R.RingGeometry(R.layout,hole);M.Ring(hole[3]/2,hole[4]/2,band,keep) else M.RingRestore() end
+ M.ringCircle=round
+ if M.probe.ring then local band,keep=R.RingGeometry(R.layout,hole);if round then M.Ring(side/2,side/2,side*(128/113-1)/2,keep) else M.Ring(hole[3]/2,hole[4]/2,band,keep) end else M.RingRestore() end
  local over=type(MouseIsOver)=="function" and (MouseIsOver(Minimap) or MouseIsOver(M.zoomOut) or MouseIsOver(M.zoomIn))
  for i,b in ipairs({M.zoomOut,M.zoomIn}) do
-  local x,y=R.ZoomXY(i,a)
-  R.Child(b,M.root,{x,y,24,25});R.Stable(b,"z"..R.key..":"..M.root:GetFrameLevel(),function() b:SetFrameStrata("DIALOG");b:SetFrameLevel(80);b:Hide();b:Show() end);Blank(b);T.Font(b.fieldkitLabel,18,T.gold,true);b.fieldkitLabel:SetText((R.key=="elwynn_minimal" or R.key=="elwynn_complete") and "" or (i==1 and "-" or "+"))
+  local x,y=R.ZoomXY(i,a);if round then x,y=R.RoundZoom(i,R.layout,hole) end
+  R.Child(b,M.root,{x,y,24,25});R.Stable(b,"z"..R.key..tostring(M.shape)..":"..M.root:GetFrameLevel(),function() b:SetFrameStrata("DIALOG");b:SetFrameLevel(80);b:Hide();b:Show() end)
+  if round then b.fieldkitArtOnly=nil;T.State(b,false) else Blank(b) end -- the square art bakes the buttons; a round map draws its own
+  T.Font(b.fieldkitLabel,18,T.gold,true);b.fieldkitLabel:SetText((not round and (R.key=="elwynn_minimal" or R.key=="elwynn_complete")) and "" or (i==1 and "-" or "+"))
   if T.zone=="elwynn" or over then if not b:IsShown() then b:Show() end else b:Hide() end
  end
  return true
@@ -797,7 +843,7 @@ function R.RingGeometry(d,hole)
  local function Add(x,y,w,h) table.insert(keep,{l=x-cx,r=x+w-cx,top=cy-y,bottom=cy-(y+h)}) end
  if d.zone then Add(d.zone[1],d.zone[2],d.zone[3],d.zone[4]) end
  if d.mode then Add(d.mode[1],d.mode[2],d.mode[3],d.mode[4]) end
- for i=1,2 do local x,y=R.ZoomXY(i,d.map);Add(x,y,24,25) end
+ for i=1,2 do local x,y=R.ZoomXY(i,d.map);if FieldKitThemeMinimap.shape=="round" then x,y=R.RoundZoom(i,d,hole) end;Add(x,y,24,25) end
  return band,keep
 end
 function R.Preferred(kind,d)

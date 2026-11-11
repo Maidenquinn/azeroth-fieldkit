@@ -824,7 +824,7 @@ function U.Refresh()
     string.format(FieldKit_L("Profile %d · empty"),i)
    local active=FieldKitDB.activeHudProfile==i
    FieldKit_Text(b,active and ("✓ "..label) or label)
-   b.fieldkitSelected=active
+   b.fieldkitChoice=true;b.fieldkitSelected=active
    T.State(b,active)
    if b.fieldkitShowSelected then b.fieldkitShowSelected(active) end
   end
@@ -837,7 +837,7 @@ function U.Refresh()
      string.format(FieldKit_L("Profile %d · empty"),i)
     if active then label=label.." ✓" end
    FieldKit_Text(U.quickProfileButtons[i],label)
-   U.quickProfileButtons[i].fieldkitSelected=active
+   U.quickProfileButtons[i].fieldkitChoice=true;U.quickProfileButtons[i].fieldkitSelected=active
    T.State(U.quickProfileButtons[i],active)
   end
  end
@@ -853,6 +853,7 @@ function U.Refresh()
   local fr=FieldKit_Language()=="fr"
   -- Unlike a momentary hover, selected buttons must stay selected after
   -- OnLeave and show an unambiguous visible check mark.
+  U.languageRow.en.fieldkitChoice=true;U.languageRow.fr.fieldkitChoice=true
   U.languageRow.en.fieldkitSelected=en
   U.languageRow.fr.fieldkitSelected=fr
   T.State(U.languageRow.en,en)

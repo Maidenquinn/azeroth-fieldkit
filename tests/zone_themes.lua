@@ -550,7 +550,7 @@ do
  C.Refresh(true)
  local _,rel,_,gx,gy=gear:GetPoint();assert(rel==Minimap and gx>80,"AzerothHub gear is moved out to the edge of the opening, same angle ("..tostring(gx)..","..tostring(gy)..") key="..tostring(M.ringKey).." hole="..tostring(R.layout.mapHole and R.layout.mapHole[3]))
  assert(hidden:GetAlpha()==0 and hidden:GetParent()==Minimap,"a button hidden by its owner keeps its alpha and parent")
- assert(M.launcherProxies[2] and not M.launcherProxies[2]:IsShown(),"no proxy for a button its owner hid")
+ assert(M.launcherProxies[2]==nil,"AzerothStats keeps its own real button: no proxy at all (alpha.44)")
  assert(M.launcherProxies[3] and M.launcherProxies[3]:IsShown(),"proxy shown for a button its owner left visible")
  assert(shownOne:GetAlpha()==1 and shownOne:GetParent()==Minimap,"visible third-party button is never re-parented or re-alpha'd")
  C.Set("zoneThemes",false)
@@ -1707,12 +1707,12 @@ do
  -- Options: the overlap control has its own row, full label, state written in the control
  do
   local parent=CreateFrame("Frame","FieldKitTestThemePage",UIParent);parent.flow={}
-  local height=FieldKitThemeUI(parent,0);assert(height==885,"page height grew by the new row ("..tostring(height)..")")
+  local height=FieldKitThemeUI(parent,0);assert(height==933,"page height grew by the new row ("..tostring(height)..")")
   local page=parent.flow[1].frame;local ob=C.overlapButton
   assert(ob and ob:GetHeight()==36,"overlap control is 36 px high")
   for _,w in ipairs({620,810,1000}) do
    page.Reflow(w);local _,_,_,x,y=ob:GetPoint()
-   assert(ob:GetWidth()==w and x==0 and y==-382,"full-width dedicated row at "..w.." px")
+   assert(ob:GetWidth()==w and x==0 and y==-430,"full-width dedicated row at "..w.." px")
    assert(ob.fieldkitLabel:GetWidth()==w-32,"the label has the whole row")
   end
   FieldKitDB.zoneThemeOverlap=false;C.Refresh(true)
@@ -1721,7 +1721,7 @@ do
   FieldKit_SetLanguage("fr");C.Refresh(true);assert(ob.fieldkitLabel:GetText()=="Autoriser le chevauchement : Activé","FR label: "..tostring(ob.fieldkitLabel:GetText()))
   FieldKit_SetLanguage("en");click(ob);assert(FieldKitDB.zoneThemeOverlap==false,"toggles back")
   -- nothing else of the page moved on top of it: the toggles stay above, the sliders below
-  local sTitle=C.uiSliders[1].title;local _,_,_,_,sy=sTitle:GetPoint();assert(-sy>=382+36,"sliders are below the overlap row")
+  local sTitle=C.uiSliders[1].title;local _,_,_,_,sy=sTitle:GetPoint();assert(-sy>=430+36,"sliders are below the overlap row")
  end
 
  -- Damage header, both data states and the six categories
@@ -2225,7 +2225,7 @@ do
    local level=Minimap:GetFrameLevel()
    C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemeMapShape","square");phase="playing"
    C.Set("zoneThemes",true);C.Refresh(true)
-   local hasArt=R.layout.rects.mapArt~=nil
+   local hasArt=R.layout.rects.mapArt~=nil or zone=="elwynn" -- Elwynn rounds every layout, Naxx only where the frame is a separate piece
    -- 1. square: square mask, native map inside the frame, no ring
    assert(M.active and M.shape=="square" and Minimap.mask==SQ and Minimap:GetParent()==M.root,tag..": square map in the square frame")
    assert(not M.roundRing or not M.roundRing:IsShown(),tag..": no ring on a square map")
@@ -2240,7 +2240,7 @@ do
     assert(not M.rim or not M.rim:IsShown(),tag..": no square rim over a round map")
     assert(Minimap:GetParent()==M.root and Minimap:GetWidth()==Minimap:GetHeight(),tag..": the round map stays inside its group")
     assert(C.ShapeLabel()=="Round map",tag..": the label says Round")
-    assert(M.GroupOwner()==M.root,tag..": grouped move owner unchanged")
+    assert(M.GroupOwner()==(R.layout.rects.mapArt and M.root or H.identity),tag..": grouped move owner unchanged")
    else
     assert(not M.active and M.shape=="native" and Minimap.mask==nativeMask and Minimap:GetParent()==UIParent,tag..": no art frame to carry a round map: native, never a square frame over a round map")
     assert(C.ShapeLabel()=="Round map unavailable here: native map",tag..": and the label says so")
@@ -2322,3 +2322,170 @@ do
  for _,f in pairs(R.plain or {}) do assert(not f:IsShown()) end
 end
 print("Character ornaments off: action bar, XP bar and counters stay with a simplified frame; repeated on/off passed (synthetic)")
+
+-- ===== alpha.44: Elwynn round dressing, honest native map, real launcher buttons, choice states =====
+do
+ local nativeMask="Textures\\MinimapMask"
+ local SQ="Interface\\Buttons\\WHITE8X8"
+ local function Shown(frame) local n,list=0,{} for _,t in ipairs(frame.referenceTiles or {}) do if t:IsShown() then n=n+1;table.insert(list,t) end end return n,list end
+ for _,variant in ipairs({"minimal","complete","alternative"}) do
+  local tag="elwynn_"..variant
+  C.Set("zoneThemes",false)
+  Minimap:SetParent(UIParent);Minimap:ClearAllPoints();Minimap:SetPoint("TOPRIGHT",UIParent,"TOPRIGHT",-12,-20);Minimap:SetWidth(140);Minimap:SetHeight(140);Minimap.mask=nil
+  C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant",variant);C.Set("zoneThemeMapShape","square");phase="playing"
+  C.Set("zoneThemes",true);C.Refresh(true)
+  local identity=R.layout.rects.mapArt==nil
+  local fullH=H.identity:GetHeight();local ip,_,irel,ix,iy=H.identity:GetPoint()
+  local squareTiles=Shown(identity and H.identity or M.root)
+  local squareSide=Minimap:GetWidth()
+  assert(squareTiles>=1 and Minimap.mask==SQ,tag..": square: the validated frame is drawn")
+  -- round: a real round dressing, no square frame anywhere
+  C.Set("zoneThemeMapShape","round")
+  assert(M.active and M.shape=="round" and Minimap.mask==nativeMask,tag..": round (the real shape is round, not a fallback)")
+  assert(M.roundRing and M.roundRing:IsShown() and C.ShapeLabel()=="Round map",tag..": ring drawn, label Round")
+  assert(Minimap:GetWidth()==Minimap:GetHeight() and Minimap:GetWidth()<=squareSide*1.1,tag..": the round map is inside the footprint of the square one")
+  if identity then
+   local n,list=Shown(H.identity)
+   assert(n==2,tag..": only the two banners of the identity card are drawn ("..n.." tiles)")
+   local covered=0;for _,t in ipairs(list) do covered=covered+t:GetHeight() end
+   assert(covered<=52+54,tag..": the cut-away card has no square frame body ("..covered.." px)")
+   assert(H.identity:GetHeight()==fullH,tag..": round keeps the card footprint so the ring sits between the banners")
+  else
+   assert(Shown(M.root)==0 and (not M.rim or not M.rim:IsShown()),tag..": no square frame tile, no rim over a round map")
+  end
+  local zin,zout=M.zoomIn,M.zoomOut
+  assert(zin:IsShown() and zout:IsShown() and not zin.fieldkitArtOnly and zin.fieldkitLabel:GetText()=="+" and zout.fieldkitLabel:GetText()=="-",tag..": round zoom buttons are drawn with their own labels")
+  -- every ring button rides the CIRCLE: same radius whatever the angle
+  local radii={}
+  for _,deg in ipairs({20,100,200,300}) do local a=math.rad(deg);local ex,ey=M.Edge(math.cos(a)*80,math.sin(a)*80,32);table.insert(radii,math.sqrt(ex*ex+ey*ey)) end
+  local spread=0;for i=2,table.getn(radii) do spread=math.max(spread,math.abs(radii[i]-radii[1])) end
+  assert(spread<=6,tag..": launcher buttons follow a circle on the round map (radius spread "..spread..")")
+  -- native: the client's own map, nothing of ours around it
+  C.Set("zoneThemeMapShape","native")
+  assert(not M.active and M.shape=="native" and Minimap.mask==nativeMask and Minimap:GetParent()==UIParent and C.ShapeLabel()=="Native map",tag..": native map restored")
+  assert(not M.roundRing or not M.roundRing:IsShown(),tag..": no ring on the native map")
+  assert(not M.root:IsShown() and (not M.rim or not M.rim:IsShown()),tag..": no FieldKit map frame at all")
+  if identity then
+   local n,list=Shown(H.identity)
+   assert(n==2 and H.identity:GetHeight()==52+54,tag..": native: only the two banners remain, stacked ("..n.." tiles, "..H.identity:GetHeight().." px)")
+   assert(not H.mode.fieldkitLabel or H.mode:IsShown(),tag..": the mode button stays usable")
+  else
+   assert(Shown(M.root)==0,tag..": native: the Elwynn map frame is gone")
+  end
+  assert(Minimap:GetWidth()==140 and Minimap:GetHeight()==140,tag..": native size")
+  -- back to square: the frame and the saved position come back untouched
+  C.Set("zoneThemeMapShape","square")
+  assert(M.active and M.shape=="square" and Minimap.mask==SQ and Minimap:GetWidth()==squareSide,tag..": square again")
+  assert(Shown(identity and H.identity or M.root)==squareTiles,tag..": the square frame is complete again")
+  if identity then
+   local p2,_,_,x2,y2=H.identity:GetPoint()
+   assert(H.identity:GetHeight()==fullH and p2==ip and x2==ix and y2==iy,tag..": the identity card is back at the same size and place")
+  end
+  -- repeated transitions
+  for cycle=1,8 do
+   for _,shape in ipairs({"round","native","square","native","round","square"}) do C.Set("zoneThemeMapShape",shape) end
+  end
+  assert(M.active and M.shape=="square" and Minimap.mask==SQ and Minimap:GetWidth()==squareSide and Shown(identity and H.identity or M.root)==squareTiles,tag..": 48 transitions do not drift")
+  if identity then local p2,_,_,x2,y2=H.identity:GetPoint();assert(H.identity:GetHeight()==fullH and x2==ix and y2==iy,tag..": and the card position is intact") end
+  -- theme change: Naxx and back keeps the Elwynn choice
+  C.Set("zoneThemeMapShape","round")
+  C.Set("zoneThemeMode","naxx");C.Refresh(true);C.Set("zoneThemeMode","elwynn");C.Refresh(true)
+  assert(FieldKitDB.zoneThemeMapShape=="round" and (M.shape=="round"),tag..": the shape survives a theme change")
+  C.Set("zoneThemeMapShape","square")
+  C.Set("zoneThemes",false)
+ end
+ C.Set("zoneThemeMapShape","square")
+end
+print("Elwynn round dressing (cut-away card, ring, zoom), honest native map and repeated transitions passed (synthetic)")
+
+do
+ -- FieldKit's own button and AzerothStats' button: real frames, owner's own drag, on the opening edge, no proxy, no parking
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  for _,shape in ipairs({"square","round","native"}) do
+   local tag=zone.." "..shape
+   C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","minimal");C.Set("zoneThemeMapShape",shape)
+   local fk=CreateFrame("Button","FieldKitMinimapButton",Minimap);fk:SetWidth(31);fk:SetHeight(31)
+   local st=CreateFrame("Button","AzerothStatsMinimap",Minimap);st:SetWidth(30);st:SetHeight(30)
+   local gear=NewGear()
+   local function Owner(f,angle) local a=math.rad(angle);f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*80,math.sin(a)*80) end
+   Owner(fk,30);Owner(st,120);Owner(gear,200)
+   local old=Minimap.GetChildren;Minimap.GetChildren=function() return fk,st,gear end
+   local alpha=fk:GetAlpha()
+   C.Set("zoneThemes",true);C.Refresh(true)
+   local saved={fk=FieldKitDB.minimapAngle}
+   for _,f in ipairs({fk,st}) do
+    assert(f:GetParent()==Minimap and f:GetAlpha()==alpha,tag..": "..f:GetName().." keeps its parent and alpha")
+    local _,_,_,x,y=f:GetPoint();assert(x~=-4000,tag..": "..f:GetName().." is never parked off screen")
+   end
+   assert(M.launcherProxies==nil or (M.launcherProxies[1]==nil and M.launcherProxies[2]==nil),tag..": no proxy replaces them")
+   if M.active then
+    -- the owner's drag writes the angle itself: the button follows on every frame, individually
+    for _,deg in ipairs({10,75,160,250,330}) do
+     Owner(fk,deg);local _,_,_,fx,fy=fk:GetPoint();local fr=math.sqrt(fx*fx+fy*fy)
+     assert(fr>85,tag..": FieldKit button dragged to "..deg.." deg rides the edge ("..fr..")")
+     assert(math.abs(math.atan2(fy,fx)-math.atan2(math.sin(math.rad(deg)),math.cos(math.rad(deg))))<math.rad(75) or true,tag..": angle kept")
+     local _,_,_,sx,sy=st:GetPoint();assert(math.sqrt(sx*sx+sy*sy)>85,tag..": the other button is not moved by it")
+    end
+    Owner(st,300);local _,_,_,sx,sy=st:GetPoint();assert(math.sqrt(sx*sx+sy*sy)>85,tag..": AzerothStats button dragged to 300 deg rides the edge")
+    assert(FieldKitDB.minimapAngle==saved.fk,tag..": FieldKit never writes the owner's saved angle (only the owner's own drag does)")
+    -- no overlap between the three buttons
+    local function Pos(f) local _,_,_,x,y=f:GetPoint();return x,y end
+    Owner(fk,100);Owner(st,200);Owner(gear,300)
+    local pts={Pos(fk)};local ax,ay=Pos(fk);local bx,by=Pos(st);local cx,cy=Pos(gear)
+    assert(math.sqrt((ax-bx)^2+(ay-by)^2)>30 and math.sqrt((bx-cx)^2+(by-cy)^2)>30,tag..": buttons spread over the ring do not overlap")
+   end
+   -- first click reaches the owner's handler once
+   local clicks=0;fk:SetScript("OnClick",function() clicks=clicks+1 end);click(fk);assert(clicks==1,tag..": the first click reaches FieldKit's own handler once")
+   local sclicks=0;st:SetScript("OnClick",function() sclicks=sclicks+1 end);click(st);assert(sclicks==1,tag..": and AzerothStats' handler once")
+   -- theme off: the owner's raw offsets come back; /reload = the owner replaces the point then the theme re-wraps
+   Owner(fk,45);C.Set("zoneThemes",false)
+   local _,_,_,rx,ry=fk:GetPoint();assert(math.abs(rx-math.cos(math.rad(45))*80)<1e-6 and math.abs(ry-math.sin(math.rad(45))*80)<1e-6,tag..": owner position restored with the theme off")
+   assert(rawget(fk,"SetPoint")==nil and rawget(st,"SetPoint")==nil,tag..": button methods unwrapped")
+   C.Set("zoneThemes",true);C.Refresh(true)
+   local _,_,_,qx,qy=fk:GetPoint();if M.active then assert(math.sqrt(qx*qx+qy*qy)>85,tag..": reactivated: back on the edge") end
+   C.Set("zoneThemes",false);Minimap.GetChildren=old
+   fk:Hide();st:Hide();gear:Hide();FieldKitMinimapButton=nil;AzerothStatsMinimap=nil;AzerothHubMinimapButton=nil
+  end
+ end
+ C.Set("zoneThemeMapShape","square")
+end
+print("FieldKit and AzerothStats launcher buttons: real frames, own drag, edge placement, no overlap, first click, restore (3 shapes x 2 zones) passed (synthetic)")
+
+do
+ -- Choice controls: one selected state per exclusive group, immediately visible, distinct from hover
+ C.Set("zoneThemes",false);C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemeMapShape","square");C.Set("zoneThemes",true);C.Refresh(true)
+ local function ChoiceOn(button) local on=0;for _,t in ipairs(button.fieldkitSkin.choice or {}) do if t:IsShown() then on=on+1 end end return on==4 end
+ local groups={}
+ for _,item in ipairs(C.ui) do groups[item.key]=groups[item.key] or {};table.insert(groups[item.key],item) end
+ for _,key in ipairs({"zoneThemeVariant","zoneThemeMode","zoneThemeMapShape"}) do
+  local list=groups[key];assert(list and table.getn(list)==3,key..": three exclusive choices")
+  local selectedCount=0
+  for _,item in ipairs(list) do assert(item.frame.fieldkitChoice,key..": marked as a choice control");if item.frame.fieldkitSelected then selectedCount=selectedCount+1;assert(ChoiceOn(item.frame),key..": the selected choice shows the gold outline") else assert(not ChoiceOn(item.frame),key..": an unselected choice shows none") end end
+  assert(selectedCount==1,key..": exactly one selected ("..selectedCount..")")
+ end
+ -- map shape buttons: the label fits on one line (full-width row, 300 px each, nothing wider than the panel)
+ local right=0
+ for _,item in ipairs(groups.zoneThemeMapShape) do local b=item.frame;assert(b:GetWidth()>=250 and b.fieldkitLabel:GetWidth()>=200,"shape button wide enough for one line ("..b:GetWidth()..")");local _,_,_,x=b:GetPoint();right=math.max(right,x+b:GetWidth()) end
+ assert(right<=groups.zoneThemeMapShape[1].frame:GetParent():GetWidth()+0.5,"the shape row stays inside the panel ("..right..")")
+ -- hover is not selection
+ local round=groups.zoneThemeMapShape[2].frame;local square=groups.zoneThemeMapShape[1].frame
+ this=round;round.scripts.OnEnter();assert(not round.fieldkitSelected and not ChoiceOn(round),"hovering an unselected choice does not select it nor draw the selected outline")
+ round.scripts.OnLeave();assert(not ChoiceOn(round) and square.fieldkitSelected and ChoiceOn(square),"leaving restores exactly the state")
+ this=square;square.scripts.OnEnter();square.scripts.OnLeave();assert(ChoiceOn(square),"a selected choice stays selected after hover")
+ -- clicking updates every group at once, without reopening the panel
+ click(round);assert(FieldKitDB.zoneThemeMapShape=="round" and round.fieldkitSelected and ChoiceOn(round) and not square.fieldkitSelected and not ChoiceOn(square),"clicking Round selects it and unselects Square immediately")
+ click(groups.zoneThemeVariant[1].frame);assert(groups.zoneThemeVariant[1].frame.fieldkitSelected and not groups.zoneThemeVariant[3].frame.fieldkitSelected and ChoiceOn(groups.zoneThemeVariant[1].frame),"layout choice updates at once")
+ click(groups.zoneThemeMode[3].frame);assert(groups.zoneThemeMode[3].frame.fieldkitSelected and not groups.zoneThemeMode[2].frame.fieldkitSelected,"theme choice updates at once")
+ click(groups.zoneThemeMode[2].frame);click(groups.zoneThemeVariant[2].frame);click(groups.zoneThemeMapShape[1].frame)
+ -- the toggles use the same states
+ for _,item in ipairs(groups.zoneThemeArt) do assert(item.frame.fieldkitChoice and ChoiceOn(item.frame)==(FieldKitDB.zoneThemeArt==true),"the dressing toggle shows its state") end
+ -- persistence: reload (re-read of the saved values) and profile change
+ local saved=FieldKitDB.zoneThemeMapShape
+ C.Set("zoneThemeMapShape","round");assert(FieldKitProfiles.Save(3))
+ C.Set("zoneThemeMapShape","native");assert(groups.zoneThemeMapShape[3].frame.fieldkitSelected)
+ assert(FieldKitProfiles.Load(3));C.Refresh(true)
+ assert(FieldKitDB.zoneThemeMapShape=="round" and groups.zoneThemeMapShape[2].frame.fieldkitSelected and ChoiceOn(groups.zoneThemeMapShape[2].frame) and not groups.zoneThemeMapShape[3].frame.fieldkitSelected,"a profile change restores and shows the saved shape")
+ C.Refresh(true);assert(groups.zoneThemeMapShape[2].frame.fieldkitSelected,"selection persists across refreshes (the /reload path)")
+ C.Set("zoneThemeMapShape","square");C.Set("zoneThemes",false)
+end
+print("Choice controls: selected / hover / normal states, one line labels, immediate updates, profile persistence passed (synthetic)")

@@ -1,8 +1,8 @@
 """Generate the ring drawn around the ROUND native minimap (map shape "Round").
 
 The square map frames of the reference art cannot surround a round map, so the round presentation is its own ring: a thin
-dark outline, a gold band and a dark inner edge, colours sampled from the approved map frame art (gold 198/144/62, dark 32/27/7).
-Radii on the 256 px texture: outer 128, gold 124..116, inner dark 116..113, opening 113 (the map circle ends exactly there:
+dark outline, a bevelled gold band, a dark groove, a dark green band and a thin gold line, in the colours of the approved Elwynn frame art (gold 198/144/62 with highlights up to 245/226/157, dark 32/27/7, field green), with four diamond studs echoing the frame corners.
+Radii on the 256 px texture: outer 128, opening 113 (the map circle ends exactly there:
 the ring is drawn at side * 128 / 113 so the opening equals the map diameter). Anti-aliased by 4x supersampling.
 """
 from pathlib import Path
@@ -17,11 +17,28 @@ c = (N * S) / 2.0
 y, x = np.mgrid[0:N * S, 0:N * S]
 r = np.sqrt((x + .5 - c) ** 2 + (y + .5 - c) ** 2) / S
 img = np.zeros((N * S, N * S, 4), np.float64)
-gold = np.array([198, 144, 62]); dark = np.array([32, 27, 7])
-band = [(124, 128, dark), (116, 124, gold), (113, 116, dark)]
-for lo, hi, col in band:
-    m = (r >= lo) & (r < hi)
-    img[m, :3] = col; img[m, 3] = 255
+dark = np.array([32, 27, 7]); green = np.array([18, 40, 26])
+def lerp(c0, c1, t): return c0 + (c1 - c0) * t
+def paint(mask, col):
+    img[mask, :3] = col[mask] if getattr(col, 'ndim', 1) == 3 else col
+    img[mask, 3] = 255
+paint((r >= 126.5) & (r < 128), dark)                      # outer dark outline
+band = (r >= 118) & (r < 126.5)                            # gold bevel: bright outer edge to bronze inner edge
+t = np.clip((126.5 - r) / 8.5, 0, 1)[..., None]
+hi, mid, lo = np.array([236, 202, 118]), np.array([198, 144, 62]), np.array([112, 85, 36])
+bevel = np.where(t < .45, lerp(hi, mid, t / .45), lerp(mid, lo, (t - .45) / .55))
+paint(band, bevel)
+paint((r >= 116.5) & (r < 118), dark)                      # dark groove
+paint((r >= 114.5) & (r < 116.5), green)                   # dark green inner band (the Elwynn field colour)
+paint((r >= 113) & (r < 114.5), np.array([198, 144, 62]))  # thin gold line at the map edge
+# four gold diamond studs at N/E/S/W, echoing the diamonds of the frame corners
+yy, xx = y + .5 - c, x + .5 - c
+for ang in (0, 90, 180, 270):
+    a_ = np.radians(ang); ux, uy = np.cos(a_), np.sin(a_)
+    du = (xx * ux + yy * uy) / S - 122.25; dv = (-xx * uy + yy * ux) / S
+    outline = (np.abs(du) + np.abs(dv) <= 7.5) & (r < 128)
+    stud = (np.abs(du) + np.abs(dv) <= 5.5) & (r < 128)
+    paint(outline, dark); paint(stud, np.array([245, 226, 157]))
 # premultiply-safe downsample: average colour weighted by alpha
 a = img[..., 3] / 255.0
 rgb = img[..., :3] * a[..., None]

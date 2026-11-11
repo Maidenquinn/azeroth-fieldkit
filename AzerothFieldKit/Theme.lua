@@ -148,6 +148,33 @@ function T.State(frame,active)
  end
  T.Solid(skin.selected,T.gold);skin.selected:Hide()
  frame.fieldkitActive=active and true or false
+ if frame.fieldkitChoice and skin.kind=="button" then T.ChoiceLook(frame,frame.fieldkitSelected==true,active and true or false) end
+end
+-- Choice controls (exclusive groups and toggles marked fieldkitChoice): three clearly different states.
+--  selected = golden fill, a gold outline, the accent bar and a bright label (persistent: it never depends on the pointer);
+--  hover    = a discreet lightening only (never the selected look);
+--  normal   = the dark fill, the standard border and a legible muted label.
+-- `selected` comes from frame.fieldkitSelected, `hover` is the pointer (T.State's `active` argument), so hovering a selected
+-- choice keeps it selected and leaving a hovered one gives back exactly its own state.
+function T.ChoiceLook(frame,selected,hover)
+ local skin=frame.fieldkitSkin
+ if not skin.choice then
+  skin.choice={}
+  for i=1,4 do local t=frame:CreateTexture(nil,"OVERLAY");T.Solid(t,{1,.82,.35});t:Hide();skin.choice[i]=t end
+ end
+ local w,h=frame:GetWidth(),frame:GetHeight()
+ if skin.choiceW~=w or skin.choiceH~=h then
+  skin.choiceW=w;skin.choiceH=h
+  local e={{2,2,w-4,2},{2,h-4,w-4,2},{2,2,2,h-4},{w-4,2,2,h-4}}
+  for i=1,4 do local t=skin.choice[i];t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",e[i][1],-e[i][2]);t:SetWidth(math.max(1,e[i][3]));t:SetHeight(math.max(1,e[i][4])) end
+ end
+ local base=selected and {.34,.25,.05} or (hover and {.2,.19,.14} or nil)
+ if base and not frame.fieldkitArtOnly then T.Solid(skin.base,base);skin.base:SetAlpha(1) end
+ for i=1,4 do if selected and not frame.fieldkitArtOnly then skin.choice[i]:Show() else skin.choice[i]:Hide() end end
+ if selected and not frame.fieldkitArtOnly then skin.selected:Show() end
+ if frame.fieldkitLabel then
+  if selected then frame.fieldkitLabel:SetTextColor(1,.94,.66) elseif hover then frame.fieldkitLabel:SetTextColor(.95,.85,.55) else frame.fieldkitLabel:SetTextColor(.8,.7,.45) end
+ end
 end
 
 -- Retain legacy widget input/checked/value behavior; only its material changes.

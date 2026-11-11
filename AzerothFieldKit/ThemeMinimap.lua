@@ -36,7 +36,10 @@ end
 -- radius, e.g. cos/sin*80 while dragging) keep their angle but ride the edge of the visible opening. The owner's own
 -- SetPoint calls are intercepted on that button instance, so the correction is applied in the same call (no frame-order
 -- race with the owner's drag OnUpdate) and the owner's raw offsets are always known for an exact restoration.
-local ringProxied={FieldKitMinimapButton=true,AzerothStatsMinimap=true,AzerothOneMinimapButton=true}
+-- Only AzerothOne's launcher is still proxied. FieldKit's own button and AzerothStats' button keep their real frames: both place
+-- themselves with the standard "CENTER on the Minimap at radius 80, angle from the cursor" drag and save their own angle (DB.minimapAngle,
+-- A.db.settings.miniAngle), so the ring interception below moves them to the opening edge while the owner's drag keeps working.
+local ringProxied={AzerothOneMinimapButton=true}
 -- Ring placement from the REAL geometry: the point where the pointer's direction crosses the border of the map opening, plus half
 -- the thickness of the decorative border there (the button is centred ON the gold border: half over the map, half over the frame).
 -- geometry = {holeHalfWidth,holeHalfHeight,borderThickness,keepOutRectangles}; a keep-out rectangle (title, foot, zoom buttons) is
@@ -48,7 +51,7 @@ local function Edge(x,y,size)
  local half=(size or 32)/2;local theta=math.atan2(y,x)
  local function Place(t)
   local dx,dy=math.cos(t),math.sin(t)
-  local reach=1/math.max(math.abs(dx)/geometry[1],math.abs(dy)/geometry[2])+(geometry[3] or 0)/2
+  local reach=(M.ringCircle and geometry[1] or 1/math.max(math.abs(dx)/geometry[1],math.abs(dy)/geometry[2]))+(geometry[3] or 0)/2 -- round map: the border is a circle
   return dx*reach,dy*reach
  end
  local function Blocked(px,py)
@@ -81,7 +84,7 @@ function M.Wrap(f)
 end
 function M.Ring(halfW,halfH,band,keep)
  M.ring=M.ring or {}
- local key=halfW..":"..halfH..":"..tostring(band)
+ local key=halfW..":"..halfH..":"..tostring(band)..":"..tostring(M.ringCircle)
  for _,k in ipairs(keep or {}) do key=key..":"..k.l..","..k.r..","..k.top..","..k.bottom end
  local changed=M.ringKey~=key
  M.ringKey=key;M.ringHalf={halfW,halfH,band or 0,keep or {}}
@@ -95,7 +98,7 @@ function M.Ring(halfW,halfH,band,keep)
    if was and was==0 and alpha>0 then M.log=M.log or {};table.insert(M.log,string.format("%s alpha 0 -> %.2f (mouse over map: %s)",name,alpha,tostring(type(MouseIsOver)=="function" and MouseIsOver(Minimap) and true or false)));if table.getn(M.log)>8 then table.remove(M.log,1) end end
    M.alphaSeen[f]=alpha
   end
-  if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and not string.find(name,"^FieldKit") and not f.fieldkitRingOriginal then
+  if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and (name=="FieldKitMinimapButton" or not string.find(name,"^FieldKit")) and not f.fieldkitRingOriginal then
    local points=FieldKitThemeHUD.Points(f);local p=points[1]
    if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5],f.GetWidth and f:GetWidth()) then
     M.Wrap(f);f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",p[4],p[5]) -- goes through the wrapper: edge position, raw remembered
@@ -110,9 +113,10 @@ end
 -- native level is remembered (M.Layers keeps computing the mouse stack from it, so the validated order is unchanged) and put back
 -- with the theme. Nothing else changes: no position, no script, no other frame.
 function M.Lift()
- if not M.rim or not M.rim.GetFrameLevel then return end
+ local top=(M.shape=="round" and M.roundRing and M.roundRing:IsShown()) and M.roundRing or M.rim
+ if not top or not top.GetFrameLevel then return end
  M.lifted=M.lifted or {}
- local want=M.rim:GetFrameLevel()+1
+ local want=top:GetFrameLevel()+1
  for f in pairs(M.ring or {}) do
   if f.GetFrameLevel and f.SetFrameLevel then
    if M.lifted[f]==nil then M.lifted[f]=f:GetFrameLevel() end
@@ -198,7 +202,10 @@ function M.Effective()
  local want=M.Requested();M.shapeNote=nil
  if want=="round" then
   local R=FieldKitReferenceHUD
-  if not (R and R.active and R.layout and R.layout.rects and R.layout.rects.mapArt) then M.shapeNote="round-unavailable";return "native" end
+  -- Elwynn has a round dressing on every layout (a ring; on the identity-card layout the square map frame is cut away, only the
+  -- zone and mode banners stay). Naxx has none yet: only where its map frame is a separate piece.
+  local ok=R and R.active and R.layout and R.layout.rects and (R.layout.rects.mapArt~=nil or FieldKitTheme.zone=="elwynn")
+  if not ok then M.shapeNote="round-unavailable";return "native" end
  end
  return want
 end
