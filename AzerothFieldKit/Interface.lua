@@ -130,7 +130,7 @@ function FieldKit.BuildJourneySections(sections,actions)
    set=function(v) FieldKitDB.cardStyle=v;T.Refresh() end},
   {kind="slider",label="Card background opacity",min=0,max=100,step=1,
    format=function(v) return FieldKit_L("Card background opacity")..": "..v.."%" end,
-   get=function() return FieldKitDB.cardOpacity end,set=function(v) FieldKitDB.cardOpacity=v;T.Refresh() end},
+   get=function() return FieldKitDB.cardOpacity end,set=function(v) FieldKitDB.cardOpacity=v;if FieldKitZoneThemes and FieldKitZoneThemes.ApplyOpacity then FieldKitZoneThemes.ApplyOpacity() else T.Refresh() end end},
   {kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
    get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
    set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end},

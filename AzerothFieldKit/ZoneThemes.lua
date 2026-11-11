@@ -213,6 +213,7 @@ function C.ShapeLabel()
  return "Round map unavailable here: native map"
 end
 function C.Refresh(force)
+ C.lastOpacity=nil -- a full refresh redraws the cards at the current value: the slider memo must not skip the next write
  if not FieldKit.zoneThemeReady or not FieldKitDB or not getglobal("FieldKitPlayerBar") then return end
  if C.ui then for _,item in ipairs(C.ui) do
   local selected=item.value=="toggle" and FieldKitDB[item.key]==true or FieldKitDB[item.key]==item.value
@@ -359,6 +360,18 @@ function C.Tick()
  if C.deadline and now<C.deadline then return end
  C.deadline=now+.2;C.Refresh()
 end
+-- Panel opacity changes only the alpha of the background regions of the cards (R.ApplyOpacity, T.RefreshOpacity). It does NOT go
+-- through C.Set: that path suspends and rebuilds the whole HUD (every card, the placement engine, the minimap, the native frames) and
+-- the slider fires it on every step, which froze the client for seconds. The value is memorised so repeated events cost nothing.
+function C.ApplyOpacity()
+ local value=FieldKit.Number(FieldKitDB.cardOpacity,100,0,100)
+ if C.lastOpacity==value then return 0 end
+ C.lastOpacity=value
+ local n=T.RefreshOpacity()
+ if FieldKitReferenceHUD and FieldKitReferenceHUD.active then n=n+FieldKitReferenceHUD.ApplyOpacity() end
+ C.opacityWrites=n
+ return n
+end
 function C.Set(key,value)
  local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeMapShape=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
@@ -496,7 +509,7 @@ function FieldKitThemeUI(parent,offset)
   for _,suffix in ipairs({"Low","High","Text"}) do local part=getglobal("FieldKitThemeSlider"..key..suffix);if part then part:Hide() end end
   slider:SetValue(FieldKitDB[key] or 100);local pref=key;local label=i==1 and "HUD scale" or "Panel opacity"
   title:SetText(FieldKit_L(label).." : "..tostring(FieldKitDB[key] or 100).." %")
-  slider:SetScript("OnValueChanged",function() if not C.sliderRefresh then local value=math.floor((this:GetValue() or 100)/5+.5)*5;title:SetText(FieldKit_L(label).." : "..value.." %");C.Set(pref,value) end end)
+  slider:SetScript("OnValueChanged",function() if not C.sliderRefresh then local value=math.floor((this:GetValue() or 100)/5+.5)*5;title:SetText(FieldKit_L(label).." : "..value.." %");if pref=="cardOpacity" then FieldKitDB.cardOpacity=value;C.ApplyOpacity() else C.Set(pref,value) end end end)
   sliders[i]={slider=slider,title=title,key=key,label=label}
  end
  C.uiSliders=sliders

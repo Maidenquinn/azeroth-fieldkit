@@ -2345,11 +2345,13 @@ do
   assert(M.roundRing and M.roundRing:IsShown() and C.ShapeLabel()=="Round map",tag..": ring drawn, label Round")
   assert(Minimap:GetWidth()==Minimap:GetHeight() and Minimap:GetWidth()<=squareSide*1.1,tag..": the round map is inside the footprint of the square one")
   if identity then
-   local n,list=Shown(H.identity)
-   assert(n==2,tag..": only the two banners of the identity card are drawn ("..n.." tiles)")
-   local covered=0;for _,t in ipairs(list) do covered=covered+t:GetHeight() end
-   assert(covered<=52+54,tag..": the cut-away card has no square frame body ("..covered.." px)")
-   assert(H.identity:GetHeight()==fullH,tag..": round keeps the card footprint so the ring sits between the banners")
+   assert(Shown(H.identity)==0,tag..": no rectangular banner or square frame art on the round map")
+   assert(R.plateTex and R.plateTex[1]:IsShown() and R.plateTex[2]:IsShown(),tag..": the curved header and foot plates are drawn")
+   local _,_,_,_,y1=R.plateTex[1]:GetPoint();local _,_,_,_,y2=R.plateTex[2]:GetPoint()
+   assert(y1>y2,tag..": header plate above the foot plate")
+   local zr=R.idCut.round.zone;local mr=R.idCut.round.mode
+   assert(zr[2]<mr[2] and zr[3]<=140 and mr[3]<=140,tag..": zone text above, mode text below, both short enough for the plate")
+   assert(H.identity:GetHeight()==fullH,tag..": round keeps the card footprint")
   else
    assert(Shown(M.root)==0 and (not M.rim or not M.rim:IsShown()),tag..": no square frame tile, no rim over a round map")
   end
@@ -2367,7 +2369,11 @@ do
   assert(not M.root:IsShown() and (not M.rim or not M.rim:IsShown()),tag..": no FieldKit map frame at all")
   if identity then
    local n,list=Shown(H.identity)
-   assert(n==2 and H.identity:GetHeight()==52+54,tag..": native: only the two banners remain, stacked ("..n.." tiles, "..H.identity:GetHeight().." px)")
+   assert(n==2 and H.identity:GetHeight()==78 and H.identity:GetWidth()==240,tag..": native: two compact cartouches ("..n.." tiles, "..H.identity:GetWidth().."x"..H.identity:GetHeight()..")")
+   assert(list[1]:GetHeight()==36 and list[2]:GetHeight()==36,tag..": equal cartouches")
+   local _,_,_,_,ya=list[1]:GetPoint();local _,_,_,_,yb=list[2]:GetPoint()
+   assert(math.abs(yb-ya)==42,tag..": regular 6 px gap between the two cartouches")
+   assert(R.plateTex[1]:IsShown()==false and R.plateTex[2]:IsShown()==false,tag..": no round plates on the native presentation")
    assert(not H.mode.fieldkitLabel or H.mode:IsShown(),tag..": the mode button stays usable")
   else
    assert(Shown(M.root)==0,tag..": native: the Elwynn map frame is gone")
@@ -2489,3 +2495,72 @@ do
  C.Set("zoneThemeMapShape","square");C.Set("zoneThemes",false)
 end
 print("Choice controls: selected / hover / normal states, one line labels, immediate updates, profile persistence passed (synthetic)")
+
+-- ===== alpha.45: panel opacity is a fast path that fades the BODY only =====
+do
+ local counts={update=0,suspend=0,refresh=0,hud=0}
+ local oldUpdate,oldSuspend,oldRefresh,oldHud=R.Update,C.Suspend,C.Refresh,H.Update
+ R.Update=function(variant,zone) counts.update=counts.update+1;return oldUpdate(variant,zone) end
+ C.Suspend=function() counts.suspend=counts.suspend+1;return oldSuspend() end
+ C.Refresh=function(force) counts.refresh=counts.refresh+1;return oldRefresh(force) end
+ H.Update=function(variant,zone) counts.hud=counts.hud+1;return oldHud(variant,zone) end
+ local function Slide(value) local slider=C.uiSliders[2].slider;slider:SetValue(value);this=slider;slider.scripts.OnValueChanged() end
+ local function Tiles(frame) local n=0;for _,t in ipairs(frame.referenceTiles or {}) do n=n+1 end;for _,t in ipairs(frame.referenceMattes or {}) do n=n+1 end;return n end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  for _,variant in ipairs({"complete","minimal","alternative"}) do
+   local tag=zone.."_"..variant
+   C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);phase="playing";FieldKitDB.cardOpacity=100
+   C.Set("zoneThemes",true);C.Refresh(true)
+   -- the page exists (the options journey built it earlier in this file)
+   assert(C.uiSliders and C.uiSliders[2].key=="cardOpacity",tag..": the opacity slider exists")
+   local cards={};for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do local f=R.frames[kind];if f then cards[kind]=f end end
+   local before={};for kind,f in pairs(cards) do before[kind]=Tiles(f) end
+   local bodies=0;for kind,f in pairs(cards) do for _,t in ipairs(f.referenceTiles or {}) do if t:IsShown() then bodies=bodies+1 end end end;assert(bodies>=5,tag..": the cards really are drawn ("..bodies.." body tiles)")
+   local mattes=0;for kind,f in pairs(cards) do for _,m in ipairs(f.referenceMattes or {}) do if m:IsShown() and m:GetAlpha()==1 and string.find(m.referenceAsset or "","_frame.tga",1,true) then mattes=mattes+1 end end end
+   assert(mattes==bodies,tag..": every card body tile has its opaque frame matte on top ("..mattes.."/"..bodies..")")
+   for _,value in ipairs({0,25,50,75,100,50,0,100}) do
+    counts.update,counts.suspend,counts.refresh,counts.hud=0,0,0,0
+    Slide(value)
+    assert(FieldKitDB.cardOpacity==value,tag..": the value is set ("..value..")")
+    assert(counts.update==0 and counts.suspend==0 and counts.refresh==0 and counts.hud==0,tag..": no HUD rebuild at "..value.." (update "..counts.update..", suspend "..counts.suspend..", refresh "..counts.refresh..")")
+    for kind,f in pairs(cards) do
+     local frames=f.referenceMattes or {}
+     for i,t in ipairs(f.referenceTiles or {}) do
+      if t:IsShown() then
+       assert(math.abs(t:GetAlpha()-value/100)<1e-6,tag..": "..kind.." body tile alpha "..tostring(t:GetAlpha()).." at "..value)
+       local m=frames[i];if zone and R.FRAME_MATTE then assert(m==nil or (m:GetAlpha()==1),tag..": "..kind.." frame matte stays fully opaque") end
+      end
+     end
+     assert(f:GetAlpha()==1,tag..": "..kind.." parent frame alpha untouched (text, icons, controls keep full opacity)")
+    end
+   end
+   for kind,f in pairs(cards) do assert(Tiles(f)==before[kind],tag..": "..kind..": no texture accumulated over 8 slider events") end
+   -- a burst of events with the same value costs nothing (memo); a changed value writes a handful of regions only
+   Slide(40);Slide(40);Slide(40);counts.update=0;Slide(40);assert(C.opacityWrites~=nil and counts.update==0,tag..": repeated value: nothing rebuilt")
+   Slide(65);assert(C.opacityWrites<=80,tag..": one change writes "..tostring(C.opacityWrites).." regions at most")
+   -- reload path (full refresh) draws the saved value; persistence
+   C.Refresh(true)
+   for kind,f in pairs(cards) do for _,t in ipairs(f.referenceTiles or {}) do if t:IsShown() then assert(math.abs(t:GetAlpha()-.65)<1e-6,tag..": after a full refresh/reload the saved value is drawn") end end end
+   assert(FieldKitDB.cardOpacity==65,tag..": persisted")
+   -- the old 30 % floor is gone: 0 really is 0
+   Slide(0);for kind,f in pairs(cards) do for _,t in ipairs(f.referenceTiles or {}) do if t:IsShown() then assert(t:GetAlpha()==0,tag..": 0 % is transparent body") end end end
+   -- profile change brings the profile's opacity back, and the slider memo does not skip it
+   FieldKitDB.cardOpacity=100;C.Refresh(true);Slide(30)
+   for kind,f in pairs(cards) do for _,t in ipairs(f.referenceTiles or {}) do if t:IsShown() then assert(math.abs(t:GetAlpha()-.3)<1e-6,tag..": a stale memo never skips a real change") end end end
+   Slide(100);C.Set("zoneThemes",false)
+  end
+ end
+ -- legacy HUD cards (T.Surface): the fill follows, the gold border slices keep their opacity
+ do
+  local f=CreateFrame("Frame",nil,UIParent);f:SetWidth(200);f:SetHeight(100);T.Surface(f,"card",true)
+  FieldKitDB.cardOpacity=100;T.State(f,false);local border=f.fieldkitSkin.parts[1].texture:GetAlpha()
+  FieldKitDB.cardOpacity=20;C.lastOpacity=nil;C.ApplyOpacity()
+  assert(math.abs(f.fieldkitSkin.base:GetAlpha()-.2)<1e-6 and f.fieldkitSkin.parts[1].texture:GetAlpha()==border,"legacy card: fill follows the setting, border slices stay opaque")
+  FieldKitDB.cardOpacity=100;C.lastOpacity=nil;C.ApplyOpacity()
+ end
+ R.Update,C.Suspend,C.Refresh,H.Update=oldUpdate,oldSuspend,oldRefresh,oldHud
+ -- the matte assets exist for every card art tile of both zones
+ for _,name in ipairs({"Accessories","Damage","Effects","Lairs","Stats"}) do for _,zone in ipairs({"elwynn","naxx"}) do assert(R.FRAME_MATTE[zone.."_complete_"..name.."_1.tga"]) end end
+ FieldKitDB.cardOpacity=100
+end
+print("Panel opacity: fast path (no rebuild), body-only fade with the frame kept opaque, memo, reload, profile, 0 % really transparent passed (synthetic)")

@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.45 - OPACITE DES PANNEAUX (FREEZE), CARTE RONDE ELWYNN, CARTOUCHES NATIFS
+Le curseur ne reconstruit plus le HUD et ne fait fondre que le fond. A recetter en jeu.
+
 ALPHA.44 - MINICARTE RONDE ELWYNN, BOUTONS TIERS, ETATS DES CHOIX
 Carte ronde Elwynn, carte native libre, boutons FieldKit/AzerothStats reels et deplacables, etats selectionne/survol. A recetter en jeu.
 

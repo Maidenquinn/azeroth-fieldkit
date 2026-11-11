@@ -33,6 +33,15 @@ function T.Opacity(frame)
  if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
  return FieldKit.Number(FieldKitDB and FieldKitDB.cardOpacity,100,0,100)/100
 end
+-- Panel opacity only: repaint the fill of the HUD cards. The border slices, labels and controls are not touched.
+function T.RefreshOpacity()
+ local n=0
+ for i=1,table.getn(T.surfaces) do
+  local frame=T.surfaces[i]
+  if frame.fieldkitSkin and frame.fieldkitSkin.hud and frame.fieldkitSkin.kind~="button" then T.State(frame,frame.fieldkitActive);n=n+1 end
+ end
+ return n
+end
 function T.Refresh()
  for i=1,table.getn(T.surfaces) do
   local frame=T.surfaces[i];T.State(frame,frame.fieldkitActive);T.Update(frame)

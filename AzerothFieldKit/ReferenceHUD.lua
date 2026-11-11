@@ -182,6 +182,23 @@ function R.Child(frame,parent,rect)
  frame.referenceRect=rect
  frame.referenceChildKey=R.key
 end
+-- Panel opacity. The card tiles bake the dark body and the gold frame in one texture; tools/build_card_frame_matte.py derives a
+-- "frame matte" of each (everything that is not the dark body). A card draws the approved tile at the panel opacity and its matte on top
+-- at full opacity: the setting fades the BODY only, never the border, ornaments, rules, text, icons or bars.
+R.CARD={Damage=true,Lairs=true,Accessories=true,Stats=true,Effects=true,chat=true}
+R.FRAME_MATTE={}
+for _,zone in ipairs({"elwynn","naxx"}) do for _,kind in ipairs({"Accessories","Damage","Effects","Lairs","Stats"}) do R.FRAME_MATTE[zone.."_complete_"..kind.."_1.tga"]=true end end
+R.opacityFrames={}
+function R.Opacity() return FieldKit.Number(FieldKitDB.cardOpacity,100,0,100)/100 end
+-- Fast path of the panel opacity slider: only the alpha of the body tiles of the cards already drawn (a handful of regions).
+-- No rebuild, no placement, no allocation. Returns the number of regions written.
+function R.ApplyOpacity()
+ local alpha=R.Opacity();local n=0
+ for frame in pairs(R.opacityFrames) do
+  for _,t in ipairs(frame.referenceTiles or {}) do t:SetAlpha(alpha);n=n+1 end
+ end
+ return n
+end
 function R.Art(frame,component,layout)
  local tiles=(layout or R.layout).tiles[component]
  if component=="dock" and not FieldKitDB.zoneThemeArt then tiles=nil end
@@ -224,8 +241,19 @@ function R.Art(frame,component,layout)
    t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2],-a[3]);t:SetWidth(a[4]);t:SetHeight(a[5])
    if component=="header" and R.key=="elwynn_complete" then local ratio=1+180/R.layout.rects.header[3];t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2]*ratio,-a[3]);t:SetWidth(a[4]*ratio) end
    t:SetTexCoord(0,a[6],a[7],a[8])
-   t:SetAlpha((component=="Damage" or component=="Lairs" or component=="Accessories" or component=="Stats" or component=="Effects" or component=="chat") and FieldKit.Number(FieldKitDB.cardOpacity,100,30,100)/100 or 1);t:Show()
-  else t:Hide() end
+   t:SetAlpha(R.CARD[component] and R.Opacity() or 1);t:Show()
+   if R.CARD[component] then R.opacityFrames[frame]=true end
+   -- the frame matte, on top of the body tile, always fully opaque
+   local matte=R.FRAME_MATTE[a[1]] and (string.gsub(a[1],"%.tga$","_frame.tga")) or nil
+   local mt=frame.referenceMattes and frame.referenceMattes[i]
+   if matte then
+    frame.referenceMattes=frame.referenceMattes or {}
+    if not mt then mt=frame:CreateTexture(nil,"BORDER");frame.referenceMattes[i]=mt end
+    local masset=T.media.."ReferenceHUD\\"..matte
+    if mt.referenceAsset~=masset then mt:SetTexture(masset);mt.referenceAsset=masset end
+    mt:ClearAllPoints();mt:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2],-a[3]);mt:SetWidth(a[4]);mt:SetHeight(a[5]);mt:SetTexCoord(0,a[6],a[7],a[8]);mt:SetAlpha(1);mt:Show()
+   elseif mt then mt:Hide() end
+  else t:Hide();if frame.referenceMattes and frame.referenceMattes[i] then frame.referenceMattes[i]:Hide() end end
  end
 end
 local function Label(label,parent,rect,size,heading,justify,face)
@@ -268,6 +296,7 @@ function R.Stop()
  -- Benilla caches native status bars independently of a hidden ancestor.
  for _,f in ipairs({H.health,H.resource,H.xp,R.xpArt,R.xpBadge,H.utility,R.barOverlay}) do if f then f:Hide() end end
  for _,f in pairs(R.plain or {}) do f:Hide() end
+ for _,t in ipairs(R.plateTex or {}) do t:Hide() end
  for _,f in ipairs({H.identity,H.header,H.healthRoot,H.dock,H.nav,R.xpArt,R.xpBadge,H.utility}) do if f then for _,t in ipairs(f.referenceTiles or {}) do t:Hide() end end end
 end
 -- Option "Character ornaments" OFF: the baked dock art (character illustrations AND the frame the spell sockets, the XP track and
@@ -296,22 +325,41 @@ function R.PlainDock(d)
   elseif f then f:Hide() end
  end
 end
--- Cut-away identity card of Elwynn Complete for the round and native maps (nil for the square map and every other layout).
--- Slices of elwynn_complete_identity_1 (302 x 350 art px): the zone banner (rows 0-52) and the mode banner (rows 296-350). Round:
--- both stay where they are (the ring sits between them). Native: the mode banner is moved up under the zone banner, so the card
--- is a small two-banner block and the native map is not held by any frame.
+-- Elwynn Complete: the map sits INSIDE the identity card, whose square frame is baked into the art. Round and native maps must not
+-- keep that frame. ROUND: no card art at all; two curved plates (map_round_plate.tga, the foot is the same texture flipped) hug the
+-- top and the bottom of the ring and carry the zone name and the mode, as horizontal centred text. NATIVE: two compact rounded
+-- cartouches (elwynn_cartouche.tga) stacked with a regular gap, zone above mode, and nothing around the native map.
+R.PLATE={cy=170.5,mid=149.5,half=118.1,inner=93.1,top=167.5} -- plate geometry on the 256 x 128 texture (ring centre at (128, cy))
 R.idCut={}
 function R.IdentityCut(d,zone,shape)
  if zone~="elwynn" or R.key~="elwynn_complete" or (shape~="round" and shape~="native") then return nil end
- local c=R.idCut[shape]
- if not c then
-  local file=d.tiles.identity[1][1];local r=d.rects.identity
-  local top,foot=52,54;local footAt=shape=="native" and top or 296
-  c={shift=296-footAt,rect={r[1],r[2],r[3],shape=="native" and top+foot or r[4]},
-     layout={tiles={identity={{file,0,0,302,top,512,512,0},{file,0,footAt,302,foot,512,512,296}}}}}
-  R.idCut[shape]=c
+ local c=R.idCut[shape];if c then return c end
+ local r=d.rects.identity
+ if shape=="native" then
+  c={rect={r[1],r[2],240,78},zone={r[1]+10,r[2]+5,220,26},mode={r[1]+10,r[2]+47,220,26},zoneSize=16,modeSize=14,
+     layout={tiles={identity={{"elwynn_cartouche.tga",0,0,240,36,256,64,0},{"elwynn_cartouche.tga",0,42,240,36,256,64,0}}}}}
+ else
+  local side,cx,cy=R.RoundGeometry(d,d.mapHole);local s=side*128/113/256;local P=R.PLATE;local off=(P.mid-4)*s
+  c={rect=r,zone={cx-65,cy-off-11,130,22},mode={cx-65,cy+off-11,130,22},zoneSize=15,modeSize=13,layout={tiles={}},
+     plates={x=cx-128*s,w=256*s,h=128*s,top=cy-P.cy*s,foot=cy+P.cy*s-128*s,scale=s}}
  end
+ R.idCut[shape]=c
  return c
+end
+-- The two curved plates of the round presentation: textures of the identity card (same layer as its art, below its labels).
+function R.IdentityPlates(cut)
+ local want=cut and cut.plates
+ if not want then for _,t in ipairs(R.plateTex or {}) do t:Hide() end;return end
+ R.plateTex=R.plateTex or {}
+ local o=cut.rect
+ for i=1,2 do
+  local t=R.plateTex[i]
+  if not t then t=H.identity:CreateTexture(nil,"BACKGROUND");t:SetTexture(T.media.."ReferenceHUD\\map_round_plate.tga");R.plateTex[i]=t end
+  local y=i==1 and want.top or want.foot
+  t:ClearAllPoints();t:SetPoint("TOPLEFT",H.identity,"TOPLEFT",want.x-o[1],-(y-o[2]));t:SetWidth(want.w);t:SetHeight(want.h)
+  if i==1 then t:SetTexCoord(0,1,0,1) else t:SetTexCoord(0,1,1,0) end
+  t:Show()
+ end
 end
 -- Round map geometry: the diameter of the native map and the centre of its ring. The ring (texture 256 px, opening radius 113) is drawn
 -- at side*128/113; it fits the map frame piece when there is one, else the opening of the identity card.
@@ -323,7 +371,7 @@ end
 -- The two zoom buttons of a round map sit ON the ring, lower right (+ above -): top-left of a 24 x 25 button.
 function R.RoundZoom(i,d,hole)
  local side,cx,cy=R.RoundGeometry(d,hole);local radius=(side/2+side/2*128/113)/2
- local a=math.rad(i==1 and -62 or -30)
+ local a=math.rad(i==1 and -9 or 21) -- right side, between the two plates
  return cx+radius*math.cos(a)-12,cy-radius*math.sin(a)-12.5
 end
 function R.Update(variant,zone)
@@ -336,8 +384,8 @@ function R.Update(variant,zone)
  -- Elwynn Complete: the map sits INSIDE the identity card, whose square frame is baked into the art. Round and native maps must not
  -- keep that frame: only the two banners (zone name above, mode below) are drawn, from the same art, cut away from the card.
  local cut=R.IdentityCut(d,zone,M.shape)
- local dm=d.mode
- if cut then dm={d.mode[1],d.mode[2]-cut.shift,d.mode[3],d.mode[4]} end
+ local dm,dz=d.mode,d.zone
+ if cut then dm,dz=cut.mode,cut.zone end
  for _,entry in ipairs({{H.identity,"identity"},{H.header,"header"},{H.healthRoot,"vitality"},{H.dock,"dock"},{H.nav,"nav"}}) do
   if d.rects[entry[2]] then
    local rect=d.rects[entry[2]];local layout=nil
@@ -349,11 +397,12 @@ function R.Update(variant,zone)
  if key=="elwynn_complete" then local a=d.rects.header;R.Geometry(H.header,{a[1]-90,a[2],a[3]+180,a[4]}) end
  H.sculpture:Hide();H.left:Hide();H.right:Hide();H.namePlate:Hide();H.schedule:Hide()
  for _,rim in ipairs(H.actionRims) do rim:Hide() end
- Label(H.zone,H.identity,d.zone,variant=="complete" and 23 or 20,true,"CENTER")
- Button(H.mode,H.identity,dm);Label(H.mode.fieldkitLabel,H.mode,dm,17,true,"CENTER")
+ R.IdentityPlates(cut)
+ Label(H.zone,H.identity,dz,cut and cut.zoneSize or (variant=="complete" and 23 or 20),true,"CENTER")
+ Button(H.mode,H.identity,dm);Label(H.mode.fieldkitLabel,H.mode,dm,cut and cut.modeSize or 17,true,"CENTER")
  if d.heroic then Label(R.heroic,H.identity,d.heroic,variant=="alternative" and 18 or 19,true,nil,variant=="alternative" and "NotoSerif-Regular.ttf" or nil);R.heroic:SetText((FieldKit.GetHeroicLabel() or "?")..(variant=="alternative" and " · "..FieldKit_L("Mode") or ""));H.mode.fieldkitLabel:SetText(variant=="alternative" and "" or FieldKit_L("Mode"))
- else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and " · "..FieldKit_L("Mode") or "")) end
- if zone=="elwynn" and variant~="alternative" then
+ else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and not cut and " · "..FieldKit_L("Mode") or "")) end
+ if zone=="elwynn" and variant~="alternative" and not cut then
   local a=dm;local icon=R.MODE_ICON[R.key]
   -- The info icon ("i" in a gold ring) is part of the foot art, at the right end of the button: the label stays in the free
   -- area to its left (art left cap .. icon - margin) instead of running under it. The whole button stays the click target.
@@ -841,8 +890,14 @@ function R.RingGeometry(d,hole)
  if band>=1000000 then band=0 end
  local cx,cy=hole[1]+hole[3]/2,hole[2]+hole[4]/2;local keep={}
  local function Add(x,y,w,h) table.insert(keep,{l=x-cx,r=x+w-cx,top=cy-y,bottom=cy-(y+h)}) end
- if d.zone then Add(d.zone[1],d.zone[2],d.zone[3],d.zone[4]) end
- if d.mode then Add(d.mode[1],d.mode[2],d.mode[3],d.mode[4]) end
+ local roundPlates=FieldKitThemeMinimap.shape=="round" and not d.rects.mapArt and R.idCut.round
+ if roundPlates then
+  local P=R.PLATE;local s=roundPlates.plates.scale
+  table.insert(keep,{l=-P.half*s,r=P.half*s,top=P.top*s,bottom=P.inner*s});table.insert(keep,{l=-P.half*s,r=P.half*s,top=-P.inner*s,bottom=-P.top*s})
+ else
+  if d.zone then Add(d.zone[1],d.zone[2],d.zone[3],d.zone[4]) end
+  if d.mode then Add(d.mode[1],d.mode[2],d.mode[3],d.mode[4]) end
+ end
  for i=1,2 do local x,y=R.ZoomXY(i,d.map);if FieldKitThemeMinimap.shape=="round" then x,y=R.RoundZoom(i,d,hole) end;Add(x,y,24,25) end
  return band,keep
 end
