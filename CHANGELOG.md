@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.47 - 2026-11-11 (native map banners finish, neutral row socket path, unreleased)
+
+- Native map banners (zone name, mode). The generated cartouche of alpha.45/46 is replaced by banners built from the REAL pixels of the approved card frame (`tools/build_native_banner.py` -> `elwynn_banner.tga`): the same worked gold frame, chamfered corners with their triangular plate and stud, and the same dark green body as the other HUD cards. Each banner is 50 px high and drawn as left cap | middle stretched | right cap (`R.Art` tiles now accept a source column and width), so the four corners are never scaled; the two banners are 6 px apart and as wide as the native map (200..260 canvas px, following it). The text boxes sit inside the gold frame with equal margins and are centred on the middle of each banner; the face is the serif title face (`AzerothSerif.ttf`), shrunk by `R.Fit` instead of being truncated. The native minimap, its buttons and its behaviour are untouched; Square, Round and the opacity path are untouched.
+- Neutral row socket. `R.RowIcon` (the placeholder of rows without an icon) used `"Interface\Buttons\WHITE8X8"` with single backslashes, which Lua turns into a non-existent path. Now the real stock texture path, with the same tint (.16 .14 .10, .85) it was written for; the audit exception is removed (the string-escape audit has no exception left). Its native rendering has to be compared in the client.
+- Tooling: the obsolete `elwynn_cartouche.tga` is removed (manifest included).
+
 ## 0.6.0-alpha.46 - 2026-11-11 (Elwynn rendering corrections after the refused alpha.45 recette, unreleased)
 
 - Panel opacity, root cause (alpha.45 was refused): the cards other than Equipment (Damage, Lairs, Bonuses, Effects) paint a clean dark body (`frame.cleanBody`, `<zone>_card_body_v9.tga`, `R.Update`) over the interior of the tile; it was never touched by the slider, so only the Equipment card (which has none) answered. The tab band (`frame.navBand`, black 30 percent) was also fixed. `R.ApplyOpacity` now writes the clean body and the tab band as well (78 regions per change in the synthetic suite, no rebuild).

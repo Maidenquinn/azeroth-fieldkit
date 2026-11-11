@@ -2368,13 +2368,21 @@ do
   assert(not M.root:IsShown() and (not M.rim or not M.rim:IsShown()),tag..": no FieldKit map frame at all")
   if identity then
    local n,list=Shown(H.identity)
-   assert(n==2 and H.identity:GetHeight()==76 and H.identity:GetWidth()==240,tag..": native: two compact banners ("..n.." tiles, "..H.identity:GetWidth().."x"..H.identity:GetHeight()..")")
-   assert(list[1]:GetHeight()==36 and list[2]:GetHeight()==36,tag..": equal cartouches")
-   local _,_,_,_,ya=list[1]:GetPoint();local _,_,_,_,yb=list[2]:GetPoint()
-   assert(math.abs(yb-ya)==40,tag..": regular 4 px gap between the two banners")
+   local nc;for key,v in pairs(R.idCut) do if string.find(key,"native",1,true) then nc=v end end
+   local W=nc.rect[3]
+   assert(W>=200 and W<=260 and H.identity:GetWidth()==W and H.identity:GetHeight()==106,tag..": native: two banners as wide as the native map, within 200..260 ("..W.."x"..H.identity:GetHeight()..")")
+   assert(n==6,tag..": each banner = left cap + stretched middle + right cap ("..n.." tiles)")
+   local caps,mids=0,0;for _,t in ipairs(list) do if t:GetWidth()==25 then caps=caps+1 elseif t:GetWidth()==W-50 then mids=mids+1 end end
+   assert(caps==4 and mids==2,tag..": the four corners are never scaled, only the middle is stretched ("..caps.." caps, "..mids.." middles)")
+   local ys={};for _,t in ipairs(list) do local _,_,_,_,y=t:GetPoint();ys[-y]=true end
+   assert(ys[0] and ys[56] and not ys[1],tag..": the two banners are 6 px apart (50 px high each)")
+   assert(string.find(list[1].referenceAsset,"elwynn_banner.tga",1,true),tag..": banner art derived from the approved card frame")
    assert(H.zone:GetParent()==H.identity and (not R.textLayer or not R.textLayer:IsShown()),tag..": native: the texts are back on the card, no round text layer")
-   local zr,mr=R.idCut.native.zone,R.idCut.native.mode;assert(zr[3]==240 and zr[4]==36 and mr[3]==240 and mr[4]==36 and mr[2]-zr[2]==40,tag..": each text box is exactly its banner, so the text is centred in it")
-   assert(not H.mode.fieldkitLabel or H.mode:IsShown(),tag..": the mode button stays usable")
+   local zr,mr=nc.zone,nc.mode
+   assert(zr[1]-nc.rect[1]==28 and zr[3]==W-56 and mr[3]==W-56 and mr[2]-zr[2]==56,tag..": each text box sits inside its gold frame, equal margins both sides")
+   assert(zr[2]+zr[4]/2-nc.rect[2]==25 and mr[2]+mr[4]/2-nc.rect[2]==81,tag..": text centred on the middle of each banner (25 and 81 px)")
+   local path=H.zone:GetFont();assert(string.find(path,"AzerothSerif",1,true),tag..": the banners use the serif title face ("..tostring(path)..")")
+   assert(H.mode:IsShown() and H.mode:GetWidth()==W-56,tag..": the mode button stays usable")
   else
    assert(Shown(M.root)==0,tag..": native: the Elwynn map frame is gone")
   end
@@ -2617,3 +2625,30 @@ do
  C.open={};C.Set("zoneThemes",false)
 end
 print("Panel opacity on every dark region (clean body, tab band, body tile, matte), Effects empty state and states passed (synthetic)")
+
+-- ===== alpha.47: native banners (finish), neutral row socket path =====
+do
+ C.Set("zoneThemes",false);C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");phase="playing";C.Set("zoneThemeMapShape","native");C.Set("zoneThemes",true);C.Refresh(true)
+ local ip,_,_,ix,iy=H.identity:GetPoint()
+ local function Count() local n=0;for _,t in ipairs(H.identity.referenceTiles or {}) do if t:IsShown() then n=n+1 end end return n end
+ local tiles=table.getn(H.identity.referenceTiles or {});assert(Count()==6)
+ for i=1,12 do C.Refresh(true) end
+ local p2,_,_,x2,y2=H.identity:GetPoint();assert(p2==ip and x2==ix and y2==iy and Count()==6 and table.getn(H.identity.referenceTiles)==tiles,"native banners: 12 refreshes do not move, rebuild or accumulate anything")
+ H.saved={};C.Refresh(true);assert(Count()==6,"native banners survive the /reload path")
+ -- shape changes and back
+ for _,shape in ipairs({"square","round","native","square","native"}) do C.Set("zoneThemeMapShape",shape) end
+ assert(Count()==6 and FieldKitDB.zoneThemeMapShape=="native","native banners after shape changes")
+ -- profile change
+ assert(FieldKitProfiles.Save(2));C.Set("zoneThemeMapShape","square");assert(FieldKitProfiles.Load(2));C.Refresh(true)
+ assert(FieldKitDB.zoneThemeMapShape=="native" and Count()==6,"native banners come back with the profile")
+ -- the native minimap is the same object in the same state (not modified by the banners)
+ assert(not M.active and Minimap:GetParent()==UIParent,"native map untouched")
+ C.Set("zoneThemeMapShape","square");C.Set("zoneThemes",false)
+ -- neutral row socket: the placeholder texture path really names the stock white texture (a single backslash would be dropped by Lua)
+ local row={icon=CreateFrame("Frame",nil,UIParent):CreateTexture(nil,"ARTWORK")};local seen
+ local orig=row.icon.SetTexture;row.icon.SetTexture=function(self,path) seen=path;if orig then return orig(self,path) end end
+ row.GetName=function() return nil end;row.ClearAllPoints=function() end;row.SetPoint=function() end
+ R.RowIcon(row,nil)
+ assert(seen=="Interface\\Buttons\\WHITE8X8","neutral socket texture path is the stock WHITE8X8 ("..tostring(seen)..")")
+end
+print("Native banners (finish) and neutral row socket path passed (synthetic)")

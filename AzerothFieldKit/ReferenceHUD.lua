@@ -234,8 +234,9 @@ function R.Art(frame,component,layout)
    table.insert(pieces,{a[1],dx,split,iw,extra,iw/tw,(split-dy-4)/th,(split-dy+4)/th})
    table.insert(pieces,{a[1],dx,split+extra,iw,dy+ih-split,iw/tw,(split-dy)/th,ih/th})
   else
-   local v0=(a[8] or 0)/th -- optional: the slice starts a[8] px down the texture (cut-away art)
-   table.insert(pieces,{a[1],dx,(extra>0 and dy>=split) and dy+extra or dy,iw,ih,iw/tw,v0,v0+ih/th})
+   -- optional: the slice starts a[8] px down and a[9] px across the texture, and a[10] px of it are drawn over iw (a stretched middle piece)
+   local v0=(a[8] or 0)/th;local u0=(a[9] or 0)/tw
+   table.insert(pieces,{a[1],dx,(extra>0 and dy>=split) and dy+extra or dy,iw,ih,u0+(a[10] or iw)/tw,v0,v0+ih/th,u0})
   end
  end
  for i=1,math.max(table.getn(pieces),table.getn(frame.referenceTiles)) do
@@ -247,7 +248,7 @@ function R.Art(frame,component,layout)
    if t.referenceAsset~=asset then t:SetTexture(asset);t.referenceAsset=asset end
    t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2],-a[3]);t:SetWidth(a[4]);t:SetHeight(a[5])
    if component=="header" and R.key=="elwynn_complete" then local ratio=1+180/R.layout.rects.header[3];t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2]*ratio,-a[3]);t:SetWidth(a[4]*ratio) end
-   t:SetTexCoord(0,a[6],a[7],a[8])
+   t:SetTexCoord(a[9] or 0,a[6],a[7],a[8])
    t:SetAlpha(R.CARD[component] and R.Opacity() or 1);t:Show()
    if R.CARD[component] then R.opacityFrames[frame]=true end
    -- the frame matte, on top of the body tile, always fully opaque
@@ -341,11 +342,22 @@ R.MEDAL={mid=121,half=112,bandH=32,textW=196} -- medallion geometry on its 512 p
 R.idCut={}
 function R.IdentityCut(d,zone,shape)
  if zone~="elwynn" or R.key~="elwynn_complete" or (shape~="round" and shape~="native") then return nil end
- local c=R.idCut[shape];if c then return c end
+ local c=shape=="round" and R.idCut[shape];if c then return c end
  local r=d.rects.identity
  if shape=="native" then
-  c={rect={r[1],r[2],240,76},zone={r[1],r[2],240,36},mode={r[1],r[2]+40,240,36},zoneSize=16,modeSize=14,
-     layout={tiles={identity={{"elwynn_cartouche.tga",0,0,240,36,256,64,0},{"elwynn_cartouche.tga",0,40,240,36,256,64,0}}}}}
+  -- Two banners built from the approved card frame (elwynn_banner.tga: left cap | stretched middle | right cap, 50 px high), 6 px apart,
+  -- as wide as the native map (the width follows it, 200..260), zone above mode, text boxes inside the gold frame, centred.
+  local M_=FieldKitThemeMinimap;local mw=(M_.before and M_.before.width) or (Minimap and Minimap.GetWidth and Minimap:GetWidth()) or 140
+  local es=Minimap and Minimap.GetEffectiveScale and Minimap:GetEffectiveScale() or 1;local cs=R.canvas and R.canvas.GetEffectiveScale and R.canvas:GetEffectiveScale() or 1
+  local W=math.max(200,math.min(260,math.floor(mw*es/math.max(cs,.1)+.5)));local key="native"..W
+  c=R.idCut[key]
+  if c then return c end
+  local f="elwynn_banner.tga";local function Plate(dy) return {{f,0,dy,25,50,128,64,0,0,25},{f,25,dy,W-50,50,128,64,0,32,16},{f,W-25,dy,25,50,128,64,0,64,25}} end
+  local tiles=Plate(0);for _,t in ipairs(Plate(56)) do table.insert(tiles,t) end
+  c={rect={r[1],r[2],W,106},zone={r[1]+28,r[2]+12,W-56,26},mode={r[1]+28,r[2]+68,W-56,26},zoneSize=17,modeSize=15,face="AzerothSerif.ttf",
+     layout={tiles={identity=tiles}}}
+  R.idCut[key]=c
+  return c
  else
   local side,cx,cy=R.RoundGeometry(d,d.mapHole);local s=side*128/113/256;local M_=R.MEDAL;local off=M_.mid*s;local w,h=M_.textW*s,M_.bandH*s-6*s
   c={rect=r,zone={cx-w/2,cy-off-h/2,w,h},mode={cx-w/2,cy+off-h/2,w,h},zoneSize=16,modeSize=14,layout={tiles={}},scale=s,cx=cx,cy=cy,medal=true}
@@ -403,10 +415,11 @@ function R.Update(variant,zone)
  for _,rim in ipairs(H.actionRims) do rim:Hide() end
  local lp=(cut and cut.medal) and R.TextLayer() or H.identity
  if lp==H.identity and R.textLayer then R.textLayer:Hide() end
- Label(H.zone,lp,dz,cut and cut.zoneSize or (variant=="complete" and 23 or 20),true,"CENTER")
- Button(H.mode,lp,dm);Label(H.mode.fieldkitLabel,H.mode,dm,cut and cut.modeSize or 17,true,"CENTER")
+ Label(H.zone,lp,dz,cut and cut.zoneSize or (variant=="complete" and 23 or 20),true,"CENTER",cut and cut.face)
+ Button(H.mode,lp,dm);Label(H.mode.fieldkitLabel,H.mode,dm,cut and cut.modeSize or 17,true,"CENTER",cut and cut.face)
  if cut then -- vertically centred in the banner and shrunk (never truncated) to the banner width
   if H.zone.SetJustifyV then H.zone:SetJustifyV("MIDDLE") end;if H.mode.fieldkitLabel.SetJustifyV then H.mode.fieldkitLabel:SetJustifyV("MIDDLE") end
+  if R.Fit then R.Fit(H.zone,cut.zoneSize,9);R.Fit(H.mode.fieldkitLabel,cut.modeSize,9) end
  end
  if d.heroic then Label(R.heroic,H.identity,d.heroic,variant=="alternative" and 18 or 19,true,nil,variant=="alternative" and "NotoSerif-Regular.ttf" or nil);R.heroic:SetText((FieldKit.GetHeroicLabel() or "?")..(variant=="alternative" and " · "..FieldKit_L("Mode") or ""));H.mode.fieldkitLabel:SetText(variant=="alternative" and "" or FieldKit_L("Mode"))
  else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and not cut and " · "..FieldKit_L("Mode") or "")) end
@@ -1411,7 +1424,7 @@ end
 function R.RowIcon(r,texture)
  r.icon:ClearAllPoints();r.icon:SetPoint("TOPLEFT",r,"TOPLEFT",-45,-1);r.icon:SetWidth(26);r.icon:SetHeight(26)
  if texture then r.icon:SetTexCoord(.07,.93,.07,.93);r.icon:SetVertexColor(1,1,1,1);r.icon:SetTexture(texture)
- else r.icon:SetTexCoord(0,1,0,1);r.icon:SetTexture("Interface\Buttons\WHITE8X8");r.icon:SetVertexColor(.16,.14,.1,.85) end
+ else r.icon:SetTexCoord(0,1,0,1);r.icon:SetTexture("Interface\\Buttons\\WHITE8X8");r.icon:SetVertexColor(.16,.14,.1,.85) end
  r.icon:Show()
 end
 function R.Stable(frame,key,apply) if frame.fieldkitStable~=key then frame.fieldkitStable=key;apply(frame) end end

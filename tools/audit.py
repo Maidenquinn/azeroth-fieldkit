@@ -28,7 +28,6 @@ for name in loaded:
  strings=re.compile(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'')
  for lit in strings.finditer(tokens.sub(lambda m: m.group(0) if m.group(0)[0] in '"\'' else ' ',text)):
   bad=re.search(r'\\(?![ntrabfv"\'0-9\n])',lit.group(0).replace('\\\\',''))
-  if bad and name=='ReferenceHUD.lua' and lit.group(0)=='"Interface'+chr(92)+'Buttons'+chr(92)+'WHITE8X8"': continue # known latent literal of the validated neutral row socket (R.RowIcon): left as is, reported in the alpha.46 causes report
   assert not bad,(name,'invalid escape in a string literal (Lua drops the backslash)',lit.group(0)[:70])
  identifiers=set(re.findall(r'\b[A-Za-z_]\w*\b',code))
  allowed={'SendAddonMessage','AZS_SetOnTopOfScreens'} if name=='Runtime.lua' else set()
