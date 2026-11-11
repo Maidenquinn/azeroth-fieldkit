@@ -187,6 +187,29 @@ again.execute('assert(FieldKitDB.cardStyle==2 and FieldKitDB.cardOpacity==37 and
 again.execute('assert(FieldKitDB.language=="fr");assert(FieldKitDB.guardianPins==false);assert(FieldKitDB.targetHealthMode==2);assert(FieldKitDB.combatTextX==-123);assert(FieldKitDB.combatEvents.crit.size=="31");assert(FieldKitDB.chatCopy==false)')
 zone_themes=runtime();zone_themes.execute((base/"tests/zone_themes.lua").read_text(encoding="utf8"))
 # Walk every compiled nested function, even callbacks the mock did not reach.
+# Generated card and round-map textures: their alpha layers are checked, not trusted (alpha.45 shipped a matte that still carried the baked
+# interior of the cards, and a ring whose path never resolved).
+import numpy as np
+from PIL import Image
+media=root/'media/ReferenceHUD'
+CLEAN={'elwynn_complete_Damage_1':(400,259),'elwynn_complete_Lairs_1':(367,140),'elwynn_complete_Stats_1':(361,220),'elwynn_complete_Effects_1':(361,116),
+       'naxx_complete_Damage_1':(326,335),'naxx_complete_Lairs_1':(326,206),'naxx_complete_Stats_1':(320,198),'naxx_complete_Effects_1':(320,125)}
+for name,(w,h) in CLEAN.items():
+ for suffix in ('_body','_frame'):
+  a_=np.array(Image.open(media/(name+suffix+'.tga')).convert('RGBA'))[...,3]
+  assert a_[44:h-16,17:w-17].max()==0,(name+suffix,'the clean-body interior must be fully transparent')
+  assert a_[:44].max()>0 and a_[:,:17].max()>0,(name+suffix,'the frame must be kept')
+ frame=np.array(Image.open(media/(name+'_frame.tga')).convert('RGBA'))[...,3]
+ body=np.array(Image.open(media/(name+'_body.tga')).convert('RGBA'))[...,3]
+ assert (frame>200).sum()<(body>200).sum()*0.5,(name,'the matte must keep far less than the whole body')
+for zone in ('elwynn','naxx'):
+ acc=np.array(Image.open(media/(zone+'_complete_Accessories_1_frame.tga')).convert('RGBA'))[...,3]
+ assert 0<(acc>200).sum()<acc.size*0.25,(zone,'Equipment matte')
+med=np.array(Image.open(media/'map_round_medallion.tga').convert('RGBA'))
+assert med.shape[:2]==(512,512)
+ring_r=np.hypot(*(np.mgrid[0:512,0:512]-255.5))
+assert (med[...,3][(ring_r>118)&(ring_r<126)&(np.abs(np.mgrid[0:512,0:512][0]-255.5)<100)]>250).all(),'the medallion ring band must be opaque and continuous outside the banners'
+assert med[...,3][(ring_r<100)].max()==0,'the medallion opening must be transparent'
 compiler=LuaRuntime(encoding=None);prototypes={}
 for name in files:
  data=(root/name).read_bytes();assert not data.startswith(b'\xef\xbb\xbf')

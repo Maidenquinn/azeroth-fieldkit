@@ -2346,11 +2346,10 @@ do
   assert(Minimap:GetWidth()==Minimap:GetHeight() and Minimap:GetWidth()<=squareSide*1.1,tag..": the round map is inside the footprint of the square one")
   if identity then
    assert(Shown(H.identity)==0,tag..": no rectangular banner or square frame art on the round map")
-   assert(R.plateTex and R.plateTex[1]:IsShown() and R.plateTex[2]:IsShown(),tag..": the curved header and foot plates are drawn")
-   local _,_,_,_,y1=R.plateTex[1]:GetPoint();local _,_,_,_,y2=R.plateTex[2]:GetPoint()
-   assert(y1>y2,tag..": header plate above the foot plate")
+   assert(M.roundRing.textureAsset and string.find(M.roundRing.textureAsset,"ReferenceHUD\\map_round_medallion.tga",1,true),tag..": the medallion (ring + header + foot banners in ONE texture) is drawn, with a real backslash in its path ("..tostring(M.roundRing.textureAsset)..")")
    local zr=R.idCut.round.zone;local mr=R.idCut.round.mode
-   assert(zr[2]<mr[2] and zr[3]<=140 and mr[3]<=140,tag..": zone text above, mode text below, both short enough for the plate")
+   assert(zr[2]<mr[2] and zr[3]==mr[3] and zr[3]>=150,tag..": zone text above, mode text below, banners wide enough for the text ("..zr[3].." px)")
+   assert(H.zone:GetParent()==R.textLayer and H.mode:GetParent()==R.textLayer and R.textLayer:GetFrameLevel()>M.roundRing:GetFrameLevel(),tag..": the texts live on a layer ABOVE the ring")
    assert(H.identity:GetHeight()==fullH,tag..": round keeps the card footprint")
   else
    assert(Shown(M.root)==0 and (not M.rim or not M.rim:IsShown()),tag..": no square frame tile, no rim over a round map")
@@ -2369,11 +2368,12 @@ do
   assert(not M.root:IsShown() and (not M.rim or not M.rim:IsShown()),tag..": no FieldKit map frame at all")
   if identity then
    local n,list=Shown(H.identity)
-   assert(n==2 and H.identity:GetHeight()==78 and H.identity:GetWidth()==240,tag..": native: two compact cartouches ("..n.." tiles, "..H.identity:GetWidth().."x"..H.identity:GetHeight()..")")
+   assert(n==2 and H.identity:GetHeight()==76 and H.identity:GetWidth()==240,tag..": native: two compact banners ("..n.." tiles, "..H.identity:GetWidth().."x"..H.identity:GetHeight()..")")
    assert(list[1]:GetHeight()==36 and list[2]:GetHeight()==36,tag..": equal cartouches")
    local _,_,_,_,ya=list[1]:GetPoint();local _,_,_,_,yb=list[2]:GetPoint()
-   assert(math.abs(yb-ya)==42,tag..": regular 6 px gap between the two cartouches")
-   assert(R.plateTex[1]:IsShown()==false and R.plateTex[2]:IsShown()==false,tag..": no round plates on the native presentation")
+   assert(math.abs(yb-ya)==40,tag..": regular 4 px gap between the two banners")
+   assert(H.zone:GetParent()==H.identity and (not R.textLayer or not R.textLayer:IsShown()),tag..": native: the texts are back on the card, no round text layer")
+   local zr,mr=R.idCut.native.zone,R.idCut.native.mode;assert(zr[3]==240 and zr[4]==36 and mr[3]==240 and mr[4]==36 and mr[2]-zr[2]==40,tag..": each text box is exactly its banner, so the text is centred in it")
    assert(not H.mode.fieldkitLabel or H.mode:IsShown(),tag..": the mode button stays usable")
   else
    assert(Shown(M.root)==0,tag..": native: the Elwynn map frame is gone")
@@ -2564,3 +2564,56 @@ do
  FieldKitDB.cardOpacity=100
 end
 print("Panel opacity: fast path (no rebuild), body-only fade with the frame kept opaque, memo, reload, profile, 0 % really transparent passed (synthetic)")
+
+-- ===== alpha.46: every dark region of every card follows the opacity; Effects states; medallion/cartouche text =====
+do
+ local function Slide(value) local slider=C.uiSliders[2].slider;slider:SetValue(value);this=slider;slider.scripts.OnValueChanged() end
+ for _,zone in ipairs({"elwynn","naxx"}) do
+  C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant","complete");phase="playing";FieldKitDB.cardOpacity=100
+  C.open={};C.Set("zoneThemes",true)
+  for _,kind in ipairs({"Damage","Lairs","Accessories","Stats","Effects"}) do C.open[kind]=true end
+  C.Refresh(true)
+  local seen=0
+  for _,kind in ipairs({"Damage","Lairs","Stats","Effects"}) do
+   local f=R.frames[kind];assert(f and f.cleanBody and f.cleanBody:IsShown(),zone..": "..kind.." draws its clean dark body")
+   -- the tile under it is the "_body" tile (interior removed), the matte is the "_frame" matte
+   for i,t in ipairs(f.referenceTiles or {}) do if t:IsShown() then
+    assert(string.find(t.referenceAsset,"_body.tga",1,true),zone..": "..kind.." body tile is the interior-free tile ("..tostring(t.referenceAsset)..")")
+    assert(f.referenceMattes[i] and string.find(f.referenceMattes[i].referenceAsset,"_frame.tga",1,true),zone..": "..kind.." frame matte on top");seen=seen+1
+   end end
+   for _,value in ipairs({0,25,50,75,100}) do
+    Slide(value)
+    assert(math.abs(f.cleanBody:GetAlpha()-value/100)<1e-6,zone..": "..kind.." clean body alpha "..f.cleanBody:GetAlpha().." at "..value)
+    if f.navBand then assert(math.abs(f.navBand:GetAlpha()-value/100)<1e-6,zone..": "..kind.." tab band follows") end
+    assert(f:GetAlpha()==1,zone..": "..kind.." frame alpha untouched")
+   end
+  end
+  assert(seen>=4,zone..": the four cards with a clean body really drew tiles")
+  local acc=R.frames.Accessories;assert(acc and not acc.cleanBody,zone..": Equipment has no clean body and its tile is the whole tile")
+  for _,t in ipairs(acc.referenceTiles or {}) do if t:IsShown() then assert(not string.find(t.referenceAsset,"_body.tga",1,true),zone..": Equipment uses the full tile") end end
+  -- the opacity survives a redraw (card text refresh, reload path)
+  Slide(35);C.Refresh(true);for _,kind in ipairs({"Damage","Lairs","Stats","Effects"}) do assert(math.abs(R.frames[kind].cleanBody:GetAlpha()-.35)<1e-6,zone..": "..kind.." clean body drawn at the saved opacity after a refresh") end
+  Slide(100)
+  -- Effects: 0, 1, several effects, appearance and disappearance, theme change, reload
+  if zone=="elwynn" then
+   local ef=R.frames.Effects
+   local function Effects(rows) FieldKitNativeTools.frames=FieldKitNativeTools.frames or {};FieldKitNativeTools.frames[1]=FieldKitNativeTools.frames[1] or {};FieldKitNativeTools.frames[1].lastRows=rows;C.Refresh(true) end
+   local function Icons() local n=0;for _,r in ipairs(ef.rows) do if r:IsShown() and r.icon:IsShown() then n=n+1 end end return n end
+   local function Rows() local n=0;for _,r in ipairs(ef.rows) do if r:IsShown() then n=n+1 end end return n end
+   Effects({})
+   assert(Rows()==1 and Icons()==0,"Effects: no effect = one text row and NO icon square")
+   assert(ef.rows[1].label:GetText()==FieldKit_L("No active effect"),"Effects: the empty state text")
+   Effects({{label="Mark of the Wild",value="12:30",icon="Interface\\Icons\\Spell_Nature_Regeneration",buffIndex=1}})
+   assert(Rows()==1 and Icons()==1 and ef.rows[1].label:GetText()=="Mark of the Wild" and ef.rows[1].value:GetText()=="12:30","Effects: one effect keeps its icon, name and duration")
+   Effects({{label="A",value="1:00",icon="Interface\\Icons\\Spell_Nature_Regeneration",buffIndex=1},{label="B",value="2:00",icon="Interface\\Icons\\Spell_Holy_WordFortitude",buffIndex=2},{label="C",value="3:00",icon="Interface\\Icons\\Spell_Nature_ThunderClap",buffIndex=3}})
+   assert(Rows()==2 and Icons()==2,"Effects: several effects, two visible rows each with its icon")
+   for cycle=1,6 do Effects({});assert(Icons()==0,"Effects: cycle "..cycle..": empty again, no icon square");Effects({{label="A",value="1:00",icon="Interface\\Icons\\Spell_Nature_Regeneration",buffIndex=1}});assert(Icons()==1,"Effects: cycle "..cycle..": back with its icon") end
+   Effects({});C.Set("zoneThemeMode","naxx");C.Refresh(true);C.Set("zoneThemeMode","elwynn");C.Refresh(true)
+   assert(Icons()==0 and R.frames.Effects.cleanBody:IsShown(),"Effects: empty state after a theme change")
+   H.saved={};C.Refresh(true);assert(Icons()==0,"Effects: empty state after a reload")
+   FieldKitNativeTools.frames[1].lastRows=nil
+  end
+ end
+ C.open={};C.Set("zoneThemes",false)
+end
+print("Panel opacity on every dark region (clean body, tab band, body tile, matte), Effects empty state and states passed (synthetic)")

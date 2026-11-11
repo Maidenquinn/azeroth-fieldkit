@@ -188,6 +188,11 @@ end
 R.CARD={Damage=true,Lairs=true,Accessories=true,Stats=true,Effects=true,chat=true}
 R.FRAME_MATTE={}
 for _,zone in ipairs({"elwynn","naxx"}) do for _,kind in ipairs({"Accessories","Damage","Effects","Lairs","Stats"}) do R.FRAME_MATTE[zone.."_complete_"..kind.."_1.tga"]=true end end
+-- Cards other than Equipment draw their own clean dark body (frame.cleanBody, <zone>_card_body_v9.tga) over the interior of the tile.
+-- Alpha.45 left it opaque, which is why only the Equipment card answered the slider. For them the tile used as "body" is
+-- <tile>_body.tga (the same tile without that interior), so every dark region fades together and the matte keeps the frame only.
+R.BODY_TILE={}
+for _,zone in ipairs({"elwynn","naxx"}) do for _,kind in ipairs({"Damage","Lairs","Stats","Effects"}) do R.BODY_TILE[zone.."_complete_"..kind.."_1.tga"]=true end end
 R.opacityFrames={}
 function R.Opacity() return FieldKit.Number(FieldKitDB.cardOpacity,100,0,100)/100 end
 -- Fast path of the panel opacity slider: only the alpha of the body tiles of the cards already drawn (a handful of regions).
@@ -196,6 +201,8 @@ function R.ApplyOpacity()
  local alpha=R.Opacity();local n=0
  for frame in pairs(R.opacityFrames) do
   for _,t in ipairs(frame.referenceTiles or {}) do t:SetAlpha(alpha);n=n+1 end
+  if frame.cleanBody then frame.cleanBody:SetAlpha(alpha);n=n+1 end   -- the clean dark body of the card
+  if frame.navBand then frame.navBand:SetAlpha(alpha);n=n+1 end        -- the darkening band under the category tabs
  end
  return n
 end
@@ -236,7 +243,7 @@ function R.Art(frame,component,layout)
   if not t then t=frame:CreateTexture(nil,"BACKGROUND");frame.referenceTiles[i]=t end
   local a=pieces[i]
   if a then
-   local asset=T.media.."ReferenceHUD\\"..a[1]
+   local asset=T.media.."ReferenceHUD\\"..((R.CARD[component] and R.BODY_TILE[a[1]]) and (string.gsub(a[1],"%.tga$","_body.tga")) or a[1])
    if t.referenceAsset~=asset then t:SetTexture(asset);t.referenceAsset=asset end
    t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2],-a[3]);t:SetWidth(a[4]);t:SetHeight(a[5])
    if component=="header" and R.key=="elwynn_complete" then local ratio=1+180/R.layout.rects.header[3];t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",a[2]*ratio,-a[3]);t:SetWidth(a[4]*ratio) end
@@ -296,7 +303,7 @@ function R.Stop()
  -- Benilla caches native status bars independently of a hidden ancestor.
  for _,f in ipairs({H.health,H.resource,H.xp,R.xpArt,R.xpBadge,H.utility,R.barOverlay}) do if f then f:Hide() end end
  for _,f in pairs(R.plain or {}) do f:Hide() end
- for _,t in ipairs(R.plateTex or {}) do t:Hide() end
+ if R.textLayer then R.textLayer:Hide() end
  for _,f in ipairs({H.identity,H.header,H.healthRoot,H.dock,H.nav,R.xpArt,R.xpBadge,H.utility}) do if f then for _,t in ipairs(f.referenceTiles or {}) do t:Hide() end end end
 end
 -- Option "Character ornaments" OFF: the baked dock art (character illustrations AND the frame the spell sockets, the XP track and
@@ -326,40 +333,37 @@ function R.PlainDock(d)
  end
 end
 -- Elwynn Complete: the map sits INSIDE the identity card, whose square frame is baked into the art. Round and native maps must not
--- keep that frame. ROUND: no card art at all; two curved plates (map_round_plate.tga, the foot is the same texture flipped) hug the
--- top and the bottom of the ring and carry the zone name and the mode, as horizontal centred text. NATIVE: two compact rounded
--- cartouches (elwynn_cartouche.tga) stacked with a regular gap, zone above mode, and nothing around the native map.
-R.PLATE={cy=170.5,mid=149.5,half=118.1,inner=93.1,top=167.5} -- plate geometry on the 256 x 128 texture (ring centre at (128, cy))
+-- keep that frame. ROUND: no card art; ONE medallion texture (map_round_medallion.tga: the ring with a header banner and a foot banner
+-- crossing it, corners cut like the zone material) carries the zone name and the mode as horizontal centred text, drawn on a layer
+-- ABOVE the ring. NATIVE: two compact banners (elwynn_cartouche.tga, same family) stacked with a regular 4 px gap, zone above mode,
+-- nothing around the native map.
+R.MEDAL={mid=121,half=112,bandH=32,textW=196} -- medallion geometry on its 512 px texture (ring centre at the middle), see tools/build_map_round_ring.py
 R.idCut={}
 function R.IdentityCut(d,zone,shape)
  if zone~="elwynn" or R.key~="elwynn_complete" or (shape~="round" and shape~="native") then return nil end
  local c=R.idCut[shape];if c then return c end
  local r=d.rects.identity
  if shape=="native" then
-  c={rect={r[1],r[2],240,78},zone={r[1]+10,r[2]+5,220,26},mode={r[1]+10,r[2]+47,220,26},zoneSize=16,modeSize=14,
-     layout={tiles={identity={{"elwynn_cartouche.tga",0,0,240,36,256,64,0},{"elwynn_cartouche.tga",0,42,240,36,256,64,0}}}}}
+  c={rect={r[1],r[2],240,76},zone={r[1],r[2],240,36},mode={r[1],r[2]+40,240,36},zoneSize=16,modeSize=14,
+     layout={tiles={identity={{"elwynn_cartouche.tga",0,0,240,36,256,64,0},{"elwynn_cartouche.tga",0,40,240,36,256,64,0}}}}}
  else
-  local side,cx,cy=R.RoundGeometry(d,d.mapHole);local s=side*128/113/256;local P=R.PLATE;local off=(P.mid-4)*s
-  c={rect=r,zone={cx-65,cy-off-11,130,22},mode={cx-65,cy+off-11,130,22},zoneSize=15,modeSize=13,layout={tiles={}},
-     plates={x=cx-128*s,w=256*s,h=128*s,top=cy-P.cy*s,foot=cy+P.cy*s-128*s,scale=s}}
+  local side,cx,cy=R.RoundGeometry(d,d.mapHole);local s=side*128/113/256;local M_=R.MEDAL;local off=M_.mid*s;local w,h=M_.textW*s,M_.bandH*s-6*s
+  c={rect=r,zone={cx-w/2,cy-off-h/2,w,h},mode={cx-w/2,cy+off-h/2,w,h},zoneSize=16,modeSize=14,layout={tiles={}},scale=s,cx=cx,cy=cy,medal=true}
  end
  R.idCut[shape]=c
  return c
 end
--- The two curved plates of the round presentation: textures of the identity card (same layer as its art, below its labels).
-function R.IdentityPlates(cut)
- local want=cut and cut.plates
- if not want then for _,t in ipairs(R.plateTex or {}) do t:Hide() end;return end
- R.plateTex=R.plateTex or {}
- local o=cut.rect
- for i=1,2 do
-  local t=R.plateTex[i]
-  if not t then t=H.identity:CreateTexture(nil,"BACKGROUND");t:SetTexture(T.media.."ReferenceHUD\\map_round_plate.tga");R.plateTex[i]=t end
-  local y=i==1 and want.top or want.foot
-  t:ClearAllPoints();t:SetPoint("TOPLEFT",H.identity,"TOPLEFT",want.x-o[1],-(y-o[2]));t:SetWidth(want.w);t:SetHeight(want.h)
-  if i==1 then t:SetTexCoord(0,1,0,1) else t:SetTexCoord(0,1,1,0) end
-  t:Show()
+-- Layer of the round presentation's texts: ABOVE the ring frame (the identity card is the bottom of the map group, the ring sits
+-- over the map). The zone and mode labels are moved here while the medallion is drawn, and back to the card otherwise.
+function R.TextLayer()
+ local M_=FieldKitThemeMinimap
+ if not R.textLayer then
+  local f=CreateFrame("Frame",nil,H.identity);f:EnableMouse(false);R.textLayer=f
  end
+ local f=R.textLayer;local r=H.identity.referenceRect
+ f:SetParent(H.identity);f:ClearAllPoints();f:SetAllPoints(H.identity);f.referenceRect=r
+ f:SetFrameLevel((Minimap.GetFrameLevel and Minimap:GetFrameLevel() or 1)+6);f:Show()
+ return f
 end
 -- Round map geometry: the diameter of the native map and the centre of its ring. The ring (texture 256 px, opening radius 113) is drawn
 -- at side*128/113; it fits the map frame piece when there is one, else the opening of the identity card.
@@ -397,9 +401,13 @@ function R.Update(variant,zone)
  if key=="elwynn_complete" then local a=d.rects.header;R.Geometry(H.header,{a[1]-90,a[2],a[3]+180,a[4]}) end
  H.sculpture:Hide();H.left:Hide();H.right:Hide();H.namePlate:Hide();H.schedule:Hide()
  for _,rim in ipairs(H.actionRims) do rim:Hide() end
- R.IdentityPlates(cut)
- Label(H.zone,H.identity,dz,cut and cut.zoneSize or (variant=="complete" and 23 or 20),true,"CENTER")
- Button(H.mode,H.identity,dm);Label(H.mode.fieldkitLabel,H.mode,dm,cut and cut.modeSize or 17,true,"CENTER")
+ local lp=(cut and cut.medal) and R.TextLayer() or H.identity
+ if lp==H.identity and R.textLayer then R.textLayer:Hide() end
+ Label(H.zone,lp,dz,cut and cut.zoneSize or (variant=="complete" and 23 or 20),true,"CENTER")
+ Button(H.mode,lp,dm);Label(H.mode.fieldkitLabel,H.mode,dm,cut and cut.modeSize or 17,true,"CENTER")
+ if cut then -- vertically centred in the banner and shrunk (never truncated) to the banner width
+  if H.zone.SetJustifyV then H.zone:SetJustifyV("MIDDLE") end;if H.mode.fieldkitLabel.SetJustifyV then H.mode.fieldkitLabel:SetJustifyV("MIDDLE") end
+ end
  if d.heroic then Label(R.heroic,H.identity,d.heroic,variant=="alternative" and 18 or 19,true,nil,variant=="alternative" and "NotoSerif-Regular.ttf" or nil);R.heroic:SetText((FieldKit.GetHeroicLabel() or "?")..(variant=="alternative" and " · "..FieldKit_L("Mode") or ""));H.mode.fieldkitLabel:SetText(variant=="alternative" and "" or FieldKit_L("Mode"))
  else R.heroic:Hide();H.mode.fieldkitLabel:SetText((FieldKit.GetHeroicLabel() or "?")..(zone=="elwynn" and not cut and " · "..FieldKit_L("Mode") or "")) end
  if zone=="elwynn" and variant~="alternative" and not cut then
@@ -580,12 +588,17 @@ end
 function R.MapRound(M,hole,side)
  if M.shape~="round" then if M.roundRing then M.roundRing:Hide() end;return end
  if not M.roundRing then
-  local f=CreateFrame("Frame",nil,M.root);f:EnableMouse(false);f.texture=f:CreateTexture(nil,"OVERLAY");f.texture:SetAllPoints(f)
-  f.texture:SetTexture(T.media.."ReferenceHUD\map_round_ring.tga");M.roundRing=f
+  local f=CreateFrame("Frame",nil,M.root);f:EnableMouse(false);f.texture=f:CreateTexture(nil,"OVERLAY");M.roundRing=f
  end
  local f=M.roundRing;local box=side*128/113;local p=M.root.referenceRect
  local cx,cy=hole[1]+hole[3]/2,hole[2]+hole[4]/2
  f:SetParent(M.root);f:ClearAllPoints();f:SetPoint("CENTER",M.root,"TOPLEFT",cx-p[1],p[2]-cy);f:SetWidth(box);f:SetHeight(box)
+ -- the identity-card layout draws the medallion (ring + header and foot banners, ONE texture of twice the ring box); the others the plain ring
+ local medal=not R.layout.rects.mapArt and R.idCut.round and R.idCut.round.medal
+ local tex=T.media.."ReferenceHUD\\"..(medal and "map_round_medallion.tga" or "map_round_ring.tga")
+ f.texture:ClearAllPoints()
+ if f.textureAsset~=tex then f.texture:SetTexture(tex);f.textureAsset=tex end
+ if medal then f.texture:SetPoint("CENTER",f,"CENTER",0,0);f.texture:SetWidth(2*box);f.texture:SetHeight(2*box) else f.texture:SetAllPoints(f) end
  f:SetFrameLevel(Minimap:GetFrameLevel()+2);f:Show()
 end
 function R.Map()
@@ -698,7 +711,7 @@ function R.DamageTabs(f,a,zone,index)
   f.bandKey=bandKey
   if not f.navBand then f.navBand=f:CreateTexture(nil,"ARTWORK");f.headRule=f:CreateTexture(nil,"ARTWORK");f.navRule=f:CreateTexture(nil,"ARTWORK");f.navDividers={} end
   local bandH=elwynn and tabH+4 or 54
-  T.Solid(f.navBand,{0,0,0},.30);f.navBand:ClearAllPoints();f.navBand:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2));f.navBand:SetWidth(a[3]-40);f.navBand:SetHeight(bandH);f.navBand:Show()
+  T.Solid(f.navBand,{0,0,0},.30);f.navBand:SetAlpha(R.Opacity());f.navBand:ClearAllPoints();f.navBand:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2));f.navBand:SetWidth(a[3]-40);f.navBand:SetHeight(bandH);f.navBand:Show()
   T.Solid(f.navRule,{1,.82,.12},.45);f.navRule:ClearAllPoints();f.navRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-2+bandH));f.navRule:SetWidth(a[3]-40);f.navRule:SetHeight(1);f.navRule:Show()
   if elwynn then T.Solid(f.headRule,{1,.82,.12},.55);f.headRule:ClearAllPoints();f.headRule:SetPoint("TOPLEFT",f,"TOPLEFT",20,-(top-4));f.headRule:SetWidth(a[3]-40);f.headRule:SetHeight(1);f.headRule:Show() else f.headRule:Hide() end
   for n=1,5 do
@@ -890,10 +903,10 @@ function R.RingGeometry(d,hole)
  if band>=1000000 then band=0 end
  local cx,cy=hole[1]+hole[3]/2,hole[2]+hole[4]/2;local keep={}
  local function Add(x,y,w,h) table.insert(keep,{l=x-cx,r=x+w-cx,top=cy-y,bottom=cy-(y+h)}) end
- local roundPlates=FieldKitThemeMinimap.shape=="round" and not d.rects.mapArt and R.idCut.round
- if roundPlates then
-  local P=R.PLATE;local s=roundPlates.plates.scale
-  table.insert(keep,{l=-P.half*s,r=P.half*s,top=P.top*s,bottom=P.inner*s});table.insert(keep,{l=-P.half*s,r=P.half*s,top=-P.inner*s,bottom=-P.top*s})
+ local medal=FieldKitThemeMinimap.shape=="round" and not d.rects.mapArt and R.idCut.round
+ if medal then
+  local P=R.MEDAL;local s=medal.scale;local lo,hi=(P.mid-P.bandH/2)*s,(P.mid+P.bandH/2)*s
+  table.insert(keep,{l=-P.half*s,r=P.half*s,top=hi,bottom=lo});table.insert(keep,{l=-P.half*s,r=P.half*s,top=-lo,bottom=-hi})
  else
   if d.zone then Add(d.zone[1],d.zone[2],d.zone[3],d.zone[4]) end
   if d.mode then Add(d.mode[1],d.mode[2],d.mode[3],d.mode[4]) end
@@ -1525,7 +1538,7 @@ function R.Panels(variant,zone)
    if f.footerPatch then f.footerPatch:Hide() end
    if kind~="Accessories" then
     if not f.cleanBody then f.cleanBody=f:CreateTexture(nil,"BORDER") end
-    local t=f.cleanBody;t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_card_body_v9.tga");t:SetTexCoord(0,1,0,1);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",17,-44);t:SetWidth(a[3]-34);t:SetHeight(a[4]-60);t:Show()
+    local t=f.cleanBody;t:SetAlpha(R.Opacity());t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_card_body_v9.tga");t:SetTexCoord(0,1,0,1);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",17,-44);t:SetWidth(a[3]-34);t:SetHeight(a[4]-60);t:Show()
    end
    f.more:Show();R.Stable(f.more,table.concat({a[3],a[4],zone,f:GetFrameLevel()},":"),function(b) b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);b:SetWidth(a[3]-42);b:SetHeight(28) end);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
    if f.emptySocket then f.emptySocket:Hide() end;f.total:Hide();f.rateLabel:Hide();f.pager:Hide();for _,r in ipairs(f.rows) do r.fieldkitUsed=nil;r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end end

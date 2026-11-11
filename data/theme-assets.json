@@ -777,24 +777,24 @@
       "source": "Frame matte of elwynn_complete_Accessories_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/elwynn_complete_Damage_1_frame.tga": {
-      "sha256": "f8068022bcc17cf36e0cba0a4993dfc8f4a01a46049433da92d970c1a76abb21",
+      "sha256": "96d02e23b7c530e0e67c58ff04aebaff63d8166fb0f480bded4894ff82d48ac3",
       "bytes": 1048620,
-      "source": "Frame matte of elwynn_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of elwynn_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/elwynn_complete_Effects_1_frame.tga": {
-      "sha256": "c43ec394dda031ffd4f8caaa80230277a0d0fd94ab2e37180130fcc0729947e4",
+      "sha256": "039a642aa74cd6559b58d20851e9682edd997b606c9e1cf0460a21769d600223",
       "bytes": 262188,
-      "source": "Frame matte of elwynn_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of elwynn_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/elwynn_complete_Lairs_1_frame.tga": {
-      "sha256": "160e68bf09db30dcfb5d3779adb5a06620838ab290821e19044417fdebe4b92c",
+      "sha256": "78f7af712a2700461536ac8a408d7d19003fbd7999a4d713eba3a20cbf759e78",
       "bytes": 524332,
-      "source": "Frame matte of elwynn_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of elwynn_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/elwynn_complete_Stats_1_frame.tga": {
-      "sha256": "19653aa4e3a12346e96cb99b528f71ec950f2817202200ad8da5f1169b226dd4",
+      "sha256": "7f9aaf4ee1503103ded40689284363ea0787b62a957c621225189cb44cfe2212",
       "bytes": 524332,
-      "source": "Frame matte of elwynn_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of elwynn_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/naxx_complete_Accessories_1_frame.tga": {
       "sha256": "06cda36efc1ca9d0203b7336153f02caa7782d4d143ff8d75fb8939592fd2f07",
@@ -802,34 +802,74 @@
       "source": "Frame matte of naxx_complete_Accessories_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/naxx_complete_Damage_1_frame.tga": {
-      "sha256": "3ff58ba3e623b24f01f0638ff0aa140588df265c9c01478fd787e64a3164a336",
+      "sha256": "90b8fbc12bb8e35edd0c19b3138d5e1aeb298348bc2dff2d168d2d4cd8858466",
       "bytes": 1048620,
-      "source": "Frame matte of naxx_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of naxx_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/naxx_complete_Effects_1_frame.tga": {
-      "sha256": "8b7104fbc35a2680eac0a307f827a540f9c62acbcc46312335c12de345732633",
+      "sha256": "2b31161c3d03a18e498cbf2c97d2de6e69d89e16deb7afd3725d7068e3717fb8",
       "bytes": 262188,
-      "source": "Frame matte of naxx_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of naxx_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/naxx_complete_Lairs_1_frame.tga": {
-      "sha256": "d2afa6715286cb9f6160cd0818e193e62c0ccaa3e336ea1a6efef7019ce962a6",
+      "sha256": "24e62d35ecdf5802567405a7e0836855f34c2f351c04046610b80037a09811a1",
       "bytes": 524332,
-      "source": "Frame matte of naxx_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+      "source": "Frame matte of naxx_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/naxx_complete_Stats_1_frame.tga": {
-      "sha256": "c62e2750718c5a878591b68d9adb7e561edf1435704dd960f90e5574f15e852a",
+      "sha256": "1f2bba6bff44292618d0ecd990530665c00a235b3b591b1ddffbaebe81974835",
       "bytes": 524332,
-      "source": "Frame matte of naxx_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
-    },
-    "media/ReferenceHUD/map_round_plate.tga": {
-      "sha256": "7b309608405a1f7acbb62937397eb538bc638b54f8ad54cc20e0942fbf5f1efc",
-      "bytes": 131116,
-      "source": "Generated by tools/build_map_round_ring.py: curved Elwynn plate (annular sector, rounded ends) for the top of the round map; the foot plate is this texture flipped."
+      "source": "Frame matte of naxx_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
     },
     "media/ReferenceHUD/elwynn_cartouche.tga": {
-      "sha256": "79df44cdba216984fc42899383cfc95aa5b62954fec61a7ffb3e64512c256faf",
+      "sha256": "9d23ca047abf4d2eab4bf722911cba4eab88937e2941bdf788fac877fe522e60",
       "bytes": 65580,
-      "source": "Generated by tools/build_map_round_ring.py: compact rounded Elwynn cartouche 240x36 at the top left of a 256x64 texture, for the native-map presentation."
+      "source": "Generated by tools/build_map_round_ring.py: compact Elwynn cartouche 240x36 (same banner family and corner cut as the medallion) at the top left of a 256x64 texture, for the native-map presentation."
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1_body.tga": {
+      "sha256": "b24e6cb5b8787821e1ff3258a6e568e4c5121e6bd5c62943137612e35dfabf5f",
+      "bytes": 1048620,
+      "source": "Body tile of elwynn_complete_Damage_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1_body.tga": {
+      "sha256": "0fb18fa63c8e2aebe0fd241166e071b57ef69db9f255ac9e009d1429d3ee6c72",
+      "bytes": 262188,
+      "source": "Body tile of elwynn_complete_Effects_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1_body.tga": {
+      "sha256": "9b45ada4d3eedc2e05163300f0092e8de7d5b76bd55096cc23fdc4ebb28fd474",
+      "bytes": 524332,
+      "source": "Body tile of elwynn_complete_Lairs_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1_body.tga": {
+      "sha256": "8f90e551008ea0550c7651e6fa74b29ae4e6b841728e69876cd61953e12010c6",
+      "bytes": 524332,
+      "source": "Body tile of elwynn_complete_Stats_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1_body.tga": {
+      "sha256": "78689fee8fe7f7eabd633385463184f08e93ea5077b405c6d9aec9b30ee0d38d",
+      "bytes": 1048620,
+      "source": "Body tile of naxx_complete_Damage_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1_body.tga": {
+      "sha256": "4733253d561929e18121b1f94bb44960f03369ed1ecb109bcfe6740e15e1f005",
+      "bytes": 262188,
+      "source": "Body tile of naxx_complete_Effects_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1_body.tga": {
+      "sha256": "32ebca66e0cc1d8f16f937b4f37031a2532c5b1259186e6cb996a0410721162e",
+      "bytes": 524332,
+      "source": "Body tile of naxx_complete_Lairs_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1_body.tga": {
+      "sha256": "e2d564307c0f1d2d8c48b5892b4c88dc4d4fa454a982f60c14ec960f9cc5cbe4",
+      "bytes": 524332,
+      "source": "Body tile of naxx_complete_Stats_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/map_round_medallion.tga": {
+      "sha256": "7ce77c1d93400b363ac0d828ed78ab08020c684d063a43b6070918cff5558042",
+      "bytes": 1048620,
+      "source": "Generated by tools/build_map_round_ring.py: Elwynn round-map medallion (ring with its header and foot banners cut like the zone material corners) in one 512x512 texture; ring centre (256,256), opening radius 113, banners 224x32 centred on radius 121."
     }
   }
 }
