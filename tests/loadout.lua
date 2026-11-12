@@ -105,3 +105,71 @@ local previous=FieldKitNative.serial;AZS_RUN.t=1;FieldKitNative.Watch()
 D.Capture("Ogre hits you for 12.");assert(D.count==0 and FieldKitNative.serial>previous)
 L.Update();assert(table.getn(L.spells)==0,"Stale native learned spells survived a run change")
 print("Native loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed")
+
+-- ===== alpha.51 (P1-2B): the loadout scan runs when something changed, not every 1.5 s for the whole run =====
+do
+ local L=FieldKitLoadout
+ local tip=FieldKitLoadoutScan
+ local N=FieldKitNative
+ -- a clean, active run with a fresh spell packet
+ AZS_RUN={t=100,ph="playing",kills=0,gold=0,chest=0,sh=0}
+ function AZS_GetPhase() return "playing" end
+ AZS_SPELLS={{key="fireball",spell=133,rank=7}}
+ local function Reset() L.scanAt=0;L.scanned=nil;L.contentKey=nil;L.dirty=false;L.lastScan=nil;L.sigCount=0;L.sigKeys,L.sigRanks={},{} end
+ local scans,walks=0,0
+ local realTooltip=L.Tooltip
+ L.Tooltip=function(a,b,c) walks=walks+1;return realTooltip(a,b,c) end
+ local realScan=L.Scan
+ local redraws=0;local realRefresh=L.refresh
+ L.refresh=function() redraws=redraws+1;if realRefresh then return realRefresh() end end
+ local function Run(seconds,dt)
+  for i=1,math.floor(seconds/dt) do NOW=NOW+dt;L.Update() end
+ end
+ -- 1) 5 minutes of play at 5 updates a second with nothing changing: one scan, then only the safety net
+ Reset();NOW=NOW+1000;walks=0;redraws=0
+ Run(300,.2)
+ local tooltipsPerScan=walks
+ assert(redraws==1,"the card is redrawn once, not at every scan ("..redraws..")")
+ -- one scan = 1 action slot (the fixture has one) + 5 equipment slots = 6 tooltips; the safety net adds one scan per 30 s
+ assert(walks<=6*11,"5 minutes without change: "..walks.." tooltip reads (before: a scan every 1.5 s = ~1200)")
+ -- 2) a different packet (a rank) is picked up within the minimum gap and redraws the card
+ walks=0;redraws=0
+ NOW=NOW+40;L.Update()          -- settle (safety net may fire here)
+ walks=0;redraws=0
+ AZS_SPELLS={{key="fireball",spell=133,rank=8}}
+ L.Update();assert(walks==0,"a change is not scanned inside the minimum gap")
+ Run(2.0,.2)
+ assert(walks>=1 and L.spells[1].rank=="Rank 8","the new rank is read within the gap ("..walks.." tooltip reads, "..tostring(L.spells[1] and L.spells[1].rank)..")")
+ assert(redraws==1,"and the card is redrawn once ("..redraws..")")
+ -- 3) equipment event: a rescan, redrawn only if the text differs
+ NOW=NOW+40;L.Update();walks=0;redraws=0
+ event="UNIT_INVENTORY_CHANGED";arg1="target";this=L.eventFrame;L.eventFrame.scripts.OnEvent();assert(not L.dirty,"another unit's inventory is ignored")
+ event="UNIT_INVENTORY_CHANGED";arg1="player";L.eventFrame.scripts.OnEvent();assert(L.dirty,"the player's inventory marks the scan as due")
+ Run(2.0,.2)
+ assert(walks>=1 and not L.dirty,"the equipment event triggers a scan ("..walks..")")
+ assert(redraws==0,"identical text: no redraw ("..redraws..")")
+ -- 4) text that changed (a ring was swapped) is shown
+ function tip:SetInventoryItem(unit,slot)
+  line("FieldKitLoadoutScanTextLeft1","Other Ring",false);line("FieldKitLoadoutScanTextRight1","",false)
+  line("FieldKitLoadoutScanTextLeft2","+99% damage",true);line("FieldKitLoadoutScanTextLeft3","",false)
+ end
+ event="ACTIONBAR_SLOT_CHANGED";arg1=nil;L.eventFrame.scripts.OnEvent();Run(2.0,.2)
+ assert(L.items[11].bonuses[1]=="+99% damage" and redraws==1,"a changed item text is read and drawn ("..redraws..")")
+ -- 5) safety net: a missed event is repaired within 30 s
+ function tip:SetInventoryItem(unit,slot)
+  line("FieldKitLoadoutScanTextLeft1","Third Ring",false);line("FieldKitLoadoutScanTextRight1","",false)
+  line("FieldKitLoadoutScanTextLeft2","+11% damage",true);line("FieldKitLoadoutScanTextLeft3","",false)
+ end
+ redraws=0;Run(29,.2);local early=redraws
+ Run(3,.2)
+ assert(L.items[11].bonuses[1]=="+11% damage" and redraws==1,"a change with no event is found by the 30 s safety net ("..redraws..")")
+ -- 6) a run boundary still rescans at once and redraws
+ redraws=0;local serial=N.serial;N.serial=N.serial+1
+ L.Update();assert(L.scanned and redraws==1,"a run boundary rescans and redraws immediately ("..redraws..")")
+ -- 7) while the run is not active nothing is scanned
+ function AZS_GetPhase() return "ready" end
+ walks=0;Run(10,.2);assert(walks==0 and table.getn(L.spells)==0,"no scan outside a run")
+ function AZS_GetPhase() return "playing" end
+ L.Tooltip=realTooltip;L.refresh=realRefresh;Reset()
+end
+print("Loadout scan: once, then on change / event / boundary, 30 s safety net, no redraw of identical text passed (synthetic)")
