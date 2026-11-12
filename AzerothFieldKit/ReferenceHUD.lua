@@ -77,6 +77,13 @@ end
 -- Called from the chat module when a preference changes: the plan is applied at once instead of waiting for the next refresh.
 function R.ChatSync() if R.active and FieldKitZoneThemes and FieldKitZoneThemes.Refresh then FieldKitZoneThemes.Refresh(true) end end
 function R.Has(zone,variant) return FieldKitReferenceArt[zone.."_"..variant]~=nil end
+-- Elwynn Complete shows neither the FieldKit / Journal shortcuts of the bottom-right plates nor the permanent version text: the same
+-- features stay reachable from the minimap launcher icons (and the version from the settings window and /fieldkit version). Only
+-- their DISPLAY is removed here; with no arguments the question is about the layout drawn now.
+function R.ShortcutsHidden(zone,variant)
+ if zone then return zone=="elwynn" and variant=="complete" end
+ return R.key=="elwynn_complete"
+end
 local function Blank(frame)
  frame.fieldkitArtOnly=true;T.State(frame,false)
 end
@@ -403,7 +410,10 @@ function R.Update(variant,zone)
  local dm,dz=d.mode,d.zone
  if cut then dm,dz=cut.mode,cut.zone end
  for _,entry in ipairs({{H.identity,"identity"},{H.header,"header"},{H.healthRoot,"vitality"},{H.dock,"dock"},{H.nav,"nav"}}) do
-  if d.rects[entry[2]] then
+  if entry[2]=="nav" and R.ShortcutsHidden(zone,variant) then
+   -- no baked plates, no buttons, no clickable area: the navigation frame stays only as the invisible anchor of the secondary menu
+   R.Art(entry[1],"none");entry[1]:Hide()
+  elseif d.rects[entry[2]] then
    local rect=d.rects[entry[2]];local layout=nil
    if entry[2]=="identity" and cut then rect=cut.rect;layout=cut.layout end
    if entry[2]~="vitality" or not d.integratedVitals then R.Geometry(entry[1],rect) end;Blank(entry[1]);if entry[2]~="vitality" or not d.integratedVitals then R.Art(entry[1],entry[2],layout) else R.Art(entry[1],"none") end;entry[1]:Show()
@@ -509,7 +519,7 @@ function R.Update(variant,zone)
   if d.utilityLabel then Label(H.utility.fieldkitLabel,H.utility,d.utilityLabel,20,true);H.utility.fieldkitLabel:SetText("FIELDKIT") else H.utility.fieldkitLabel:SetText("") end
  end
  for _,b in ipairs(H.buttons) do b:Hide();b.fieldkitLabel:Hide() end
- for i,a in ipairs(d.navButtons) do
+ for i,a in ipairs(R.ShortcutsHidden(zone,variant) and {} or d.navButtons) do
   local b=H.buttons[i];local route=a[1]
   Button(b,H.nav,{a[2],a[3],a[4],a[5]});Label(b.fieldkitLabel,b,{a[2],a[3],a[4],a[5]},variant=="minimal" and 15 or 17,true,"CENTER","NotoSerif-Regular.ttf");FieldKit_Text(b,route=="Accessories" and (a[4]<90 and "Equip" or "Equipment") or route);b:RegisterForClicks("LeftButtonUp","RightButtonUp");b.callback=function() if route=="FieldKit" and arg1=="RightButton" then if H.micro:IsShown() then H.micro:Hide() else H.micro:Show() end else FieldKitZoneThemes.Open(route) end end
  end
@@ -559,7 +569,8 @@ function R.Update(variant,zone)
   chat:ClearAllPoints();chat:SetPoint("TOPLEFT",R.chat,"TOPLEFT",plan.textX,plan.textY)
  end
  for _,name in ipairs({"ChatFrame1UpButton","ChatFrame1DownButton","ChatFrame1BottomButton","ChatFrame1MenuButton","ChatFrameMenuButton","FieldKitChatCopyButton"}) do local f=getglobal(name);if f then FieldKitZoneThemes.Mask(f,true) end end
- Label(R.footer,R.canvas,{d.size[1]-305,d.size[2]-27,290,20},11,false,"RIGHT");R.footer:SetText("FIELDKIT "..FieldKit.version.." · "..string.upper(zone))
+ if R.ShortcutsHidden(zone,variant) then R.footer:Hide()
+ else Label(R.footer,R.canvas,{d.size[1]-305,d.size[2]-27,290,20},11,false,"RIGHT");R.footer:SetText("FIELDKIT "..FieldKit.version.." · "..string.upper(zone)) end
  for _,label in ipairs({H.zone,H.mode.fieldkitLabel,R.heroic,H.clock,H.next,H.name,R.level,H.hp,H.resourceText,H.xpText}) do if label:IsShown() then R.Fit(label) end end
  for _,label in ipairs(R.counts) do R.Fit(label,nil,10) end
  for _,b in ipairs(H.buttons) do if b:IsShown() then R.Fit(b.fieldkitLabel,nil,10) end end
@@ -1015,7 +1026,7 @@ local function FixedObstacles(d,report)
  local list={}
  for _,name in ipairs(OBSTACLES) do
   local r=d.rects[name]
-  if r then
+  if r and not (name=="nav" and R.ShortcutsHidden()) then -- hidden plates reserve no room
    local n=Inset(name);local f=OBSTACLE_FRAME[name] and OBSTACLE_FRAME[name]()
    local x,y,w,h
    if f and f.IsShown and f:IsShown() then x,y,w,h=R.LiveRect(f) end

@@ -380,7 +380,9 @@ function H.Update(variant,zone)
  for _,name in ipairs({"FieldKitCompactBar","FieldKitMoneyFrame","MainMenuBar","PlayerFrame","FieldKitPlayerBar"}) do local f=getglobal(name);if f then c.Mask(f,true) end end
  local buffs=getglobal("FieldKitPlayerBuffs");if buffs then Place(buffs,"BOTTOM",H.healthRoot,"TOP",0,4) end
  local boss=getglobal("FieldKitBossFrame1");if boss then Place(boss,"TOP",UIParent,"TOP",0,-98) end
- for _,f in ipairs({H.dock,H.header,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.nav,H.utility}) do f:Show();T.Update(f) end
+ for _,f in ipairs({H.dock,H.header,H.identity,H.healthRoot,H.xpRoot,H.counterRoot,H.nav,H.utility}) do
+  if not (f==H.nav and FieldKitReferenceHUD and FieldKitReferenceHUD.ShortcutsHidden and FieldKitReferenceHUD.ShortcutsHidden(zone,variant)) then f:Show();T.Update(f) end
+ end
 end
 
 -- Compact, readable summaries project the existing view models; full tables,

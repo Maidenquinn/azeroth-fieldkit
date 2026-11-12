@@ -50,7 +50,7 @@ function C.Elements()
  Add("FieldKitThemeIdentity",not d.rects.mapArt and "Map, zone and mode" or nil);Add("FieldKitThemeHeader")
  if not d.integratedVitals then Add("FieldKitThemeVitality") end
  if d.rects.mapArt then Add("FieldKitThemeMap") end
- if d.rects.nav then Add("FieldKitThemeNavigation") end
+ if d.rects.nav and not FieldKitReferenceHUD.ShortcutsHidden() then Add("FieldKitThemeNavigation") end
  Add("FieldKitReferenceChat")
  if d.rects.xpArt then Add("FieldKitReferenceXP") end
  if d.utilityRect or d.rects.utility then Add("FieldKitThemeUtility") end
@@ -404,7 +404,7 @@ function C.Open(kind)
 end
 -- Diagnostic sub-commands (read-only). They are routed from /fieldkit before the settings window can open, and each has an
 -- independent slash command that never opens it either. Every call prints a result, errors included.
-C.diagnostics={barprobe=true,groupprobe=true,cardprobe=true,dragdiag=true,mapprobe=true,mapstack=true,mapfocus=true,mapdiag=true,clickdiag=true}
+C.diagnostics={barprobe=true,groupprobe=true,cardprobe=true,dragdiag=true,mapprobe=true,mapstack=true,mapfocus=true,mapdiag=true,clickdiag=true,version=true}
 function C.Diagnostic(msg)
  local ok,err=pcall(C.Command,msg)
  if not ok then DEFAULT_CHAT_FRAME:AddMessage("FieldKit diagnostic error ("..tostring(msg).."): "..tostring(err)) end
@@ -420,7 +420,8 @@ Slash("FKMAPFOCUS","/fkmapfocus",function() return "mapfocus" end)
 Slash("FKCARDPROBE","/fkcardprobe",function() return "cardprobe" end)
 function C.Command(msg)
  local arg=string.lower(string.gsub(msg or "","^%s*(.-)%s*$","%1"))
- if arg=="status" then
+ if arg=="version" then DEFAULT_CHAT_FRAME:AddMessage("Azeroth FieldKit "..tostring(FieldKit.version))
+ elseif arg=="status" then
   DEFAULT_CHAT_FRAME:AddMessage("FieldKit "..tostring(C.signature).." | art="..tostring(FieldKitDB.zoneThemeArt).." | accepted="..tostring(H.artAccepted).." | texture="..tostring(H.left and H.left:GetTexture()).." | map="..tostring(FieldKitThemeMinimap.reason or FieldKitThemeMinimap.active))
   for _,name in ipairs({"PlayerFrame","MainMenuBar","FieldKitCompactBar","ActionButton1"}) do
    local f=getglobal(name)

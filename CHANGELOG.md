@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0-alpha.48 - 2026-11-12 (Elwynn Complete last finish, unreleased)
+
+- Elwynn Complete no longer draws the two bottom-right shortcut plates (FieldKit, Journal; `H.nav` and `H.buttons` in `R.Update`, the baked `elwynn_complete_nav_1` art included) nor the permanent version text (`R.footer`). Only their DISPLAY is removed (`R.ShortcutsHidden`, Elwynn Complete only): the navigation frame is hidden, so no clickable area stays at the old place; the other layouts keep both. The features stay reachable: the minimap launcher icons (untouched), the right click on the mode banner/button (secondary menu: Statistics, Journal, FieldKit), the settings window (which shows the version) and the new `/fieldkit version`.
+- Consequences handled: the hidden plates reserve no room in the placement engine (`FixedObstacles`), the "Navigation" element no longer appears in the per-element size list on this layout, and `H.Update` no longer re-shows the frame on every refresh.
+- Untouched: square and round maps, native banners, panel opacity, life bar, spell bar, chat, HUD panels, saved positions, profiles, other addons' saved variables.
+
 ## 0.6.0-alpha.47 - 2026-11-11 (native map banners finish, neutral row socket path, unreleased)
 
 - Native map banners (zone name, mode). The generated cartouche of alpha.45/46 is replaced by banners built from the REAL pixels of the approved card frame (`tools/build_native_banner.py` -> `elwynn_banner.tga`): the same worked gold frame, chamfered corners with their triangular plate and stud, and the same dark green body as the other HUD cards. Each banner is 50 px high and drawn as left cap | middle stretched | right cap (`R.Art` tiles now accept a source column and width), so the four corners are never scaled; the two banners are 6 px apart and as wide as the native map (200..260 canvas px, following it). The text boxes sit inside the gold frame with equal margins and are centred on the middle of each banner; the face is the serif title face (`AzerothSerif.ttf`), shrunk by `R.Fit` instead of being truncated. The native minimap, its buttons and its behaviour are untouched; Square, Round and the opacity path are untouched.

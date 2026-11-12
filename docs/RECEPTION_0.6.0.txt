@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.48 - ELWYNN COMPLET : PLUS DE RACCOURCIS FIELDKIT/JOURNAL NI DE TEXTE DE VERSION
+Affichage retire uniquement ; fonctions accessibles par les icones de la minicarte. A recetter en jeu.
+
 ALPHA.47 - FINITION DES CARTOUCHES DE LA CARTE NATIVE
 Cartouches issus du cadre approuve des cartes ; chemin de la case neutre corrige. A recetter en jeu.
 
