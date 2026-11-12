@@ -146,8 +146,26 @@ do
  local theirs=function() return "theirs" end
  FieldKitHudStack.Apply=theirs
  SlashCmdList.FieldKit("diag off")
- assert(FieldKitHudStack.Apply==theirs and D.skipped>=0,"a function replaced by someone else while ON is left alone")
+ assert(FieldKitHudStack.Apply==theirs and D.replaced>=0,"a function replaced by someone else while ON is left alone")
  FieldKitHudStack.Apply=original[10]
+ -- 10) isolation tests: one module paused on demand, temporary, restored by skip off / diag off
+ lines={}
+ SlashCmdList.FieldKit("diag skip loadout");assert(string.find(lines[1],"need /fieldkit diag on",1,true),"isolation needs the diagnostics")
+ 
+ local realLoadout=FieldKitLoadout.Update
+ SlashCmdList.FieldKit("diag on")
+ local wrapped=FieldKitLoadout.Update
+ SlashCmdList.FieldKit("diag skip loadout")
+ assert(FieldKitLoadout.Update~=wrapped and D.skipped.loadout,"loadout paused")
+ local calls=0;local sawScan=FieldKitLoadout.Scan
+ FieldKitLoadout.Update();assert(table.getn(D.SkippedNames())==1 and D.SkippedNames()[1]=="loadout")
+ assert(string.find(table.concat(D.Lines(),string.char(10)),"PAUSED modules = loadout",1,true),"the report states what is paused")
+ SlashCmdList.FieldKit("diag skip chat");assert(D.skipped.chat and table.getn(D.SkippedNames())==2,"two modules paused")
+ SlashCmdList.FieldKit("diag skip nonsense");assert(string.find(lines[table.getn(lines)],"Isolation modules:",1,true),"unknown module lists the choices")
+ SlashCmdList.FieldKit("diag skip off")
+ assert(FieldKitLoadout.Update==wrapped and table.getn(D.SkippedNames())==0,"skip off restores")
+ SlashCmdList.FieldKit("diag skip hudstack");SlashCmdList.FieldKit("diag off")
+ assert(FieldKitHudStack.Apply==original[10] and FieldKitLoadout.Update==realLoadout and table.getn(D.SkippedNames())==0,"diag off also restores paused modules")
  SlashCmdList.FieldKit("diag compat") -- unchanged commands still answer
  SlashCmdList.FieldKit("diag bogus");assert(string.find(lines[table.getn(lines)],"Usage:",1,true) and string.find(lines[table.getn(lines)],"status",1,true),"usage lists status")
  DEFAULT_CHAT_FRAME.AddMessage=old

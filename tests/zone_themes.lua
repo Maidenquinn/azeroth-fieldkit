@@ -2880,3 +2880,62 @@ do
  C.Set("zoneThemes",false)
 end
 print("Performance counters on the real theme paths (fast opacity vs full teardown, tick refreshes, state unchanged) passed (synthetic)")
+
+-- ===== alpha.51 (P1-3): performance budgets. Counted on the mock (writes of widget properties, calls), never native timings =====
+-- Every ceiling below is a MEASURED value plus a small margin. A fix lowers its ceiling in the same commit; a regression that
+-- brings the cost back fails here. Native confirmation is a separate step (see the delivery report).
+do
+ local D=FieldKitDiagnostics
+ BUDGET=BUDGET or {}
+ local B=BUDGET
+ B.refreshWrites=B.refreshWrites or 2300       -- all widget writes of one idle C.Refresh (Elwynn Complete)
+
+ B.opacityWrites=B.opacityWrites or 2500        -- one panel-opacity step (fast path)
+ B.scaleWrites=B.scaleWrites or 200000          -- one HUD-scale change
+ B.chatForcedPerSecond=B.chatForcedPerSecond or 10 -- theme refreshes forced by the chat watcher per second (watcher at 5 Hz)
+ B.tickPerSecond=B.tickPerSecond or 5.5         -- unforced theme refreshes per second at 20 fps
+ local mt=getmetatable(Minimap).__index
+ local counted={"SetPoint","ClearAllPoints","SetText","SetAlpha","SetTexture","Show","Hide","SetWidth","SetHeight","SetFont","SetTexCoord","SetVertexColor","SetScale","SetParent","SetFrameLevel","SetBackdrop","SetTextColor"}
+ local originals,total={},0
+ for _,name in ipairs(counted) do
+  local orig=mt[name]
+  if orig then originals[name]=orig;mt[name]=function(self,...) total=total+1;return orig(self,unpack(arg)) end end
+ end
+ local function Writes(fn) total=0;fn();return total end
+ local function Setup(zone,variant) C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemeMapShape","square");C.Set("zoneThemeScale",100);C.Set("zoneThemes",true);C.Refresh(true) end
+ SlashCmdList.FieldKit("diag off")
+
+ -- 1) an idle refresh writes a bounded number of properties
+ Setup("elwynn","complete");for i=1,3 do C.Refresh() end
+ local idle=Writes(function() for i=1,5 do C.Refresh() end end)/5
+ assert(idle<=B.refreshWrites,"an idle theme refresh writes "..idle.." properties (budget "..B.refreshWrites..")")
+ B.measuredIdle=idle
+ -- 2) the opacity fast path: bounded, and a repeated value costs nothing (memo)
+ FieldKitDB.cardOpacity=60;C.ApplyOpacity()
+ local first=Writes(function() FieldKitDB.cardOpacity=40;C.ApplyOpacity() end)
+ local again=Writes(function() C.ApplyOpacity() end)
+ assert(first>0 and first<=B.opacityWrites,"one opacity step: "..first.." writes (budget "..B.opacityWrites..")")
+ assert(again==0,"the same opacity again costs nothing ("..again..")")
+ -- 3) one HUD-scale change
+ local scale=Writes(function() C.Set("zoneThemeScale",90) end)
+ assert(scale<=B.scaleWrites,"a HUD-scale change writes "..scale.." properties (budget "..B.scaleWrites..")")
+ B.measuredScale=scale
+ C.Set("zoneThemeScale",100)
+ -- 4) the theme tick runs at 5 Hz, not per frame
+ NOW=NOW+1;Setup("elwynn","complete");D.Enable(true)
+ for i=1,200 do NOW=NOW+.05;C.Tick() end
+ local ticks=D.ops["C.Refresh(tick/unforced)"].calls
+ assert(ticks<=B.tickPerSecond*10,"at 20 fps the theme ticks "..ticks.." times in 10 s (budget "..(B.tickPerSecond*10)..")")
+ -- 5) the chat watcher must not force full theme refreshes
+ FieldKitDB.chatStyle=true;FieldKitDB.chatCopy=false;D.Reset()
+ local watcher=FieldKitChatWatcher
+ for i=1,25 do NOW=NOW+.2;arg1=.2;this=watcher;watcher.scripts.OnUpdate() end
+ local forced=D.ops["C.Refresh(forced)"] and D.ops["C.Refresh(forced)"].calls or 0
+ assert(forced<=B.chatForcedPerSecond*5,"the chat watcher forced "..forced.." theme refreshes in 5 s (budget "..(B.chatForcedPerSecond*5)..")")
+ B.measuredChatForced=forced
+ FieldKitDB.chatStyle=false
+ D.Enable(false)
+ for name,orig in pairs(originals) do mt[name]=orig end
+ C.Set("zoneThemes",false)
+end
+print("Performance budgets (idle refresh writes, opacity step and memo, HUD-scale change, 5 Hz tick, chat-forced refreshes) passed (synthetic)")

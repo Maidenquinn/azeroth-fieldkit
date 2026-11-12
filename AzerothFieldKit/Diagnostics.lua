@@ -53,6 +53,14 @@ local targets={
  {"FieldKitHudStack","Apply","HudStack.Apply"},
  {"FieldKitCardLayout","ApplyRight","CardLayout.ApplyRight"},
  {"FieldKitLoadout","Update","Loadout.Update"},
+ {"FieldKitLoadout","Scan","Loadout.Scan(spell book + action bar walk)"},
+ {"FieldKitLoadout","Tooltip","Loadout.Tooltip(one tooltip scan)"},
+ {"FieldKitLoadout","Render","Loadout.Render(card rows)"},
+ {"FieldKitLoadout","refresh","Loadout.refresh(card redraw)"},
+ {"FieldKit","SyncChat","FieldKit.SyncChat"},
+ {"FieldKit","ApplyChatStyle","FieldKit.ApplyChatStyle"},
+ {"FieldKitReferenceHUD","ChatSync","R.ChatSync(forces a theme refresh)"},
+ {"FieldKitCardLayout","Rows","CardLayout.Rows"},
  {"FieldKitRunMode","Update","RunMode.Update"},
  {"FieldKitCoop","Update","Coop.Update"},
  {"FieldKitNativeTools","Update","NativeTools.Update"},
@@ -90,7 +98,7 @@ function D.Reset()
  for i=1,5 do local x=D.spikes[i];if not x then x={0,0,"-"};D.spikes[i]=x end;x[1]=0;x[2]=0;x[3]="-" end
  for i=1,table.getn(D.opOrder) do local op=D.opOrder[i];op.calls=0;op.total=0;op.max=0;op.zero=0;op.fc=0;op.lastFrame=-1 end
  D.mem.start=nil;D.mem.last=nil;D.mem.max=nil;D.mem.min=nil;D.mem.samples=0;D.memTimer=0;D.lastOp=nil
- D.skipped=0
+ D.replaced=0
 end
 D.Reset()
 -- Install / remove the wrappers. Fixed argument forwarding (no vararg table in Lua 5.0); a wrapper that is still in a call chain
@@ -114,14 +122,14 @@ function D.Install()
      if not D.enabled then return orig(a1,a2,a3,a4,a5) end
      local o=op;if pick and pick(a1) then o=alt end
      local t0=D.now()
-     local r1,r2=orig(a1,a2,a3,a4,a5)
+     local r1,r2,r3,r4=orig(a1,a2,a3,a4,a5)
      local dt=D.now()-t0
      o.calls=o.calls+1;o.total=o.total+dt;if dt>o.max then o.max=dt end;if dt<=0 then o.zero=o.zero+1 end
      D.lastOp=o.label
      -- which operations ran during this frame (the client clock may be frame-cached, then durations are 0 and only the frame
      -- delta of the NEXT tick shows what a frame cost): stamp with the frame index, counted per frame
      if o.lastFrame==D.frames then o.fc=o.fc+1 else o.lastFrame=D.frames;o.fc=1 end
-     return r1,r2
+     return r1,r2,r3,r4
     end
    end
    owner[field]=wrapper
@@ -134,13 +142,54 @@ end
 function D.Uninstall()
  for i=1,table.getn(D.wrapped) do
   local w=D.wrapped[i]
-  if w[1][w[2]]==w[4] then w[1][w[2]]=w[3] else D.skipped=D.skipped+1 end
+  if w[1][w[2]]==w[4] then w[1][w[2]]=w[3] else D.replaced=D.replaced+1 end
  end
  D.wrapped={};D.installed=false;D.ops={};D.opOrder={}
 end
+-- Isolation tests (temporary, never saved): `/fieldkit diag skip <name>` replaces ONE periodic module by a no-op so that a
+-- microfreeze can be attributed by elimination in the real client; `/fieldkit diag skip off` (or `diag off`) puts everything back.
+-- The paused module simply does not run: nothing is persisted, and the game is unaffected beyond that module's display.
+local isolation={
+ loadout={{"FieldKitLoadout","Update"}},
+ hudstack={{"FieldKitHudStack","Apply"}},
+ cardright={{"FieldKitCardLayout","ApplyRight"}},
+ nativetools={{"FieldKitNativeTools","Update"}},
+ screenlayers={{"FieldKitScreenLayers","Update"}},
+ runmode={{"FieldKitRunMode","Update"}},
+ coop={{"FieldKitCoop","Update"}},
+ partysync={{"FieldKitPartySync","Tick"}},
+ themetick={{"FieldKitZoneThemes","Tick"}},
+ chat={{"FieldKit","SyncChat"},{"FieldKit","ApplyChatStyle"}},
+}
+D.isolation=isolation
+D.skipped={}
+local function NoOp() end
+function D.Skip(name)
+ local group=isolation[name];if not group then return false end
+ if D.skipped[name] then return true end
+ local entries={}
+ for i=1,table.getn(group) do
+  local owner=getglobal(group[i][1]);local field=group[i][2]
+  if type(owner)=="table" and type(owner[field])=="function" then
+   table.insert(entries,{owner,field,owner[field]});owner[field]=NoOp
+  end
+ end
+ D.skipped[name]=entries
+ return true
+end
+function D.Unskip()
+ for name,entries in pairs(D.skipped) do
+  for i=1,table.getn(entries) do local e=entries[i];if e[1][e[2]]==NoOp then e[1][e[2]]=e[3] end end
+ end
+ D.skipped={}
+end
+function D.SkippedNames()
+ local list={};for name in pairs(D.skipped) do table.insert(list,name) end;table.sort(list)
+ return list
+end
 function D.Enable(value)
  D.enabled=value==true
- if D.enabled then D.Install() else D.Uninstall();D.Reset() end
+ if D.enabled then D.Install() else D.Unskip();D.Uninstall();D.Reset() end
  return D.enabled
 end
 local SPIKE_MIN=.03
@@ -205,6 +254,8 @@ function D.Lines()
  local db=FieldKitDB or {}
  local T,M=FieldKitTheme,FieldKitThemeMinimap
  local icons=0;if M and M.ring then for _ in pairs(M.ring) do icons=icons+1 end end
+ local paused=D.SkippedNames()
+ table.insert(out,"isolation: "..(table.getn(paused)>0 and ("PAUSED modules = "..table.concat(paused,",")) or "none"))
  table.insert(out,"state: theme="..tostring(db.zoneThemes).." mode="..tostring(db.zoneThemeMode).." variant="..tostring(db.zoneThemeVariant).." layout="..tostring(FieldKitZoneThemes and FieldKitZoneThemes.currentLayout).." mapShape="..tostring(M and M.shape).." hudScale="..tostring(db.zoneThemeScale).." opacity="..tostring(db.cardOpacity).." surfaces="..tostring(T and T.surfaces and table.getn(T.surfaces)).." ringIcons="..icons)
  local fps=secs>0 and data.frames/secs or 0
  local cur=type(GetFramerate)=="function" and GetFramerate() or nil
@@ -293,9 +344,18 @@ function D.Command(command)
  if command=="on" then D.Enable(true);Say("Diagnostics enabled for this session ("..table.getn(D.wrapped).." functions measured). /fieldkit diag report | reset | status | off")
  elseif command=="off" then D.Enable(false);Say("Diagnostics disabled, original functions restored, counters cleared.")
  elseif command=="status" then D.Status()
+ elseif command=="skip" or string.sub(command,1,5)=="skip " then
+  local name=string.sub(command,6)
+  if not D.enabled then Say("Isolation tests need /fieldkit diag on first.")
+  elseif name=="off" then D.Unskip();Say("Isolation off: every module runs again.")
+  elseif D.Skip(name) then Say("Isolation: '"..name.."' is PAUSED (its display stops updating) until /fieldkit diag skip off or diag off.")
+  else
+   local names={};for key in pairs(isolation) do table.insert(names,key) end;table.sort(names)
+   Say("Isolation modules: "..table.concat(names,", ").." | /fieldkit diag skip <name> | skip off")
+  end
  elseif command=="reset" then D.Reset();Say("Diagnostics counters reset.")
  elseif command=="api" then D.ReportAPIs()
  elseif command=="compat" then D.ReportCompatibility()
  elseif command=="" or command=="report" then D.Report()
- else Say("Usage: /fieldkit diag on | off | status | reset | report | api | compat") end
+ else Say("Usage: /fieldkit diag on | off | status | reset | report | skip <module> | api | compat") end
 end
