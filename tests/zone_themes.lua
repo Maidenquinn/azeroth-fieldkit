@@ -2476,7 +2476,8 @@ do
  local groups={}
  for _,item in ipairs(C.ui) do groups[item.key]=groups[item.key] or {};table.insert(groups[item.key],item) end
  for _,key in ipairs({"zoneThemeVariant","zoneThemeMode","zoneThemeMapShape"}) do
-  local list=groups[key];assert(list and table.getn(list)==3,key..": three exclusive choices")
+  local list=groups[key];local expected=(key=="zoneThemeMode" and 2 or 3)
+  assert(list and table.getn(list)==expected,key..": expected exclusive choices")
   local selectedCount=0
   for _,item in ipairs(list) do assert(item.frame.fieldkitChoice,key..": marked as a choice control");if item.frame.fieldkitSelected then selectedCount=selectedCount+1;assert(ChoiceOn(item.frame),key..": the selected choice shows the gold outline") else assert(not ChoiceOn(item.frame),key..": an unselected choice shows none") end end
   assert(selectedCount==1,key..": exactly one selected ("..selectedCount..")")
