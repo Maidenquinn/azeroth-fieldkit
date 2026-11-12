@@ -154,7 +154,8 @@ function C.Resolve()
  if not FieldKitDB or not FieldKitDB.zoneThemes then return nil end
  local key=FieldKitDB.zoneThemeMode
  if key=="auto" then key=type(AZS_ZONE)=="table" and AZS_ZONE.zone end
- if key=="elwynn" or key=="naxx" then return key end
+ -- Naxxramas is unfinished and deliberately unavailable in this release.
+ if key=="elwynn" then return key end
 end
 function C.Suspend()
  for _,handle in pairs(C.detailHandles or {}) do handle:Hide() end
@@ -389,6 +390,7 @@ function C.SetHudScale(value)
  C.Refresh()
 end
 function C.Set(key,value)
+ if key=="zoneThemeMode" and value=="naxx" then return end -- unfinished theme is gated even for saved/direct calls
  if key=="zoneThemeScale" then C.SetHudScale(value);return end
  local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeMapShape=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
@@ -484,7 +486,7 @@ function C.Command(msg)
   end end
  elseif arg=="off" then C.Set("zoneThemes",false)
  elseif arg=="on" then C.Set("zoneThemes",true)
- elseif arg=="auto" or arg=="elwynn" or arg=="naxx" then C.Set("zoneThemeMode",arg);C.Set("zoneThemes",true)
+ elseif arg=="auto" or arg=="elwynn" then C.Set("zoneThemeMode",arg);C.Set("zoneThemes",true)
  elseif arg=="minimal" or arg=="complete" or arg=="alternative" then C.Set("zoneThemeVariant",arg)
  else
   SlashCmdList.FieldKit("");if FieldKitUI.frame then FieldKitUI.Select("look") end
@@ -509,7 +511,7 @@ function FieldKitThemeUI(parent,offset)
   b.badge=T.Label(b,nil,164,12,78,25,14,T.gold,true);C.previewCards[i]={button=b,key=key}
  end
  local modes={}
- for i,key in ipairs({"auto","elwynn","naxx"}) do modes[i]=Button("zoneThemeMode",key,FieldKit_L(key),(i-1)*270,286,260) end
+ for i,key in ipairs({"auto","elwynn"}) do modes[i]=Button("zoneThemeMode",key,FieldKit_L(key),(i-1)*270,286,260) end
  local enabled=Button("zoneThemes","toggle","Enable / disable themes",0,334,260)
  local art=Button("zoneThemeArt","toggle","Character ornaments",274,334,260)
  -- Map shape: its own row, three equal buttons wide enough for the label on ONE line (13 px font, 300 px each)
