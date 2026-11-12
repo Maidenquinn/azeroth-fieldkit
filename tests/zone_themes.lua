@@ -4,8 +4,11 @@ function NewGear() local g=CreateFrame("Button","AzerothHubMinimapButton",Minima
 TARGET=nil
 fire(FieldKitFrame,"VARIABLES_LOADED")
 SlashCmdList.FieldKit("")
-assert(FieldKitZoneThemes.ui and table.getn(FieldKitZoneThemes.ui)==12,"Theme settings must be present in the real options journey")
+assert(FieldKitZoneThemes.ui and table.getn(FieldKitZoneThemes.ui)==11,"Theme settings must be present in the real options journey")
 local C,H,M,T=FieldKitZoneThemes,FieldKitThemeHUD,FieldKitThemeMinimap,FieldKitTheme
+-- Naxx is hidden from production, but legacy layout regression fixtures remain executable.
+assert(C.Resolve()==nil)
+C.allowUnfinishedThemes=true
 assert(not C.active and not FieldKitDB.zoneThemes)
 FieldKit.zoneThemeReady=false;FieldKitDB.zoneThemes=true;FieldKitDB.zoneThemeMode="naxx"
 C.Refresh();assert(not C.active,"Do not capture native frames during legacy HUD construction")
