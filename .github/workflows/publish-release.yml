@@ -1,8 +1,13 @@
 name: Publish FieldKit release
 
-# Manual-only: never auto-publish a stale release when a PR merges.
+# One-time, path-scoped publication trigger for the maintainer-approved 0.6.0.
+# Normal source pushes and PR merges cannot publish a release.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-release.yml'
 
 permissions:
   contents: write
