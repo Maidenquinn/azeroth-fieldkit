@@ -2494,7 +2494,7 @@ do
  -- clicking updates every group at once, without reopening the panel
  click(round);assert(FieldKitDB.zoneThemeMapShape=="round" and round.fieldkitSelected and ChoiceOn(round) and not square.fieldkitSelected and not ChoiceOn(square),"clicking Round selects it and unselects Square immediately")
  click(groups.zoneThemeVariant[1].frame);assert(groups.zoneThemeVariant[1].frame.fieldkitSelected and not groups.zoneThemeVariant[3].frame.fieldkitSelected and ChoiceOn(groups.zoneThemeVariant[1].frame),"layout choice updates at once")
- click(groups.zoneThemeMode[3].frame);assert(groups.zoneThemeMode[3].frame.fieldkitSelected and not groups.zoneThemeMode[2].frame.fieldkitSelected,"theme choice updates at once")
+ click(groups.zoneThemeMode[1].frame);assert(groups.zoneThemeMode[1].frame.fieldkitSelected and not groups.zoneThemeMode[2].frame.fieldkitSelected,"public theme choice updates at once")
  click(groups.zoneThemeMode[2].frame);click(groups.zoneThemeVariant[2].frame);click(groups.zoneThemeMapShape[1].frame)
  -- the toggles use the same states
  for _,item in ipairs(groups.zoneThemeArt) do assert(item.frame.fieldkitChoice and ChoiceOn(item.frame)==(FieldKitDB.zoneThemeArt==true),"the dressing toggle shows its state") end
