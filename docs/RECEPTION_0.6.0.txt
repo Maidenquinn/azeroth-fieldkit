@@ -136,6 +136,9 @@ Terrain Elwynn Complète contenu entre le titre et le pied du cadre.
 La validation complète des six compositions en combat et le déplacement
 physique de la carte restent à recetter ; aucune certification à 100 %.
 
+ALPHA.50 - COMPTEURS DE PERFORMANCE (DIAGNOSTIC)
+/fieldkit diag on | status | report | reset | off ; desactive par defaut, rien d'installe tant qu'il est coupe. A mesurer en jeu.
+
 ALPHA.49 - ICONES DE LA MINICARTE : PLACEMENT SELON LA FORME, TAILLE COMMUNE
 AzerLoot suit le cadre carre ; anneau d'Azeroth Stats recentre ; collisions et coins geres. A recetter en jeu.
 

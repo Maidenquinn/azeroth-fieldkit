@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha.50 - 2026-11-12 (P1-0 performance counters, unreleased)
+
+- Diagnostics extended with performance counters (`Diagnostics.lua`), OFF by default and invisible while off: nothing is installed, no hot-path function is touched (the measured functions are the very same ones), no frame, no texture, no extra OnUpdate. `/fieldkit diag on` installs thin counting / timing wrappers around a FIXED list of 32 functions (theme refresh tick / forced, suspension idle / FULL teardown, setting change, opacity fast path, element scale, repaint of every surface, `R.Update`, `H.Update`, minimap apply / ring, card layout, profile load / save, ...); `/fieldkit diag off` puts the originals back (a function replaced by someone else meanwhile is left alone). All data is session memory, preallocated at enable time, never written to the SavedVariables.
+- Measured per operation: calls, calls per second, average, maximum and total time (inclusive of nested measured calls), zero-duration calls (timer resolution). The clock is `debugprofilestop` if the client has it, else `GetTime`. Also: frame-delta histogram (>50 ms, >100 ms, >250 ms, >1 s), the five worst frames (>= 30 ms) each with the list of measured operations that ran in that frame (useful even if the client clock is cached per frame and every duration reads 0, which the report then states), current and average frame rate, and Lua memory (`gcinfo`) start / now / min / max when the client provides it.
+- Commands: `/fieldkit diag on | off | status | reset | report | api | compat`. `report` prints plain `key=value` lines (header `FIELDKIT-DIAG v1`, footer `END FIELDKIT-DIAG`) that can be copied from the chat.
+- PERF-01 / PERF-02 of the global audit are NOT optimised in this lot: they are to be measured in the real client first. No behaviour of the HUD, the themes, the profiles or the minimap icons changed.
+- Repository: the worktree `.git` pointer (pointing to a removed H: folder) was repaired to the real repository after a backup of the pointer.
+
 ## 0.6.0-alpha.49 - 2026-11-12 (minimap launcher icons, unreleased)
 
 - Third-party launcher icons now follow the shape of the map. Root cause of "AzerLoot keeps a circular placement on the square map": AzerLoot places its button at half the map width + 10, which on the enlarged square map is a radius of ~125, beyond the 55..100 window the ring placement accepted (that window assumed the native radius 80), so the button was never taken. The window now follows the map size (up to 1.5 x the half size + 20); beyond the native 100 only launcher-sized frames (16..48) are accepted, so no other child of the map is grabbed. The validated edge definition is unchanged.

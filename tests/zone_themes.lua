@@ -2835,3 +2835,48 @@ do
  C.Set("zoneThemeScale",100);C.Set("zoneThemeMapShape","square");C.Set("zoneThemes",false)
 end
 print("Launcher icons: rectangular / circular / native placement, common apparent size, border re-anchor, no overlap, corners clear, no drift (3 shapes x 4 layouts, HUD 80/90/100) passed (synthetic)")
+
+-- ===== alpha.50 (P1-0): the counters see the real theme paths and never change them =====
+do
+ local D=FieldKitDiagnostics
+ local function Setup() C.Set("zoneThemes",false);C.Set("zoneThemeMode","elwynn");C.Set("zoneThemeVariant","complete");C.Set("zoneThemeMapShape","square");C.Set("zoneThemeScale",100);C.Set("zoneThemes",true);C.Refresh(true) end
+ local function Fingerprint()
+  local keys={};for k,v in pairs(FieldKitDB) do if type(v)~="table" then table.insert(keys,tostring(k).."="..tostring(v)) end end
+  table.sort(keys);return table.concat(keys,";").."|"..tostring(T.zone).."|"..tostring(M.shape).."|"..tostring(C.currentLayout).."|"..table.getn(objects)
+ end
+ local function Scenario()
+  Setup();for v=75,110,5 do FieldKitDB.cardOpacity=v;C.ApplyOpacity() end
+  C.Set("zoneThemeScale",90);C.Set("zoneThemeMapShape","round");C.Set("zoneThemeMapShape","square");C.Set("zoneThemeScale",100)
+  for i=1,6 do NOW=NOW+.25;C.Tick() end
+  return Fingerprint()
+ end
+ SlashCmdList.FieldKit("diag off")
+ local plain=Scenario()
+ SlashCmdList.FieldKit("diag on")
+ local measured=Scenario()
+ assert(plain==measured,"the diagnostics change neither the settings, the layout nor the widget count\n"..plain.."\n"..measured)
+ -- the paths are told apart: the opacity fast path never suspends nor repaints; a scale change does
+ SlashCmdList.FieldKit("diag reset")
+ for v=75,100,5 do FieldKitDB.cardOpacity=v;C.ApplyOpacity() end
+ assert(D.ops["C.ApplyOpacity(fast path)"].calls==6 and D.ops["C.Set(setting change)"].calls==0,"opacity sweep uses the fast path only")
+ local suspend=D.ops["C.Suspend(FULL teardown)"];local repaint=D.ops["T.Refresh(repaint ALL surfaces)"]
+ assert(suspend.calls==0 and repaint.calls==0,"no full teardown and no repaint of every surface during an opacity sweep")
+ SlashCmdList.FieldKit("diag reset")
+ C.Set("zoneThemeScale",90)
+ assert(D.ops["C.Set(setting change)"].calls==1,"one setting change")
+ assert(D.ops["C.Suspend(FULL teardown)"].calls==1,"it performs one FULL teardown while the theme is active")
+ assert(D.ops["T.Refresh(repaint ALL surfaces)"].calls>=1,"and repaints every surface")
+ assert(D.ops["C.Refresh(forced)"].calls>=1 and D.ops["R.Update"].calls>=1 and D.ops["H.Update"].calls>=1,"and rebuilds the HUD")
+ assert(D.ops["T.State(per surface)"].calls>400,"T.State is called for every surface ("..D.ops["T.State(per surface)"].calls..")")
+ SlashCmdList.FieldKit("diag reset")
+ for i=1,5 do NOW=NOW+.25;C.Tick() end
+ assert(D.ops["C.Tick(per frame)"].calls==5 and D.ops["C.Refresh(tick/unforced)"].calls>=1,"the 5 Hz tick shows as unforced refreshes")
+ -- the report reads on this state
+ local lines=D.Lines();local text=table.concat(lines,"\n")
+ for _,key in ipairs({"layout=elwynn:complete","mapShape=square","C.Refresh(tick/unforced)","R.Update"}) do assert(string.find(text,key,1,true),"report mentions "..key) end
+ SlashCmdList.FieldKit("diag off")
+ assert(not D.installed and FieldKitZoneThemes.Refresh and C.Refresh==FieldKitZoneThemes.Refresh)
+ C.Refresh(true);assert(C.active,"the theme keeps working after the diagnostics are switched off")
+ C.Set("zoneThemes",false)
+end
+print("Performance counters on the real theme paths (fast opacity vs full teardown, tick refreshes, state unchanged) passed (synthetic)")
