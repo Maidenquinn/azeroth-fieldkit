@@ -43,6 +43,7 @@ function T.RefreshOpacity()
  return n
 end
 function T.Refresh()
+ T.gen=T.gen+1 -- zone colours / assets may have changed: every surface repaints once
  for i=1,table.getn(T.surfaces) do
   local frame=T.surfaces[i];T.State(frame,frame.fieldkitActive);T.Update(frame)
  end
@@ -125,8 +126,26 @@ function T.Surface(frame,kind,hud)
 end
 
 -- Selection/hover only changes the fixed material, never allocates another layer.
+-- T.State is a pure function of: the art-only flag, active, navigation flag, the opacity (or the card's own fill alpha), the fill
+-- colour, the style and the zone/colours generation (T.gen, bumped by T.SetZone / T.Refresh). Called ~1500 times per theme
+-- refresh with the same inputs, it used to rewrite ~10 textures each time: it now returns at once when nothing changed. Choice
+-- buttons keep the full path (their label colour is also set by others).
+T.gen=T.gen or 0
 function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
+ local fillNow=frame.fieldkitFill
+ if not frame.fieldkitChoice then
+  local m=skin.memo
+  local opacityNow=skin.kind=="button" and 1 or T.Opacity(frame);if fillNow then opacityNow=fillNow.alpha end
+  local color=fillNow and fillNow.color
+  local artNow=frame.fieldkitArtOnly and true or false;local activeNow=active and true or false;local navNow=frame.fieldkitNavigation and true or false
+  local styleNow=T.Style(frame)
+  if m and m.gen==T.gen and m.art==artNow and m.active==activeNow and m.nav==navNow and m.opacity==opacityNow and m.style==styleNow
+   and m.hasFill==(fillNow~=nil) and (not color or (m.r==color[1] and m.g==color[2] and m.b==color[3])) then return end
+  if not m then m={};skin.memo=m end
+  m.gen=T.gen;m.art=artNow;m.active=activeNow;m.nav=navNow;m.opacity=opacityNow;m.style=styleNow;m.hasFill=(fillNow~=nil)
+  if color then m.r,m.g,m.b=color[1],color[2],color[3] else m.r,m.g,m.b=nil,nil,nil end
+ end
  -- frame.fieldkitFill = {color={r,g,b},alpha=a}: the card's own interior colour and opacity (the chat preferences), applied to the
  -- fill and to the centre slice only; the gold border slices keep their own opacity.
  local fill=frame.fieldkitFill

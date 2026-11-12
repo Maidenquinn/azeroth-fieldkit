@@ -1562,7 +1562,12 @@ function R.Panels(variant,zone)
    if f.footerPatch then f.footerPatch:Hide() end
    if kind~="Accessories" then
     if not f.cleanBody then f.cleanBody=f:CreateTexture(nil,"BORDER") end
-    local t=f.cleanBody;t:SetAlpha(R.Opacity());t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_card_body_v9.tga");t:SetTexCoord(0,1,0,1);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",17,-44);t:SetWidth(a[3]-34);t:SetHeight(a[4]-60);t:Show()
+    local t=f.cleanBody;local opacity=R.Opacity()
+    -- written only when its inputs changed (it used to be rewritten 5 times a second); R.ApplyOpacity sets the same alpha
+    if t.fieldkitZone~=zone or t.fieldkitW~=a[3] or t.fieldkitH~=a[4] or t.fieldkitOpacity~=opacity then
+     t.fieldkitZone,t.fieldkitW,t.fieldkitH,t.fieldkitOpacity=zone,a[3],a[4],opacity
+     t:SetAlpha(opacity);t:SetTexture(T.media.."ReferenceHUD\\"..zone.."_card_body_v9.tga");t:SetTexCoord(0,1,0,1);t:ClearAllPoints();t:SetPoint("TOPLEFT",f,"TOPLEFT",17,-44);t:SetWidth(a[3]-34);t:SetHeight(a[4]-60);t:Show()
+    end
    end
    f.more:Show();R.Stable(f.more,table.concat({a[3],a[4],zone,f:GetFrameLevel()},":"),function(b) b:SetFrameLevel(f:GetFrameLevel()+15);b:ClearAllPoints();b:SetPoint("BOTTOM",f,"BOTTOM",-5,zone=="elwynn" and 20 or 8);b:SetWidth(a[3]-42);b:SetHeight(28) end);f.more.fieldkitLabel:SetWidth(a[3]-42);f.more.fieldkitLabel:SetJustifyH("CENTER");T.Font(f.more.fieldkitLabel,17,{1,.82,.12},true)
    if f.emptySocket then f.emptySocket:Hide() end;f.total:Hide();f.rateLabel:Hide();f.pager:Hide();for _,r in ipairs(f.rows) do r.fieldkitUsed=nil;r.icon:Hide();r.bar:Hide();if r.trough then r.trough:Hide() end end

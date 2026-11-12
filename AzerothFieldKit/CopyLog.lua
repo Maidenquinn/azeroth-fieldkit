@@ -264,6 +264,22 @@ function FieldKit.ChatGuard(f)
  f:ClearAllPoints();f:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",px,py);lastPositionStamp=nil
  return true
 end
+-- The themed chat card is planned from these preferences only (R.ChatPlan, ChatFontWanted). The chat watcher calls ApplyChatStyle
+-- five times a second: the theme is told to refresh only when one of them CHANGED (it used to be forced twice per tick, i.e. a full
+-- theme refresh ten times a second). The theme's own periodic refresh recomputes the plan anyway, so a missed change is applied
+-- within a fifth of a second even without this call.
+local themedChatKeys={"chatStyle","chatWidth","chatHeight","chatBackgroundOpacity","chatBackgroundColor","chatFontFace","chatFontSize"}
+local themedChatSeen={}
+local themedChatKnown=false
+local function ThemedChatChanged()
+ local db=FieldKitDB;local changed=not themedChatKnown
+ for i=1,table.getn(themedChatKeys) do
+  local key=themedChatKeys[i];local value=db[key]
+  if themedChatSeen[key]~=value then themedChatSeen[key]=value;changed=true end
+ end
+ themedChatKnown=true
+ return changed
+end
 function FieldKit.ApplyChatStyle()
  local f=NativeChat()
  if not f or not FieldKitDB then return end
@@ -271,9 +287,10 @@ function FieldKit.ApplyChatStyle()
   -- the theme owns the geometry while it is active; keep the handle and the hooks, never restore a native snapshot onto a themed chat
   if chatBackdrop then chatBackdrop:Hide() end
   MoveControl()
-  if FieldKitReferenceHUD.ChatSync then FieldKitReferenceHUD.ChatSync() end
+  if ThemedChatChanged() and FieldKitReferenceHUD.ChatSync then FieldKitReferenceHUD.ChatSync() end
   return
  end
+ themedChatKnown=false -- the next themed pass synchronises once
  if not FieldKitDB.chatStyle then
   if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end

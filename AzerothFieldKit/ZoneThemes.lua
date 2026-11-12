@@ -358,7 +358,12 @@ function C.Tick()
  end
  local now=GetTime()
  if C.deadline and now<C.deadline then return end
- C.deadline=now+.2;C.Refresh()
+ -- A refresh that took long (native ~40 ms, more on a loaded frame) pushes the next one away: the pause is six times the
+ -- measured duration, between 0.2 s (the normal 5 Hz) and 1 s, so a heavy moment can never turn into a train of heavy frames.
+ -- With a clock that does not advance inside a frame the duration reads 0 and the rate stays 5 Hz.
+ C.Refresh()
+ local spent=GetTime()-now
+ C.deadline=now+math.max(.2,math.min(1,spent*6))
 end
 -- Panel opacity changes only the alpha of the background regions of the cards (R.ApplyOpacity, T.RefreshOpacity). It does NOT go
 -- through C.Set: that path suspends and rebuilds the whole HUD (every card, the placement engine, the minimap, the native frames) and

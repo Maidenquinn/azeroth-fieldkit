@@ -2888,11 +2888,11 @@ do
  local D=FieldKitDiagnostics
  BUDGET=BUDGET or {}
  local B=BUDGET
- B.refreshWrites=B.refreshWrites or 2300       -- all widget writes of one idle C.Refresh (Elwynn Complete)
+ B.refreshWrites=B.refreshWrites or 2000       -- all widget writes of one idle C.Refresh (Elwynn Complete); 2172 before P1-2A
 
  B.opacityWrites=B.opacityWrites or 2500        -- one panel-opacity step (fast path)
  B.scaleWrites=B.scaleWrites or 6000            -- one HUD-scale change (was 171 091 before P1-1)
- B.chatForcedPerSecond=B.chatForcedPerSecond or 10 -- theme refreshes forced by the chat watcher per second (watcher at 5 Hz)
+ B.chatForcedPerSecond=B.chatForcedPerSecond or 0.4 -- theme refreshes forced by the chat watcher per second; 10 before P1-2A
  B.tickPerSecond=B.tickPerSecond or 5.5         -- unforced theme refreshes per second at 20 fps
  local mt=getmetatable(Minimap).__index
  local counted={"SetPoint","ClearAllPoints","SetText","SetAlpha","SetTexture","Show","Hide","SetWidth","SetHeight","SetFont","SetTexCoord","SetVertexColor","SetScale","SetParent","SetFrameLevel","SetBackdrop","SetTextColor"}
@@ -3001,3 +3001,100 @@ do
  C.Set("zoneThemeScale",100);C.Set("zoneThemes",false)
 end
 print("HUD scale: light path (no teardown, no repaint of every surface), same layout back and forth, saved positions untouched passed (synthetic)")
+
+-- ===== alpha.51 (P1-2A): theme refresh without redundant work =====
+do
+ local D=FieldKitDiagnostics
+ local mt=getmetatable(Minimap).__index
+ local counted={"SetPoint","ClearAllPoints","SetText","SetAlpha","SetTexture","Show","Hide","SetWidth","SetHeight","SetTexCoord","SetVertexColor","SetScale","SetParent","SetFrameLevel","SetTextColor"}
+ local saved,total={},0
+ for _,name in ipairs(counted) do local orig=mt[name];saved[name]=orig;mt[name]=function(self,...) total=total+1;return orig(self,unpack(arg)) end end
+ local function Writes(fn) total=0;fn();return total end
+ local function Setup(zone,variant) C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemeMapShape","square");C.Set("zoneThemeScale",100);C.Set("zoneThemes",true);C.Refresh(true) end
+ Setup("elwynn","complete");for i=1,3 do C.Refresh() end
+ local f=R.chat -- a themed HUD surface (card kind, hud scope)
+ assert(f and f.fieldkitSkin and f.fieldkitSkin.hud,"a themed HUD card")
+
+ -- 1) T.State is skipped when none of its inputs changed, and runs when one does
+ T.State(f,false)
+ assert(Writes(function() T.State(f,false) end)==0,"same inputs: no write")
+ assert(Writes(function() T.State(f,false) end)==0)
+ assert(Writes(function() T.State(f,true) end)>0,"hover state changes: written")
+ assert(Writes(function() T.State(f,true) end)==0,"and then remembered")
+ T.State(f,false)
+ local saveOpacity=FieldKitDB.cardOpacity
+ FieldKitDB.cardOpacity=55
+ assert(Writes(function() T.State(f,false) end)>0,"opacity changed: written")
+ assert(Writes(function() T.State(f,false) end)==0)
+ FieldKitDB.cardOpacity=saveOpacity;T.State(f,false)
+ local fill=f.fieldkitFill
+ f.fieldkitFill={color={.1,.2,.3},alpha=.5}
+ assert(Writes(function() T.State(f,false) end)>0,"own fill colour / alpha: written")
+ assert(Writes(function() T.State(f,false) end)==0)
+ f.fieldkitFill.color[2]=.9
+ assert(Writes(function() T.State(f,false) end)>0,"the colour edited IN PLACE is noticed")
+ f.fieldkitFill=fill;T.State(f,false)
+ f.fieldkitArtOnly=true;assert(Writes(function() T.State(f,false) end)>0,"art-only flag: written");f.fieldkitArtOnly=nil;T.State(f,false)
+ assert(Writes(function() T.Refresh() end)>0,"a zone / colours refresh repaints every surface once")
+ assert(Writes(function() T.State(f,false) end)==0,"and the next State call is free")
+ -- choice buttons (settings) keep the full path: their label colour is also driven elsewhere
+ local button=C.ui[1].frame
+ assert(button.fieldkitChoice,"a choice button")
+ local first=Writes(function() T.State(button,false) end);local second=Writes(function() T.State(button,false) end)
+ assert(second>0,"choice buttons are never short-circuited ("..first..","..second..")")
+
+ -- 2) the clean body of a card is written once, then only when its inputs change
+ local body=R.frames.Damage.cleanBody
+ assert(body,"the Damage card has a clean body")
+ C.Refresh();local textureWrites=0
+ local realSetTexture=body.SetTexture;body.SetTexture=function(self,v) textureWrites=textureWrites+1;return mt.SetTexture(self,v) end
+ for i=1,5 do C.Refresh() end
+ assert(textureWrites==0,"the clean body texture is not re-assigned at every refresh ("..textureWrites..")")
+ FieldKitDB.cardOpacity=40;C.Refresh();assert(body.alpha==.4,"a new opacity reaches the clean body ("..tostring(body.alpha)..")")
+ FieldKitDB.cardOpacity=100;C.ApplyOpacity();assert(body.alpha==1);C.Refresh();assert(body.alpha==1)
+ C.Set("zoneThemeMode","naxx");C.Refresh(true);assert(textureWrites>=1 and string.find(body.texture,"naxx_card_body",1,true),"another zone gives another texture")
+ body.SetTexture=realSetTexture
+ Setup("elwynn","complete")
+
+ -- 3) the chat watcher forces a theme refresh only when a chat preference changed
+ FieldKitDB.chatStyle=true;FieldKitDB.chatCopy=false;D.Enable(true)
+ local watcher=FieldKitChatWatcher
+ local function Watch(n) for i=1,n do NOW=NOW+.2;arg1=.2;this=watcher;watcher.scripts.OnUpdate() end end
+ Watch(1);D.Reset()
+ Watch(50)
+ local forced=D.ops["C.Refresh(forced)"] and D.ops["C.Refresh(forced)"].calls or 0
+ assert(forced==0,"50 watcher ticks without any change force "..forced.." theme refreshes (was 100)")
+ FieldKitDB.chatWidth=520;D.Reset();Watch(1)
+ assert((D.ops["C.Refresh(forced)"] and D.ops["C.Refresh(forced)"].calls or 0)==1,"a changed chat width is applied at once, by one refresh")
+ assert(R.chatPlan and R.chatPlan.textW==520,"and the plan follows it ("..tostring(R.chatPlan and R.chatPlan.textW)..")")
+ D.Reset();Watch(10);assert((D.ops["C.Refresh(forced)"] and D.ops["C.Refresh(forced)"].calls or 0)==0,"then silence")
+ for _,change in ipairs({{"chatHeight",260},{"chatBackgroundOpacity",30},{"chatFontSize",14},{"chatFontFace",2},{"chatBackgroundColor",3}}) do
+  FieldKitDB[change[1]]=change[2];D.Reset();Watch(2)
+  assert((D.ops["C.Refresh(forced)"] and D.ops["C.Refresh(forced)"].calls or 0)==1,change[1].." change is applied once")
+ end
+ -- theme off and on again: the next themed pass synchronises once more
+ C.Set("zoneThemes",false);Watch(3);C.Set("zoneThemes",true);C.Refresh(true);D.Reset();Watch(3)
+ assert((D.ops["C.Refresh(forced)"] and D.ops["C.Refresh(forced)"].calls or 0)<=1,"after the theme comes back: at most one synchronisation")
+ FieldKitDB.chatStyle=false;D.Enable(false)
+
+ -- 4) the 5 Hz tick backs off after a slow refresh (graceful degradation) and is normal otherwise
+ Setup("elwynn","complete")
+ local realRefresh=C.Refresh;local costs={0}
+ C.Refresh=function(a) NOW=NOW+costs[1];return realRefresh(a) end
+ NOW=NOW+10;C.deadline=nil
+ costs[1]=0;local t0=NOW;C.Tick();assert(math.abs(C.deadline-(t0+.2))<1e-6,"a free refresh keeps the 0.2 s rhythm ("..(C.deadline-t0)..")")
+ NOW=NOW+10;C.deadline=nil
+ costs[1]=.05;local t0=NOW;C.Tick();assert(math.abs(C.deadline-(t0+.3))<1e-6,"a 50 ms refresh waits 0.3 s ("..(C.deadline-t0)..")")
+ NOW=NOW+10;C.deadline=nil
+ costs[1]=.66;local t0=NOW;C.Tick();assert(math.abs(C.deadline-(t0+1))<1e-6,"a 660 ms refresh waits 1 s at most ("..(C.deadline-t0)..")")
+ C.Refresh=realRefresh;C.deadline=nil
+
+ -- 5) budgets, tightened by this lot
+ BUDGET.refreshWrites=2000;BUDGET.chatForcedPerSecond=0.4
+ Setup("elwynn","complete");for i=1,3 do C.Refresh() end
+ local idle=Writes(function() for i=1,5 do C.Refresh() end end)/5
+ assert(idle<=BUDGET.refreshWrites,"an idle theme refresh writes "..idle.." properties (budget "..BUDGET.refreshWrites..", was 2172)")
+ for name,orig in pairs(saved) do mt[name]=orig end
+ C.Set("zoneThemes",false)
+end
+print("Theme refresh: State memo, clean body written once, chat forces a refresh only on change, tick backs off, tightened budgets passed (synthetic)")
