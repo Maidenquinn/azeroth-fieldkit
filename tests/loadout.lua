@@ -106,6 +106,18 @@ D.Capture("Ogre hits you for 12.");assert(D.count==0 and FieldKitNative.serial>p
 L.Update();assert(table.getn(L.spells)==0,"Stale native learned spells survived a run change")
 print("Native loadout tooltips, ranks, icons, lair arrival, partial named taken and reset fixtures passed")
 
+-- P1-2B: changing only the spell icon must invalidate the card content.
+do
+ local L=FieldKitLoadout
+ local previousSpells,previousItems=L.spells,L.items
+ L.spells={{key="test",rank="Rank 1",name="Test",icon="OldIcon",bonuses={},upgrades={}}}
+ L.items={}
+ local before=L.ContentKey()
+ L.spells[1].icon="NewIcon"
+ assert(L.ContentKey()~=before,"Icon-only Loadout change must trigger refresh")
+ L.spells,L.items=previousSpells,previousItems
+end
+
 -- ===== alpha.51 (P1-2B): the loadout scan runs when something changed, not every 1.5 s for the whole run =====
 do
  local L=FieldKitLoadout
