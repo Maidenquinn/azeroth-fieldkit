@@ -2862,13 +2862,13 @@ do
  local suspend=D.ops["C.Suspend(FULL teardown)"];local repaint=D.ops["T.Refresh(repaint ALL surfaces)"]
  assert(suspend.calls==0 and repaint.calls==0,"no full teardown and no repaint of every surface during an opacity sweep")
  SlashCmdList.FieldKit("diag reset")
- C.Set("zoneThemeScale",90)
+ C.Set("zoneThemeMapShape","round") -- a setting that still takes the full path (the HUD scale no longer does)
  assert(D.ops["C.Set(setting change)"].calls==1,"one setting change")
  assert(D.ops["C.Suspend(FULL teardown)"].calls==1,"it performs one FULL teardown while the theme is active")
  assert(D.ops["T.Refresh(repaint ALL surfaces)"].calls>=1,"and repaints every surface")
  assert(D.ops["C.Refresh(forced)"].calls>=1 and D.ops["R.Update"].calls>=1 and D.ops["H.Update"].calls>=1,"and rebuilds the HUD")
  assert(D.ops["T.State(per surface)"].calls>400,"T.State is called for every surface ("..D.ops["T.State(per surface)"].calls..")")
- SlashCmdList.FieldKit("diag reset")
+ C.Set("zoneThemeMapShape","square");SlashCmdList.FieldKit("diag reset")
  for i=1,5 do NOW=NOW+.25;C.Tick() end
  assert(D.ops["C.Tick(per frame)"].calls==5 and D.ops["C.Refresh(tick/unforced)"].calls>=1,"the 5 Hz tick shows as unforced refreshes")
  -- the report reads on this state
@@ -2891,7 +2891,7 @@ do
  B.refreshWrites=B.refreshWrites or 2300       -- all widget writes of one idle C.Refresh (Elwynn Complete)
 
  B.opacityWrites=B.opacityWrites or 2500        -- one panel-opacity step (fast path)
- B.scaleWrites=B.scaleWrites or 200000          -- one HUD-scale change
+ B.scaleWrites=B.scaleWrites or 6000            -- one HUD-scale change (was 171 091 before P1-1)
  B.chatForcedPerSecond=B.chatForcedPerSecond or 10 -- theme refreshes forced by the chat watcher per second (watcher at 5 Hz)
  B.tickPerSecond=B.tickPerSecond or 5.5         -- unforced theme refreshes per second at 20 fps
  local mt=getmetatable(Minimap).__index
@@ -2939,3 +2939,65 @@ do
  C.Set("zoneThemes",false)
 end
 print("Performance budgets (idle refresh writes, opacity step and memo, HUD-scale change, 5 Hz tick, chat-forced refreshes) passed (synthetic)")
+
+-- ===== alpha.51 (P1-1): the HUD scale changes only the scale: no teardown, no repaint of every surface, same layout back and forth =====
+do
+ local D=FieldKitDiagnostics
+ local function Setup(zone,variant,shape) C.Set("zoneThemes",false);C.Set("zoneThemeMode",zone);C.Set("zoneThemeVariant",variant);C.Set("zoneThemeMapShape",shape or "square");C.Set("zoneThemeScale",100);C.Set("zoneThemes",true);C.Refresh(true) end
+ local function Layout()
+  -- every themed card and the canvas: point, size, shown
+  local out={}
+  for _,kind in ipairs({"Damage","Lairs","Effects","Accessories","Stats"}) do
+   local f=R.frames and R.frames[kind]
+   if f then local p,rel,rp,x,y=f:GetPoint();out[kind]=table.concat({tostring(p),tostring(x),tostring(y),tostring(f:GetWidth()),tostring(f:GetHeight()),tostring(f:IsShown())},"|") end
+  end
+  out.canvas=tostring(R.canvas:GetScale()).."|"..tostring(R.canvas:GetWidth())
+  out.map=tostring(M.shape).."|"..tostring(M.active)
+  return out
+ end
+ local function Same(a,b,tag,skipCanvas)
+  for k,v in pairs(a) do if not (skipCanvas and k=="canvas") then assert(b[k]==v,tag..": "..k.." differs ("..tostring(v).." vs "..tostring(b[k])..")") end end
+ end
+ for _,case in ipairs({{"elwynn","complete"},{"elwynn","minimal"},{"naxx","complete"},{"naxx","alternative"}}) do
+  local tag=case[1].." "..case[2]
+  Setup(case[1],case[2]);C.Refresh()
+  local before=Layout();local positions=FieldKitDB.zoneThemePositions
+  local savedBefore=tostring(positions)
+  SlashCmdList.FieldKit("diag on");D.Reset()
+  C.Set("zoneThemeScale",90)
+  assert(D.ops["C.Suspend(FULL teardown)"].calls==0,tag..": no full teardown for a scale change")
+  assert(D.ops["T.Refresh(repaint ALL surfaces)"].calls==0,tag..": no repaint of every surface for a scale change")
+  assert(D.ops["C.Suspend(idle)"].calls==0,tag..": no suspension at all")
+  SlashCmdList.FieldKit("diag off")
+  local scaled=Layout()
+  assert(FieldKitDB.zoneThemeScale==90,tag..": the value is stored")
+  assert(scaled.canvas~=before.canvas,tag..": the canvas really changed scale ("..scaled.canvas..")")
+  -- same everything else: cards keep their anchors (they are children of the canvas), the map keeps its mode
+  Same(before,scaled,tag.." at 90 %",true)
+  for _,v in ipairs({75,110,85,100}) do C.Set("zoneThemeScale",v) end
+  local after=Layout()
+  Same(before,after,tag.." back at 100 %")
+  assert(FieldKitDB.zoneThemePositions==positions and tostring(FieldKitDB.zoneThemePositions)==savedBefore,tag..": saved positions untouched")
+  -- the state a rebuild would give: same as the old path
+  local viaRebuild
+  C.Suspend();C.Refresh(true);viaRebuild=Layout()
+  Same(after,viaRebuild,tag..": the light path leaves the state a full rebuild would leave")
+ end
+ -- theme off: stored, nothing painted; the next activation uses it
+ C.Set("zoneThemes",false);C.Set("zoneThemeScale",80);assert(FieldKitDB.zoneThemeScale==80)
+ C.Set("zoneThemes",true);C.Refresh(true);assert(string.find(tostring(R.canvas:GetScale()),"%d"),"scale applied at activation")
+ -- the budget: the HUD-scale change is now a normal refresh
+ BUDGET.scaleWrites=6000
+ Setup("elwynn","complete");C.Refresh()
+ local mt=getmetatable(Minimap).__index
+ local total=0;local saved={}
+ for _,name in ipairs({"SetPoint","ClearAllPoints","SetText","SetAlpha","SetTexture","Show","Hide","SetWidth","SetHeight","SetTexCoord","SetVertexColor","SetScale","SetParent","SetFrameLevel"}) do
+  local orig=mt[name];saved[name]=orig;mt[name]=function(self,...) total=total+1;return orig(self,unpack(arg)) end
+ end
+ total=0;C.Set("zoneThemeScale",90)
+ local writes=total
+ for name,orig in pairs(saved) do mt[name]=orig end
+ assert(writes<=BUDGET.scaleWrites,"a HUD-scale change now writes "..writes.." properties (budget "..BUDGET.scaleWrites..")")
+ C.Set("zoneThemeScale",100);C.Set("zoneThemes",false)
+end
+print("HUD scale: light path (no teardown, no repaint of every surface), same layout back and forth, saved positions untouched passed (synthetic)")

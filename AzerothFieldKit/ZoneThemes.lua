@@ -372,7 +372,19 @@ function C.ApplyOpacity()
  C.opacityWrites=n
  return n
 end
+-- HUD scale. The scale is read in one place only (the canvas scale in R.Update): changing it does not need the full suspension
+-- (teardown of every themed card, restoration of the native frames, repaint of all surfaces, rebuild) that C.Set performs. The
+-- placement is planned again (placed / revision, exactly what the suspension reset) and one ordinary refresh applies the new scale.
+function C.SetHudScale(value)
+ local n=FieldKit.Number(value,100,75,110)
+ if FieldKitDB.zoneThemeScale==n then return end
+ FieldKitDB.zoneThemeScale=n
+ if not C.active then return end -- theme off: stored for the next activation
+ C.placed={};C.revision=C.revision+1
+ C.Refresh()
+end
 function C.Set(key,value)
+ if key=="zoneThemeScale" then C.SetHudScale(value);return end
  local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeMapShape=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
  if key=="zoneThemeMapShape" and value~="square" and value~="round" and value~="native" then return end
