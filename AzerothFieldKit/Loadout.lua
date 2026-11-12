@@ -194,7 +194,7 @@ function L.ContentKey()
  local parts={};local n=0
  for i=1,table.getn(L.spells) do
   local e=L.spells[i];n=n+1
-  parts[n]=tostring(e.key)..":"..tostring(e.rank)..":"..tostring(e.name)..":"..table.concat(e.bonuses or {},"|")..":"..table.concat(e.upgrades or {},"|")
+  parts[n]=tostring(e.key)..":"..tostring(e.rank)..":"..tostring(e.name)..":"..tostring(e.icon)..":"..table.concat(e.bonuses or {},"|")..":"..table.concat(e.upgrades or {},"|")
  end
  for _,slot in ipairs({2,13,14,11,12}) do
   local it=L.items[slot];n=n+1
