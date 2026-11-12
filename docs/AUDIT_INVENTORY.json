@@ -54,8 +54,8 @@
       "literalEvents": []
     },
     "Diagnostics.lua": {
-      "bytes": 16348,
-      "sha256": "742e3c6208ad800187b951065abd9e4fc61c84427add84fd2d6c0bf68bf60b16",
+      "bytes": 19304,
+      "sha256": "9b15eab8eda0b5cbe84b309ec7ad35fd97721646f916d352f6b3053729a0ffa9",
       "namedFunctions": [
         {
           "name": "Say",
@@ -71,83 +71,99 @@
         },
         {
           "name": "NewOp",
-          "line": 65
+          "line": 73
         },
         {
           "name": "MemFunction",
-          "line": 71
-        },
-        {
-          "name": "SampleMemory",
           "line": 79
         },
         {
+          "name": "SampleMemory",
+          "line": 87
+        },
+        {
           "name": "D.Reset",
-          "line": 86
+          "line": 94
         },
         {
           "name": "D.Install",
-          "line": 98
+          "line": 106
         },
         {
           "name": "D.Uninstall",
-          "line": 134
+          "line": 142
         },
         {
-          "name": "D.Enable",
-          "line": 141
+          "name": "NoOp",
+          "line": 166
         },
         {
-          "name": "Blame",
-          "line": 148
+          "name": "D.Skip",
+          "line": 167
         },
         {
-          "name": "D.Tick",
-          "line": 157
-        },
-        {
-          "name": "D.Mark",
-          "line": 176
-        },
-        {
-          "name": "D.Capabilities",
+          "name": "D.Unskip",
           "line": 180
         },
         {
+          "name": "D.SkippedNames",
+          "line": 186
+        },
+        {
+          "name": "D.Enable",
+          "line": 190
+        },
+        {
+          "name": "Blame",
+          "line": 197
+        },
+        {
+          "name": "D.Tick",
+          "line": 206
+        },
+        {
+          "name": "D.Mark",
+          "line": 225
+        },
+        {
+          "name": "D.Capabilities",
+          "line": 229
+        },
+        {
           "name": "D.Snapshot",
-          "line": 189
+          "line": 238
         },
         {
           "name": "Ms",
-          "line": 198
+          "line": 247
         },
         {
           "name": "D.Lines",
-          "line": 200
+          "line": 249
         },
         {
           "name": "D.Report",
-          "line": 235
+          "line": 286
         },
         {
           "name": "D.Status",
-          "line": 239
+          "line": 290
         },
         {
           "name": "D.ReportAPIs",
-          "line": 246
+          "line": 297
         },
         {
           "name": "D.Compatibility",
-          "line": 264
+          "line": 315
         },
         {
           "name": "D.ReportCompatibility",
-          "line": 281
+          "line": 332
         },
         {
           "name": "D.Command",
-          "line": 292
+          "line": 343
         }
       ],
       "literalEvents": []
@@ -331,8 +347,8 @@
       "literalEvents": []
     },
     "Theme.lua": {
-      "bytes": 13128,
-      "sha256": "2fa2e7db33824410fac5fde29ed24d61060e2d570315d7685cfe3f681e3342c6",
+      "bytes": 14614,
+      "sha256": "542e69d7228949459b505a72b49afee292b3574b412c2f1696a7a2b572cc23d1",
       "namedFunctions": [
         {
           "name": "T.Solid",
@@ -360,43 +376,43 @@
         },
         {
           "name": "T.Font",
-          "line": 56
+          "line": 57
         },
         {
           "name": "T.Update",
-          "line": 72
+          "line": 73
         },
         {
           "name": "T.Surface",
-          "line": 105
+          "line": 106
         },
         {
           "name": "T.State",
-          "line": 128
+          "line": 134
         },
         {
           "name": "T.ChoiceLook",
-          "line": 168
+          "line": 187
         },
         {
           "name": "T.PaintControl",
-          "line": 190
+          "line": 209
         },
         {
           "name": "T.Control",
-          "line": 199
+          "line": 218
         },
         {
           "name": "T.Button",
-          "line": 206
+          "line": 225
         },
         {
           "name": "T.Glyph",
-          "line": 222
+          "line": 241
         },
         {
           "name": "T.Label",
-          "line": 229
+          "line": 248
         }
       ],
       "literalEvents": []
@@ -1553,8 +1569,8 @@
       "literalEvents": []
     },
     "Loadout.lua": {
-      "bytes": 17487,
-      "sha256": "265193b7708087cc6b4a273ec0156ab9b293b00976df7c7637009437028510d3",
+      "bytes": 19885,
+      "sha256": "044a94e24f4d3ba755200878196fdd45bf3b50da7bb6ebeb2e8c8a4e2909d507",
       "namedFunctions": [
         {
           "name": "L.Plain",
@@ -1613,24 +1629,32 @@
           "line": 171
         },
         {
+          "name": "L.SpellsChanged",
+          "line": 181
+        },
+        {
+          "name": "L.ContentKey",
+          "line": 193
+        },
+        {
           "name": "L.Scan",
-          "line": 179
+          "line": 214
         },
         {
           "name": "L.Tip",
-          "line": 241
+          "line": 289
         },
         {
           "name": "L.Attach",
-          "line": 250
+          "line": 298
         },
         {
           "name": "L.Render",
-          "line": 269
+          "line": 317
         },
         {
           "name": "L.Update",
-          "line": 324
+          "line": 372
         }
       ],
       "literalEvents": []
@@ -2916,8 +2940,8 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 30968,
-      "sha256": "e5ca2fd500f4b66590836b09ec49cdc57141f9e8edd88c1acfc54c4e151265e1",
+      "bytes": 31998,
+      "sha256": "34c15ca01ffac46a10ddc9335dfe2ad568a430e9695f778c1a7f2928ca4d016a",
       "namedFunctions": [
         {
           "name": "Themed",
@@ -2992,64 +3016,68 @@
           "line": 250
         },
         {
+          "name": "ThemedChatChanged",
+          "line": 274
+        },
+        {
           "name": "FieldKit.ApplyChatStyle",
-          "line": 267
+          "line": 283
         },
         {
           "name": "CopyButton",
-          "line": 367
+          "line": 384
         },
         {
           "name": "Clean",
-          "line": 403
+          "line": 420
         },
         {
           "name": "Capture",
-          "line": 412
+          "line": 429
         },
         {
           "name": "ImportVisible",
-          "line": 419
+          "line": 436
         },
         {
           "name": "FieldKit.ClearChat",
-          "line": 433
+          "line": 450
         },
         {
           "name": "Hook",
-          "line": 442
+          "line": 459
         },
         {
           "name": "FieldKit.ClearChatRenderHistory",
-          "line": 468
+          "line": 485
         },
         {
           "name": "FieldKit.ResizeChatPreservingHistory",
-          "line": 474
+          "line": 491
         },
         {
           "name": "FieldKit.RestoreDisplayedChat",
-          "line": 499
+          "line": 516
         },
         {
           "name": "FieldKit.RecolorDisplayedChat",
-          "line": 517
+          "line": 534
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 553
+          "line": 570
         },
         {
           "name": "OpenCopy",
-          "line": 577
+          "line": 594
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 615
+          "line": 632
         },
         {
           "name": "FieldKit.ThemeChatFont",
-          "line": 638
+          "line": 655
         }
       ],
       "literalEvents": []
@@ -3282,8 +3310,8 @@
       "literalEvents": []
     },
     "ReferenceHUD.lua": {
-      "bytes": 141840,
-      "sha256": "7c205a6cafe6483968537ddfa582a83d1575428bec56453f6fa22a7416ce1253",
+      "bytes": 142188,
+      "sha256": "34f1aa82fe87448dba03a2c31a02e9cd198e74896cce024fc8780f2098c5f69c",
       "namedFunctions": [
         {
           "name": "Short",
@@ -3735,26 +3763,26 @@
         },
         {
           "name": "Wide",
-          "line": 1609
+          "line": 1614
         },
         {
           "name": "Wide",
-          "line": 1659
+          "line": 1664
         },
         {
           "name": "R.Settings",
-          "line": 1753
+          "line": 1758
         },
         {
           "name": "R.Buffs",
-          "line": 1768
+          "line": 1773
         }
       ],
       "literalEvents": []
     },
     "ZoneThemes.lua": {
-      "bytes": 41594,
-      "sha256": "8ba65ee97e43353179990540af901765213b6ac86e2cede91491ef438122018a",
+      "bytes": 42736,
+      "sha256": "c588ceda15b16c30868d4fbc19b5b0be1e32d561c19af5a5dbf572d894a1843a",
       "namedFunctions": [
         {
           "name": "C.NormalizeScales",
@@ -3870,47 +3898,51 @@
         },
         {
           "name": "C.ApplyOpacity",
-          "line": 366
+          "line": 371
+        },
+        {
+          "name": "C.SetHudScale",
+          "line": 383
         },
         {
           "name": "C.Set",
-          "line": 375
+          "line": 391
         },
         {
           "name": "C.ToggleNativeMeter",
-          "line": 385
+          "line": 402
         },
         {
           "name": "C.Open",
-          "line": 389
+          "line": 406
         },
         {
           "name": "C.Diagnostic",
-          "line": 408
+          "line": 425
         },
         {
           "name": "Slash",
-          "line": 413
+          "line": 430
         },
         {
           "name": "C.Command",
-          "line": 421
+          "line": 438
         },
         {
           "name": "FieldKitThemeUI",
-          "line": 476
+          "line": 493
         },
         {
           "name": "Button",
-          "line": 480
+          "line": 497
         },
         {
           "name": "C.CycleElement",
-          "line": 532
+          "line": 549
         },
         {
           "name": "C.RefreshElementUI",
-          "line": 538
+          "line": 555
         }
       ],
       "literalEvents": []
