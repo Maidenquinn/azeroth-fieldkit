@@ -155,7 +155,7 @@ function C.Resolve()
  local key=FieldKitDB.zoneThemeMode
  if key=="auto" then key=type(AZS_ZONE)=="table" and AZS_ZONE.zone end
  -- Naxxramas is unfinished and deliberately unavailable in this release.
- if key=="elwynn" then return key end
+ if key=="elwynn" or (key=="naxx" and C.allowUnfinishedThemes) then return key end
 end
 function C.Suspend()
  for _,handle in pairs(C.detailHandles or {}) do handle:Hide() end
@@ -390,7 +390,7 @@ function C.SetHudScale(value)
  C.Refresh()
 end
 function C.Set(key,value)
- if key=="zoneThemeMode" and value=="naxx" then return end -- unfinished theme is gated even for saved/direct calls
+ if key=="zoneThemeMode" and value=="naxx" and not C.allowUnfinishedThemes then return end -- unfinished theme gated for players
  if key=="zoneThemeScale" then C.SetHudScale(value);return end
  local allowed={zoneThemes=true,zoneThemeMode=true,zoneThemeVariant=true,zoneThemeMinimap=true,zoneThemeMapShape=true,zoneThemeArt=true,zoneThemeOverlap=true,zoneThemeScale=true,cardOpacity=true}
  if not allowed[key] then return end
@@ -486,7 +486,7 @@ function C.Command(msg)
   end end
  elseif arg=="off" then C.Set("zoneThemes",false)
  elseif arg=="on" then C.Set("zoneThemes",true)
- elseif arg=="auto" or arg=="elwynn" then C.Set("zoneThemeMode",arg);C.Set("zoneThemes",true)
+ elseif arg=="auto" or arg=="elwynn" or (arg=="naxx" and C.allowUnfinishedThemes) then C.Set("zoneThemeMode",arg);C.Set("zoneThemes",true)
  elseif arg=="minimal" or arg=="complete" or arg=="alternative" then C.Set("zoneThemeVariant",arg)
  else
   SlashCmdList.FieldKit("");if FieldKitUI.frame then FieldKitUI.Select("look") end
