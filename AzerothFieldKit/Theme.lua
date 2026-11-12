@@ -6,9 +6,26 @@ FieldKitTheme={media="Interface\\AddOns\\AzerothFieldKit\\media\\",
  green={.61,.77,.57},red={.91,.40,.37}}
 local T=FieldKitTheme
 T.surfaces={}
+T.fonts={};T.controls={};T.zone="classic"
+function T.Solid(texture,color,alpha)
+ texture:SetTexture("Interface\\Buttons\\WHITE8X8")
+ texture:SetVertexColor(color[1],color[2],color[3],alpha or 1)
+end
+function T.SetZone(zone)
+ if not FieldKitZoneRegistry or not FieldKitZoneRegistry[zone] then zone="classic" end
+ if T.zone==zone then return end
+ T.zone=zone
+ for key,value in pairs(FieldKitZoneRegistry[zone]) do
+  if type(value)=="table" and type(T[key])=="table" then
+   for i=1,3 do T[key][i]=value[i] end
+  end
+ end
+ T.Refresh()
+end
 
 -- Display preferences affect only our material layers, never frame/text alpha.
 function T.Style(frame)
+ if T.zone~="classic" then return 3 end
  if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
  return FieldKitDB and FieldKitDB.cardStyle==2 and 2 or 1
 end
@@ -16,18 +33,40 @@ function T.Opacity(frame)
  if not frame or not frame.fieldkitSkin or not frame.fieldkitSkin.hud then return 1 end
  return FieldKit.Number(FieldKitDB and FieldKitDB.cardOpacity,100,0,100)/100
 end
+-- Panel opacity only: repaint the fill of the HUD cards. The border slices, labels and controls are not touched.
+function T.RefreshOpacity()
+ local n=0
+ for i=1,table.getn(T.surfaces) do
+  local frame=T.surfaces[i]
+  if frame.fieldkitSkin and frame.fieldkitSkin.hud and frame.fieldkitSkin.kind~="button" then T.State(frame,frame.fieldkitActive);n=n+1 end
+ end
+ return n
+end
 function T.Refresh()
+ T.gen=T.gen+1 -- zone colours / assets may have changed: every surface repaints once
  for i=1,table.getn(T.surfaces) do
   local frame=T.surfaces[i];T.State(frame,frame.fieldkitActive);T.Update(frame)
  end
+ for i=1,table.getn(T.fonts) do
+  local r=T.fonts[i];r.label:SetTextColor(r.color[1],r.color[2],r.color[3])
+ end
+ for i=1,table.getn(T.controls) do T.PaintControl(T.controls[i]) end
 end
 
 -- Keep headings and body type consistent; the native face is a safe fallback.
-function T.Font(label,size,color,heading)
- local path=T.media..(heading and "AzerothSerif.ttf" or "AzerothSans.ttf")
- local ok,result=pcall(label.SetFont,label,path,size or 14,"")
+function T.Font(label,size,color,heading,face)
+ local path=T.media..(face or (heading and "NotoSerif-Regular.ttf" or "AzerothSans.ttf"))
+ size=size or 14
+ local fit=label.fieldkitFit
+ if fit and fit.path==path and fit.baseSize==size and fit.width==label:GetWidth() and fit.height==label:GetHeight() and (label:GetText()==fit.full or label:GetText()==fit.display) then size=fit.renderSize end
+ local oldPath,oldSize,oldFlags;if label.GetFont then oldPath,oldSize,oldFlags=label:GetFont() end
+ local ok,result=true,true
+ if oldPath~=path or oldSize~=size or (oldFlags or "")~="" then ok,result=pcall(label.SetFont,label,path,size,"") end
  if not ok or result==false then label:SetFont(heading and "Fonts\\FRIZQT__.TTF" or "Fonts\\ARIALN.TTF",size or 14,"") end
  color=color or T.text;label:SetTextColor(color[1],color[2],color[3])
+ if not label.fieldkitFontRecord then
+  label.fieldkitFontRecord={label=label,color=color};table.insert(T.fonts,label.fieldkitFontRecord)
+ else label.fieldkitFontRecord.color=color end
 end
 
 -- Explicit dimensions avoid this client's custom-backdrop tiling/stretch quirks.
@@ -38,8 +77,13 @@ function T.Update(frame)
  local style=T.Style(frame)
  if skin.width==w and skin.height==h and skin.style==style then return end
  skin.width=w;skin.height=h;skin.style=style
- skin.base:SetWidth(w);skin.base:SetHeight(h);skin.grain:SetWidth(w);skin.grain:SetHeight(h)
- local c=math.min(skin.kind=="window" and 18 or (skin.kind=="card" and 10 or 6),w/3,h/3)
+ local c=math.min(T.Style(frame)==3 and 12 or (skin.kind=="window" and 24 or (skin.kind=="card" and 16 or 8)),w/3,h/3)
+ -- The corners of the zone material are cut diagonally (transparent triangles): a full-size fill would show as a dark halo
+ -- outside the gold border. In the reference style the fill covers only the INSIDE of the frame (inside the corner cut).
+ local inset=style==3 and c or 0
+ skin.base:ClearAllPoints();skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",inset,-inset);skin.base:SetWidth(math.max(1,w-2*inset));skin.base:SetHeight(math.max(1,h-2*inset))
+ skin.grain:ClearAllPoints();skin.grain:SetPoint("TOPLEFT",frame,"TOPLEFT",inset,-inset);skin.grain:SetWidth(math.max(1,w-2*inset));skin.grain:SetHeight(math.max(1,h-2*inset))
+ skin.inset=inset
  local xs,ys={0,c,w-c},{0,c,h-c}
  if style==2 then
   -- Four one-pixel solid edges; remaining ornate slices stay hidden.
@@ -67,7 +111,8 @@ function T.Surface(frame,kind,hud)
  table.insert(T.surfaces,frame)
  local color=kind=="card" and T.panel or T.background
  skin.base=frame:CreateTexture(nil,"BACKGROUND");skin.base:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
- skin.base:SetTexture(color[1],color[2],color[3]);skin.base:SetAlpha(1)
+ T.Solid(skin.base,color);skin.base:SetAlpha(1)
+ skin.selected=frame:CreateTexture(nil,"OVERLAY");skin.selected:SetPoint("TOPLEFT",frame,"TOPLEFT",3,-3);skin.selected:SetWidth(3);skin.selected:SetPoint("BOTTOMLEFT",frame,"BOTTOMLEFT",3,3);T.Solid(skin.selected,T.gold);skin.selected:Hide()
  skin.grain=frame:CreateTexture(nil,"BACKGROUND");skin.grain:SetPoint("TOPLEFT",frame,"TOPLEFT",0,0)
  skin.grain:SetTexture(T.media.."ChronicleGrain.tga");skin.grain:SetAlpha(.16)
  local cuts={0,.07,.93,1}
@@ -81,26 +126,99 @@ function T.Surface(frame,kind,hud)
 end
 
 -- Selection/hover only changes the fixed material, never allocates another layer.
+-- T.State is a pure function of: the art-only flag, active, navigation flag, the opacity (or the card's own fill alpha), the fill
+-- colour, the style and the zone/colours generation (T.gen, bumped by T.SetZone / T.Refresh). Called ~1500 times per theme
+-- refresh with the same inputs, it used to rewrite ~10 textures each time: it now returns at once when nothing changed. Choice
+-- buttons keep the full path (their label colour is also set by others).
+T.gen=T.gen or 0
 function T.State(frame,active)
  local skin=frame.fieldkitSkin;if not skin then return end
+ local fillNow=frame.fieldkitFill
+ if not frame.fieldkitChoice then
+  local m=skin.memo
+  local opacityNow=skin.kind=="button" and 1 or T.Opacity(frame);if fillNow then opacityNow=fillNow.alpha end
+  local color=fillNow and fillNow.color
+  local artNow=frame.fieldkitArtOnly and true or false;local activeNow=active and true or false;local navNow=frame.fieldkitNavigation and true or false
+  local styleNow=T.Style(frame)
+  if m and m.gen==T.gen and m.art==artNow and m.active==activeNow and m.nav==navNow and m.opacity==opacityNow and m.style==styleNow
+   and m.hasFill==(fillNow~=nil) and (not color or (m.r==color[1] and m.g==color[2] and m.b==color[3])) then return end
+  if not m then m={};skin.memo=m end
+  m.gen=T.gen;m.art=artNow;m.active=activeNow;m.nav=navNow;m.opacity=opacityNow;m.style=styleNow;m.hasFill=(fillNow~=nil)
+  if color then m.r,m.g,m.b=color[1],color[2],color[3] else m.r,m.g,m.b=nil,nil,nil end
+ end
+ -- frame.fieldkitFill = {color={r,g,b},alpha=a}: the card's own interior colour and opacity (the chat preferences), applied to the
+ -- fill and to the centre slice only; the gold border slices keep their own opacity.
+ local fill=frame.fieldkitFill
+ if frame.fieldkitArtOnly then skin.base:SetAlpha(0);skin.grain:SetAlpha(0);skin.selected:Hide();for _,part in ipairs(skin.parts) do part.texture:Hide() end;return end
  local alpha=(frame.fieldkitNavigation and not active) and 0 or 1
  local opacity=skin.kind=="button" and 1 or T.Opacity(frame)
+ if fill then opacity=fill.alpha end
+ T.Solid(skin.base,fill and fill.color or (skin.kind=="card" and T.panel or T.background))
  skin.base:SetAlpha(alpha*opacity);skin.grain:SetAlpha(T.Style(frame)==2 and 0 or .16*alpha*opacity)
  local plate=skin.kind=="window" and 4 or (skin.kind=="card" and 3 or (active and 2 or 1))
  for i=1,table.getn(skin.parts) do
   local t=skin.parts[i].texture
   if T.Style(frame)==2 then
    if i<=4 then
-    t:Show();t:SetTexture(T.bronze[1],T.bronze[2],T.bronze[3]);t:SetAlpha(alpha)
+    t:Show();T.Solid(t,active and T.gold or T.bronze);t:SetAlpha(alpha)
    else t:Hide() end
    t.fieldkitPlate=nil
   else
    if skin.kind=="window" and i==5 then t:Hide() else t:Show() end
-   if t.fieldkitPlate~=plate then t:SetTexture(T.media.."ChroniclePlate"..plate..".tga");t.fieldkitPlate=plate end
+   local asset=T.Style(frame)==3 and (T.media.."ReferenceHUD\\"..T.zone.."_material_v3.tga") or (T.media.."ChroniclePlate"..plate..".tga")
+   if T.Style(frame)==3 and i==5 then T.Solid(t,fill and fill.color or T.panel);t.fieldkitPlate=nil else if t.fieldkitPlate~=asset then t:SetTexture(asset);t.fieldkitPlate=asset end end
+   local part=skin.parts[i];local cuts=T.Style(frame)==3 and {0,12/512,500/512,1} or {0,.07,.93,1}
+   local row=part.y;if T.Style(frame)==3 and part.x==2 and part.y==1 then row=3 end
+   t:SetTexCoord(cuts[part.x],cuts[part.x+1],cuts[row],cuts[row+1])
+   if T.Style(frame)==3 and i==5 then local c=fill and fill.color or T.panel;t:SetVertexColor(c[1],c[2],c[3]) else t:SetVertexColor(1,1,1) end
    t:SetAlpha(alpha*(i==5 and opacity or 1))
   end
  end
+ T.Solid(skin.selected,T.gold);skin.selected:Hide()
  frame.fieldkitActive=active and true or false
+ if frame.fieldkitChoice and skin.kind=="button" then T.ChoiceLook(frame,frame.fieldkitSelected==true,active and true or false) end
+end
+-- Choice controls (exclusive groups and toggles marked fieldkitChoice): three clearly different states.
+--  selected = golden fill, a gold outline, the accent bar and a bright label (persistent: it never depends on the pointer);
+--  hover    = a discreet lightening only (never the selected look);
+--  normal   = the dark fill, the standard border and a legible muted label.
+-- `selected` comes from frame.fieldkitSelected, `hover` is the pointer (T.State's `active` argument), so hovering a selected
+-- choice keeps it selected and leaving a hovered one gives back exactly its own state.
+function T.ChoiceLook(frame,selected,hover)
+ local skin=frame.fieldkitSkin
+ if not skin.choice then
+  skin.choice={}
+  for i=1,4 do local t=frame:CreateTexture(nil,"OVERLAY");T.Solid(t,{1,.82,.35});t:Hide();skin.choice[i]=t end
+ end
+ local w,h=frame:GetWidth(),frame:GetHeight()
+ if skin.choiceW~=w or skin.choiceH~=h then
+  skin.choiceW=w;skin.choiceH=h
+  local e={{2,2,w-4,2},{2,h-4,w-4,2},{2,2,2,h-4},{w-4,2,2,h-4}}
+  for i=1,4 do local t=skin.choice[i];t:ClearAllPoints();t:SetPoint("TOPLEFT",frame,"TOPLEFT",e[i][1],-e[i][2]);t:SetWidth(math.max(1,e[i][3]));t:SetHeight(math.max(1,e[i][4])) end
+ end
+ local base=selected and {.34,.25,.05} or (hover and {.2,.19,.14} or nil)
+ if base and not frame.fieldkitArtOnly then T.Solid(skin.base,base);skin.base:SetAlpha(1) end
+ for i=1,4 do if selected and not frame.fieldkitArtOnly then skin.choice[i]:Show() else skin.choice[i]:Hide() end end
+ if selected and not frame.fieldkitArtOnly then skin.selected:Show() end
+ if frame.fieldkitLabel then
+  if selected then frame.fieldkitLabel:SetTextColor(1,.94,.66) elseif hover then frame.fieldkitLabel:SetTextColor(.95,.85,.55) else frame.fieldkitLabel:SetTextColor(.8,.7,.45) end
+ end
+end
+
+-- Retain legacy widget input/checked/value behavior; only its material changes.
+function T.PaintControl(control)
+ if control.kind=="slider" and control.frame.SetThumbTexture then
+  control.frame:SetThumbTexture(T.zone~="classic" and (T.media.."ReferenceHUD\\"..T.zone.."_thumb_v3.tga") or "Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+  if control.frame.GetThumbTexture then
+   local thumb=control.frame:GetThumbTexture();if thumb then thumb:SetVertexColor(1,1,1);if T.zone~="classic" then thumb:SetWidth(26);thumb:SetHeight(26) end end
+  end
+ end
+ T.State(control.frame,false)
+end
+function T.Control(frame,kind)
+ if frame.fieldkitControl then return end
+ frame.fieldkitControl={frame=frame,kind=kind};table.insert(T.controls,frame.fieldkitControl)
+ T.Surface(frame,"button");T.PaintControl(frame.fieldkitControl)
 end
 
 -- Native legacy Button with its own visible label; no red template underneath.

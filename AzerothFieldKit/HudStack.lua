@@ -118,6 +118,7 @@ function S.FinishDragging()
 end
 
 function S.Apply()
+ if FieldKitZoneThemes and FieldKitZoneThemes.active and not FieldKit.layoutEditing then return end
  if not S.root then return end
  if not FieldKitDB.linkLeftCards then
   if S.linked then

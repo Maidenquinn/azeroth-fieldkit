@@ -24,7 +24,7 @@ local extra={
  "combatTextGroup","combatTextHealing","combatTextOutgoing",
  "combatTextIncoming"
 }
-local tableKeys={
+local tableKeys={"zoneThemePositions","zoneThemeElementScales",
  "frameAnchors","pos","collapsedWindows","cardSizes","onTopWindows",
  "shownStats","meterHiddenRows","combatEvents","combatProfiles",
  "worldMarkerSettings","chatAnchor"

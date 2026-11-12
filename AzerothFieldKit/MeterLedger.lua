@@ -507,8 +507,9 @@ function L.Read(view)
  local healPersp=(FieldKitDB and FieldKitDB.meterHealDone) and "performed" or "received"
  if view=="kills" then
   local out,total={},0
+  local localized={};local snap=Snapshot("damage","self","run","source");if snap then local native=RowsFromSnap(snap);for _,row in ipairs(native) do if row.icon then if localized[row.icon] and localized[row.icon]~=row.name then localized[row.icon]=false else localized[row.icon]=row.name end end end end
   for name,count in pairs(kills) do
-   table.insert(out,{name=name,dmg=count,dps=nil,share=nil,proc=0,kills=count,icon=IconOf(name)})
+   table.insert(out,{name=name,displayName=localized[IconOf(name)] or FieldKit_L(name),dmg=count,dps=nil,share=nil,proc=0,kills=count,icon=IconOf(name)})
    total=total+count
   end
   for i=1,table.getn(out) do if total>0 then out[i].share=out[i].dmg/total end end
@@ -524,7 +525,7 @@ function L.Read(view)
     local src=row.source or row[1];local dmg=Num(row.dmg or row[2],0)
     if type(src)=="string" and dmg then
      -- Same as AZS Spell Meter: per-source DPS = amount / run clock.
-     table.insert(out,{name=TAKEN_NAMES[src] or Text(src,80) or src,dmg=dmg,dps=dmg/t,source=src,share=nil})
+     table.insert(out,{name=TAKEN_NAMES[src] or Text(src,80) or src,displayName=FieldKit_L(TAKEN_NAMES[src] or Text(src,80) or src),dmg=dmg,dps=dmg/t,source=src,share=nil})
      sum=sum+dmg
     end
    end

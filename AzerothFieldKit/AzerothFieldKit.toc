@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Title: Azeroth FieldKit
-## Version: 0.5.0
+## Version: 0.6.0
 ## Author: Kevin Radlowski (Maidenhead); derived from MASH by Malk
 ## Notes: Azeroth Survivors helper (/fieldkit): elite-only nameplates, chronicle boss bars + schedule timeline, health bar with shield, buffs and low health warning, crits, stats, gold and chest price, accessories, tabbed meter with sort/hide/heal done-recv/party drill/pet DoT tips, chests on the minimap, lairs, camera.
 ## SavedVariables: FieldKitDB
@@ -12,6 +12,7 @@ Profiles.lua
 Localization.lua
 InterfaceStrings.lua
 Theme.lua
+ZoneThemeRegistry.lua
 Seed.lua
 PortraitCatalog.lua
 Portraits.lua
@@ -25,6 +26,7 @@ BossTimeline.lua
 HudStack.lua
 CardLayout.lua
 Coop.lua
+GroupHistory.lua
 PartySync.lua
 PartyDetails.lua
 ScreenLayers.lua
@@ -44,3 +46,9 @@ WorldMarkers.lua
 CombatText.lua
 CombatOptions.lua
 CopyLog.lua
+ThemeMinimap.lua
+ThemeHUD.lua
+ThemeTarget.lua
+ReferenceArt.lua
+ReferenceHUD.lua
+ZoneThemes.lua

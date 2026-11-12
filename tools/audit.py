@@ -23,6 +23,12 @@ for name in loaded:
  assert b'\r' not in raw,'Normalize runtime text to LF before verification/packaging'
  assert '--[[' not in text and '[[' not in text,'Update tokenizer before adding long literals'
  code=tokens.sub(' ',text)
+ # An unknown backslash escape in a Lua 5.0/5.1 string silently drops the backslash: "ReferenceHUD\map.tga" names a file that does not
+ # exist ("ReferenceHUDmap.tga") and the texture is simply never drawn (the round ring of alpha.43-alpha.45). String literals are checked.
+ strings=re.compile(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'')
+ for lit in strings.finditer(tokens.sub(lambda m: m.group(0) if m.group(0)[0] in '"\'' else ' ',text)):
+  bad=re.search(r'\\(?![ntrabfv"\'0-9\n])',lit.group(0).replace('\\\\',''))
+  assert not bad,(name,'invalid escape in a string literal (Lua drops the backslash)',lit.group(0)[:70])
  identifiers=set(re.findall(r'\b[A-Za-z_]\w*\b',code))
  allowed={'SendAddonMessage','AZS_SetOnTopOfScreens'} if name=='Runtime.lua' else set()
  assert not identifiers&(forbidden-allowed),(name,identifiers&(forbidden-allowed))
@@ -57,6 +63,12 @@ for p in sorted(root.rglob('*'),key=lambda p:p.relative_to(root).as_posix()):
  if p.suffix=='.tga':
   raw=p.read_bytes();width,height=struct.unpack_from('<HH',raw,12)
   allowed_sizes=((128,128),(256,256))
+  if relative in ('media/ZoneThemes/elwynnOrnaments512.tga','media/ZoneThemes/naxxOrnaments512.tga','media/ZoneThemes/elwynnDock512.tga','media/ZoneThemes/naxxDock512.tga'):
+   allowed_sizes=allowed_sizes+((512,256),)
+  if relative in ('media/ZoneThemes/elwynnFrame512.tga','media/ZoneThemes/naxxFrame512.tga'):
+   allowed_sizes=allowed_sizes+((512,512),)
+  if relative.startswith('media/ReferenceHUD/'):
+   allowed_sizes=tuple((w,h) for w in (1,2,4,8,16,32,64,128,256,512) for h in (1,2,4,8,16,32,64,128,256,512))
   if relative.startswith('media/ChroniclePremium/'):
    allowed_sizes=allowed_sizes+((310,55),(512,128))
   assert raw[1]==0 and raw[2]==2 and raw[16]==32 and (width,height) in allowed_sizes,(relative,width,height)

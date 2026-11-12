@@ -1,5 +1,5 @@
 {
-  "design": "Chroniques d’Azeroth; maintained Azeroth Stats visual system",
+  "design": "Chroniques d\u2019Azeroth; maintained Azeroth Stats visual system",
   "source": "maintainer-provided installed Azeroth Stats media, 2026-10-27",
   "fonts": "Noto OFL derivatives; included OFL-NotoSans.txt applies to both Latin faces",
   "files": {
@@ -102,6 +102,774 @@
     "media/ChronicleGlyph16.tga": {
       "sha256": "ea117d4d4c7d485b6ba06f9fe445d465d093e1092e874cef95fef62024881141",
       "bytes": 262188
+    },
+    "media/ZoneThemes/elwynnOrnaments512.tga": {
+      "sha256": "7d57b8ae6f6f5014300d5d546b2c956d03e4e51146a8e244f2a989147e0bcc3e",
+      "bytes": 524332,
+      "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
+      "sourcePngSha256": "865100f15c14bdd6fa8a220ee10869024c4c12fe135c08ddd5cff857ae625118"
+    },
+    "media/ZoneThemes/naxxOrnaments512.tga": {
+      "sha256": "333f1400a7d967284d7a4de5e60fe47b71f7f8f63133d90e1c6ad875e20d9a3a",
+      "bytes": 524332,
+      "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
+      "sourcePngSha256": "ace5064fb783d268a39e8a3bda377ce3d28d3b851e3e421dd94bfc585e32403c"
+    },
+    "media/ZoneThemes/elwynnFrame512.tga": {
+      "sha256": "3b21f5dd7329c259b2fa41e5b7f7043acf6fdc99a488f0bb7030629396b91e0f",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "786c887da18055f833209943f79d1895d1c967e8d53045c689e65ad494363779"
+    },
+    "media/ZoneThemes/naxxFrame512.tga": {
+      "sha256": "5ea0106e01c37fabdffffa686d0708c929726391e40b1590d93f0a879a5c9fd4",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "950662bfe3ef4689a8e83c7c5a3d530606a9d8439c49ebcef0bf7fc86ac61346"
+    },
+    "media/ZoneThemes/elwynnDock512.tga": {
+      "sha256": "010e06afb52e6e2dfbe433360e836a6e310e5873c2ab8dfc6c1cab5f56d1d478",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "86b7c81351a75ffe8131f51b880d8d2b7c6a99acdeac51c36187b7600cf69115"
+    },
+    "media/ZoneThemes/naxxDock512.tga": {
+      "sha256": "c4d9890ed54c110aea19012a05ab6dad68bd6dcd38d6171ac67db9f6d2274365",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "af7c6a12761a96e44dceb0b1571a120f6e6db3f851920633ed04ae850e727d60"
+    },
+    "media/ReferenceHUD/elwynn_complete_identity_1.tga": {
+      "sha256": "34c40c902fd0607f037047a5f3fc2307fcdc7701a1fe872692ac1d419f3e217e",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_header_1.tga": {
+      "sha256": "7fa078021a835e1e09d09c278eb676d303348b6b9e20907fad682fa9789bb1e2",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_header_2.tga": {
+      "sha256": "cacf22de22d57ef2e1834104c2334d60e78036bf1c02fa1ffbd86561c795f7d9",
+      "bytes": 32812,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_vitality_1.tga": {
+      "sha256": "5c270699f94d0cc67c481e194cb1dee65f4754e82827842db08f2c7c6d60f0c3",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1.tga": {
+      "sha256": "ce62a4d0ab5bb66de0f6b9978902c0a0f16565aa3bf14e855da0bf57539bd7e5",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1.tga": {
+      "sha256": "5e8c45aaf24e3c1f23774f488119404a819066cd3fbae1b9379c18cd7281d516",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Accessories_1.tga": {
+      "sha256": "69dc996194b0755515b228a55a89a827302eef087daa337d30d46f63486aa534",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1.tga": {
+      "sha256": "d8f39964bf02d8a5ad6b2bd4b4b6dbaf991cbb548d72447eb4c744f8b6312659",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1.tga": {
+      "sha256": "fa07d867b03e594df542595d026f366020890c74d4ce2c90732a1783118438e1",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_dock_1.tga": {
+      "sha256": "666c56d0ed23d92fc7792cc15821adfe0538b8e3ab4477994482aea3e5e4c306",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_dock_2.tga": {
+      "sha256": "98ac1938b7c65cdabd50db30ea63d9c419ab490631420005e43f15d7a87884bf",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_dock_3.tga": {
+      "sha256": "04f9ef075c50d93e29a105cc049d7c1384621c44f98e4d2a91ae710aa51e08ad",
+      "bytes": 16428,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_chat_1.tga": {
+      "sha256": "8a942d7e406f99627312454b4c26ed0850cdd73c4b223a7cc7408832e564293f",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_nav_1.tga": {
+      "sha256": "7fdb13fe86a2c1a891868d63d337dd778d88941737ecd03ce12503aa292e5460",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_minimal_identity_1.tga": {
+      "sha256": "feac18cbc1208ddd7a4de415918d86ac326473277afd123418be9d5bb7c4eb49",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_header_1.tga": {
+      "sha256": "99951cf23029edea03aa88df65476328f00ecf541bb005ebb5aa7831b4cff003",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_header_2.tga": {
+      "sha256": "9fa5ed4f2401c46b5359f61c445b2e02107fde745afbadb75e87fab7033dbd34",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_vitality_1.tga": {
+      "sha256": "6dd2f4b85b3caa9aaafe8c9d8bcfffb1bc3418914b60b6bb63efb73d12cbfe71",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_dock_1.tga": {
+      "sha256": "a53594002a61cbf9b3cfc86856f0427a072f20ba317e02e3dacb84047fefbc9e",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_dock_2.tga": {
+      "sha256": "f693d95fc45c8c041604ead82ee3c0a1f86133bd77f56367b8f99315ca5acba2",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_chat_1.tga": {
+      "sha256": "03dfff98afbf7b3c4e7ecec5303cefa9781e9e32050ba4106e2648a1a3061c87",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_utility_1.tga": {
+      "sha256": "cea86e4e322cb5246d63a5141af65d53c85ce209c05177ff3e823031362137a1",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_nav_1.tga": {
+      "sha256": "b0cbfed0520c3d84b17ba1ee20cceff3f6812e3b2d6510ffb392313f38858b8b",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_mapArt_1.tga": {
+      "sha256": "3a7141380bee2b04811cc440e52b99b05a2cab032fbc25d64e14fc93b66ee781",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/naxx_complete_identity_1.tga": {
+      "sha256": "285117b9bccaf27d69ba61ed002d0fe7f323c89b29e37ed02d8458808913f3ac",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_header_1.tga": {
+      "sha256": "49824992c23511e27495ceaaa2f967060b580055dacd637b87b50cdd768f5881",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_header_2.tga": {
+      "sha256": "8e0a36f2d2c727401cfba84e24c4704a140f5fa53a63068cd5f167bb2d670715",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_vitality_1.tga": {
+      "sha256": "a09ccd3c84aecd22aec8dfca0e91f1714b9aa08c6e5d6be1c04b98cba3eff48f",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_vitality_2.tga": {
+      "sha256": "c193837dc1f32f6edd9459ab6862b768fb8188d09f0ba98424135f143f91fcf2",
+      "bytes": 4140,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_dock_1.tga": {
+      "sha256": "fcc48f7122cc6c6bfe33a86d42165143b52340af5ef4181e88fba4ff1cf1c443",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_dock_2.tga": {
+      "sha256": "df89774c27f8826b3c64ec595eebf735081355936176e5d0a327201f0d55671f",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_dock_3.tga": {
+      "sha256": "5e691759ec5ec73405f2eaf47deb58bb4071c72cc9c3d7e38c8fc468a6e3c971",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_chat_1.tga": {
+      "sha256": "5dead8308521bebec6d52a9bf907c33ce8be1c57e889491d0207716fb4ab53a2",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1.tga": {
+      "sha256": "c420985d79ebdcb7b8880df29203e4ffb81c6181e7f0853be3a0b9d4dbef6241",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1.tga": {
+      "sha256": "7a75887440132a57e69c941cb77e43171ca6e674b073093bba6c150a36c9f71a",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Accessories_1.tga": {
+      "sha256": "f87bf1b1a6ad9bae717999b5574cee0829fdc9bd83945f796ec34950849662bd",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1.tga": {
+      "sha256": "330550d5003f629aafccc77c3094c2fb818348425c3b49320129b2d1a9e8cdf7",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1.tga": {
+      "sha256": "e9634d5c0f25d4e6b4e8b68deffd2b2214b79f1c259cc70a3b910e4450209e92",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_mapArt_1.tga": {
+      "sha256": "5e3b615fc7c2509cd08743e078eedc0894520ca00ec39169177599c348f821a5",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/NotoSerif-Regular.ttf": {
+      "sha256": "c8f669ceb2c9c60ccf55198b305e08a997ffca79a38cc7eeb551e643cbe66505",
+      "bytes": 616196,
+      "source": "https://github.com/notofonts/noto-fonts/blob/main/hinted/ttf/NotoSerif/NotoSerif-Regular.ttf",
+      "license": "Unmodified Noto Serif Regular, SIL OFL 1.1; existing media/OFL-NotoSans.txt is the identical upstream license."
+    },
+    "media/ReferenceHUD/elwynn_settings_window_1.tga": {
+      "sha256": "4214ada040d88e2864fb6c0a2371edc2fe1f68d7f24decd3dd8151bb7ee32dd3",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_2.tga": {
+      "sha256": "f821ca97fdb4010ed8cb5fa9d8e1138f20e0c886bc3c2f8608caa8c256014bb8",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_3.tga": {
+      "sha256": "06849656b22934fdeb79c9ad3031c7bf0029818442f89001bdd677516182f445",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_4.tga": {
+      "sha256": "8d0c26a9d88422e3fff8809b8e9203e37c7f0a15cf1d07581b35373cf85df4fa",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_5.tga": {
+      "sha256": "f3914397cf73952a94158fbd5e3cabdcb3a8008833feb4924e89fb4fdc96fb71",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_6.tga": {
+      "sha256": "e7a40d017dd50f88de3796c85f52ffafe23281174ee0b12a898a1ac61bafc792",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/naxx_settings_window_1.tga": {
+      "sha256": "b0ef8eb479768a6ce5d7aea61d28ec09e85e279c780064360dd0f9fc1224e680",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_2.tga": {
+      "sha256": "cc23e320981ccdbe3cc0b071ed0cb6601e34b657c84a74163d260d2e56957b84",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_3.tga": {
+      "sha256": "5b7a625686722e06c896c188a2b0a0085edefb3b9667403b61efa8db5080bb8b",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_4.tga": {
+      "sha256": "0c4696ead2a14c4d1c5ac4fc7a84b287bad1d1f9a931996affc6972aeb5ead24",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_5.tga": {
+      "sha256": "70b451e799d2b7e7fd9bec179e364dc9954de01e20951fa2b4b892833cad372d",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_6.tga": {
+      "sha256": "fe126833f86a09e819ad632538cbddf7c81f5fb7bca8e90c065adf74811cee16",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/elwynn_minimal_preview.tga": {
+      "sha256": "067e45c6bf119a084c82ffaea91793b3eb8962e54c8620cd3e8871f88f559b98",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/elwynn_complete_preview.tga": {
+      "sha256": "623c2111368dd06aa3033ad23f314c777170f45dad69a516565fd6cdd086f6bd",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/elwynn_alternative_preview.tga": {
+      "sha256": "064c40bd05b3e87b3f8f5f08ea64102fda9bde4ac7a5103745c67a36b01271a0",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/naxx_minimal_preview.tga": {
+      "sha256": "c2cab6e7780828370c9d32bab971881ac0a1e16863fd8ac373e8157bb587070c",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/naxx_complete_preview.tga": {
+      "sha256": "16c624f6763e3ae193208e72d5de48029ea988292e8237d4e9e457836533ee1e",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/naxx_alternative_preview.tga": {
+      "sha256": "44be706a7976de1fa321f03d9a6708b43d68312fc0e84804712ef48f504372c7",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/elwynn_material_v3.tga": {
+      "sha256": "7a885080573195b3b77bc22c40395051ae00931770f7f389f9b3b3cf942cb05a",
+      "bytes": 1048620,
+      "source": "Mechanical nine-slice packing of the approved equipment-panel perimeter; live widgets supply all labels and values."
+    },
+    "media/ReferenceHUD/naxx_material_v3.tga": {
+      "sha256": "90bb25548996a990fb6a037e9d3e037a379bbfcde3d3646d3d06a27b4eecccc9",
+      "bytes": 1048620,
+      "source": "Mechanical nine-slice packing of the approved equipment-panel perimeter; live widgets supply all labels and values."
+    },
+    "media/ReferenceHUD/naxx_minimal_identity_1_v3.tga": {
+      "sha256": "ec47afdf8e79d27571927c582fc5657ee02da0f509faccef5972bcdb4b69a700",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_header_1_v3.tga": {
+      "sha256": "b5ec26d3a03b36d1a60a275e613e63562ab991a044eeaf08f4a5bf1f6336d6f5",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_header_2_v3.tga": {
+      "sha256": "025f9821dfeb02696e66deed5a081e92de0c67120a2e1c5645078365fe74adf9",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_vitality_1_v3.tga": {
+      "sha256": "35650ed3917f73b1445aeef63bbc73204bb21b33ab038371279af55792fc663b",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_vitality_2_v3.tga": {
+      "sha256": "7ee83f5047eb72e9204a8100acd7a187aca7e1972c31336a4b7c14faf1034a92",
+      "bytes": 32812,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_dock_1_v3.tga": {
+      "sha256": "1d6fe193e5f108a3a9601c2715f68ef099933a72dc4aef52c0d2c657976e5edd",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_dock_2_v3.tga": {
+      "sha256": "2f2d2c4ffed0ee2f0ad043ec589a70eebde2f558e1f08285d908304fad0ad88e",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_dock_3_v3.tga": {
+      "sha256": "91d13a3dbceba3e50c6161d3b8fa1009e34159eff232b12ff9d9d50a617cdf79",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_chat_1_v3.tga": {
+      "sha256": "650b2fabd13d8f6dc747e57a46f6021d1ba9041d6323333d5204c9f4e7218205",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_nav_1_v3.tga": {
+      "sha256": "b35b14583e134c4d1bb79c2f5dccb20a12e62c184eede5504e655fcc80c81fb4",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_mapArt_1_v3.tga": {
+      "sha256": "97bfe59baa604bba2bffa794cb637b9de1b07c96eb3d16f5198738a9d66488f3",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/elwynn_seal_v3.tga": {
+      "sha256": "91dcec857fb2abc912670e03860cc801863f9eeefe8b2111beebebe599037e54",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/naxx_seal_v3.tga": {
+      "sha256": "f74e7c323495edb289b34f5d096a4675f3d11c0c1f052966a68fd30357016c98",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/elwynn_thumb_v3.tga": {
+      "sha256": "c92b98d5799d16731d9215f0bdd8c37afcf99d9484868fa6e732cbc1735e3da8",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/naxx_thumb_v3.tga": {
+      "sha256": "aa56fe48161ff9f89ac3ab1dc948a6c4569b74e2581cb91f231b770a813bee44",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/naxx_alternative_identity_1_v3.tga": {
+      "sha256": "6ecf4b88fc7d09fa3da27c358f7b8c0648dd6c77fe33176bd201a93ea62c0b19",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_header_1_v3.tga": {
+      "sha256": "2f8fb4065370652976866c640f9aba393136c383bad9f8051433449bb3f2b4fa",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_vitality_1_v3.tga": {
+      "sha256": "ec97a3ed1d1b5f3533dc8f78162453af1cc757cf5b47de955487626e5bc1b435",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_dock_1_v3.tga": {
+      "sha256": "a59827082f249fca253af45dab8b0da160f0333693b460c3769e99afd8e64833",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_dock_2_v3.tga": {
+      "sha256": "3bc44e436e5aa9eac07429671dab55c615d04b75fdb79931f44b93b1b7739b79",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_dock_3_v3.tga": {
+      "sha256": "2d1f80db6e210bc827e8a53829f8a712dd89ea35f58dc1848263b9db0b8f9474",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_chat_1_v3.tga": {
+      "sha256": "fd7d1d22fa52312081e611927eff958d2b6d50b2b13d8a608e8bca49407d44fa",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_nav_1_v3.tga": {
+      "sha256": "6af6091eda816535cbec7858eede0723c4f2b17e8721c05c019c2d1af333e73a",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_1_v3.tga": {
+      "sha256": "4c3c88f7a6df03ddcdb76cf5944fc1bd198c67ff5c153223469f5f0bd3507eb1",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_2_v3.tga": {
+      "sha256": "f89dc728b69d7ea732526f701c6b15e9c81be90a73752afa0109cc51ac1caa0b",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_3_v3.tga": {
+      "sha256": "bffa1c71187660126bc0b0ab34b30ce208c88c63a0b5b1e0d695cde0ef525ce3",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_4_v3.tga": {
+      "sha256": "ef5037dbb505af18ff435f8544a93cfe7a23dc6e9c4d198913cf377f1eaf71e0",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpBadge_1_v3.tga": {
+      "sha256": "3447b28a893e7d11ad66d2a09049928a61d565dd6e50c7ddb127c0b7f7645555",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/elwynn_alternative_identity_1_v3.tga": {
+      "sha256": "79f64c1b362febcdcf82179b966235af5ee3121610588bd2bed18fcf7df5f33d",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_header_1_v3.tga": {
+      "sha256": "e05ef748cb4eadf1dfd371a7699ce2198cc7ea545c10b7f88f4400e768b39d59",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_vitality_1_v3.tga": {
+      "sha256": "99b07cafe5ea9ee59c6924158b87df9245427f2792e91fcfb610096a47aec673",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_vitality_2_v3.tga": {
+      "sha256": "d38b5e01779659a1a7ce6a9aa5e6fab96cd93f91738e774204761c2621943615",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_dock_1_v3.tga": {
+      "sha256": "3e1f4a69409135402aeaa2741db54b64d3bd01169fe73f324ea0ed7908de7c41",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_dock_2_v3.tga": {
+      "sha256": "6293e8628092ecf0e85db69afc22d22ac3be7fc5b6cdd44783559be886336a08",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_dock_3_v3.tga": {
+      "sha256": "cd6062fc8147649d69cd9fd388b1a8e508e649ec7f117034441dbd9b1f3b710a",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_chat_1_v3.tga": {
+      "sha256": "7dff611769467914b35aacd6aece390d4b5624ae20ae92afc8e69736c1c96680",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_nav_1_v3.tga": {
+      "sha256": "243647e78c99934877ec6d94530e831f175e572b8c6dbc6368f5b1323ce76c1d",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_nav_2_v3.tga": {
+      "sha256": "353fdc2cc7448be189d6ea4b55f91132c3ea89ef5a33e9567e845626c746f945",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_mapArt_1_v3.tga": {
+      "sha256": "d590c583f0d5e971c5e8105924913f0d19b32721445ef25c0d51c6eea31a82f5",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_1_v3.tga": {
+      "sha256": "68b36f3cbad3cd7038aea38ca40c0e03a234721a7e239cb32d9cc9e0dbc90147",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_2_v3.tga": {
+      "sha256": "443664f4d8516d7e6fe5b0b9c41d9fdd42e35666ff2fe72c9b219120e5cee861",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_3_v3.tga": {
+      "sha256": "35fe5602f1169888fad7fde0370a566a3cacaa996ffea25eb6bb529fd95a8c06",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_4_v3.tga": {
+      "sha256": "6ddc1b6a9c0994d7d83e1a868b826ab9833fdaab4981df92c055cfa9cf397fc5",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpBadge_1_v3.tga": {
+      "sha256": "9b9b46f1455045444b301bbcba1bc43ff4eaacd08840c66d9b67809f90acf669",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_card_body_v9.tga": {
+      "sha256": "8ef3e1833370f968369a7bf9000f88af8d642c8dc9eeb9d1a72d6766d96a812b",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/naxx_card_body_v9.tga": {
+      "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/elwynn_complete_vitality_slot_overlay.tga": {
+      "sha256": "091f7d7d963985dbca18f11474eec1a344641e4feb3a6bf11a20c34fa48d8696",
+      "bytes": 32812,
+      "source": "Pixels of the approved elwynn_complete_vitality_1 art (slot ring, unchanged); the slot interior is made transparent by tools/build_bar_slot_overlay.py."
+    },
+    "media/ReferenceHUD/map_round_ring.tga": {
+      "sha256": "598d6fc9b793796ea3954f0b58f5fc154ac5e34553fb2c0e63b99df25256b7e9",
+      "bytes": 262188,
+      "source": "Generated by tools/build_map_round_ring.py: Elwynn ring (directional bevel, beaded engraving, dark groove, green band, gold line, four studs); colours sampled from the approved Elwynn frame art; no original art is altered."
+    },
+    "media/ReferenceHUD/elwynn_complete_Accessories_1_frame.tga": {
+      "sha256": "2948a68f75e9903c82bda410fc5b7602e26f4a69f70b47dfc12c5e20c36c15bf",
+      "bytes": 524332,
+      "source": "Frame matte of elwynn_complete_Accessories_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1_frame.tga": {
+      "sha256": "96d02e23b7c530e0e67c58ff04aebaff63d8166fb0f480bded4894ff82d48ac3",
+      "bytes": 1048620,
+      "source": "Frame matte of elwynn_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1_frame.tga": {
+      "sha256": "039a642aa74cd6559b58d20851e9682edd997b606c9e1cf0460a21769d600223",
+      "bytes": 262188,
+      "source": "Frame matte of elwynn_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1_frame.tga": {
+      "sha256": "78f7af712a2700461536ac8a408d7d19003fbd7999a4d713eba3a20cbf759e78",
+      "bytes": 524332,
+      "source": "Frame matte of elwynn_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1_frame.tga": {
+      "sha256": "7f9aaf4ee1503103ded40689284363ea0787b62a957c621225189cb44cfe2212",
+      "bytes": 524332,
+      "source": "Frame matte of elwynn_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Accessories_1_frame.tga": {
+      "sha256": "06cda36efc1ca9d0203b7336153f02caa7782d4d143ff8d75fb8939592fd2f07",
+      "bytes": 524332,
+      "source": "Frame matte of naxx_complete_Accessories_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1_frame.tga": {
+      "sha256": "90b8fbc12bb8e35edd0c19b3138d5e1aeb298348bc2dff2d168d2d4cd8858466",
+      "bytes": 1048620,
+      "source": "Frame matte of naxx_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1_frame.tga": {
+      "sha256": "2b31161c3d03a18e498cbf2c97d2de6e69d89e16deb7afd3725d7068e3717fb8",
+      "bytes": 262188,
+      "source": "Frame matte of naxx_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1_frame.tga": {
+      "sha256": "24e62d35ecdf5802567405a7e0836855f34c2f351c04046610b80037a09811a1",
+      "bytes": 524332,
+      "source": "Frame matte of naxx_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1_frame.tga": {
+      "sha256": "1f2bba6bff44292618d0ecd990530665c00a235b3b591b1ddffbaebe81974835",
+      "bytes": 524332,
+      "source": "Frame matte of naxx_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1_body.tga": {
+      "sha256": "b24e6cb5b8787821e1ff3258a6e568e4c5121e6bd5c62943137612e35dfabf5f",
+      "bytes": 1048620,
+      "source": "Body tile of elwynn_complete_Damage_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1_body.tga": {
+      "sha256": "0fb18fa63c8e2aebe0fd241166e071b57ef69db9f255ac9e009d1429d3ee6c72",
+      "bytes": 262188,
+      "source": "Body tile of elwynn_complete_Effects_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1_body.tga": {
+      "sha256": "9b45ada4d3eedc2e05163300f0092e8de7d5b76bd55096cc23fdc4ebb28fd474",
+      "bytes": 524332,
+      "source": "Body tile of elwynn_complete_Lairs_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1_body.tga": {
+      "sha256": "8f90e551008ea0550c7651e6fa74b29ae4e6b841728e69876cd61953e12010c6",
+      "bytes": 524332,
+      "source": "Body tile of elwynn_complete_Stats_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1_body.tga": {
+      "sha256": "78689fee8fe7f7eabd633385463184f08e93ea5077b405c6d9aec9b30ee0d38d",
+      "bytes": 1048620,
+      "source": "Body tile of naxx_complete_Damage_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1_body.tga": {
+      "sha256": "4733253d561929e18121b1f94bb44960f03369ed1ecb109bcfe6740e15e1f005",
+      "bytes": 262188,
+      "source": "Body tile of naxx_complete_Effects_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1_body.tga": {
+      "sha256": "32ebca66e0cc1d8f16f937b4f37031a2532c5b1259186e6cb996a0410721162e",
+      "bytes": 524332,
+      "source": "Body tile of naxx_complete_Lairs_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1_body.tga": {
+      "sha256": "e2d564307c0f1d2d8c48b5892b4c88dc4d4fa454a982f60c14ec960f9cc5cbe4",
+      "bytes": 524332,
+      "source": "Body tile of naxx_complete_Stats_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/map_round_medallion.tga": {
+      "sha256": "7ce77c1d93400b363ac0d828ed78ab08020c684d063a43b6070918cff5558042",
+      "bytes": 1048620,
+      "source": "Generated by tools/build_map_round_ring.py: Elwynn round-map medallion (ring with its header and foot banners cut like the zone material corners) in one 512x512 texture; ring centre (256,256), opening radius 113, banners 224x32 centred on radius 121."
+    },
+    "media/ReferenceHUD/elwynn_banner.tga": {
+      "sha256": "0608977aa53b1b0ac6b671f5650f2c42192a5187b42dfb6d2053a7cbe635c1f5",
+      "bytes": 32812,
+      "source": "Pixels of the approved elwynn_complete_Effects_1 card frame (four corners and a plain stretch of the top and bottom edges), packed without resampling by tools/build_native_banner.py."
     }
   }
 }

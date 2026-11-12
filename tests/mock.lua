@@ -7,7 +7,13 @@ objects={}
 local methods={}
 function methods:SetScript(k,v) self.scripts[k]=v end
 function methods:GetScript(k) return self.scripts[k] end
+function methods:Click(button)
+ local previous,previousButton=this,arg1;this=self;arg1=button or "LeftButton"
+ if self.scripts.OnClick then self.scripts.OnClick() end
+ this=previous;arg1=previousButton
+end
 function methods:RegisterEvent(k) self.events[k]=true end
+function methods:UnregisterEvent(k) self.events[k]=nil end
 function methods:GetName() return self._name end
 function methods:GetObjectType() return self.kind end
 function methods:SetWidth(v) self.width=v end
@@ -50,6 +56,11 @@ function methods:GetChecked() return self.checked end
 function methods:SetParent(p) self.parent=p end
 function methods:GetParent() return self.parent end
 for _,k in ipairs({"SetFont","SetTextColor","SetJustifyH","SetTexCoord","SetFrameStrata","SetStatusBarTexture","SetStatusBarColor","SetMinMaxValues","SetMovable","RegisterForDrag","EnableMouse","SetBackdrop","SetBackdropColor","SetBackdropBorderColor","SetVertexColor","SetBlendMode","Enable","Disable","SetClampedToScreen","SetHitRectInsets","SetValueStep","SetNormalTexture","SetPushedTexture","SetHighlightTexture","RegisterForClicks","SetID","SetOwner","AddLine","SetToplevel","StartMoving","StopMovingOrSizing","SetScale","SetAlphaGradient","SetJustifyV"}) do methods[k]=function() end end
+function methods:SetJustifyH(v) self.justifyH=v end
+function methods:GetJustifyH() return self.justifyH or "LEFT" end
+function methods:IsMouseEnabled() return self.mouseEnabled==true end
+function methods:SetFrameStrata(v) self.strata=v end
+function methods:GetFrameStrata() return self.strata or "MEDIUM" end
 function CreateFrame(kind,name,parent,template)
  local o=setmetatable({kind=kind,name=name,_name=name,parent=parent,scripts={},events={},children={}}, {__index=methods})
  if name then _G[name]=o end
@@ -141,6 +152,9 @@ function methods:SetFontObject() end
 function methods:SetMaxLetters(n) self.maxLetters=n end
 function methods:ClearFocus() end
 function methods:SetFont(path,size,outline) self.fontPath=path;self.fontSize=size;self.fontOutline=outline;return true end
+function methods:GetFont() return self.fontPath or "Fonts\\ARIALN.TTF",self.fontSize or 14,self.fontOutline or "" end
+function methods:SetScale(value) self.scale=value end
+function methods:GetScale() return self.scale or 1 end
 function methods:SetTextColor(r,g,b) self.color={r,g,b} end
 
 function methods:GetFrameLevel() return self.frameLevel or 1 end
@@ -155,3 +169,7 @@ function methods:SetVerticalScroll(v) self.verticalScroll=v end
 function methods:GetVerticalScroll() return self.verticalScroll or 0 end
 function methods:SetClampedToScreen(v) self.clamped=v and true or false end
 function methods:EnableMouse(v) self.mouseEnabled=v and true or false end
+
+function methods:SetDrawLayer(layer) self.drawLayer=layer end
+
+function methods:GetTop() return self.top or 0 end

@@ -36,6 +36,7 @@ payload['README.txt']=('Azeroth FieldKit '+version+'\n\n'
  'See NOTICE.txt, LICENSE.txt and media/OFL-NotoSans.txt for credits and rights.\n'
  'Documentation, changelog, audit evidence and source:\n'
  'https://github.com/Maidenquinn/azeroth-fieldkit\n').encode('utf8')
+payload['RECETTE.txt']=(base/'docs/RECEPTION_0.6.0.txt').read_bytes()
 assert all(Path(name).suffix in {'.lua','.toc','.tga','.ttf','.txt'} for name in payload)
 assert not any(name.startswith('docs/') or Path(name).suffix=='.json' for name in payload)
 # Historical guides and raw baseline source are deliberately not in the runtime.
@@ -54,7 +55,7 @@ try:
  assert changed.issubset(generated),('Unreviewed dirty source',sorted(changed-generated))
 except (subprocess.CalledProcessError,FileNotFoundError):commit=None
 manifest={'name':'Azeroth FieldKit','version':version,'sourceCommit':commit,'approval':('maintainer accepted for publication; not independently certified' if publication['maintainerAcceptedForPublication'] else 'development candidate; not accepted for publication'),'publication':publication,
- 'distribution':'versioned addon package; maturity/permission scope in publication metadata','inGameTest':False,
+ 'distribution':'versioned addon package; maturity/permission scope in publication metadata','inGameTest':publication.get('inGameTestByAgent',False),'inGameTestScope':publication.get('inGameTestScope'),
  'files':{name:{'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)} for name,data in sorted(payload.items())}}
 out=base/'dist';out.mkdir(exist_ok=True);archive=out/f'AzerothFieldKit-{version}.zip'
 with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:

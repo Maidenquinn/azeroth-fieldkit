@@ -176,13 +176,57 @@ function L.Decorate(row,name)
  local icon=L.Icon(name);row.fieldkitIconInset=icon and 18 or 0
  if icon then row.fieldkitSpellIcon:SetTexture(icon);row.fieldkitSpellIcon:Show() else row.fieldkitSpellIcon:Hide() end
 end
+-- Did the learned-spell packet change (keys, ranks)? Compared in place with the last one seen: no allocation.
+L.sigKeys,L.sigRanks,L.sigCount={},{},0
+function L.SpellsChanged()
+ local list=type(AZS_SPELLS)=="table" and AZS_SPELLS or nil
+ local count=list and math.min(32,table.getn(list)) or 0
+ local changed=count~=L.sigCount
+ for i=1,count do
+  local s=list[i];local key,rank=type(s)=="table" and s.key,type(s)=="table" and s.rank
+  if L.sigKeys[i]~=key or L.sigRanks[i]~=rank then L.sigKeys[i]=key;L.sigRanks[i]=rank;changed=true end
+ end
+ L.sigCount=count
+ return changed
+end
+-- What the card shows, as one string: when a rescan finds the same text the card is not redrawn.
+function L.ContentKey()
+ local parts={};local n=0
+ for i=1,table.getn(L.spells) do
+  local e=L.spells[i];n=n+1
+  parts[n]=tostring(e.key)..":"..tostring(e.rank)..":"..tostring(e.name)..":"..tostring(e.icon)..":"..table.concat(e.bonuses or {},"|")..":"..table.concat(e.upgrades or {},"|")
+ end
+ for _,slot in ipairs({2,13,14,11,12}) do
+  local it=L.items[slot];n=n+1
+  parts[n]=slot..":"..tostring(it and it.name)..":"..table.concat(it and it.bonuses or {},"|")
+ end
+ return table.concat(parts,";;")
+end
+-- Native events that can change what the scan reads. They only mark the scan as due.
+L.eventFrame=CreateFrame("Frame")
+for _,name in ipairs({"UNIT_INVENTORY_CHANGED","ACTIONBAR_SLOT_CHANGED","SPELLS_CHANGED","LEARNED_SPELL_IN_TAB","PLAYER_ENTERING_WORLD"}) do L.eventFrame:RegisterEvent(name) end
+L.eventFrame:SetScript("OnEvent",function()
+ if event=="UNIT_INVENTORY_CHANGED" and arg1~="player" then return end
+ L.dirty=true
+end)
+L.RESCAN_GAP=1.5   -- shortest delay between two scans caused by changes
+L.IDLE_RESCAN=30   -- safety net: a full rescan at least this often, whatever happened (a missed event is repaired within it)
 function L.Scan()
- -- Tooltip walks across the action bar are very expensive; only rescan when the
- -- native spell packet changes, the run boundary resets, or a slow idle timer fires.
+ -- Tooltip walks across the action bar are very expensive (spell book + up to 72 action slots + tooltips). Rescan only when
+ -- something changed: first scan, run boundary, a different learned-spell packet, a native event (equipment, action bar, spells),
+ -- or the slow safety net. Before, a fresh packet meant "scan every 1.5 s" for the whole run.
  local now=GetTime()
- local force=N.Fresh("AZSSPELLS") or not L.scanned
- if now<L.scanAt and not force then return false end
- L.scanAt=now+(force and 1.5 or 5)
+ local first=not L.scanned
+ local changed=false
+ if N.Fresh("AZSSPELLS") then changed=L.SpellsChanged() end
+ if changed then L.dirty=true end
+ local due=first or now>=L.scanAt
+ if not due and L.dirty then
+  if now>=(L.lastScan or 0)+L.RESCAN_GAP then due=true end
+ end
+ if not due then return false end
+ local force=true
+ L.scanAt=now+L.IDLE_RESCAN;L.lastScan=now;L.dirty=false
  L.scanned=true
  L.spells={};L.items={};L.icons={}
  local book={}
@@ -236,6 +280,10 @@ function L.Scan()
   local bonuses,name=L.Tooltip("SetInventoryItem","player",slot)
   L.items[slot]={name=name,bonuses=bonuses}
  end
+ -- redraw the card only if the scan found something different
+ local key=L.ContentKey()
+ if key==L.contentKey then return false end
+ L.contentKey=key
  return true
 end
 function L.Tip(owner,entry)
@@ -323,7 +371,7 @@ function L.Render(frame)
 end
 function L.Update()
  if not FieldKitDB then return end
- if not N.Active() then L.scanAt=0;L.scanned=nil;L.items={};L.spells={};L.icons={};return end
- if L.serial~=N.serial then L.scanAt=0;L.scanned=nil;L.serial=N.serial end
+ if not N.Active() then L.scanAt=0;L.scanned=nil;L.items={};L.spells={};L.icons={};L.contentKey=nil;return end
+ if L.serial~=N.serial then L.scanAt=0;L.scanned=nil;L.contentKey=nil;L.serial=N.serial end
  if L.Scan() and L.refresh then L.refresh() end
 end

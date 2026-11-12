@@ -3,6 +3,11 @@
 FieldKitLocale={bindings=setmetatable({},{__mode="k"}),callbacks={}}
 local T=FieldKitLocale
 T.fr={
+ ["Taken"]="Subis",["Groups"]="Groupes",["Kills short"]="Élim.",["HEALING"]="SOINS",["BOSS DAMAGE"]="BOSS",["DAMAGE TAKEN"]="SUBIS",["PARTY DPS"]="GROUPE",["KILLS"]="ÉLIMINATIONS",
+ ["Equip"]="Équipe",
+ ["DAMAGE"]="DÉGÂTS",["LAIRS"]="ANTRES",["EQUIPMENT"]="ÉQUIPEMENT",["BONUSES"]="BONUS",["EFFECTS"]="EFFETS",["Mode"]="Mode",["victims"]="victimes",["gold"]="or",["Cache"]="Coffre",["All spells"]="Tous les sorts",["View list"]="Voir la liste",["Equipment / spells"]="Équipement / sorts",["All statistics"]="Toutes les statistiques",["All effects"]="Tous les effets",["No combat data"]="En attente de combat",["No active lair"]="Aucune antre active",["active lairs"]="antres actives",["No active effect"]="Aucun effet actif",["Empty"]="Vide",
+ ["Back to HUD"]="Retour au HUD",
+ ["Full details"]="Détails complets",
  ["Preview HUD"]="Prévisualiser le HUD",
  ["Apply profile"]="Appliquer le profil",
  ["Restore previous"]="Restaurer le précédent",
@@ -715,3 +720,36 @@ function FieldKit_CreateLanguageOption(page,y)
  FieldKit_Text(help,"Choose the language used by FieldKit. Applies immediately; game-provided names keep the game's language.")
  return y-115
 end
+
+FieldKitLocale.fr["One theme for HUD, windows and tooltips."]="Un même thème pour le HUD, les fenêtres et les infobulles."
+FieldKitLocale.fr["Essentials within reach."]="L’essentiel à portée de main."
+FieldKitLocale.fr["Detailed tracking and quick access."]="Suivi détaillé et accès rapides."
+FieldKitLocale.fr["Reorganized map and actions."]="Carte et actions réorganisées."
+FieldKitLocale.fr["Manage profiles"]="Gérer les profils"
+
+FieldKitLocale.fr["HUD scale"]="Échelle du HUD"
+FieldKitLocale.fr["Panel opacity"]="Opacité des panneaux"
+
+FieldKitLocale.fr["Battlefield"]="Champ de bataille"
+
+FieldKitLocale.fr["Next"]="Prochain"
+
+FieldKitLocale.fr["Elapsed time"]="Temps écoulé"
+
+FieldKitLocale.fr["Right click: quick menu and settings."]="Clic droit : menu rapide et paramètres."
+
+FieldKitLocale.fr["Native meter"]="Compteur natif du jeu"
+
+FieldKitLocale.fr["01  HOME"]="01  Accueil"
+FieldKitLocale.fr["02  COMBAT"]="02  Combat"
+FieldKitLocale.fr["03  INTERFACE"]="03  Interface"
+FieldKitLocale.fr["04  WORLD"]="04  Monde"
+FieldKitLocale.fr["05  MULTIPLAYER"]="05  Multijoueur"
+FieldKitLocale.fr["06  CHAT"]="06  Chat"
+FieldKitLocale.fr["07  PREFERENCES"]="07  Préférences"
+
+FieldKitLocale.fr["Stored levels"]="Niveaux en attente"
+FieldKitLocale.fr["Settings"]="Réglages"
+
+FieldKitLocale.fr["Level"]="Niveau"
+FieldKitLocale.fr["Drag window"]="Déplacer la fenêtre"

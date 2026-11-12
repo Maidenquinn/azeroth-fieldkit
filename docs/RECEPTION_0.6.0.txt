@@ -1,0 +1,288 @@
+AZEROTH FIELDKIT 0.6.0-alpha.10 — PILOTE ELWYNN / NAXXRAMAS
+7 novembre 2026 — branche codex/v0.6.0-elwynn-naxx-hud
+
+La version est installée dans le client habituel. Le code stable reste inchangé.
+Ouvrir : /fieldkit themes puis choisir Automatique et une des trois vignettes.
+Les autres zones gardent le HUD classique. La sélection manuelle ne falsifie
+jamais la vraie zone, ses boss ou ses valeurs.
+
+Cette révision reconstruit les six compositions d’après les maquettes validées :
+habillages transparents découpés par composant, sept vrais boutons de sorts,
+vraie carte carrée, PV/ressource/XP et compteurs indépendants des illustrations.
+Les réglages, tableaux secondaires et infobulles reprennent le thème sélectionné.
+Les valeurs des vignettes sont des exemples ; les valeurs du HUD sont natives.
+
+TAILLE ET POSITION
+Interface > Style et thèmes, descendre à « Taille de chaque élément ».
+Choisir un bloc avec les flèches puis régler sa taille de 50 à 130 %.
+« Taille d’origine » remet uniquement ce bloc à 100 %. Les autres blocs restent
+à leur taille. Les tailles sont séparées par zone, variante et profil.
+Le curseur « Échelle du HUD » reste disponible pour un réglage d’ensemble.
+Les sorts/personnages/PV intégrés restent groupés quand le décor est commun.
+Dans Elwynn Complète et Naxx Alternative, carte/zone/mode partagent un cadre :
+ils se redimensionnent ensemble. Les autres cartes sont indépendantes.
+Cible et cadres de boss ont aussi leur réglage. Déverrouiller les fenêtres
+pour déplacer les composants, puis verrouiller après ajustement.
+
+ACCES AUX DONNEES
+- PV : survol = détails et améliorations ; clic = interaction joueur native.
+- Ressource, XP et compteurs : survol exact ; clic = épinglage quand proposé.
+- Difficulté / Héroïque : survol ou clic = multiplicateurs, affixes et modes.
+- Horloge : chronologie complète. Prochain boss : rappels complets.
+- Dégâts, Antres, Equipement et Effets : boutons visibles / en-têtes des panneaux.
+  Les synthèses ouvrent les tableaux complets, leurs onglets et leurs survols.
+  Retour au HUD ferme le lecteur détaillé. Les préférences restent respectées.
+- Clic droit sur Difficulté / FieldKit : menu rapide, statistiques, journal,
+  personnage, sorts, talents, quêtes, social, menu natif et extensions connues.
+- Bouton engrenage / emblème du thème : fenêtre FieldKit.
+- Journal appelle Azeroth Stats quand installé. Son historique de carrière reste
+  dans Stats ; aucun historique artificiel n’est créé.
+- Cible : cadre compact et survol du cadre natif complet. Un boss déjà affiché
+  ne reçoit pas une seconde synthèse identique ; son survol retrouve les détails.
+- Niveaux stockés : bouton conditionnel thématique, ou touche native Y ; le
+  bouton natif précédent est restauré à la désactivation des thèmes.
+- Chat : historique natif conservé, mise en forme uniquement quand toutes les
+  lignes peuvent être restaurées. Naxx Complète : Chat / Copier / Réglages et
+  zone de saisie cliquable. Aucun bouton n’envoie un message automatiquement.
+
+PERSONNALISATION ET RETOUR
+Echelle et opacité sont réglables dans Style et thèmes. Les fenêtres se déplacent
+avec /fieldkit unlock. Chaque zone/variante a ses positions indépendantes ; les
+anciens placements sont conservés. Les profils mémorisent le choix du thème.
+Réinitialiser ce placement rétablit seulement la composition active.
+/fieldkit themes off rétablit l’ancien HUD, la carte ronde et les menus natifs.
+/fieldkit themes auto réactive la détection. /reload conserve les réglages.
+Les choix de niveau/coffre gardent toujours la priorité sur FieldKit.
+
+CONTROLES EFFECTUES
+Client natif 0.142.0 : six dispositions inspectées dans les vraies scènes des
+deux zones. Elwynn : combat, progression, Lardeur, coffre, choix de niveaux,
+lecteur détaillé des dégâts et retour. Naxxramas : combat, choix natif avec
+changement de variante, chat, fin de partie native. Fenêtres thématiques,
+carte carrée et transitions rechargées au fil des corrections.
+Tests Lua 5.0.3 et 5.1 : 47 modules, profils, conservation du chat, propriété des
+cadres, priorité des cartes, lecteurs, valeurs inconnues et pools réutilisés.
+Révision alpha.4 : tailles par composant, dock réduit à 65 %, six sorts acquis
+et racial en combat Elwynn, ressource réelle, choix natifs prioritaires et
+inspection des six compositions. Textes bornés, colonnes séparées et cadres
+adjacents retirés des découpes du dock. Les deux options natives activées pour
+les essais (déplacement au clic et niveaux stockés) sont revenues à leur état
+initial désactivé.
+Les preuves PNG sont dans Tests_En_Jeu/Audit_Alpha4, en complément de
+Tests_En_Jeu/Reference_Alpha3. Les JSON associés précisent
+la portée de chaque capture ; les captures intermédiaires ne certifient pas
+chacune le dernier octet du paquet.
+
+RECETTE COURTE
+1. Comparer chaque vignette au HUD réel, dans la zone correspondante.
+2. Passer un niveau et ouvrir un coffre ; vérifier le retour du HUD.
+3. Survoler PV, XP, ressource, difficulté et compteurs ; ouvrir chaque tableau.
+4. Zoomer la carte ; vérifier les repères et les raccourcis natifs du menu rapide.
+5. Changer de profil/variante, recharger, désactiver puis réactiver les thèmes.
+6. Faire un combat de boss Naxxramas et un essai coop si tu joues à plusieurs.
+
+LIMITES EXPLICITES
+Le rendu est rapproché des maquettes mais aucun score de fidélité de 100 % n’est
+mesuré. Les illustrations dérivées restent des interprétations assistées par IA,
+pas des modèles officiels extraits. Les noms/icônes/rangs réels dépendent de la
+partie. En phase prête, le texte natif « Bougez pour commencer » peut encore
+passer devant la fenêtre des réglages ; contrainte native acceptée par le
+mainteneur, il disparaît une fois la partie lancée.
+Les combats de boss Naxxramas et la coop n’ont pas été validés ici.
+La police ou la taille du chat reste native si sa modification risquerait de
+perdre des messages non récupérables. Les extensions non identifiées conservent
+leur propre interface. Aucune publication ni fusion vers le code stable.
+
+ALPHA.5 — RETOURS VISUELS
+Bandes de sélection retirées, libellés et fonds nettoyés, cases vides des effets
+masquées, chat simplifié sans bulles décoratives, sorts rentrés dans leurs cadres,
+carte Elwynn agrandie et icônes connues des addons replacées au bord de la carte.
+Le détail Bonus conserve les panneaux de synthèse et espace ses lignes.
+Contrôle visuel Elwynn Complète après rechargement. Les derniers ajustements
+d’alignement nécessitent /reload ; pas de nouvelle certification des six scènes.
+
+ALPHA.6 — CADRES ET COMPORTEMENTS
+Texture et bordure basse des cards rétablies. Onglet actif souligné, en-têtes
+et total/DPS harmonisés. Banderole Elwynn Complète élargie. Objets équipés :
+le vrai nom remplace le nom du slot. Bouton moins en haut à droite des cinq
+cards : réduction vers le dock FieldKit natif en bas à droite ; clic sur son
+bouton pour restaurer. Déplacement de la carte et de son cadre groupé.
+Les scripts de position des icônes connues sont suspendus uniquement pendant
+le thème, puis rétablis. /reload requis pour charger ces corrections.
+
+ALPHA.7
+Compte à rebours natif infini accepté même sans nom de boss. Police équipement
+fixée à 16, libellés longs tronqués avec détails au survol. Icône native des
+sorts corrigée (IconTexture), fractions des barres remises dans 0..1, onglets
+bornés. Taux inconnu omis ; le DPS Boss conserve la durée du combat de boss,
+pas la durée de la partie. Traductions des sorts d’élimination harmonisées.
+Icônes d’addons représentées par des boutons propres au thème qui conservent
+les clics d’origine. Contrôle après redémarrage complet : déplacement par
+commande de la carte, du cadre et des icônes ensemble. Placement et verrouillage
+rétablis. Le glisser réel à la souris reste à recetter : le test automatisé
+n’a pas confirmé son déplacement. Pas de validation native après-victoire
+ou du DPS en combat pour cette révision.
+
+ALPHA.8 — ETAT VIDE ET ALIGNEMENT
+Compteur vide : suppression des emplacements et jauges illustratifs ; seuls
+les vrais sorts du compteur reçoivent une icône et une barre. Les six onglets
+utilisent le même habillage. Elwynn Complète : espacement des sept sorts mesuré
+sur le décor, 83 pixels entre centres, intérieur de 66 pixels à y=795.
+
+ALPHA.9 � RETOURS VISUELS CIBLES
+Onglets du compteur plats avec soulignement actif. Fond uniforme issu du
+mat�riau approuv� des cartes, sans caches opaques autour des textes.
+Terrain Elwynn Compl�te contenu entre le titre et le pied du cadre.
+La validation compl�te des six compositions en combat et le d�placement
+physique de la carte restent � recetter ; aucune certification � 100 %.
+
+ALPHA.50 - COMPTEURS DE PERFORMANCE (DIAGNOSTIC)
+/fieldkit diag on | status | report | reset | off ; desactive par defaut, rien d'installe tant qu'il est coupe. A mesurer en jeu.
+
+ALPHA.49 - ICONES DE LA MINICARTE : PLACEMENT SELON LA FORME, TAILLE COMMUNE
+AzerLoot suit le cadre carre ; anneau d'Azeroth Stats recentre ; collisions et coins geres. A recetter en jeu.
+
+ALPHA.48 - ELWYNN COMPLET : PLUS DE RACCOURCIS FIELDKIT/JOURNAL NI DE TEXTE DE VERSION
+Affichage retire uniquement ; fonctions accessibles par les icones de la minicarte. A recetter en jeu.
+
+ALPHA.47 - FINITION DES CARTOUCHES DE LA CARTE NATIVE
+Cartouches issus du cadre approuve des cartes ; chemin de la case neutre corrige. A recetter en jeu.
+
+ALPHA.46 - OPACITE SUR TOUS LES FONDS, MEDAILLON ROND ELWYNN, EFFETS VIDE
+Corrige la recette alpha.45 refusee. A recetter en jeu.
+
+ALPHA.45 - OPACITE DES PANNEAUX (FREEZE), CARTE RONDE ELWYNN, CARTOUCHES NATIFS
+Le curseur ne reconstruit plus le HUD et ne fait fondre que le fond. A recetter en jeu.
+
+ALPHA.44 - MINICARTE RONDE ELWYNN, BOUTONS TIERS, ETATS DES CHOIX
+Carte ronde Elwynn, carte native libre, boutons FieldKit/AzerothStats reels et deplacables, etats selectionne/survol. A recetter en jeu.
+
+ALPHA.43 - MINICARTE CARREE / RONDE / NATIVE, BARRE DE SORTS SANS HABILLAGE
+Trois formes de carte (la ronde seulement la ou le cadre est une piece separee), barre de sorts, XP et compteurs conserves sans "Habillage et personnages". A recetter en jeu.
+
+ALPHA.42 - CHAT : PARAMETRES AVEC LE THEME, RESTAURATION
+Reglages du chat actifs avec le theme, chat jamais perdu a la desactivation. A recetter en jeu.
+
+ALPHA.41 - BARRE AETHUS : COINS ARRONDIS, COULEUR D'AVANT
+Capture a 100 pour cent : le vert epouse la fente aux coins arrondis, couleur plus douce.
+
+ALPHA.40 - BARRE AETHUS AJUSTEE A L'OUVERTURE DE L'ART
+Capture a 100 pour cent : plus de bandes noires aux extremites. /fieldkit barprobe affiche la ligne OPENING.
+
+ALPHA.39 - BARRE DE VIE AETHUS : REMPLISSAGE OPAQUE
+Capture a 100 pour cent, puis /fieldkit barprobe fill native pour comparer. A valider en jeu.
+
+ALPHA.38 - DIAGNOSTIC DE MA BARRE DE VIE
+/fieldkit barprobe puis /fieldkit barprobe refill : sortie a envoyer. Aucun changement de rendu.
+
+ALPHA.37 - LIGNES, EFFETS, ANTRES, DIAGNOSTIC BARRE
+Toutes les lignes Sorts/Degats quand la place existe, effets mesures sur l'art, antres en colonnes. /fieldkit barprobe et /fieldkit cardprobe a envoyer. A recetter en jeu.
+
+ALPHA.36 - CARTE SORTS DYNAMIQUE, BARRES, EFFETS
+Hauteur de la carte Equipement/Sorts selon le contenu, remplissage des barres de groupe, marges des effets. /fieldkit barprobe pour mesurer la barre. A recetter en jeu.
+
+ALPHA.35 - FINITIONS UX
+Boutons du chat, option chevauchement, icone info du pied, entete Degats, barres des cartes de groupe. A recetter en jeu.
+
+ALPHA.34 - CADRE AETHUS, ENTETE DEGATS, FOND DU CHAT
+Cartes de groupe avec le cadre Aethus, entete Degats et montants reels, fond du chat contenu. A recetter en jeu.
+
+ALPHA.33 - CARTES DE GROUPE SANS DEBORDEMENT, SURVOL CONFIRME/OBSERVE/INCONNU
+La barre ne depasse plus du cadre dore ; survol : sorts et accessoires avec leur source. A recetter en jeu.
+
+ALPHA.32 - CARTES DE GROUPE, HISTORIQUE, AUDIT API
+Une seule carte pour joueur et coequipiers, options, historique des actions, /fieldkit groupprobe. A recetter en jeu.
+
+ALPHA.31 - CARTES DE GROUPE COMPACTES
+Carte horizontale 290x56 : portrait, nom, niveau/classe, barre de vie PV/% , barre de ressource. A recetter en jeu.
+
+ALPHA.30 - CARTES DE GROUPE THEMATISEES
+Cartes du theme a la place des cadres natifs, devant les cartes principales, deplacables une par une. A recetter en jeu.
+
+ALPHA.29 - CARTES DE GROUPE DANS LE MOTEUR DE PLACEMENT
+Les cartes de coequipiers ne chevauchent plus les autres cartes et cedent la place. A recetter en jeu.
+
+ALPHA.28 - LANCEURS ET STATUT DE GROUPE
+Infobulle et clic des lanceurs corriges (Lua 5.0), statut Mort affiche si le client le fournit. A recetter en jeu.
+
+ALPHA.27 - ENGRENAGE AU-DESSUS DE LA BORDURE
+Ordre de rendu seulement : l'engrenage est dessine au-dessus de la bordure doree. A recetter en jeu apres /reload.
+
+ALPHA.26 - ENGRENAGE SUR LA BORDURE
+Anneau actif par defaut : engrenage centre sur la bordure doree, hors titre/pied/zoom. A recetter en jeu apres /reload.
+
+ALPHA.25 - EMPILEMENT SOURIS DE LA CARTE
+L'engrenage doit recevoir clic et glisser : /fkmapstack 5 puis /fkmapevents. A recetter en jeu.
+
+ALPHA.24 - COMMANDES DE DIAGNOSTIC
+/fieldkit mapprobe state|events on, mapstack 5 ne les ouvrent plus la fenetre ; /fkmapstate /fkmapevents /fkmapstack.
+
+ALPHA.23 - BORDS HAUT ET DROIT, DIAGNOSTIC ENGRENAGE
+Taille d'ecran reelle mesuree par plusieurs sources ; /fieldkit mapprobe state pour l'engrenage. A recetter.
+
+ALPHA.22 - OBSTACLES REELS, DIAGNOSTICS
+Les cartes ne sont plus bloquees par les anciens emplacements des parties deplacees. Engrenage : positionnement natif ;
+/fieldkit cardprobe, dragdiag, mapprobe, mapstack pour diagnostiquer en jeu. A recetter.
+
+ALPHA.21 - BORDS D'ECRAN, BOUTONS DE MINIMAP
+Les cartes vont jusqu'aux vrais bords ; la poignee de carte (qui couvrait les boutons) est supprimee ;
+/fieldkit mapfocus indique quel cadre recoit la souris. A recetter en jeu.
+
+ALPHA.20 - MINIMAP, CARTES ENREGISTREES, 7 SOCKETS
+La carte ne part plus seule ; les cartes que vous avez placees cedent la place (position enregistree jamais reecrite) ;
+l'onglet Sorts affiche toujours 7 emplacements. A recetter en jeu, Elwynn et Naxx Complete.
+
+ALPHA.19 - PLACEMENT DYNAMIQUE DES CARTES
+Les cartes ne se chevauchent plus (option "Autoriser le chevauchement"). Equipement : 7 sorts. Degats : lignes alignees,
+icones, infobulle thematisee, aucun clic ne s'ouvre en fenetre. Carte : la texture suit le cadre pendant le deplacement.
+A recetter en jeu, Elwynn et Naxx Complete.
+
+ALPHA.18 - BONUSES EN PLACE, INFOBULLES DEGATS, ENGRENAGE
+All statistics deploie la carte Bonuses ; survol d'une ligne Degats = infobulle complete, clic = rien ;
+indicateur de Sorts dans l'onglet ; engrenage AzerothHub a l'interieur de l'ouverture.
+Diagnostics : /fieldkit mapdiag (souris, poignee, placements), /fieldkit clickdiag. A recetter en jeu.
+
+ALPHA.17 - CLICS, DEGATS 6 LIGNES, BOUTONS DE MINIMAP
+Onglets Equipement/Sorts et 6 categories Degats : 30 alternances sans clic perdu. Degats : 6 lignes sans molette.
+Antres : marges. Engrenage AzerothHub : deplacable au bord, restaure exactement. Diagnostics : /fieldkit clickdiag, /fieldkit mapdiag.
+A recetter en jeu, Elwynn et Naxx Complete.
+
+ALPHA.16 - GLISSER, SOCKETS, BOUTONS DE MINIMAP
+Glisser une carte : doit etre continu des le premier essai. Icones Equipement/Sorts centrees dans les sockets.
+Degats : derniere ligne au-dessus de "All spells". Minimap : engrenage AzerothHub au bord ; icones masquees
+par AzerothHub restent masquees. A recetter en jeu, Elwynn et Naxx Complete.
+
+ALPHA.15 - CARTE, ONGLETS EN-TETE, PORTRAIT
+Minimap : remplit l'ouverture du cadre (carre non etire, rebord redessine). Equipement/Sorts : onglets
+dans l'en-tete. Portrait : couvre tout le socle. Antres : noms plus larges. Degats : etat vide centre,
+premier clic sur les six onglets. A recetter en jeu, Elwynn et Naxx Complete.
+
+ALPHA.14 - CORRECTIONS VISUELLES
+Portrait joueur sous le rebord du cadre ; Degats : 6 categories sur 2 rangees (aussi Naxx) ;
+onglets Equipement/Sorts : filet + souligne actif ; carte boss/gardien 340x66 centree, etiquette coloree.
+A recetter en jeu : Elwynn et Naxx Complete (portrait: Elwynn Complete / Naxx Alternative).
+
+ALPHA.13 - ONGLETS, EFFETS, ANTRES
+Carte Equipement : onglets Equipement / Sorts dans la meme carte (clic = changement immediat).
+Listes longues : molette sur la carte, indicateur "a-b / total".
+Effets : icone, nom, stacks, duree ; clic droit annule le buff ; icones natives masquees
+seulement tant que la carte les affiche, restaurees sinon.
+Antres : jusqu a 4 gardiens visibles, etat en couleur, delai et distance.
+A recetter : Elwynn et Naxx Complete ; autres variantes : verifier que les buffs natifs reviennent.
+
+ALPHA.12 - SORTS, EFFETS, ANTRES
+Carte Equipement : bouton "Sorts" -> lecteur natif sur l'onglet Sorts (1 clic).
+Effets : vrais buffs du joueur (nom, icone, stacks, duree) ; reglage "Suivre les buffs actifs".
+Antres : gardiens, etat/delai de retour, distance ; "+N" si la liste depasse la carte.
+A recetter en jeu : Elwynn et Naxx, variante Complete ; textes longs, listes longues, etat vide.
+
+ALPHA.11 - AURAS DE CIBLE
+La cible thematisee affiche sous sa carte les vrais debuffs (bordure selon le type)
+et buffs, avec stacks et infobulle native au survol. A recetter : cible avec
+buffs/debuffs, menu clic droit de cible, barre d'incantation sous les icones.
+
+ALPHA.10 - CIBLE ET LECTEURS DETAILLES
+Les fenetres de detail se deplacent par leur titre, meme si le HUD est verrouille.
+Position conservee par theme, variante et profil. Le bouton Retour suit la fenetre.
+La cible amicale utilise des PV verts. Le survol affiche une infobulle native,
+sans second cadre de cible. Sources de degats subis traduites.

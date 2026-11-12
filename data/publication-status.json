@@ -1,7 +1,7 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.0",
   "maintainerAcceptedForPublication": true,
-  "maintainerAcceptanceDate": "2026-11-06",
+  "maintainerAcceptanceDate": "2026-11-12",
   "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
   "packageSpecificGameApprovalConfirmed": false,
   "independentSecurityCertification": false,
@@ -9,5 +9,6 @@
   "githubPrerelease": false,
   "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
   "developmentAuthorizedDate": "2026-10-31",
-  "maintainerInGameTestingReported": true
+  "maintainerInGameTestingReported": true,
+  "inGameTestScope": "Maintainer acceptance on 2026-11-12: reported no microfreezes with the Elwynn theme active over approximately five minutes of x10 gameplay; accepted remaining tested functionality. Naxxramas theme explicitly rejected for release and gated off for ordinary users. This is limited native feedback, not a long-duration performance or full platform compatibility certification. See docs/RELEASE_0.6.0.md and earlier review evidence."
 }

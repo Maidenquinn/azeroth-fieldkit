@@ -1,14 +1,14 @@
 {
   "kind": "maintainer static inventory; not certification",
-  "candidate": "0.4.0",
-  "runtimeModules": 38,
-  "textureCount": 134,
+  "candidate": "0.6.0-alpha.50",
+  "runtimeModules": 48,
+  "textureCount": 267,
   "forbiddenTokenGatePassed": true,
   "dynamicCombatEventNames": "See CombatText.lua events list; not all registrations are string literals.",
   "files": {
     "Runtime.lua": {
-      "bytes": 4935,
-      "sha256": "a3ddaccb32c6457aad529cf828cf4b48360525e79dbd0bff411cb09123b95f53",
+      "bytes": 5187,
+      "sha256": "c287d216dba4ca7a23832767a9a2e717a640314a345b512f17e3053d907fe440",
       "namedFunctions": [
         {
           "name": "FieldKit.IsChoiceScreen",
@@ -44,11 +44,126 @@
         },
         {
           "name": "FieldKit.SetFrameOnTop",
-          "line": 84
+          "line": 91
         },
         {
           "name": "FieldKit.FrameOverlayAvailable",
-          "line": 97
+          "line": 104
+        }
+      ],
+      "literalEvents": []
+    },
+    "Diagnostics.lua": {
+      "bytes": 19304,
+      "sha256": "9b15eab8eda0b5cbe84b309ec7ad35fd97721646f916d352f6b3053729a0ffa9",
+      "namedFunctions": [
+        {
+          "name": "Say",
+          "line": 18
+        },
+        {
+          "name": "PickForced",
+          "line": 28
+        },
+        {
+          "name": "PickActive",
+          "line": 29
+        },
+        {
+          "name": "NewOp",
+          "line": 73
+        },
+        {
+          "name": "MemFunction",
+          "line": 79
+        },
+        {
+          "name": "SampleMemory",
+          "line": 87
+        },
+        {
+          "name": "D.Reset",
+          "line": 94
+        },
+        {
+          "name": "D.Install",
+          "line": 106
+        },
+        {
+          "name": "D.Uninstall",
+          "line": 142
+        },
+        {
+          "name": "NoOp",
+          "line": 166
+        },
+        {
+          "name": "D.Skip",
+          "line": 167
+        },
+        {
+          "name": "D.Unskip",
+          "line": 180
+        },
+        {
+          "name": "D.SkippedNames",
+          "line": 186
+        },
+        {
+          "name": "D.Enable",
+          "line": 190
+        },
+        {
+          "name": "Blame",
+          "line": 197
+        },
+        {
+          "name": "D.Tick",
+          "line": 206
+        },
+        {
+          "name": "D.Mark",
+          "line": 225
+        },
+        {
+          "name": "D.Capabilities",
+          "line": 229
+        },
+        {
+          "name": "D.Snapshot",
+          "line": 238
+        },
+        {
+          "name": "Ms",
+          "line": 247
+        },
+        {
+          "name": "D.Lines",
+          "line": 249
+        },
+        {
+          "name": "D.Report",
+          "line": 286
+        },
+        {
+          "name": "D.Status",
+          "line": 290
+        },
+        {
+          "name": "D.ReportAPIs",
+          "line": 297
+        },
+        {
+          "name": "D.Compatibility",
+          "line": 315
+        },
+        {
+          "name": "D.ReportCompatibility",
+          "line": 332
+        },
+        {
+          "name": "D.Command",
+          "line": 343
         }
       ],
       "literalEvents": []
@@ -73,102 +188,239 @@
       "literalEvents": []
     },
     "Config.lua": {
-      "bytes": 7603,
-      "sha256": "65685b2b956181532eb5444702164c4235af5c38c0af2df605557af06e8312fa",
+      "bytes": 9317,
+      "sha256": "a80c348ee3f5771f737215f7bb80aae1ebb4fefdd841f783d6476dbf41627943",
       "namedFunctions": [
         {
           "name": "FieldKit.InitializeSettings",
-          "line": 16
+          "line": 21
+        }
+      ],
+      "literalEvents": []
+    },
+    "Profiles.lua": {
+      "bytes": 15904,
+      "sha256": "558a966d596b6e2eebe7a358fc64dd720aa12ef6e4c5f975f2a600eb07fb547a",
+      "namedFunctions": [
+        {
+          "name": "Include",
+          "line": 33
+        },
+        {
+          "name": "PreferenceKeys",
+          "line": 41
+        },
+        {
+          "name": "Slot",
+          "line": 47
+        },
+        {
+          "name": "Clone",
+          "line": 51
+        },
+        {
+          "name": "Copy",
+          "line": 82
+        },
+        {
+          "name": "Capture",
+          "line": 88
+        },
+        {
+          "name": "CleanName",
+          "line": 114
+        },
+        {
+          "name": "ValidSnapshotSlot",
+          "line": 122
+        },
+        {
+          "name": "P.Name",
+          "line": 126
+        },
+        {
+          "name": "P.Rename",
+          "line": 132
+        },
+        {
+          "name": "Say",
+          "line": 142
+        },
+        {
+          "name": "Valid",
+          "line": 147
+        },
+        {
+          "name": "Upgrade",
+          "line": 151
+        },
+        {
+          "name": "P.Init",
+          "line": 173
+        },
+        {
+          "name": "ApplySnapshot",
+          "line": 193
+        },
+        {
+          "name": "P.Preview",
+          "line": 231
+        },
+        {
+          "name": "P.CancelPreview",
+          "line": 253
+        },
+        {
+          "name": "P.AcceptPreview",
+          "line": 264
+        },
+        {
+          "name": "P.SaveActive",
+          "line": 272
+        },
+        {
+          "name": "P.Save",
+          "line": 286
+        },
+        {
+          "name": "P.Load",
+          "line": 304
+        },
+        {
+          "name": "P.Undo",
+          "line": 336
+        },
+        {
+          "name": "P.ActivatePending",
+          "line": 363
+        },
+        {
+          "name": "P.Delete",
+          "line": 382
+        },
+        {
+          "name": "P.Command",
+          "line": 393
         }
       ],
       "literalEvents": []
     },
     "Localization.lua": {
-      "bytes": 43518,
-      "sha256": "ece4a32d1cf5cabb098ae2ccecddb3267d5b2883e6127186f0edfb07010d03b7",
+      "bytes": 50038,
+      "sha256": "90ffd0025824f8383c5fd33e632ae6453c1aac0ae4fdffe8a4ea3679fb0e261d",
       "namedFunctions": [
         {
           "name": "FieldKit_Language",
-          "line": 618
+          "line": 681
         },
         {
           "name": "FieldKit_L",
-          "line": 622
+          "line": 685
         },
         {
           "name": "FieldKit_Text",
-          "line": 629
+          "line": 692
         },
         {
           "name": "FieldKit_RefreshLanguage",
-          "line": 634
+          "line": 697
         },
         {
           "name": "FieldKit_SetLanguage",
-          "line": 636
+          "line": 699
         },
         {
           "name": "FieldKit_CreateLanguageOption",
-          "line": 643
+          "line": 706
         },
         {
           "name": "Refresh",
-          "line": 651
+          "line": 714
         }
       ],
       "literalEvents": []
     },
     "InterfaceStrings.lua": {
-      "bytes": 31364,
-      "sha256": "7a1ca5085093780ad3a31626664df3374cd36ede6584a3700b6f727c89d84568",
+      "bytes": 36993,
+      "sha256": "b63718fd0dd0395dec5ca3303c058c1128aa08366dab8367b2ab642b55e520c8",
       "namedFunctions": [],
       "literalEvents": []
     },
     "Theme.lua": {
-      "bytes": 6630,
-      "sha256": "3cfdd79baa64e050e6c56e4c21e68ee97288437239c4b6f7a904c59774c7c055",
+      "bytes": 14614,
+      "sha256": "542e69d7228949459b505a72b49afee292b3574b412c2f1696a7a2b572cc23d1",
       "namedFunctions": [
         {
+          "name": "T.Solid",
+          "line": 10
+        },
+        {
+          "name": "T.SetZone",
+          "line": 14
+        },
+        {
           "name": "T.Style",
-          "line": 11
+          "line": 27
         },
         {
           "name": "T.Opacity",
-          "line": 15
+          "line": 32
+        },
+        {
+          "name": "T.RefreshOpacity",
+          "line": 37
         },
         {
           "name": "T.Refresh",
-          "line": 19
+          "line": 45
         },
         {
           "name": "T.Font",
-          "line": 26
+          "line": 57
         },
         {
           "name": "T.Update",
-          "line": 34
+          "line": 73
         },
         {
           "name": "T.Surface",
-          "line": 62
+          "line": 106
         },
         {
           "name": "T.State",
-          "line": 84
+          "line": 134
+        },
+        {
+          "name": "T.ChoiceLook",
+          "line": 187
+        },
+        {
+          "name": "T.PaintControl",
+          "line": 209
+        },
+        {
+          "name": "T.Control",
+          "line": 218
         },
         {
           "name": "T.Button",
-          "line": 107
+          "line": 225
         },
         {
           "name": "T.Glyph",
-          "line": 123
+          "line": 241
         },
         {
           "name": "T.Label",
-          "line": 130
+          "line": 248
         }
       ],
+      "literalEvents": []
+    },
+    "ZoneThemeRegistry.lua": {
+      "bytes": 807,
+      "sha256": "b30035d19d58e17ffc93d360ad377e2bcbcb3fbe0292fe67155d3e02c92537ad",
+      "namedFunctions": [],
       "literalEvents": []
     },
     "Seed.lua": {
@@ -195,8 +447,8 @@
       "literalEvents": []
     },
     "Settings.lua": {
-      "bytes": 11269,
-      "sha256": "9e16aa57fb5e3d48f67d716389263adb5a750d0d1d573e49d9afad57bc31bf3c",
+      "bytes": 11735,
+      "sha256": "3f60be48cc91595da3a37d4ffb4ddbec83c55a00cab2e4b8a4af1b1fa3e2c66b",
       "namedFunctions": [
         {
           "name": "FieldKit_FormatHealth",
@@ -252,7 +504,7 @@
         },
         {
           "name": "FieldKit_AddSettingsSections",
-          "line": 162
+          "line": 168
         }
       ],
       "literalEvents": []
@@ -285,8 +537,8 @@
       "literalEvents": []
     },
     "RunMode.lua": {
-      "bytes": 5636,
-      "sha256": "883dcacb242d1e1c4616f9199891a8ad94988e1e47e58c32ff6dcfafd2b2e7c8",
+      "bytes": 5774,
+      "sha256": "0e9580257cfb408d5f72033e1d5346021daa9822e6f5757225cd120c345a3242",
       "namedFunctions": [
         {
           "name": "R.Affixes",
@@ -316,8 +568,8 @@
       "literalEvents": []
     },
     "NativeData.lua": {
-      "bytes": 4888,
-      "sha256": "ecff13f09a0ff414854ee8fb89321c74e5d530069e0c0d90de29474a94f63261",
+      "bytes": 4910,
+      "sha256": "43c6c6c5e251e8ad7d91b0f68ee10faef1e405e18e4dd50acb38695bf9253289",
       "namedFunctions": [
         {
           "name": "N.Read",
@@ -367,8 +619,8 @@
       "literalEvents": []
     },
     "MeterLedger.lua": {
-      "bytes": 26530,
-      "sha256": "81ec90beb59b31d2f66c21b8ef5059721f871faa7c582eda77a9a576b2e7c81b",
+      "bytes": 26954,
+      "sha256": "f9a2fe0866793ce76a3d4daff035c08913a1f742a084438b17e97f51eb9891d1",
       "namedFunctions": [
         {
           "name": "Text",
@@ -528,19 +780,19 @@
         },
         {
           "name": "L.AppendStats",
-          "line": 596
+          "line": 597
         },
         {
           "name": "L.ShowTip",
-          "line": 621
+          "line": 622
         },
         {
           "name": "TipName",
-          "line": 637
+          "line": 638
         },
         {
           "name": "HookTooltipMethod",
-          "line": 643
+          "line": 644
         }
       ],
       "literalEvents": [
@@ -703,23 +955,39 @@
       "literalEvents": []
     },
     "HudStack.lua": {
-      "bytes": 3347,
-      "sha256": "8b9c9b6178a9774c1fcf01a255fe66dfa66f1153bef9f8bd409d5cea4ae8b66e",
+      "bytes": 7082,
+      "sha256": "610d84dedad61bfd61ae3c433c21807fabd448f43a0420934f86e0abe45f7195",
       "namedFunctions": [
         {
           "name": "S.Initialize",
           "line": 6
         },
         {
+          "name": "MoveGroup",
+          "line": 27
+        },
+        {
+          "name": "FinishCardDrag",
+          "line": 38
+        },
+        {
+          "name": "BeginCardDrag",
+          "line": 49
+        },
+        {
+          "name": "S.FinishDragging",
+          "line": 115
+        },
+        {
           "name": "S.Apply",
-          "line": 30
+          "line": 120
         }
       ],
       "literalEvents": []
     },
     "CardLayout.lua": {
-      "bytes": 9637,
-      "sha256": "b20c90af47c3f43947a2b0494a2cdcf9ba8b311cb832651c43737e399e94995b",
+      "bytes": 10417,
+      "sha256": "f766e9b564530538ee8497890635f314d506170f62b07fe45709bedc1c8bc7a1",
       "namedFunctions": [
         {
           "name": "C.ValidName",
@@ -735,50 +1003,50 @@
         },
         {
           "name": "C.Rows",
-          "line": 31
+          "line": 32
         },
         {
           "name": "C.Money",
-          "line": 64
+          "line": 67
         },
         {
           "name": "C.Initialize",
-          "line": 73
+          "line": 76
         },
         {
           "name": "C.Bind",
-          "line": 98
+          "line": 101
         },
         {
           "name": "C.ApplyRight",
-          "line": 108
+          "line": 111
         },
         {
           "name": "C.Refresh",
-          "line": 138
+          "line": 142
         },
         {
           "name": "C.Frame",
-          "line": 143
+          "line": 147
         },
         {
           "name": "C.UpdateDock",
-          "line": 145
+          "line": 149
         },
         {
           "name": "C.SetDimension",
-          "line": 152
+          "line": 156
         },
         {
           "name": "C.Options",
-          "line": 159
+          "line": 163
         }
       ],
       "literalEvents": []
     },
     "Coop.lua": {
-      "bytes": 12803,
-      "sha256": "99676df2b0eed4370e1cf228198ee86d4e1f61f8318bfd493b35764c5c402ffe",
+      "bytes": 34398,
+      "sha256": "5d747f87ed95ebd5873100738620d1c71f87f98fd91743e0c692174dcb798b59",
       "namedFunctions": [
         {
           "name": "P.Taken",
@@ -814,27 +1082,226 @@
         },
         {
           "name": "P.CreateMember",
-          "line": 154
+          "line": 155
         },
         {
           "name": "P.Row",
-          "line": 167
+          "line": 169
+        },
+        {
+          "name": "P.Themed",
+          "line": 180
+        },
+        {
+          "name": "P.CardsOn",
+          "line": 181
+        },
+        {
+          "name": "P.ReplaceOn",
+          "line": 182
+        },
+        {
+          "name": "P.HealthColor",
+          "line": 184
+        },
+        {
+          "name": "P.Detail",
+          "line": 205
+        },
+        {
+          "name": "MakeBar",
+          "line": 206
+        },
+        {
+          "name": "P.Style",
+          "line": 222
+        },
+        {
+          "name": "P.Portrait",
+          "line": 261
+        },
+        {
+          "name": "Crop",
+          "line": 265
+        },
+        {
+          "name": "P.UsesArt",
+          "line": 294
+        },
+        {
+          "name": "P.Art",
+          "line": 296
+        },
+        {
+          "name": "P.HideArt",
+          "line": 319
+        },
+        {
+          "name": "P.SizeBar",
+          "line": 324
+        },
+        {
+          "name": "P.FillBar",
+          "line": 333
+        },
+        {
+          "name": "Box",
+          "line": 338
+        },
+        {
+          "name": "P.Compact",
+          "line": 344
+        },
+        {
+          "name": "P.Themed",
+          "line": 415
+        },
+        {
+          "name": "P.CardsOn",
+          "line": 416
+        },
+        {
+          "name": "P.ReplaceOn",
+          "line": 417
+        },
+        {
+          "name": "P.HealthColor",
+          "line": 419
         },
         {
           "name": "P.UpdateMember",
-          "line": 176
+          "line": 426
         },
         {
           "name": "P.UpdateMeter",
-          "line": 209
+          "line": 484
         },
         {
           "name": "P.Update",
-          "line": 231
+          "line": 506
         },
         {
           "name": "P.Diagnostic",
-          "line": 239
+          "line": 518
+        },
+        {
+          "name": "P.BarProbe",
+          "line": 526
+        },
+        {
+          "name": "N",
+          "line": 528
+        }
+      ],
+      "literalEvents": []
+    },
+    "GroupHistory.lua": {
+      "bytes": 17215,
+      "sha256": "f81bbd197d9ca61df4dd4354815669b4780bb79e3c02088f60be33f8b56d392a",
+      "namedFunctions": [
+        {
+          "name": "H.Compile",
+          "line": 30
+        },
+        {
+          "name": "H.Build",
+          "line": 48
+        },
+        {
+          "name": "H.Count",
+          "line": 60
+        },
+        {
+          "name": "H.Members",
+          "line": 62
+        },
+        {
+          "name": "H.Allowed",
+          "line": 68
+        },
+        {
+          "name": "H.Parse",
+          "line": 74
+        },
+        {
+          "name": "H.Record",
+          "line": 86
+        },
+        {
+          "name": "H.Handle",
+          "line": 94
+        },
+        {
+          "name": "H.Icon",
+          "line": 108
+        },
+        {
+          "name": "H.Recent",
+          "line": 122
+        },
+        {
+          "name": "H.Prune",
+          "line": 128
+        },
+        {
+          "name": "H.Clear",
+          "line": 132
+        },
+        {
+          "name": "H.Line",
+          "line": 135
+        },
+        {
+          "name": "H.Tooltip",
+          "line": 143
+        },
+        {
+          "name": "H.Sync",
+          "line": 151
+        },
+        {
+          "name": "H.Detail",
+          "line": 169
+        },
+        {
+          "name": "Add",
+          "line": 171
+        },
+        {
+          "name": "H.DetailTooltip",
+          "line": 193
+        },
+        {
+          "name": "Say",
+          "line": 211
+        },
+        {
+          "name": "Has",
+          "line": 212
+        },
+        {
+          "name": "H.ProbeApi",
+          "line": 213
+        },
+        {
+          "name": "V",
+          "line": 225
+        },
+        {
+          "name": "H.ProbeItems",
+          "line": 230
+        },
+        {
+          "name": "H.ProbeEvents",
+          "line": 245
+        },
+        {
+          "name": "H.ProbeReport",
+          "line": 267
+        },
+        {
+          "name": "H.Probe",
+          "line": 278
         }
       ],
       "literalEvents": []
@@ -1002,8 +1469,8 @@
       "literalEvents": []
     },
     "ScreenLayers.lua": {
-      "bytes": 3736,
-      "sha256": "c66920fe0dd2f94d5ec13942eec677d92ad5ed84fb269f2a45a61ddd720cafa3",
+      "bytes": 4346,
+      "sha256": "4729cd51700e54769c637aaceab5d3dece4e62fec10970f1a7d64a20b088761a",
       "namedFunctions": [
         {
           "name": "ChoiceNames",
@@ -1033,8 +1500,8 @@
       "literalEvents": []
     },
     "NativeTools.lua": {
-      "bytes": 11764,
-      "sha256": "8d051e1a3d866c8729c547930680741d08baa710a2d7ebe8c1adff4319330e3a",
+      "bytes": 13508,
+      "sha256": "44e5502153e3b2d302443e3ca734d1af722d11182062ee53b5edbea101b9b765",
       "namedFunctions": [
         {
           "name": "Count",
@@ -1049,44 +1516,48 @@
           "line": 40
         },
         {
+          "name": "T.Buffs",
+          "line": 66
+        },
+        {
           "name": "T.Effects",
-          "line": 64
+          "line": 92
         },
         {
           "name": "T.Revive",
-          "line": 100
+          "line": 129
         },
         {
           "name": "T.NextBoss",
-          "line": 116
+          "line": 145
         },
         {
           "name": "T.Reminders",
-          "line": 140
+          "line": 170
         },
         {
           "name": "T.Push",
-          "line": 160
+          "line": 190
         },
         {
           "name": "T.Banner",
-          "line": 166
+          "line": 196
         },
         {
           "name": "T.Subscription",
-          "line": 175
+          "line": 205
         },
         {
           "name": "T.Warnings",
-          "line": 182
+          "line": 212
         },
         {
           "name": "T.Update",
-          "line": 208
+          "line": 238
         },
         {
           "name": "T.Diagnostic",
-          "line": 220
+          "line": 251
         }
       ],
       "literalEvents": []
@@ -1098,8 +1569,8 @@
       "literalEvents": []
     },
     "Loadout.lua": {
-      "bytes": 17487,
-      "sha256": "265193b7708087cc6b4a273ec0156ab9b293b00976df7c7637009437028510d3",
+      "bytes": 19885,
+      "sha256": "044a94e24f4d3ba755200878196fdd45bf3b50da7bb6ebeb2e8c8a4e2909d507",
       "namedFunctions": [
         {
           "name": "L.Plain",
@@ -1158,24 +1629,32 @@
           "line": 171
         },
         {
+          "name": "L.SpellsChanged",
+          "line": 181
+        },
+        {
+          "name": "L.ContentKey",
+          "line": 193
+        },
+        {
           "name": "L.Scan",
-          "line": 179
+          "line": 214
         },
         {
           "name": "L.Tip",
-          "line": 241
+          "line": 289
         },
         {
           "name": "L.Attach",
-          "line": 250
+          "line": 298
         },
         {
           "name": "L.Render",
-          "line": 269
+          "line": 317
         },
         {
           "name": "L.Update",
-          "line": 324
+          "line": 372
         }
       ],
       "literalEvents": []
@@ -1216,8 +1695,8 @@
       ]
     },
     "Preview.lua": {
-      "bytes": 19461,
-      "sha256": "ad1b59473ffad02a0323e116bd81022dbab53a875b36a76fb8e5e810cb7e8e8e",
+      "bytes": 19581,
+      "sha256": "7de5610fb3383d0d786cc073e622a47f793ffad868e736f459977edcd4b70649",
       "namedFunctions": [
         {
           "name": "P.Initialize",
@@ -1356,8 +1835,8 @@
       "literalEvents": []
     },
     "Interface.lua": {
-      "bytes": 56658,
-      "sha256": "3db02949365c4bf15ac9b024d386af8b3c650489167e98358ea3bf5c837217cf",
+      "bytes": 77101,
+      "sha256": "25e4387af55b9e21f96a73323f726f4ffa337a1277a0080724340a8adb190b3c",
       "namedFunctions": [
         {
           "name": "HealthChoice",
@@ -1368,107 +1847,135 @@
           "line": 15
         },
         {
+          "name": "U.HideTip",
+          "line": 230
+        },
+        {
           "name": "U.Tip",
-          "line": 210
+          "line": 233
         },
         {
           "name": "U.Choice",
-          "line": 217
+          "line": 241
         },
         {
           "name": "U.CloseMenus",
-          "line": 255
+          "line": 279
         },
         {
           "name": "U.Wheel",
-          "line": 260
+          "line": 284
         },
         {
           "name": "Checkbox",
-          "line": 271
+          "line": 295
         },
         {
           "name": "Slider",
-          "line": 289
+          "line": 313
         },
         {
           "name": "BuildMarkerGallery",
-          "line": 314
+          "line": 338
         },
         {
           "name": "row.Refresh",
-          "line": 374
+          "line": 398
+        },
+        {
+          "name": "ProfileActiveBorder",
+          "line": 442
+        },
+        {
+          "name": "BuildProfileManager",
+          "line": 474
+        },
+        {
+          "name": "row.Refresh",
+          "line": 558
+        },
+        {
+          "name": "row.CloseEditors",
+          "line": 632
         },
         {
           "name": "U.EssentialHud",
-          "line": 418
+          "line": 646
         },
         {
           "name": "BuildHome",
-          "line": 433
+          "line": 661
         },
         {
           "name": "U.SelectWindowTab",
-          "line": 462
-        },
-        {
-          "name": "U.BuildPage",
-          "line": 476
-        },
-        {
-          "name": "U.UpdateRunContext",
-          "line": 542
-        },
-        {
-          "name": "U.UpdateSharingStatus",
-          "line": 549
-        },
-        {
-          "name": "U.Refresh",
-          "line": 552
-        },
-        {
-          "name": "U.Select",
-          "line": 578
-        },
-        {
-          "name": "U.Reflow",
-          "line": 618
-        },
-        {
-          "name": "U.SetLayoutEditing",
-          "line": 686
-        },
-        {
-          "name": "U.StartLayout",
-          "line": 699
-        },
-        {
-          "name": "U.ResetPositions",
-          "line": 704
-        },
-        {
-          "name": "U.UndoPositions",
           "line": 711
         },
         {
+          "name": "U.BuildPage",
+          "line": 725
+        },
+        {
+          "name": "U.UpdateRunContext",
+          "line": 793
+        },
+        {
+          "name": "U.UpdateSharingStatus",
+          "line": 800
+        },
+        {
+          "name": "U.Refresh",
+          "line": 803
+        },
+        {
+          "name": "U.Select",
+          "line": 875
+        },
+        {
+          "name": "U.Reflow",
+          "line": 915
+        },
+        {
+          "name": "U.SetLayoutEditing",
+          "line": 1019
+        },
+        {
+          "name": "U.StartLayout",
+          "line": 1033
+        },
+        {
+          "name": "U.ResetPositions",
+          "line": 1038
+        },
+        {
+          "name": "U.UndoPositions",
+          "line": 1048
+        },
+        {
           "name": "U.Build",
-          "line": 719
+          "line": 1062
         },
         {
           "name": "U.LayoutNavigation",
-          "line": 768
+          "line": 1131
+        },
+        {
+          "name": "U.EnsureProfilePreviewBar",
+          "line": 1210
+        },
+        {
+          "name": "U.UpdateProfilePreviewBar",
+          "line": 1236
         },
         {
           "name": "U.Toggle",
-          "line": 845
+          "line": 1242
         }
       ],
       "literalEvents": []
     },
     "FieldKit.lua": {
-      "bytes": 106236,
-      "sha256": "d5a367044001870d43a48cf0c0584f11f5eb4e9d12decee5c3e34019d21ce1c5",
+      "bytes": 120726,
+      "sha256": "475534084830c58e54ff709805ac9fbc2827d37c66b4591e6e889cc1257560cb",
       "namedFunctions": [
         {
           "name": "Print",
@@ -1516,360 +2023,405 @@
         },
         {
           "name": "MakeMovable",
-          "line": 174
+          "line": 175
         },
         {
           "name": "SetMovablesUnlocked",
-          "line": 208
+          "line": 209
         },
         {
           "name": "CreateBossFrame",
-          "line": 233
+          "line": 235
         },
         {
           "name": "swatch",
-          "line": 382
+          "line": 384
         },
         {
           "name": "edge",
-          "line": 444
+          "line": 446
         },
         {
           "name": "CreateBossFrames",
-          "line": 502
+          "line": 504
+        },
+        {
+          "name": "ZoneBosses",
+          "line": 512
+        },
+        {
+          "name": "BossStyle",
+          "line": 513
         },
         {
           "name": "SyncHudBosses",
-          "line": 510
+          "line": 515
+        },
+        {
+          "name": "ZoneBossLayout",
+          "line": 531
         },
         {
           "name": "ShowBossFrame",
-          "line": 524
+          "line": 545
         },
         {
           "name": "AwakeGuardianIds",
-          "line": 667
+          "line": 695
         },
         {
           "name": "UpdateBossFrame",
-          "line": 683
+          "line": 711
         },
         {
           "name": "RegisterPlate",
-          "line": 739
+          "line": 767
         },
         {
           "name": "SetPlateAlpha",
-          "line": 802
+          "line": 830
         },
         {
           "name": "Lift",
-          "line": 812
+          "line": 840
         },
         {
           "name": "Drop",
-          "line": 824
+          "line": 852
         },
         {
           "name": "ApplyPlate",
-          "line": 841
+          "line": 869
         },
         {
           "name": "UpdatePlates",
-          "line": 896
+          "line": 924
         },
         {
           "name": "SyncNativePlates",
-          "line": 964
+          "line": 992
         },
         {
           "name": "SetFilter",
-          "line": 973
+          "line": 1001
         },
         {
           "name": "ApplyCamera",
-          "line": 980
+          "line": 1008
         },
         {
           "name": "UpdateTargetHealth",
-          "line": 994
+          "line": 1022
         },
         {
           "name": "UpdatePlayerBar",
-          "line": 1023
+          "line": 1051
         },
         {
           "name": "PulsePlayerBar",
-          "line": 1076
+          "line": 1104
         },
         {
           "name": "TestLowHealth",
-          "line": 1085
+          "line": 1113
         },
         {
           "name": "CreatePlayerBar",
-          "line": 1091
+          "line": 1119
         },
         {
           "name": "BuffIcon",
-          "line": 1131
-        },
-        {
-          "name": "FormatBuffTime",
-          "line": 1149
-        },
-        {
-          "name": "UpdatePlayerBuffs",
           "line": 1159
         },
         {
+          "name": "FormatBuffTime",
+          "line": 1177
+        },
+        {
+          "name": "UpdatePlayerBuffs",
+          "line": 1187
+        },
+        {
           "name": "CreatePlayerBuffs",
-          "line": 1192
+          "line": 1220
         },
         {
           "name": "Pct",
-          "line": 1207
+          "line": 1235
         },
         {
           "name": "PctOf",
-          "line": 1212
+          "line": 1240
         },
         {
           "name": "ParseStats",
-          "line": 1252
+          "line": 1280
         },
         {
           "name": "StatsRow",
-          "line": 1267
+          "line": 1295
         },
         {
           "name": "ApplyCompactPanel",
-          "line": 1283
+          "line": 1313
         },
         {
           "name": "AddCompactButton",
-          "line": 1309
+          "line": 1336
         },
         {
           "name": "UpdateStatsFrame",
-          "line": 1320
+          "line": 1347
         },
         {
           "name": "CreateStatsFrame",
-          "line": 1356
+          "line": 1383
         },
         {
           "name": "MenuFont",
-          "line": 1385
+          "line": 1412
         },
         {
           "name": "StyleWindow",
-          "line": 1394
+          "line": 1421
         },
         {
           "name": "CreateStatsPicker",
-          "line": 1410
+          "line": 1437
         },
         {
           "name": "ToggleStatsPicker",
-          "line": 1445
+          "line": 1472
         },
         {
           "name": "RunGold",
-          "line": 1469
+          "line": 1496
         },
         {
           "name": "ChestPrice",
-          "line": 1478
+          "line": 1505
         },
         {
           "name": "ChestCost",
-          "line": 1487
+          "line": 1514
         },
         {
           "name": "NoteGoldChange",
-          "line": 1500
-        },
-        {
-          "name": "Compact",
           "line": 1527
         },
         {
+          "name": "Compact",
+          "line": 1554
+        },
+        {
           "name": "UpdateMoneyFrame",
-          "line": 1540
+          "line": 1567
         },
         {
           "name": "SyncHudTally",
-          "line": 1590
+          "line": 1617
         },
         {
           "name": "CreateMoneyFrame",
-          "line": 1604
+          "line": 1631
         },
         {
           "name": "ReadSlot",
-          "line": 1662
+          "line": 1689
         },
         {
           "name": "UpdateGearFrame",
-          "line": 1686
+          "line": 1713
         },
         {
           "name": "CreateGearFrame",
-          "line": 1693
+          "line": 1720
+        },
+        {
+          "name": "FoldChildren",
+          "line": 1791
+        },
+        {
+          "name": "UnfoldChildren",
+          "line": 1801
         },
         {
           "name": "CreateBarWindow",
-          "line": 1763
+          "line": 1813
+        },
+        {
+          "name": "SyncBarWindowCollapse",
+          "line": 1901
         },
         {
           "name": "FitRows",
-          "line": 1848
+          "line": 1925
         },
         {
           "name": "InRun",
-          "line": 1864
+          "line": 1942
         },
         {
           "name": "UpdateMeterFrame",
-          "line": 1869
+          "line": 1947
         },
         {
           "name": "UpdateTakenFrame",
-          "line": 1906
+          "line": 1984
         },
         {
           "name": "SyncHudMeter",
-          "line": 1930
+          "line": 2008
         },
         {
           "name": "CreateMeterFrames",
-          "line": 1938
+          "line": 2016
         },
         {
           "name": "UpdateMeterFrames",
-          "line": 1958
+          "line": 2036
         },
         {
           "name": "UpdateChestPins",
-          "line": 1977
+          "line": 2055
         },
         {
           "name": "FormatClock",
-          "line": 1987
+          "line": 2064
         },
         {
           "name": "UpdateLairFrame",
-          "line": 1993
+          "line": 2070
         },
         {
           "name": "CreateLairFrame",
-          "line": 2125
+          "line": 2202
         },
         {
           "name": "ApplyDamageNumbers",
-          "line": 2157
+          "line": 2234
         },
         {
           "name": "FieldKit_UseCombatTextOnly",
-          "line": 2168
+          "line": 2245
         },
         {
           "name": "SlotOf",
-          "line": 2192
+          "line": 2269
         },
         {
           "name": "SwapSlots",
-          "line": 2200
+          "line": 2277
         },
         {
           "name": "HookBarDrag",
-          "line": 2210
+          "line": 2287
         },
         {
           "name": "PlaceMicroMenu",
-          "line": 2244
+          "line": 2321
         },
         {
           "name": "PlaceBarButtons",
-          "line": 2274
+          "line": 2351
         },
         {
           "name": "UpdateCompactXP",
-          "line": 2291
+          "line": 2368
         },
         {
           "name": "CreateCompactBar",
-          "line": 2302
+          "line": 2379
         },
         {
           "name": "AttachMoneyToBar",
-          "line": 2385
+          "line": 2462
         },
         {
           "name": "KeepCompactBar",
-          "line": 2408
+          "line": 2486
         },
         {
           "name": "UpdateGryphons",
-          "line": 2452
+          "line": 2531
+        },
+        {
+          "name": "PlaceCollapseDock",
+          "line": 2550
+        },
+        {
+          "name": "DockEntries",
+          "line": 2566
+        },
+        {
+          "name": "BuildCollapseDock",
+          "line": 2579
+        },
+        {
+          "name": "StopDockDrag",
+          "line": 2601
+        },
+        {
+          "name": "FieldKit.ApplyHUDProfileLive",
+          "line": 2703
         },
         {
           "name": "ResetPositions",
-          "line": 2493
+          "line": 2775
         },
         {
           "name": "RefreshPanel",
-          "line": 2501
+          "line": 2784
         },
         {
           "name": "FieldKit_RefreshInterfaceLanguage",
-          "line": 2502
+          "line": 2785
         },
         {
           "name": "CreatePanel",
-          "line": 2508
+          "line": 2791
         },
         {
           "name": "TogglePanel",
-          "line": 2521
+          "line": 2804
         },
         {
           "name": "FieldKit.SetWindowsLocked",
-          "line": 2528
+          "line": 2811
         },
         {
           "name": "CreateMinimapButton",
-          "line": 2537
+          "line": 2820
         },
         {
           "name": "PlaceOnRim",
-          "line": 2547
+          "line": 2830
         },
         {
           "name": "InitDB",
-          "line": 2588
+          "line": 2871
         },
         {
           "name": "FieldKitEventLifecycle",
-          "line": 2610
+          "line": 2895
         },
         {
           "name": "FieldKitEventWorld",
-          "line": 2643
+          "line": 2942
         },
         {
           "name": "FieldKitEventOther",
-          "line": 2670
+          "line": 2969
         },
         {
           "name": "RefreshNativeData",
-          "line": 2724
+          "line": 3023
         }
       ],
       "literalEvents": [
         "VARIABLES_LOADED",
         "PLAYER_ENTERING_WORLD",
+        "PLAYER_LOGOUT",
         "PLAYER_TARGET_CHANGED",
         "UPDATE_MOUSEOVER_UNIT",
         "UNIT_HEALTH",
@@ -1885,8 +2437,8 @@
       ]
     },
     "WorldPins.lua": {
-      "bytes": 6040,
-      "sha256": "278214f1b8f9f0a61145455f0f257d3e830afdc7f1527859c42e87097c3aeb86",
+      "bytes": 6332,
+      "sha256": "427cc69f04fa24aa8351f8ff7afa5b227ea193a4d47ec1ee0e90e6eb6be305c2",
       "namedFunctions": [
         {
           "name": "Rotating",
@@ -1898,31 +2450,31 @@
         },
         {
           "name": "NewPin",
-          "line": 24
+          "line": 25
         },
         {
           "name": "Hide",
-          "line": 47
+          "line": 48
         },
         {
           "name": "Place",
-          "line": 51
+          "line": 52
         },
         {
           "name": "Clock",
-          "line": 67
+          "line": 69
         },
         {
           "name": "HeroPose",
-          "line": 72
+          "line": 74
         },
         {
           "name": "SameSpace",
-          "line": 85
+          "line": 87
         },
         {
           "name": "FieldKit_UpdateWorldPins",
-          "line": 91
+          "line": 93
         }
       ],
       "literalEvents": []
@@ -1991,8 +2543,8 @@
       "literalEvents": []
     },
     "WorldMarkers.lua": {
-      "bytes": 16455,
-      "sha256": "816d015ff2d175783f0ada57f7bd5a11b82732e551c4c852b148638358f0abdd",
+      "bytes": 16938,
+      "sha256": "c3e05c0d9315c58a1c88b02c8a9896b945961677a982be2debd6fec8b1e230b0",
       "namedFunctions": [
         {
           "name": "updateAura",
@@ -2135,8 +2687,12 @@
           "line": 312
         },
         {
+          "name": "M.ReloadProfileSettings",
+          "line": 316
+        },
+        {
           "name": "report",
-          "line": 314
+          "line": 332
         }
       ],
       "literalEvents": [
@@ -2384,80 +2940,1009 @@
       "literalEvents": []
     },
     "CopyLog.lua": {
-      "bytes": 16648,
-      "sha256": "718ac38d9000744209f26f5e32db68755f66c54b5986efa7682bc7b9053cf88b",
+      "bytes": 31998,
+      "sha256": "34c15ca01ffac46a10ddc9335dfe2ad568a430e9695f778c1a7f2928ca4d016a",
       "namedFunctions": [
         {
+          "name": "Themed",
+          "line": 15
+        },
+        {
           "name": "NativeChat",
-          "line": 34
+          "line": 43
         },
         {
           "name": "Clamp",
-          "line": 37
+          "line": 46
         },
         {
           "name": "ApplyAnchor",
-          "line": 42
+          "line": 51
         },
         {
           "name": "SaveAnchor",
-          "line": 56
+          "line": 65
         },
         {
           "name": "FinishMove",
-          "line": 74
+          "line": 83
         },
         {
           "name": "MoveControl",
-          "line": 84
+          "line": 98
+        },
+        {
+          "name": "FieldKit.ResetChatLayout",
+          "line": 143
         },
         {
           "name": "FieldKit.ResetChatPosition",
-          "line": 121
+          "line": 154
         },
         {
-          "name": "FieldKit.ApplyChatStyle",
-          "line": 133
+          "name": "FieldKit.ChatBackground",
+          "line": 181
         },
         {
-          "name": "CopyButton",
+          "name": "FieldKit.ChatFontWanted",
+          "line": 183
+        },
+        {
+          "name": "Frac",
+          "line": 190
+        },
+        {
+          "name": "FieldKit.ChatRect",
+          "line": 196
+        },
+        {
+          "name": "FieldKit.ChatVisible",
           "line": 205
         },
         {
-          "name": "ColorHook",
-          "line": 239
+          "name": "FieldKit.ChatNativeCapture",
+          "line": 213
+        },
+        {
+          "name": "FieldKit.ChatRestoreNative",
+          "line": 227
+        },
+        {
+          "name": "Try",
+          "line": 229
+        },
+        {
+          "name": "FieldKit.ChatGuard",
+          "line": 250
+        },
+        {
+          "name": "ThemedChatChanged",
+          "line": 274
+        },
+        {
+          "name": "FieldKit.ApplyChatStyle",
+          "line": 283
+        },
+        {
+          "name": "CopyButton",
+          "line": 384
         },
         {
           "name": "Clean",
-          "line": 262
+          "line": 420
         },
         {
           "name": "Capture",
-          "line": 271
+          "line": 429
         },
         {
           "name": "ImportVisible",
-          "line": 278
+          "line": 436
         },
         {
           "name": "FieldKit.ClearChat",
-          "line": 292
+          "line": 450
         },
         {
           "name": "Hook",
-          "line": 300
+          "line": 459
+        },
+        {
+          "name": "FieldKit.ClearChatRenderHistory",
+          "line": 485
+        },
+        {
+          "name": "FieldKit.ResizeChatPreservingHistory",
+          "line": 491
+        },
+        {
+          "name": "FieldKit.RestoreDisplayedChat",
+          "line": 516
+        },
+        {
+          "name": "FieldKit.RecolorDisplayedChat",
+          "line": 534
         },
         {
           "name": "FieldKit.SyncChat",
-          "line": 318
+          "line": 570
         },
         {
           "name": "OpenCopy",
-          "line": 336
+          "line": 594
         },
         {
           "name": "FieldKit.OpenChatCopy",
-          "line": 374
+          "line": 632
+        },
+        {
+          "name": "FieldKit.ThemeChatFont",
+          "line": 655
+        }
+      ],
+      "literalEvents": []
+    },
+    "ThemeMinimap.lua": {
+      "bytes": 24726,
+      "sha256": "8a090ebce7a617b013e024c8d3f329e1236961312c06be2b526a739f71bf5f66",
+      "namedFunctions": [
+        {
+          "name": "M.Rotate",
+          "line": 8
+        },
+        {
+          "name": "IsParked",
+          "line": 21
+        },
+        {
+          "name": "M.Park",
+          "line": 22
+        },
+        {
+          "name": "M.Unpark",
+          "line": 27
+        },
+        {
+          "name": "Span",
+          "line": 54
+        },
+        {
+          "name": "Edge",
+          "line": 55
+        },
+        {
+          "name": "Place",
+          "line": 73
+        },
+        {
+          "name": "Blocked",
+          "line": 78
+        },
+        {
+          "name": "M.Metrics",
+          "line": 92
+        },
+        {
+          "name": "M.Tune",
+          "line": 111
+        },
+        {
+          "name": "M.Untune",
+          "line": 133
+        },
+        {
+          "name": "M.Wrap",
+          "line": 143
+        },
+        {
+          "name": "M.Ring",
+          "line": 161
+        },
+        {
+          "name": "M.Lift",
+          "line": 209
+        },
+        {
+          "name": "M.RingRestore",
+          "line": 221
+        },
+        {
+          "name": "M.GroupOwner",
+          "line": 230
+        },
+        {
+          "name": "M.Layers",
+          "line": 240
+        },
+        {
+          "name": "M.Restore",
+          "line": 256
+        },
+        {
+          "name": "M.Requested",
+          "line": 290
+        },
+        {
+          "name": "M.Effective",
+          "line": 296
+        },
+        {
+          "name": "M.SetMask",
+          "line": 310
+        },
+        {
+          "name": "M.Apply",
+          "line": 324
+        },
+        {
+          "name": "Done",
+          "line": 351
+        }
+      ],
+      "literalEvents": []
+    },
+    "ThemeHUD.lua": {
+      "bytes": 35561,
+      "sha256": "28852e989368767db5005eb9935c90876ada9dc4e2113cc116b1abef175e6893",
+      "namedFunctions": [
+        {
+          "name": "H.Points",
+          "line": 7
+        },
+        {
+          "name": "H.Hidden",
+          "line": 19
+        },
+        {
+          "name": "H.Save",
+          "line": 23
+        },
+        {
+          "name": "H.Anchor",
+          "line": 30
+        },
+        {
+          "name": "H.RestoreOne",
+          "line": 35
+        },
+        {
+          "name": "H.Restore",
+          "line": 59
+        },
+        {
+          "name": "H.EnsureTip",
+          "line": 65
+        },
+        {
+          "name": "H.RichTip",
+          "line": 77
+        },
+        {
+          "name": "Line",
+          "line": 85
+        },
+        {
+          "name": "H.Tip",
+          "line": 104
+        },
+        {
+          "name": "H.HideTip",
+          "line": 120
+        },
+        {
+          "name": "H.ModeTip",
+          "line": 121
+        },
+        {
+          "name": "Open",
+          "line": 138
+        },
+        {
+          "name": "NavButton",
+          "line": 139
+        },
+        {
+          "name": "H.Create",
+          "line": 143
+        },
+        {
+          "name": "H.CompositionCreate",
+          "line": 206
+        },
+        {
+          "name": "Root",
+          "line": 208
+        },
+        {
+          "name": "H.SetHealthFill",
+          "line": 226
+        },
+        {
+          "name": "Place",
+          "line": 266
+        },
+        {
+          "name": "H.ReferenceValues",
+          "line": 272
+        },
+        {
+          "name": "H.Update",
+          "line": 294
+        },
+        {
+          "name": "H.Summaries",
+          "line": 391
+        }
+      ],
+      "literalEvents": []
+    },
+    "ThemeTarget.lua": {
+      "bytes": 7419,
+      "sha256": "a049825a014ea9c03ded821235d9c0e52abf8a8a9c8a50420a9ee43f631e1f00",
+      "namedFunctions": [
+        {
+          "name": "C.Create",
+          "line": 6
+        },
+        {
+          "name": "AuraButton",
+          "line": 29
+        },
+        {
+          "name": "C.UpdateAuras",
+          "line": 43
+        },
+        {
+          "name": "C.Stop",
+          "line": 68
+        },
+        {
+          "name": "C.Update",
+          "line": 80
+        }
+      ],
+      "literalEvents": []
+    },
+    "ReferenceArt.lua": {
+      "bytes": 11385,
+      "sha256": "b042e0777110f3a4519ccfadbf57bb4dcbb2e68ca9896f58f066775074605edf",
+      "namedFunctions": [],
+      "literalEvents": []
+    },
+    "ReferenceHUD.lua": {
+      "bytes": 142188,
+      "sha256": "34f1aa82fe87448dba03a2c31a02e9cd198e74896cce024fc8780f2098c5f69c",
+      "namedFunctions": [
+        {
+          "name": "Short",
+          "line": 8
+        },
+        {
+          "name": "R.Amount",
+          "line": 11
+        },
+        {
+          "name": "R.ChatTool",
+          "line": 26
+        },
+        {
+          "name": "R.ChatPlan",
+          "line": 43
+        },
+        {
+          "name": "R.ChatSync",
+          "line": 78
+        },
+        {
+          "name": "R.Has",
+          "line": 79
+        },
+        {
+          "name": "R.ShortcutsHidden",
+          "line": 83
+        },
+        {
+          "name": "Blank",
+          "line": 87
+        },
+        {
+          "name": "Frame",
+          "line": 90
+        },
+        {
+          "name": "NativeHandler",
+          "line": 93
+        },
+        {
+          "name": "R.Create",
+          "line": 97
+        },
+        {
+          "name": "Wheel",
+          "line": 129
+        },
+        {
+          "name": "R.Geometry",
+          "line": 169
+        },
+        {
+          "name": "R.Child",
+          "line": 182
+        },
+        {
+          "name": "R.Opacity",
+          "line": 204
+        },
+        {
+          "name": "R.ApplyOpacity",
+          "line": 207
+        },
+        {
+          "name": "R.Art",
+          "line": 216
+        },
+        {
+          "name": "Label",
+          "line": 274
+        },
+        {
+          "name": "Button",
+          "line": 278
+        },
+        {
+          "name": "R.Fit",
+          "line": 284
+        },
+        {
+          "name": "R.Stop",
+          "line": 307
+        },
+        {
+          "name": "R.PlainDock",
+          "line": 321
+        },
+        {
+          "name": "R.IdentityCut",
+          "line": 350
+        },
+        {
+          "name": "R.TextLayer",
+          "line": 377
+        },
+        {
+          "name": "R.RoundGeometry",
+          "line": 389
+        },
+        {
+          "name": "R.RoundZoom",
+          "line": 395
+        },
+        {
+          "name": "R.Update",
+          "line": 400
+        },
+        {
+          "name": "R.MapRim",
+          "line": 579
+        },
+        {
+          "name": "R.LauncherLabel",
+          "line": 604
+        },
+        {
+          "name": "R.MapRound",
+          "line": 612
+        },
+        {
+          "name": "R.Map",
+          "line": 628
+        },
+        {
+          "name": "R.EffectBox",
+          "line": 695
+        },
+        {
+          "name": "R.EffectIcon",
+          "line": 701
+        },
+        {
+          "name": "R.AmountParts",
+          "line": 707
+        },
+        {
+          "name": "Row",
+          "line": 712
+        },
+        {
+          "name": "R.DamageTabs",
+          "line": 724
+        },
+        {
+          "name": "R.SocketY",
+          "line": 768
+        },
+        {
+          "name": "R.SocketH",
+          "line": 778
+        },
+        {
+          "name": "R.SocketIcon",
+          "line": 779
+        },
+        {
+          "name": "R.DiagHook",
+          "line": 785
+        },
+        {
+          "name": "R.DamageTip",
+          "line": 793
+        },
+        {
+          "name": "Add",
+          "line": 799
+        },
+        {
+          "name": "R.ToggleStats",
+          "line": 820
+        },
+        {
+          "name": "R.StatsCapFor",
+          "line": 821
+        },
+        {
+          "name": "R.StatsPlan",
+          "line": 825
+        },
+        {
+          "name": "R.DmgZone",
+          "line": 839
+        },
+        {
+          "name": "R.DmgDelta",
+          "line": 840
+        },
+        {
+          "name": "R.AccZone",
+          "line": 847
+        },
+        {
+          "name": "R.AccMin",
+          "line": 848
+        },
+        {
+          "name": "R.AccCut",
+          "line": 849
+        },
+        {
+          "name": "R.AccDelta",
+          "line": 854
+        },
+        {
+          "name": "R.AccShape",
+          "line": 860
+        },
+        {
+          "name": "R.AccPlan",
+          "line": 868
+        },
+        {
+          "name": "R.DmgPlan",
+          "line": 881
+        },
+        {
+          "name": "Inset",
+          "line": 906
+        },
+        {
+          "name": "R.CardVisible",
+          "line": 907
+        },
+        {
+          "name": "R.ZoomXY",
+          "line": 915
+        },
+        {
+          "name": "R.RingGeometry",
+          "line": 921
+        },
+        {
+          "name": "Add",
+          "line": 929
+        },
+        {
+          "name": "R.Preferred",
+          "line": 941
+        },
+        {
+          "name": "R.LiveRect",
+          "line": 949
+        },
+        {
+          "name": "R.NoteMoved",
+          "line": 958
+        },
+        {
+          "name": "R.ScreenSize",
+          "line": 978
+        },
+        {
+          "name": "Add",
+          "line": 980
+        },
+        {
+          "name": "R.ScreenBounds",
+          "line": 991
+        },
+        {
+          "name": "R.ApplyClamp",
+          "line": 1000
+        },
+        {
+          "name": "R.ClampToScreen",
+          "line": 1008
+        },
+        {
+          "name": "FixedObstacles",
+          "line": 1025
+        },
+        {
+          "name": "R.PreferredAny",
+          "line": 1042
+        },
+        {
+          "name": "R.StatsRoom",
+          "line": 1054
+        },
+        {
+          "name": "R.GrowSpan",
+          "line": 1069
+        },
+        {
+          "name": "R.AccMaxRows",
+          "line": 1081
+        },
+        {
+          "name": "R.DmgMaxRows",
+          "line": 1089
+        },
+        {
+          "name": "R.BarTestApply",
+          "line": 1101
+        },
+        {
+          "name": "R.BarTest",
+          "line": 1107
+        },
+        {
+          "name": "R.PlayerBarRect",
+          "line": 1120
+        },
+        {
+          "name": "R.BarOverlay",
+          "line": 1126
+        },
+        {
+          "name": "Num",
+          "line": 1140
+        },
+        {
+          "name": "FName",
+          "line": 1141
+        },
+        {
+          "name": "Points",
+          "line": 1147
+        },
+        {
+          "name": "Size",
+          "line": 1158
+        },
+        {
+          "name": "Call",
+          "line": 1159
+        },
+        {
+          "name": "Edges",
+          "line": 1160
+        },
+        {
+          "name": "Scale",
+          "line": 1161
+        },
+        {
+          "name": "R.PlayerBarProbe",
+          "line": 1162
+        },
+        {
+          "name": "R.Probe",
+          "line": 1247
+        },
+        {
+          "name": "PartySame",
+          "line": 1272
+        },
+        {
+          "name": "R.PartyFrames",
+          "line": 1273
+        },
+        {
+          "name": "R.PartyPrepare",
+          "line": 1276
+        },
+        {
+          "name": "R.PartyApply",
+          "line": 1288
+        },
+        {
+          "name": "R.PartyRestore",
+          "line": 1299
+        },
+        {
+          "name": "R.PartyRestoreAll",
+          "line": 1303
+        },
+        {
+          "name": "R.PartyPass",
+          "line": 1305
+        },
+        {
+          "name": "R.Resolve",
+          "line": 1313
+        },
+        {
+          "name": "Opaque",
+          "line": 1321
+        },
+        {
+          "name": "Rank",
+          "line": 1351
+        },
+        {
+          "name": "Free",
+          "line": 1359
+        },
+        {
+          "name": "Hit",
+          "line": 1361
+        },
+        {
+          "name": "SearchY",
+          "line": 1366
+        },
+        {
+          "name": "Search",
+          "line": 1377
+        },
+        {
+          "name": "R.ApplyShift",
+          "line": 1405
+        },
+        {
+          "name": "R.PlanLayout",
+          "line": 1416
+        },
+        {
+          "name": "R.RowIcon",
+          "line": 1435
+        },
+        {
+          "name": "R.Stable",
+          "line": 1441
+        },
+        {
+          "name": "R.HideUnwanted",
+          "line": 1442
+        },
+        {
+          "name": "R.CardRect",
+          "line": 1445
+        },
+        {
+          "name": "R.Window",
+          "line": 1465
+        },
+        {
+          "name": "R.CardTabs",
+          "line": 1474
+        },
+        {
+          "name": "R.MaskBuffs",
+          "line": 1498
+        },
+        {
+          "name": "R.LairList",
+          "line": 1509
+        },
+        {
+          "name": "Tint",
+          "line": 1512
+        },
+        {
+          "name": "R.Panels",
+          "line": 1539
+        },
+        {
+          "name": "Wide",
+          "line": 1614
+        },
+        {
+          "name": "Wide",
+          "line": 1664
+        },
+        {
+          "name": "R.Settings",
+          "line": 1758
+        },
+        {
+          "name": "R.Buffs",
+          "line": 1773
+        }
+      ],
+      "literalEvents": []
+    },
+    "ZoneThemes.lua": {
+      "bytes": 42736,
+      "sha256": "c588ceda15b16c30868d4fbc19b5b0be1e32d561c19af5a5dbf572d894a1843a",
+      "namedFunctions": [
+        {
+          "name": "C.NormalizeScales",
+          "line": 21
+        },
+        {
+          "name": "C.ElementScale",
+          "line": 29
+        },
+        {
+          "name": "C.SetElementScale",
+          "line": 33
+        },
+        {
+          "name": "C.Elements",
+          "line": 45
+        },
+        {
+          "name": "Add",
+          "line": 48
+        },
+        {
+          "name": "C.BossScales",
+          "line": 62
+        },
+        {
+          "name": "C.NormalizePositions",
+          "line": 69
+        },
+        {
+          "name": "C.Position",
+          "line": 83
+        },
+        {
+          "name": "C.Place",
+          "line": 89
+        },
+        {
+          "name": "C.Remember",
+          "line": 95
+        },
+        {
+          "name": "C.Finish",
+          "line": 118
+        },
+        {
+          "name": "C.Bind",
+          "line": 122
+        },
+        {
+          "name": "C.DetailHandle",
+          "line": 134
+        },
+        {
+          "name": "Start",
+          "line": 144
+        },
+        {
+          "name": "C.Resolve",
+          "line": 153
+        },
+        {
+          "name": "C.Suspend",
+          "line": 159
+        },
+        {
+          "name": "C.NativeRestore",
+          "line": 173
+        },
+        {
+          "name": "C.NativeReplace",
+          "line": 181
+        },
+        {
+          "name": "C.Mask",
+          "line": 203
+        },
+        {
+          "name": "C.ShapeLabel",
+          "line": 210
+        },
+        {
+          "name": "C.Refresh",
+          "line": 215
+        },
+        {
+          "name": "C.Sample",
+          "line": 284
+        },
+        {
+          "name": "C.Stack",
+          "line": 300
+        },
+        {
+          "name": "Walk",
+          "line": 302
+        },
+        {
+          "name": "FrameState",
+          "line": 324
+        },
+        {
+          "name": "C.GearState",
+          "line": 331
+        },
+        {
+          "name": "C.GearEvents",
+          "line": 338
+        },
+        {
+          "name": "C.Tick",
+          "line": 353
+        },
+        {
+          "name": "C.ApplyOpacity",
+          "line": 371
+        },
+        {
+          "name": "C.SetHudScale",
+          "line": 383
+        },
+        {
+          "name": "C.Set",
+          "line": 391
+        },
+        {
+          "name": "C.ToggleNativeMeter",
+          "line": 402
+        },
+        {
+          "name": "C.Open",
+          "line": 406
+        },
+        {
+          "name": "C.Diagnostic",
+          "line": 425
+        },
+        {
+          "name": "Slash",
+          "line": 430
+        },
+        {
+          "name": "C.Command",
+          "line": 438
+        },
+        {
+          "name": "FieldKitThemeUI",
+          "line": 493
+        },
+        {
+          "name": "Button",
+          "line": 497
+        },
+        {
+          "name": "C.CycleElement",
+          "line": 549
+        },
+        {
+          "name": "C.RefreshElementUI",
+          "line": 555
         }
       ],
       "literalEvents": []
@@ -3080,6 +4565,641 @@
       "sha256": "65ff5ae1cc052c7ab36fe8d41a41cbd38f3356a0c4f83b93be96cd7fdcfeafa3"
     },
     {
+      "path": "media/ReferenceHUD/elwynn_alternative_chat_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "7dff611769467914b35aacd6aece390d4b5624ae20ae92afc8e69736c1c96680"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_dock_1_v3.tga",
+      "bytes": 1048620,
+      "sha256": "3e1f4a69409135402aeaa2741db54b64d3bd01169fe73f324ea0ed7908de7c41"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_dock_2_v3.tga",
+      "bytes": 1048620,
+      "sha256": "6293e8628092ecf0e85db69afc22d22ac3be7fc5b6cdd44783559be886336a08"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_dock_3_v3.tga",
+      "bytes": 524332,
+      "sha256": "cd6062fc8147649d69cd9fd388b1a8e508e649ec7f117034441dbd9b1f3b710a"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_header_1_v3.tga",
+      "bytes": 1048620,
+      "sha256": "e05ef748cb4eadf1dfd371a7699ce2198cc7ea545c10b7f88f4400e768b39d59"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_identity_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "79f64c1b362febcdcf82179b966235af5ee3121610588bd2bed18fcf7df5f33d"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_mapArt_1_v3.tga",
+      "bytes": 1048620,
+      "sha256": "d590c583f0d5e971c5e8105924913f0d19b32721445ef25c0d51c6eea31a82f5"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_nav_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "243647e78c99934877ec6d94530e831f175e572b8c6dbc6368f5b1323ce76c1d"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_nav_2_v3.tga",
+      "bytes": 131116,
+      "sha256": "353fdc2cc7448be189d6ea4b55f91132c3ea89ef5a33e9567e845626c746f945"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_preview.tga",
+      "bytes": 131116,
+      "sha256": "064c40bd05b3e87b3f8f5f08ea64102fda9bde4ac7a5103745c67a36b01271a0"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_vitality_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "99b07cafe5ea9ee59c6924158b87df9245427f2792e91fcfb610096a47aec673"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_vitality_2_v3.tga",
+      "bytes": 262188,
+      "sha256": "d38b5e01779659a1a7ce6a9aa5e6fab96cd93f91738e774204761c2621943615"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_xpArt_1_v3.tga",
+      "bytes": 131116,
+      "sha256": "68b36f3cbad3cd7038aea38ca40c0e03a234721a7e239cb32d9cc9e0dbc90147"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_xpArt_2_v3.tga",
+      "bytes": 131116,
+      "sha256": "443664f4d8516d7e6fe5b0b9c41d9fdd42e35666ff2fe72c9b219120e5cee861"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_xpArt_3_v3.tga",
+      "bytes": 131116,
+      "sha256": "35fe5602f1169888fad7fde0370a566a3cacaa996ffea25eb6bb529fd95a8c06"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_xpArt_4_v3.tga",
+      "bytes": 65580,
+      "sha256": "6ddc1b6a9c0994d7d83e1a868b826ab9833fdaab4981df92c055cfa9cf397fc5"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_alternative_xpBadge_1_v3.tga",
+      "bytes": 65580,
+      "sha256": "9b9b46f1455045444b301bbcba1bc43ff4eaacd08840c66d9b67809f90acf669"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_banner.tga",
+      "bytes": 32812,
+      "sha256": "0608977aa53b1b0ac6b671f5650f2c42192a5187b42dfb6d2053a7cbe635c1f5"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_card_body_v9.tga",
+      "bytes": 16428,
+      "sha256": "8ef3e1833370f968369a7bf9000f88af8d642c8dc9eeb9d1a72d6766d96a812b"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Accessories_1.tga",
+      "bytes": 524332,
+      "sha256": "69dc996194b0755515b228a55a89a827302eef087daa337d30d46f63486aa534"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Accessories_1_frame.tga",
+      "bytes": 524332,
+      "sha256": "2948a68f75e9903c82bda410fc5b7602e26f4a69f70b47dfc12c5e20c36c15bf"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Damage_1.tga",
+      "bytes": 1048620,
+      "sha256": "5e8c45aaf24e3c1f23774f488119404a819066cd3fbae1b9379c18cd7281d516"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Damage_1_body.tga",
+      "bytes": 1048620,
+      "sha256": "b24e6cb5b8787821e1ff3258a6e568e4c5121e6bd5c62943137612e35dfabf5f"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Damage_1_frame.tga",
+      "bytes": 1048620,
+      "sha256": "96d02e23b7c530e0e67c58ff04aebaff63d8166fb0f480bded4894ff82d48ac3"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Effects_1.tga",
+      "bytes": 262188,
+      "sha256": "fa07d867b03e594df542595d026f366020890c74d4ce2c90732a1783118438e1"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Effects_1_body.tga",
+      "bytes": 262188,
+      "sha256": "0fb18fa63c8e2aebe0fd241166e071b57ef69db9f255ac9e009d1429d3ee6c72"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Effects_1_frame.tga",
+      "bytes": 262188,
+      "sha256": "039a642aa74cd6559b58d20851e9682edd997b606c9e1cf0460a21769d600223"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Lairs_1.tga",
+      "bytes": 524332,
+      "sha256": "ce62a4d0ab5bb66de0f6b9978902c0a0f16565aa3bf14e855da0bf57539bd7e5"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Lairs_1_body.tga",
+      "bytes": 524332,
+      "sha256": "9b45ada4d3eedc2e05163300f0092e8de7d5b76bd55096cc23fdc4ebb28fd474"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Lairs_1_frame.tga",
+      "bytes": 524332,
+      "sha256": "78f7af712a2700461536ac8a408d7d19003fbd7999a4d713eba3a20cbf759e78"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Stats_1.tga",
+      "bytes": 524332,
+      "sha256": "d8f39964bf02d8a5ad6b2bd4b4b6dbaf991cbb548d72447eb4c744f8b6312659"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Stats_1_body.tga",
+      "bytes": 524332,
+      "sha256": "8f90e551008ea0550c7651e6fa74b29ae4e6b841728e69876cd61953e12010c6"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_Stats_1_frame.tga",
+      "bytes": 524332,
+      "sha256": "7f9aaf4ee1503103ded40689284363ea0787b62a957c621225189cb44cfe2212"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_chat_1.tga",
+      "bytes": 262188,
+      "sha256": "8a942d7e406f99627312454b4c26ed0850cdd73c4b223a7cc7408832e564293f"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_dock_1.tga",
+      "bytes": 524332,
+      "sha256": "666c56d0ed23d92fc7792cc15821adfe0538b8e3ab4477994482aea3e5e4c306"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_dock_2.tga",
+      "bytes": 524332,
+      "sha256": "98ac1938b7c65cdabd50db30ea63d9c419ab490631420005e43f15d7a87884bf"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_dock_3.tga",
+      "bytes": 16428,
+      "sha256": "04f9ef075c50d93e29a105cc049d7c1384621c44f98e4d2a91ae710aa51e08ad"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_header_1.tga",
+      "bytes": 262188,
+      "sha256": "7fa078021a835e1e09d09c278eb676d303348b6b9e20907fad682fa9789bb1e2"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_header_2.tga",
+      "bytes": 32812,
+      "sha256": "cacf22de22d57ef2e1834104c2334d60e78036bf1c02fa1ffbd86561c795f7d9"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_identity_1.tga",
+      "bytes": 1048620,
+      "sha256": "34c40c902fd0607f037047a5f3fc2307fcdc7701a1fe872692ac1d419f3e217e"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_nav_1.tga",
+      "bytes": 262188,
+      "sha256": "7fdb13fe86a2c1a891868d63d337dd778d88941737ecd03ce12503aa292e5460"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_preview.tga",
+      "bytes": 131116,
+      "sha256": "623c2111368dd06aa3033ad23f314c777170f45dad69a516565fd6cdd086f6bd"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_vitality_1.tga",
+      "bytes": 524332,
+      "sha256": "5c270699f94d0cc67c481e194cb1dee65f4754e82827842db08f2c7c6d60f0c3"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_complete_vitality_slot_overlay.tga",
+      "bytes": 32812,
+      "sha256": "091f7d7d963985dbca18f11474eec1a344641e4feb3a6bf11a20c34fa48d8696"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_material_v3.tga",
+      "bytes": 1048620,
+      "sha256": "7a885080573195b3b77bc22c40395051ae00931770f7f389f9b3b3cf942cb05a"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_chat_1.tga",
+      "bytes": 262188,
+      "sha256": "03dfff98afbf7b3c4e7ecec5303cefa9781e9e32050ba4106e2648a1a3061c87"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_dock_1.tga",
+      "bytes": 524332,
+      "sha256": "a53594002a61cbf9b3cfc86856f0427a072f20ba317e02e3dacb84047fefbc9e"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_dock_2.tga",
+      "bytes": 524332,
+      "sha256": "f693d95fc45c8c041604ead82ee3c0a1f86133bd77f56367b8f99315ca5acba2"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_header_1.tga",
+      "bytes": 262188,
+      "sha256": "99951cf23029edea03aa88df65476328f00ecf541bb005ebb5aa7831b4cff003"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_header_2.tga",
+      "bytes": 65580,
+      "sha256": "9fa5ed4f2401c46b5359f61c445b2e02107fde745afbadb75e87fab7033dbd34"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_identity_1.tga",
+      "bytes": 262188,
+      "sha256": "feac18cbc1208ddd7a4de415918d86ac326473277afd123418be9d5bb7c4eb49"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_mapArt_1.tga",
+      "bytes": 262188,
+      "sha256": "3a7141380bee2b04811cc440e52b99b05a2cab032fbc25d64e14fc93b66ee781"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_nav_1.tga",
+      "bytes": 262188,
+      "sha256": "b0cbfed0520c3d84b17ba1ee20cceff3f6812e3b2d6510ffb392313f38858b8b"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_preview.tga",
+      "bytes": 131116,
+      "sha256": "067e45c6bf119a084c82ffaea91793b3eb8962e54c8620cd3e8871f88f559b98"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_utility_1.tga",
+      "bytes": 65580,
+      "sha256": "cea86e4e322cb5246d63a5141af65d53c85ce209c05177ff3e823031362137a1"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_minimal_vitality_1.tga",
+      "bytes": 262188,
+      "sha256": "6dd2f4b85b3caa9aaafe8c9d8bcfffb1bc3418914b60b6bb63efb73d12cbfe71"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_seal_v3.tga",
+      "bytes": 65580,
+      "sha256": "91dcec857fb2abc912670e03860cc801863f9eeefe8b2111beebebe599037e54"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_settings_window_1.tga",
+      "bytes": 1048620,
+      "sha256": "4214ada040d88e2864fb6c0a2371edc2fe1f68d7f24decd3dd8151bb7ee32dd3"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_settings_window_2.tga",
+      "bytes": 1048620,
+      "sha256": "f821ca97fdb4010ed8cb5fa9d8e1138f20e0c886bc3c2f8608caa8c256014bb8"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_settings_window_3.tga",
+      "bytes": 1048620,
+      "sha256": "06849656b22934fdeb79c9ad3031c7bf0029818442f89001bdd677516182f445"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_settings_window_4.tga",
+      "bytes": 1048620,
+      "sha256": "8d0c26a9d88422e3fff8809b8e9203e37c7f0a15cf1d07581b35373cf85df4fa"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_settings_window_5.tga",
+      "bytes": 1048620,
+      "sha256": "f3914397cf73952a94158fbd5e3cabdcb3a8008833feb4924e89fb4fdc96fb71"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_settings_window_6.tga",
+      "bytes": 1048620,
+      "sha256": "e7a40d017dd50f88de3796c85f52ffafe23281174ee0b12a898a1ac61bafc792"
+    },
+    {
+      "path": "media/ReferenceHUD/elwynn_thumb_v3.tga",
+      "bytes": 65580,
+      "sha256": "c92b98d5799d16731d9215f0bdd8c37afcf99d9484868fa6e732cbc1735e3da8"
+    },
+    {
+      "path": "media/ReferenceHUD/map_round_medallion.tga",
+      "bytes": 1048620,
+      "sha256": "7ce77c1d93400b363ac0d828ed78ab08020c684d063a43b6070918cff5558042"
+    },
+    {
+      "path": "media/ReferenceHUD/map_round_ring.tga",
+      "bytes": 262188,
+      "sha256": "598d6fc9b793796ea3954f0b58f5fc154ac5e34553fb2c0e63b99df25256b7e9"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_chat_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "fd7d1d22fa52312081e611927eff958d2b6d50b2b13d8a608e8bca49407d44fa"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_dock_1_v3.tga",
+      "bytes": 1048620,
+      "sha256": "a59827082f249fca253af45dab8b0da160f0333693b460c3769e99afd8e64833"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_dock_2_v3.tga",
+      "bytes": 1048620,
+      "sha256": "3bc44e436e5aa9eac07429671dab55c615d04b75fdb79931f44b93b1b7739b79"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_dock_3_v3.tga",
+      "bytes": 262188,
+      "sha256": "2d1f80db6e210bc827e8a53829f8a712dd89ea35f58dc1848263b9db0b8f9474"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_header_1_v3.tga",
+      "bytes": 524332,
+      "sha256": "2f8fb4065370652976866c640f9aba393136c383bad9f8051433449bb3f2b4fa"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_identity_1_v3.tga",
+      "bytes": 524332,
+      "sha256": "6ecf4b88fc7d09fa3da27c358f7b8c0648dd6c77fe33176bd201a93ea62c0b19"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_nav_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "6af6091eda816535cbec7858eede0723c4f2b17e8721c05c019c2d1af333e73a"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_preview.tga",
+      "bytes": 131116,
+      "sha256": "44be706a7976de1fa321f03d9a6708b43d68312fc0e84804712ef48f504372c7"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_vitality_1_v3.tga",
+      "bytes": 524332,
+      "sha256": "ec97a3ed1d1b5f3533dc8f78162453af1cc757cf5b47de955487626e5bc1b435"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_xpArt_1_v3.tga",
+      "bytes": 131116,
+      "sha256": "4c3c88f7a6df03ddcdb76cf5944fc1bd198c67ff5c153223469f5f0bd3507eb1"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_xpArt_2_v3.tga",
+      "bytes": 131116,
+      "sha256": "f89dc728b69d7ea732526f701c6b15e9c81be90a73752afa0109cc51ac1caa0b"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_xpArt_3_v3.tga",
+      "bytes": 131116,
+      "sha256": "bffa1c71187660126bc0b0ab34b30ce208c88c63a0b5b1e0d695cde0ef525ce3"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_xpArt_4_v3.tga",
+      "bytes": 65580,
+      "sha256": "ef5037dbb505af18ff435f8544a93cfe7a23dc6e9c4d198913cf377f1eaf71e0"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_alternative_xpBadge_1_v3.tga",
+      "bytes": 65580,
+      "sha256": "3447b28a893e7d11ad66d2a09049928a61d565dd6e50c7ddb127c0b7f7645555"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_card_body_v9.tga",
+      "bytes": 16428,
+      "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Accessories_1.tga",
+      "bytes": 524332,
+      "sha256": "f87bf1b1a6ad9bae717999b5574cee0829fdc9bd83945f796ec34950849662bd"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Accessories_1_frame.tga",
+      "bytes": 524332,
+      "sha256": "06cda36efc1ca9d0203b7336153f02caa7782d4d143ff8d75fb8939592fd2f07"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Damage_1.tga",
+      "bytes": 1048620,
+      "sha256": "c420985d79ebdcb7b8880df29203e4ffb81c6181e7f0853be3a0b9d4dbef6241"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Damage_1_body.tga",
+      "bytes": 1048620,
+      "sha256": "78689fee8fe7f7eabd633385463184f08e93ea5077b405c6d9aec9b30ee0d38d"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Damage_1_frame.tga",
+      "bytes": 1048620,
+      "sha256": "90b8fbc12bb8e35edd0c19b3138d5e1aeb298348bc2dff2d168d2d4cd8858466"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Effects_1.tga",
+      "bytes": 262188,
+      "sha256": "e9634d5c0f25d4e6b4e8b68deffd2b2214b79f1c259cc70a3b910e4450209e92"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Effects_1_body.tga",
+      "bytes": 262188,
+      "sha256": "4733253d561929e18121b1f94bb44960f03369ed1ecb109bcfe6740e15e1f005"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Effects_1_frame.tga",
+      "bytes": 262188,
+      "sha256": "2b31161c3d03a18e498cbf2c97d2de6e69d89e16deb7afd3725d7068e3717fb8"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Lairs_1.tga",
+      "bytes": 524332,
+      "sha256": "7a75887440132a57e69c941cb77e43171ca6e674b073093bba6c150a36c9f71a"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Lairs_1_body.tga",
+      "bytes": 524332,
+      "sha256": "32ebca66e0cc1d8f16f937b4f37031a2532c5b1259186e6cb996a0410721162e"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Lairs_1_frame.tga",
+      "bytes": 524332,
+      "sha256": "24e62d35ecdf5802567405a7e0836855f34c2f351c04046610b80037a09811a1"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Stats_1.tga",
+      "bytes": 524332,
+      "sha256": "330550d5003f629aafccc77c3094c2fb818348425c3b49320129b2d1a9e8cdf7"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Stats_1_body.tga",
+      "bytes": 524332,
+      "sha256": "e2d564307c0f1d2d8c48b5892b4c88dc4d4fa454a982f60c14ec960f9cc5cbe4"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_Stats_1_frame.tga",
+      "bytes": 524332,
+      "sha256": "1f2bba6bff44292618d0ecd990530665c00a235b3b591b1ddffbaebe81974835"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_chat_1.tga",
+      "bytes": 1048620,
+      "sha256": "5dead8308521bebec6d52a9bf907c33ce8be1c57e889491d0207716fb4ab53a2"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_dock_1.tga",
+      "bytes": 1048620,
+      "sha256": "fcc48f7122cc6c6bfe33a86d42165143b52340af5ef4181e88fba4ff1cf1c443"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_dock_2.tga",
+      "bytes": 1048620,
+      "sha256": "df89774c27f8826b3c64ec595eebf735081355936176e5d0a327201f0d55671f"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_dock_3.tga",
+      "bytes": 131116,
+      "sha256": "5e691759ec5ec73405f2eaf47deb58bb4071c72cc9c3d7e38c8fc468a6e3c971"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_header_1.tga",
+      "bytes": 262188,
+      "sha256": "49824992c23511e27495ceaaa2f967060b580055dacd637b87b50cdd768f5881"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_header_2.tga",
+      "bytes": 262188,
+      "sha256": "8e0a36f2d2c727401cfba84e24c4704a140f5fa53a63068cd5f167bb2d670715"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_identity_1.tga",
+      "bytes": 262188,
+      "sha256": "285117b9bccaf27d69ba61ed002d0fe7f323c89b29e37ed02d8458808913f3ac"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_mapArt_1.tga",
+      "bytes": 1048620,
+      "sha256": "5e3b615fc7c2509cd08743e078eedc0894520ca00ec39169177599c348f821a5"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_preview.tga",
+      "bytes": 131116,
+      "sha256": "16c624f6763e3ae193208e72d5de48029ea988292e8237d4e9e457836533ee1e"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_vitality_1.tga",
+      "bytes": 262188,
+      "sha256": "a09ccd3c84aecd22aec8dfca0e91f1714b9aa08c6e5d6be1c04b98cba3eff48f"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_complete_vitality_2.tga",
+      "bytes": 4140,
+      "sha256": "c193837dc1f32f6edd9459ab6862b768fb8188d09f0ba98424135f143f91fcf2"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_material_v3.tga",
+      "bytes": 1048620,
+      "sha256": "90bb25548996a990fb6a037e9d3e037a379bbfcde3d3646d3d06a27b4eecccc9"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_chat_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "650b2fabd13d8f6dc747e57a46f6021d1ba9041d6323333d5204c9f4e7218205"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_dock_1_v3.tga",
+      "bytes": 1048620,
+      "sha256": "1d6fe193e5f108a3a9601c2715f68ef099933a72dc4aef52c0d2c657976e5edd"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_dock_2_v3.tga",
+      "bytes": 1048620,
+      "sha256": "2f2d2c4ffed0ee2f0ad043ec589a70eebde2f558e1f08285d908304fad0ad88e"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_dock_3_v3.tga",
+      "bytes": 131116,
+      "sha256": "91d13a3dbceba3e50c6161d3b8fa1009e34159eff232b12ff9d9d50a617cdf79"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_header_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "b5ec26d3a03b36d1a60a275e613e63562ab991a044eeaf08f4a5bf1f6336d6f5"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_header_2_v3.tga",
+      "bytes": 262188,
+      "sha256": "025f9821dfeb02696e66deed5a081e92de0c67120a2e1c5645078365fe74adf9"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_identity_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "ec47afdf8e79d27571927c582fc5657ee02da0f509faccef5972bcdb4b69a700"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_mapArt_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "97bfe59baa604bba2bffa794cb637b9de1b07c96eb3d16f5198738a9d66488f3"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_nav_1_v3.tga",
+      "bytes": 131116,
+      "sha256": "b35b14583e134c4d1bb79c2f5dccb20a12e62c184eede5504e655fcc80c81fb4"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_preview.tga",
+      "bytes": 131116,
+      "sha256": "c2cab6e7780828370c9d32bab971881ac0a1e16863fd8ac373e8157bb587070c"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_vitality_1_v3.tga",
+      "bytes": 262188,
+      "sha256": "35650ed3917f73b1445aeef63bbc73204bb21b33ab038371279af55792fc663b"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_minimal_vitality_2_v3.tga",
+      "bytes": 32812,
+      "sha256": "7ee83f5047eb72e9204a8100acd7a187aca7e1972c31336a4b7c14faf1034a92"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_seal_v3.tga",
+      "bytes": 65580,
+      "sha256": "f74e7c323495edb289b34f5d096a4675f3d11c0c1f052966a68fd30357016c98"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_settings_window_1.tga",
+      "bytes": 1048620,
+      "sha256": "b0ef8eb479768a6ce5d7aea61d28ec09e85e279c780064360dd0f9fc1224e680"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_settings_window_2.tga",
+      "bytes": 1048620,
+      "sha256": "cc23e320981ccdbe3cc0b071ed0cb6601e34b657c84a74163d260d2e56957b84"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_settings_window_3.tga",
+      "bytes": 1048620,
+      "sha256": "5b7a625686722e06c896c188a2b0a0085edefb3b9667403b61efa8db5080bb8b"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_settings_window_4.tga",
+      "bytes": 1048620,
+      "sha256": "0c4696ead2a14c4d1c5ac4fc7a84b287bad1d1f9a931996affc6972aeb5ead24"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_settings_window_5.tga",
+      "bytes": 1048620,
+      "sha256": "70b451e799d2b7e7fd9bec179e364dc9954de01e20951fa2b4b892833cad372d"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_settings_window_6.tga",
+      "bytes": 1048620,
+      "sha256": "fe126833f86a09e819ad632538cbddf7c81f5fb7bca8e90c065adf74811cee16"
+    },
+    {
+      "path": "media/ReferenceHUD/naxx_thumb_v3.tga",
+      "bytes": 65580,
+      "sha256": "aa56fe48161ff9f89ac3ab1dc948a6c4569b74e2581cb91f231b770a813bee44"
+    },
+    {
       "path": "media/WorldMarkers/aura.tga",
       "bytes": 65580,
       "sha256": "bd412b2764a07146e5f5d55602b31bd5a72355169ba1268e9f61b0662d0451bd"
@@ -3133,6 +5253,36 @@
       "path": "media/WorldMarkers/spawn.tga",
       "bytes": 262188,
       "sha256": "874c12802d23330379d313749f2c9c2ec3ae9934967210ea08769faee5189a42"
+    },
+    {
+      "path": "media/ZoneThemes/elwynnDock512.tga",
+      "bytes": 524332,
+      "sha256": "010e06afb52e6e2dfbe433360e836a6e310e5873c2ab8dfc6c1cab5f56d1d478"
+    },
+    {
+      "path": "media/ZoneThemes/elwynnFrame512.tga",
+      "bytes": 1048620,
+      "sha256": "3b21f5dd7329c259b2fa41e5b7f7043acf6fdc99a488f0bb7030629396b91e0f"
+    },
+    {
+      "path": "media/ZoneThemes/elwynnOrnaments512.tga",
+      "bytes": 524332,
+      "sha256": "7d57b8ae6f6f5014300d5d546b2c956d03e4e51146a8e244f2a989147e0bcc3e"
+    },
+    {
+      "path": "media/ZoneThemes/naxxDock512.tga",
+      "bytes": 524332,
+      "sha256": "c4d9890ed54c110aea19012a05ab6dad68bd6dcd38d6171ac67db9f6d2274365"
+    },
+    {
+      "path": "media/ZoneThemes/naxxFrame512.tga",
+      "bytes": 1048620,
+      "sha256": "5ea0106e01c37fabdffffa686d0708c929726391e40b1590d93f0a879a5c9fd4"
+    },
+    {
+      "path": "media/ZoneThemes/naxxOrnaments512.tga",
+      "bytes": 524332,
+      "sha256": "333f1400a7d967284d7a4de5e60fe47b71f7f8f63133d90e1c6ad875e20d9a3a"
     }
   ],
   "themeMedia": {
@@ -3235,22 +5385,791 @@
     "media/ChronicleGlyph16.tga": {
       "sha256": "ea117d4d4c7d485b6ba06f9fe445d465d093e1092e874cef95fef62024881141",
       "bytes": 262188
+    },
+    "media/ZoneThemes/elwynnOrnaments512.tga": {
+      "sha256": "7d57b8ae6f6f5014300d5d546b2c956d03e4e51146a8e244f2a989147e0bcc3e",
+      "bytes": 524332,
+      "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
+      "sourcePngSha256": "865100f15c14bdd6fa8a220ee10869024c4c12fe135c08ddd5cff857ae625118"
+    },
+    "media/ZoneThemes/naxxOrnaments512.tga": {
+      "sha256": "333f1400a7d967284d7a4de5e60fe47b71f7f8f63133d90e1c6ad875e20d9a3a",
+      "bytes": 524332,
+      "source": "AI-generated ornamental interpretation using documented WoW model references; not official Blizzard asset",
+      "sourcePngSha256": "ace5064fb783d268a39e8a3bda377ce3d28d3b851e3e421dd94bfc585e32403c"
+    },
+    "media/ZoneThemes/elwynnFrame512.tga": {
+      "sha256": "3b21f5dd7329c259b2fa41e5b7f7043acf6fdc99a488f0bb7030629396b91e0f",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "786c887da18055f833209943f79d1895d1c967e8d53045c689e65ad494363779"
+    },
+    "media/ZoneThemes/naxxFrame512.tga": {
+      "sha256": "5ea0106e01c37fabdffffa686d0708c929726391e40b1590d93f0a879a5c9fd4",
+      "bytes": 1048620,
+      "source": "Generated with built-in image tool for nine-slice HUD materials, matching approved zone concepts; no baked text or data.",
+      "sourcePngSha256": "950662bfe3ef4689a8e83c7c5a3d530606a9d8439c49ebcef0bf7fc86ac61346"
+    },
+    "media/ZoneThemes/elwynnDock512.tga": {
+      "sha256": "010e06afb52e6e2dfbe433360e836a6e310e5873c2ab8dfc6c1cab5f56d1d478",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "86b7c81351a75ffe8131f51b880d8d2b7c6a99acdeac51c36187b7600cf69115"
+    },
+    "media/ZoneThemes/naxxDock512.tga": {
+      "sha256": "c4d9890ed54c110aea19012a05ab6dad68bd6dcd38d6171ac67db9f6d2274365",
+      "bytes": 524332,
+      "source": "AI-generated sculpted UI ornament based on approved concept; decorative character interpretations, not official Blizzard assets. All text, bars, icons and values are native live UI.",
+      "sourcePngSha256": "af7c6a12761a96e44dceb0b1571a120f6e6db3f851920633ed04ae850e727d60"
+    },
+    "media/ReferenceHUD/elwynn_complete_identity_1.tga": {
+      "sha256": "34c40c902fd0607f037047a5f3fc2307fcdc7701a1fe872692ac1d419f3e217e",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_header_1.tga": {
+      "sha256": "7fa078021a835e1e09d09c278eb676d303348b6b9e20907fad682fa9789bb1e2",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_header_2.tga": {
+      "sha256": "cacf22de22d57ef2e1834104c2334d60e78036bf1c02fa1ffbd86561c795f7d9",
+      "bytes": 32812,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_vitality_1.tga": {
+      "sha256": "5c270699f94d0cc67c481e194cb1dee65f4754e82827842db08f2c7c6d60f0c3",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1.tga": {
+      "sha256": "ce62a4d0ab5bb66de0f6b9978902c0a0f16565aa3bf14e855da0bf57539bd7e5",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1.tga": {
+      "sha256": "5e8c45aaf24e3c1f23774f488119404a819066cd3fbae1b9379c18cd7281d516",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Accessories_1.tga": {
+      "sha256": "69dc996194b0755515b228a55a89a827302eef087daa337d30d46f63486aa534",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1.tga": {
+      "sha256": "d8f39964bf02d8a5ad6b2bd4b4b6dbaf991cbb548d72447eb4c744f8b6312659",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1.tga": {
+      "sha256": "fa07d867b03e594df542595d026f366020890c74d4ce2c90732a1783118438e1",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_dock_1.tga": {
+      "sha256": "666c56d0ed23d92fc7792cc15821adfe0538b8e3ab4477994482aea3e5e4c306",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_dock_2.tga": {
+      "sha256": "98ac1938b7c65cdabd50db30ea63d9c419ab490631420005e43f15d7a87884bf",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_dock_3.tga": {
+      "sha256": "04f9ef075c50d93e29a105cc049d7c1384621c44f98e4d2a91ae710aa51e08ad",
+      "bytes": 16428,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_chat_1.tga": {
+      "sha256": "8a942d7e406f99627312454b4c26ed0850cdd73c4b223a7cc7408832e564293f",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_complete_nav_1.tga": {
+      "sha256": "7fdb13fe86a2c1a891868d63d337dd778d88941737ecd03ce12503aa292e5460",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "892132424ee8eaaa9ae7a555cdfdff37cb8ea115e0d0a219faa6712bc4b33a73"
+    },
+    "media/ReferenceHUD/elwynn_minimal_identity_1.tga": {
+      "sha256": "feac18cbc1208ddd7a4de415918d86ac326473277afd123418be9d5bb7c4eb49",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_header_1.tga": {
+      "sha256": "99951cf23029edea03aa88df65476328f00ecf541bb005ebb5aa7831b4cff003",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_header_2.tga": {
+      "sha256": "9fa5ed4f2401c46b5359f61c445b2e02107fde745afbadb75e87fab7033dbd34",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_vitality_1.tga": {
+      "sha256": "6dd2f4b85b3caa9aaafe8c9d8bcfffb1bc3418914b60b6bb63efb73d12cbfe71",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_dock_1.tga": {
+      "sha256": "a53594002a61cbf9b3cfc86856f0427a072f20ba317e02e3dacb84047fefbc9e",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_dock_2.tga": {
+      "sha256": "f693d95fc45c8c041604ead82ee3c0a1f86133bd77f56367b8f99315ca5acba2",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_chat_1.tga": {
+      "sha256": "03dfff98afbf7b3c4e7ecec5303cefa9781e9e32050ba4106e2648a1a3061c87",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_utility_1.tga": {
+      "sha256": "cea86e4e322cb5246d63a5141af65d53c85ce209c05177ff3e823031362137a1",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_nav_1.tga": {
+      "sha256": "b0cbfed0520c3d84b17ba1ee20cceff3f6812e3b2d6510ffb392313f38858b8b",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/elwynn_minimal_mapArt_1.tga": {
+      "sha256": "3a7141380bee2b04811cc440e52b99b05a2cab032fbc25d64e14fc93b66ee781",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "8a645c1234ee77ce00788a8df7d887115f8819d129aaf293c298a3decdc9f2d5"
+    },
+    "media/ReferenceHUD/naxx_complete_identity_1.tga": {
+      "sha256": "285117b9bccaf27d69ba61ed002d0fe7f323c89b29e37ed02d8458808913f3ac",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_header_1.tga": {
+      "sha256": "49824992c23511e27495ceaaa2f967060b580055dacd637b87b50cdd768f5881",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_header_2.tga": {
+      "sha256": "8e0a36f2d2c727401cfba84e24c4704a140f5fa53a63068cd5f167bb2d670715",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_vitality_1.tga": {
+      "sha256": "a09ccd3c84aecd22aec8dfca0e91f1714b9aa08c6e5d6be1c04b98cba3eff48f",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_vitality_2.tga": {
+      "sha256": "c193837dc1f32f6edd9459ab6862b768fb8188d09f0ba98424135f143f91fcf2",
+      "bytes": 4140,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_dock_1.tga": {
+      "sha256": "fcc48f7122cc6c6bfe33a86d42165143b52340af5ef4181e88fba4ff1cf1c443",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_dock_2.tga": {
+      "sha256": "df89774c27f8826b3c64ec595eebf735081355936176e5d0a327201f0d55671f",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_dock_3.tga": {
+      "sha256": "5e691759ec5ec73405f2eaf47deb58bb4071c72cc9c3d7e38c8fc468a6e3c971",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_chat_1.tga": {
+      "sha256": "5dead8308521bebec6d52a9bf907c33ce8be1c57e889491d0207716fb4ab53a2",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1.tga": {
+      "sha256": "c420985d79ebdcb7b8880df29203e4ffb81c6181e7f0853be3a0b9d4dbef6241",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1.tga": {
+      "sha256": "7a75887440132a57e69c941cb77e43171ca6e674b073093bba6c150a36c9f71a",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Accessories_1.tga": {
+      "sha256": "f87bf1b1a6ad9bae717999b5574cee0829fdc9bd83945f796ec34950849662bd",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1.tga": {
+      "sha256": "330550d5003f629aafccc77c3094c2fb818348425c3b49320129b2d1a9e8cdf7",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1.tga": {
+      "sha256": "e9634d5c0f25d4e6b4e8b68deffd2b2214b79f1c259cc70a3b910e4450209e92",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/ReferenceHUD/naxx_complete_mapArt_1.tga": {
+      "sha256": "5e3b615fc7c2509cd08743e078eedc0894520ca00ec39169177599c348f821a5",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "14eedcbbedc4a276b2efeac32cfd42116d849b0a65e22362580178a61220d160"
+    },
+    "media/NotoSerif-Regular.ttf": {
+      "sha256": "c8f669ceb2c9c60ccf55198b305e08a997ffca79a38cc7eeb551e643cbe66505",
+      "bytes": 616196,
+      "source": "https://github.com/notofonts/noto-fonts/blob/main/hinted/ttf/NotoSerif/NotoSerif-Regular.ttf",
+      "license": "Unmodified Noto Serif Regular, SIL OFL 1.1; existing media/OFL-NotoSans.txt is the identical upstream license."
+    },
+    "media/ReferenceHUD/elwynn_settings_window_1.tga": {
+      "sha256": "4214ada040d88e2864fb6c0a2371edc2fe1f68d7f24decd3dd8151bb7ee32dd3",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_2.tga": {
+      "sha256": "f821ca97fdb4010ed8cb5fa9d8e1138f20e0c886bc3c2f8608caa8c256014bb8",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_3.tga": {
+      "sha256": "06849656b22934fdeb79c9ad3031c7bf0029818442f89001bdd677516182f445",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_4.tga": {
+      "sha256": "8d0c26a9d88422e3fff8809b8e9203e37c7f0a15cf1d07581b35373cf85df4fa",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_5.tga": {
+      "sha256": "f3914397cf73952a94158fbd5e3cabdcb3a8008833feb4924e89fb4fdc96fb71",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/elwynn_settings_window_6.tga": {
+      "sha256": "e7a40d017dd50f88de3796c85f52ffafe23281174ee0b12a898a1ac61bafc792",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "68b0d3c595bf976d89f0f336a7ef6f4c3e35e6c12f328351757a8b6c11c4740f"
+    },
+    "media/ReferenceHUD/naxx_settings_window_1.tga": {
+      "sha256": "b0ef8eb479768a6ce5d7aea61d28ec09e85e279c780064360dd0f9fc1224e680",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_2.tga": {
+      "sha256": "cc23e320981ccdbe3cc0b071ed0cb6601e34b657c84a74163d260d2e56957b84",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_3.tga": {
+      "sha256": "5b7a625686722e06c896c188a2b0a0085edefb3b9667403b61efa8db5080bb8b",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_4.tga": {
+      "sha256": "0c4696ead2a14c4d1c5ac4fc7a84b287bad1d1f9a931996affc6972aeb5ead24",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_5.tga": {
+      "sha256": "70b451e799d2b7e7fd9bec179e364dc9954de01e20951fa2b4b892833cad372d",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/naxx_settings_window_6.tga": {
+      "sha256": "fe126833f86a09e819ad632538cbddf7c81f5fb7bca8e90c065adf74811cee16",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "e97cbbc784fd2c9125328cef93c3fedcc8ad316933bd7ba25aeabe0f2e86fe12"
+    },
+    "media/ReferenceHUD/elwynn_minimal_preview.tga": {
+      "sha256": "067e45c6bf119a084c82ffaea91793b3eb8962e54c8620cd3e8871f88f559b98",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/elwynn_complete_preview.tga": {
+      "sha256": "623c2111368dd06aa3033ad23f314c777170f45dad69a516565fd6cdd086f6bd",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/elwynn_alternative_preview.tga": {
+      "sha256": "064c40bd05b3e87b3f8f5f08ea64102fda9bde4ac7a5103745c67a36b01271a0",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/naxx_minimal_preview.tga": {
+      "sha256": "c2cab6e7780828370c9d32bab971881ac0a1e16863fd8ac373e8157bb587070c",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/naxx_complete_preview.tga": {
+      "sha256": "16c624f6763e3ae193208e72d5de48029ea988292e8237d4e9e457836533ee1e",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/naxx_alternative_preview.tga": {
+      "sha256": "44be706a7976de1fa321f03d9a6708b43d68312fc0e84804712ef48f504372c7",
+      "bytes": 131116,
+      "source": "Illustrative thumbnail of the user-approved concept; contains example values and is labelled as a concept preview in settings, never used for live information."
+    },
+    "media/ReferenceHUD/elwynn_material_v3.tga": {
+      "sha256": "7a885080573195b3b77bc22c40395051ae00931770f7f389f9b3b3cf942cb05a",
+      "bytes": 1048620,
+      "source": "Mechanical nine-slice packing of the approved equipment-panel perimeter; live widgets supply all labels and values."
+    },
+    "media/ReferenceHUD/naxx_material_v3.tga": {
+      "sha256": "90bb25548996a990fb6a037e9d3e037a379bbfcde3d3646d3d06a27b4eecccc9",
+      "bytes": 1048620,
+      "source": "Mechanical nine-slice packing of the approved equipment-panel perimeter; live widgets supply all labels and values."
+    },
+    "media/ReferenceHUD/naxx_minimal_identity_1_v3.tga": {
+      "sha256": "ec47afdf8e79d27571927c582fc5657ee02da0f509faccef5972bcdb4b69a700",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_header_1_v3.tga": {
+      "sha256": "b5ec26d3a03b36d1a60a275e613e63562ab991a044eeaf08f4a5bf1f6336d6f5",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_header_2_v3.tga": {
+      "sha256": "025f9821dfeb02696e66deed5a081e92de0c67120a2e1c5645078365fe74adf9",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_vitality_1_v3.tga": {
+      "sha256": "35650ed3917f73b1445aeef63bbc73204bb21b33ab038371279af55792fc663b",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_vitality_2_v3.tga": {
+      "sha256": "7ee83f5047eb72e9204a8100acd7a187aca7e1972c31336a4b7c14faf1034a92",
+      "bytes": 32812,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_dock_1_v3.tga": {
+      "sha256": "1d6fe193e5f108a3a9601c2715f68ef099933a72dc4aef52c0d2c657976e5edd",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_dock_2_v3.tga": {
+      "sha256": "2f2d2c4ffed0ee2f0ad043ec589a70eebde2f558e1f08285d908304fad0ad88e",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_dock_3_v3.tga": {
+      "sha256": "91d13a3dbceba3e50c6161d3b8fa1009e34159eff232b12ff9d9d50a617cdf79",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_chat_1_v3.tga": {
+      "sha256": "650b2fabd13d8f6dc747e57a46f6021d1ba9041d6323333d5204c9f4e7218205",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_nav_1_v3.tga": {
+      "sha256": "b35b14583e134c4d1bb79c2f5dccb20a12e62c184eede5504e655fcc80c81fb4",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/naxx_minimal_mapArt_1_v3.tga": {
+      "sha256": "97bfe59baa604bba2bffa794cb637b9de1b07c96eb3d16f5198738a9d66488f3",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "4458efb6b3202eae6a56928ad1b15186c8fa2614b6d83fcae886ba37c33a1ea1"
+    },
+    "media/ReferenceHUD/elwynn_seal_v3.tga": {
+      "sha256": "91dcec857fb2abc912670e03860cc801863f9eeefe8b2111beebebe599037e54",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/naxx_seal_v3.tga": {
+      "sha256": "f74e7c323495edb289b34f5d096a4675f3d11c0c1f052966a68fd30357016c98",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/elwynn_thumb_v3.tga": {
+      "sha256": "c92b98d5799d16731d9215f0bdd8c37afcf99d9484868fa6e732cbc1735e3da8",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/naxx_thumb_v3.tga": {
+      "sha256": "aa56fe48161ff9f89ac3ab1dc948a6c4569b74e2581cb91f231b770a813bee44",
+      "bytes": 65580,
+      "source": "Image-tool extraction from approved settings references, mechanically packed into a native texture."
+    },
+    "media/ReferenceHUD/naxx_alternative_identity_1_v3.tga": {
+      "sha256": "6ecf4b88fc7d09fa3da27c358f7b8c0648dd6c77fe33176bd201a93ea62c0b19",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_header_1_v3.tga": {
+      "sha256": "2f8fb4065370652976866c640f9aba393136c383bad9f8051433449bb3f2b4fa",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_vitality_1_v3.tga": {
+      "sha256": "ec97a3ed1d1b5f3533dc8f78162453af1cc757cf5b47de955487626e5bc1b435",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_dock_1_v3.tga": {
+      "sha256": "a59827082f249fca253af45dab8b0da160f0333693b460c3769e99afd8e64833",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_dock_2_v3.tga": {
+      "sha256": "3bc44e436e5aa9eac07429671dab55c615d04b75fdb79931f44b93b1b7739b79",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_dock_3_v3.tga": {
+      "sha256": "2d1f80db6e210bc827e8a53829f8a712dd89ea35f58dc1848263b9db0b8f9474",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_chat_1_v3.tga": {
+      "sha256": "fd7d1d22fa52312081e611927eff958d2b6d50b2b13d8a608e8bca49407d44fa",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_nav_1_v3.tga": {
+      "sha256": "6af6091eda816535cbec7858eede0723c4f2b17e8721c05c019c2d1af333e73a",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_1_v3.tga": {
+      "sha256": "4c3c88f7a6df03ddcdb76cf5944fc1bd198c67ff5c153223469f5f0bd3507eb1",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_2_v3.tga": {
+      "sha256": "f89dc728b69d7ea732526f701c6b15e9c81be90a73752afa0109cc51ac1caa0b",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_3_v3.tga": {
+      "sha256": "bffa1c71187660126bc0b0ab34b30ce208c88c63a0b5b1e0d695cde0ef525ce3",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpArt_4_v3.tga": {
+      "sha256": "ef5037dbb505af18ff435f8544a93cfe7a23dc6e9c4d198913cf377f1eaf71e0",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/naxx_alternative_xpBadge_1_v3.tga": {
+      "sha256": "3447b28a893e7d11ad66d2a09049928a61d565dd6e50c7ddb127c0b7f7645555",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "f2e3e5cf16409bffff496cb67f84e36f25313d4ab6c05e6a9f24f20940708cd0"
+    },
+    "media/ReferenceHUD/elwynn_alternative_identity_1_v3.tga": {
+      "sha256": "79f64c1b362febcdcf82179b966235af5ee3121610588bd2bed18fcf7df5f33d",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_header_1_v3.tga": {
+      "sha256": "e05ef748cb4eadf1dfd371a7699ce2198cc7ea545c10b7f88f4400e768b39d59",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_vitality_1_v3.tga": {
+      "sha256": "99b07cafe5ea9ee59c6924158b87df9245427f2792e91fcfb610096a47aec673",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_vitality_2_v3.tga": {
+      "sha256": "d38b5e01779659a1a7ce6a9aa5e6fab96cd93f91738e774204761c2621943615",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_dock_1_v3.tga": {
+      "sha256": "3e1f4a69409135402aeaa2741db54b64d3bd01169fe73f324ea0ed7908de7c41",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_dock_2_v3.tga": {
+      "sha256": "6293e8628092ecf0e85db69afc22d22ac3be7fc5b6cdd44783559be886336a08",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_dock_3_v3.tga": {
+      "sha256": "cd6062fc8147649d69cd9fd388b1a8e508e649ec7f117034441dbd9b1f3b710a",
+      "bytes": 524332,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_chat_1_v3.tga": {
+      "sha256": "7dff611769467914b35aacd6aece390d4b5624ae20ae92afc8e69736c1c96680",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_nav_1_v3.tga": {
+      "sha256": "243647e78c99934877ec6d94530e831f175e572b8c6dbc6368f5b1323ce76c1d",
+      "bytes": 262188,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_nav_2_v3.tga": {
+      "sha256": "353fdc2cc7448be189d6ea4b55f91132c3ea89ef5a33e9567e845626c746f945",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_mapArt_1_v3.tga": {
+      "sha256": "d590c583f0d5e971c5e8105924913f0d19b32721445ef25c0d51c6eea31a82f5",
+      "bytes": 1048620,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_1_v3.tga": {
+      "sha256": "68b36f3cbad3cd7038aea38ca40c0e03a234721a7e239cb32d9cc9e0dbc90147",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_2_v3.tga": {
+      "sha256": "443664f4d8516d7e6fe5b0b9c41d9fdd42e35666ff2fe72c9b219120e5cee861",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_3_v3.tga": {
+      "sha256": "35fe5602f1169888fad7fde0370a566a3cacaa996ffea25eb6bb529fd95a8c06",
+      "bytes": 131116,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpArt_4_v3.tga": {
+      "sha256": "6ddc1b6a9c0994d7d83e1a868b826ab9833fdaab4981df92c055cfa9cf397fc5",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_alternative_xpBadge_1_v3.tga": {
+      "sha256": "9b9b46f1455045444b301bbcba1bc43ff4eaacd08840c66d9b67809f90acf669",
+      "bytes": 65580,
+      "source": "Information-free artwork extracted with image tool from approved concept; mechanically cropped and packed without resampling. Dock excludes intersecting independent panel rectangles for separate scaling. All text, live bars, map and action icons are native components.",
+      "sourcePngSha256": "737ad4d4ac5f33a36065afde99438f686031c30ed27c3167fbf485873ed15347"
+    },
+    "media/ReferenceHUD/elwynn_card_body_v9.tga": {
+      "sha256": "8ef3e1833370f968369a7bf9000f88af8d642c8dc9eeb9d1a72d6766d96a812b",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/naxx_card_body_v9.tga": {
+      "sha256": "efe2d313bc6ac8b74259d4f2afc3d166a90cab9303c7c4c538169e602aec5587",
+      "bytes": 16428,
+      "source": "Unchanged 128x32 crop of the approved information-free lair-card body, packed without resampling; no sockets, tracks, labels or footer ornaments."
+    },
+    "media/ReferenceHUD/elwynn_complete_vitality_slot_overlay.tga": {
+      "sha256": "091f7d7d963985dbca18f11474eec1a344641e4feb3a6bf11a20c34fa48d8696",
+      "bytes": 32812,
+      "source": "Pixels of the approved elwynn_complete_vitality_1 art (slot ring, unchanged); the slot interior is made transparent by tools/build_bar_slot_overlay.py."
+    },
+    "media/ReferenceHUD/map_round_ring.tga": {
+      "sha256": "598d6fc9b793796ea3954f0b58f5fc154ac5e34553fb2c0e63b99df25256b7e9",
+      "bytes": 262188,
+      "source": "Generated by tools/build_map_round_ring.py: Elwynn ring (directional bevel, beaded engraving, dark groove, green band, gold line, four studs); colours sampled from the approved Elwynn frame art; no original art is altered."
+    },
+    "media/ReferenceHUD/elwynn_complete_Accessories_1_frame.tga": {
+      "sha256": "2948a68f75e9903c82bda410fc5b7602e26f4a69f70b47dfc12c5e20c36c15bf",
+      "bytes": 524332,
+      "source": "Frame matte of elwynn_complete_Accessories_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1_frame.tga": {
+      "sha256": "96d02e23b7c530e0e67c58ff04aebaff63d8166fb0f480bded4894ff82d48ac3",
+      "bytes": 1048620,
+      "source": "Frame matte of elwynn_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1_frame.tga": {
+      "sha256": "039a642aa74cd6559b58d20851e9682edd997b606c9e1cf0460a21769d600223",
+      "bytes": 262188,
+      "source": "Frame matte of elwynn_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1_frame.tga": {
+      "sha256": "78f7af712a2700461536ac8a408d7d19003fbd7999a4d713eba3a20cbf759e78",
+      "bytes": 524332,
+      "source": "Frame matte of elwynn_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1_frame.tga": {
+      "sha256": "7f9aaf4ee1503103ded40689284363ea0787b62a957c621225189cb44cfe2212",
+      "bytes": 524332,
+      "source": "Frame matte of elwynn_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Accessories_1_frame.tga": {
+      "sha256": "06cda36efc1ca9d0203b7336153f02caa7782d4d143ff8d75fb8939592fd2f07",
+      "bytes": 524332,
+      "source": "Frame matte of naxx_complete_Accessories_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1_frame.tga": {
+      "sha256": "90b8fbc12bb8e35edd0c19b3138d5e1aeb298348bc2dff2d168d2d4cd8858466",
+      "bytes": 1048620,
+      "source": "Frame matte of naxx_complete_Damage_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1_frame.tga": {
+      "sha256": "2b31161c3d03a18e498cbf2c97d2de6e69d89e16deb7afd3725d7068e3717fb8",
+      "bytes": 262188,
+      "source": "Frame matte of naxx_complete_Effects_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1_frame.tga": {
+      "sha256": "24e62d35ecdf5802567405a7e0836855f34c2f351c04046610b80037a09811a1",
+      "bytes": 524332,
+      "source": "Frame matte of naxx_complete_Lairs_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1_frame.tga": {
+      "sha256": "1f2bba6bff44292618d0ecd990530665c00a235b3b591b1ddffbaebe81974835",
+      "bytes": 524332,
+      "source": "Frame matte of naxx_complete_Stats_1.tga derived by tools/build_card_frame_matte.py (difference matte against the tile body colour; the clean-body interior removed); every colour comes from the approved tile."
+    },
+    "media/ReferenceHUD/elwynn_complete_Damage_1_body.tga": {
+      "sha256": "b24e6cb5b8787821e1ff3258a6e568e4c5121e6bd5c62943137612e35dfabf5f",
+      "bytes": 1048620,
+      "source": "Body tile of elwynn_complete_Damage_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Effects_1_body.tga": {
+      "sha256": "0fb18fa63c8e2aebe0fd241166e071b57ef69db9f255ac9e009d1429d3ee6c72",
+      "bytes": 262188,
+      "source": "Body tile of elwynn_complete_Effects_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Lairs_1_body.tga": {
+      "sha256": "9b45ada4d3eedc2e05163300f0092e8de7d5b76bd55096cc23fdc4ebb28fd474",
+      "bytes": 524332,
+      "source": "Body tile of elwynn_complete_Lairs_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/elwynn_complete_Stats_1_body.tga": {
+      "sha256": "8f90e551008ea0550c7651e6fa74b29ae4e6b841728e69876cd61953e12010c6",
+      "bytes": 524332,
+      "source": "Body tile of elwynn_complete_Stats_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Damage_1_body.tga": {
+      "sha256": "78689fee8fe7f7eabd633385463184f08e93ea5077b405c6d9aec9b30ee0d38d",
+      "bytes": 1048620,
+      "source": "Body tile of naxx_complete_Damage_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Effects_1_body.tga": {
+      "sha256": "4733253d561929e18121b1f94bb44960f03369ed1ecb109bcfe6740e15e1f005",
+      "bytes": 262188,
+      "source": "Body tile of naxx_complete_Effects_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Lairs_1_body.tga": {
+      "sha256": "32ebca66e0cc1d8f16f937b4f37031a2532c5b1259186e6cb996a0410721162e",
+      "bytes": 524332,
+      "source": "Body tile of naxx_complete_Lairs_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/naxx_complete_Stats_1_body.tga": {
+      "sha256": "e2d564307c0f1d2d8c48b5892b4c88dc4d4fa454a982f60c14ec960f9cc5cbe4",
+      "bytes": 524332,
+      "source": "Body tile of naxx_complete_Stats_1.tga: the approved tile with the interior rectangle removed (the card draws its own clean body there); derived by tools/build_card_frame_matte.py."
+    },
+    "media/ReferenceHUD/map_round_medallion.tga": {
+      "sha256": "7ce77c1d93400b363ac0d828ed78ab08020c684d063a43b6070918cff5558042",
+      "bytes": 1048620,
+      "source": "Generated by tools/build_map_round_ring.py: Elwynn round-map medallion (ring with its header and foot banners cut like the zone material corners) in one 512x512 texture; ring centre (256,256), opening radius 113, banners 224x32 centred on radius 121."
+    },
+    "media/ReferenceHUD/elwynn_banner.tga": {
+      "sha256": "0608977aa53b1b0ac6b671f5650f2c42192a5187b42dfb6d2053a7cbe635c1f5",
+      "bytes": 32812,
+      "source": "Pixels of the approved elwynn_complete_Effects_1 card frame (four corners and a plain stretch of the top and bottom edges), packed without resampling by tools/build_native_banner.py."
     }
   },
   "inGameTest": false,
-  "approval": "maintainer accepted for publication; not independently certified",
+  "approval": "development candidate; not accepted for publication",
   "publication": {
-    "version": "0.4.0",
-    "maintainerAcceptedForPublication": true,
-    "maintainerAcceptanceDate": "2026-11-03",
+    "version": "0.6.0-alpha.50",
+    "maintainerAcceptedForPublication": false,
+    "maintainerAcceptanceDate": null,
     "gameTeamPublicationPermission": "reported by maintainer on 2026-10-28",
     "packageSpecificGameApprovalConfirmed": false,
     "independentSecurityCertification": false,
-    "inGameTestByAgent": false,
+    "inGameTestByAgent": true,
     "githubPrerelease": false,
-    "rights": "See NOTICE.md and LICENSE.md; inherited rights remain unresolved.",
+    "rights": "Maintainer reports holding necessary distribution permissions on 2026-11-06; original attribution and license notices retained. Not independently verified.",
     "developmentAuthorizedDate": "2026-10-31",
-    "maintainerInGameTestingReported": true
+    "maintainerInGameTestingReported": true,
+    "inGameTestScope": "Alpha50: Lua 5.0.3/5.1 synthetic performance counters (OFF installs nothing and the measured functions are untouched, ON wraps a fixed list of 32 functions, counts / durations / frame histogram / reset / off, 60 on-off cycles without growth, nothing written to the SavedVariables, state identical with and without the diagnostics); the times are NOT native CPU or FPS measurements and the real client has NOT been measured; NOT validated natively. Previous scope - Alpha49: Lua 5.0.3/5.1 synthetic launcher icons (square rectangle / round circle / native untouched, 4 layouts, HUD 80/90/100, AzerLoot-style radius, AzerothStats border re-anchor, common apparent size, no overlap, corners clear, no drift over transitions and reloads, owners scripts and clicks untouched); the apparent diameters and the stock border proportions are derived from the standard 53/31 convention and are NOT measured natively; NOT validated natively. Previous scope - Alpha48: Lua 5.0.3/5.1 synthetic Elwynn Complete without the FieldKit/Journal shortcut plates and the version text (initial, refreshes, dressing on/off, shapes, theme changes, profile, reload, no clickable ghost, menu and version command reachable, other layouts unchanged); NOT validated natively. Previous scope - Alpha47: Lua 5.0.3/5.1 synthetic native banners (six tiles, caps never scaled, 6 px gap, centred text boxes, serif face, 12 refreshes without drift, reload, shape changes, profile) and the neutral row socket path; the banner art is NOT seen natively; the neutral socket rendering is NOT compared natively; NOT validated natively. Previous scope - Alpha46: Lua 5.0.3/5.1 synthetic opacity on every dark region of the five cards in both zones (clean body, tab band, body tile, matte), Effects 0/1/many/cycles/theme/reload, round medallion with texts above the ring, native banners, string-escape audit and alpha-layer checks of the generated textures; the freeze is NOT measured natively; the rendering is NOT seen natively; NOT validated natively. Previous scope - Alpha45: Lua 5.0.3/5.1 synthetic panel opacity (0/25/50/65/75/100, no HUD rebuild per slider event, body tiles faded with the frame matte on top, memo, reload, profile) and Elwynn round composition (curved plates, cartouches); the freeze is NOT measured natively, the matte/plates/cartouches are NOT seen natively; NOT validated natively. Previous scope - Alpha44: Lua 5.0.3/5.1 synthetic Elwynn round map on all three layouts (cut-away identity card, ring, zoom), honest native map, 48 shape transitions, real FieldKit/AzerothStats launcher buttons (own drag, edge, restore), choice states (selected/hover/normal), one-line shape buttons, profile persistence; the generated ring and the cut-away card are NOT seen natively; NOT validated natively. Previous scope - Alpha43: Lua 5.0.3/5.1 synthetic minimap square/round/native (2 zones x 3 variants, immediate switch, honest round fallback on identity-card layouts, restoration, cycles) and action bar with the dressing option on/off; the generated round ring is NOT seen natively; NOT validated natively. Previous scope - Alpha42: Lua 5.0.3/5.1 synthetic chat preferences with the theme (size, font, opacity, colour, corners, ten cycles, reload, profile) and chat restoration with a screen guard; NOT validated natively; layout-cache behaviour across /reload not observable here. Previous scope - Alpha41: Lua 5.0.3/5.1 synthetic Aethus life bar filling the measured opening with a ring overlay and the stock texture again; composite checked offline from the real art; NOT validated: needs a native capture at 100 percent. Previous scope - Alpha40: Lua 5.0.3/5.1 synthetic Aethus life bar fitted to the measured slot opening (art pixels), proportional at 100/99/80/50/1/0; NOT validated: needs a native capture at 100 percent. Previous scope - Alpha39: Lua 5.0.3/5.1 synthetic flat opaque fill of the player life bar, native/flat switch and held percentages; the stock texture could not be inspected; NOT validated: needs a native capture of a full uniform bar at 100 percent. Previous scope - Alpha38: diagnostic only (player life bar probe), synthetic test of the report; no rendering change; NOT yet run in the client. Previous scope - Alpha37: Lua 5.0.3/5.1 synthetic rows when there is room (0-24 spells, moved-low card, Damage 6-24 lines), Effects geometry from measured art, Lairs columns; alpha.36 dynamic height did not work in the client; NOT yet observed natively; life bar cause unknown (needs /fieldkit barprobe). Previous scope - Alpha36: Lua 5.0.3/5.1 synthetic dynamic Equipment/Spells card (0-12 spells), bar fill at 6 values x 4 scales, Effects margins; art cut points measured offline; NOT yet observed natively; alpha.35 flat fill did not fix the bar in the real client. Previous scope - Alpha35: Lua 5.0.3/5.1 synthetic chat controls, overlap row, Damage header and amounts, foot label vs baked icon, flat bar fill; NOT yet observed natively. Previous scope - Alpha34: Lua 5.0.3/5.1 synthetic Aethus-art group card geometry, Damage header/amounts FR-EN, chat fill inset; art composition checked offline from the real texture; NOT yet observed natively. Previous scope - Alpha33: Lua 5.0.3/5.1 synthetic card geometry (skin size, content box, 3 details x 3 scales) and provenance tooltip; NOT yet observed natively; alpha.32 passed its tests and still overflowed natively. Previous scope - Alpha32: Lua 5.0.3/5.1 synthetic group card component, options, history parser, probe; NOT yet observed natively; event delivery to be measured with groupprobe. Previous scope - Alpha31: Lua 5.0.3/5.1 synthetic compact teammate card (bars, values, states, sizes); NOT yet observed natively - alpha.30 passed the same kind of tests and failed natively. Previous scope - Alpha30: Lua 5.0.3/5.1 synthetic themed teammate cards (states, native replacement and restore, strata, individual moves, priority over main cards), both zones; NOT yet observed natively. Previous scope - Alpha29: Lua 5.0.3/5.1 synthetic teammate cards in the placement engine (0-4 members, collisions, drag, persistence, Bonuses expansion), both zones; NOT yet observed natively. Previous scope - Alpha28: Lua 5.0.3/5.1 synthetic launcher proxy click/tooltip, party dead status, leave and empty state; NOT yet observed natively. Previous scope - Alpha27: Lua 5.0.3/5.1 synthetic render order (gear above the art rim, native levels restored), both zones; NOT yet observed natively. Previous scope - Alpha26: Lua 5.0.3/5.1 synthetic ring geometry (border-centred, keep-outs, default on), both zones; NOT yet observed natively. Previous scope - Alpha25: Lua 5.0.3/5.1 synthetic regression reproducing the native mouse stack (owner 3, map 2, gear 2) and the corrected order, both zones; gear click/drag NOT yet observed natively. Previous scope - Alpha24: Lua 5.0.3/5.1 synthetic regression for diagnostic command routing (none opens the settings window, each prints, errors printed) and unchanged ordinary commands; commands in the real client NOT yet run. Previous scope - Alpha23: Lua 5.0.3/5.1 synthetic regression for the four real screen edges with a short UIParent measurement (all five cards, both zones, drop snap, persistence) and read-only gear diagnostics; real edges and the AzerothHub gear NOT observed natively. Previous scope - Alpha22: Lua 5.0.3/5.1 synthetic regression for protected parts measured where they really are, cards dropped on former places, clamp off, map/card probes; real mouse, AzerothHub gear and the clamp behaviour NOT observed natively. Previous scope - Alpha21: Lua 5.0.3/5.1 synthetic regression for real screen bounds (letterboxed canvas), edge-flush manual placement and drop snapping, protected-obstacle limit for Bonuses, no-cascade search, map mouse coverage; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha20: Lua 5.0.3/5.1 synthetic regression bench on RENDERED rectangles with every card saved (captured case), map group owner, zoom buttons, seven permanent sockets; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha19: Lua 5.0.3/5.1 synthetic regression for the vertical placement engine (determinism, drag freeze, pinned neighbours, option), seven spells, six damage categories, tooltip and map follower; real mouse, AzerothHub and rendering NOT observed natively. Previous scope - Alpha18: Lua 5.0.3/5.1 synthetic regression for Spells indicator, in-place Bonuses (4/12/29 rows, screen edge, Effects, saved positions), Damage hover tooltips (full and partial data) and gear placement; real mouse interaction and AzerothHub NOT observed natively. Previous scope - Alpha17: Lua 5.0.3/5.1 synthetic regression for 30-alternation click stability (Hide counted, mock fires no OnHide), six damage rows and stretched art, lair margins, repeated theme/map-button transitions; real mouse interaction and AzerothHub NOT observed natively. Previous scope - Alpha16: Lua 5.0.3/5.1 synthetic regression for drag across refreshes (mock does not fire OnHide: Hide calls counted), socket-centred icons, Damage foot clearance and third-party map buttons; drag and map NOT observed natively. Previous scope - Alpha15: Lua 5.0.3/5.1 synthetic regression for map opening fill and rim, header tabs, portrait socket, lair columns, empty damage state and tab stability; NOT observed natively. Previous scope - Alpha14: Lua 5.0.3/5.1 synthetic regression for portrait layering, damage 3x2 navigation, tab marks and boss/guardian card; NOT observed natively. Previous scope - Alpha13: Lua 5.0.3/5.1 synthetic regression for in-card tabs, scrolling lists, four guardians, buff mask/restore; NOT observed natively. Previous scope - Alpha12: Lua 5.0.3/5.1 synthetic regression for Spells access, buffs in Effects, lair guardian rows; NOT observed natively. Previous scope - Alpha11: Lua 5.0.3/5.1 synthetic regression for target buff/debuff rows, aura tooltips and clearing; NOT observed natively yet (no visual control tool in this session). Previous scope - Alpha10: Lua 5.0.3/5.1 reader drag with locked HUD and reopen-position regression, localized taken sources, single target surface, and existing suite. Native Elwynn Complete combat: title-handle drag moved the spell reader and its Return button; friendly self-target shows green health without duplicate native target, enemy target and native unit tooltip inspected. Stats/Lairs share the tested drag path and synthetic acceptance; not a full six-layout native certification."
   },
   "optionalPartyDetailTransport": {
     "defaultEnabled": false,

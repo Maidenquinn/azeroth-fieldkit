@@ -5,9 +5,9 @@ FieldKitCardLayout={selected=1}
 local C=FieldKitCardLayout
 C.names={"FieldKitModeFrame","FieldKitMeterFrame","FieldKitTakenFrame","FieldKitLairFrame",
  "FieldKitGearFrame","FieldKitStatsFrame","FieldKitMoneyFrame","FieldKitPartyMeterFrame",
- "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings"}
+ "FieldKitPartyCard1","FieldKitPartyCard2","FieldKitPartyCard3","FieldKitPartyCard4","FieldKitEffectsFrame","FieldKitReviveFrame","FieldKitEncounterFrame","FieldKitNativeWarnings","FieldKitPlayerCard"}
 C.labels={"Run mode","Damage","Damage taken","Lairs","Accessories","Statistics","Gold and chest price","Group damage",
- "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings"}
+ "Teammate 1","Teammate 2","Teammate 3","Teammate 4","Effects","Revive","Run reminders","Native warnings","My card"}
 
 function C.ValidName(name)
  for i=1,table.getn(C.names) do if C.names[i]==name then return true end end
@@ -17,12 +17,13 @@ end
 function C.MinimumWidth(name)
  if name=="FieldKitNativeWarnings" then return 300 end
  if name=="FieldKitMeterFrame" or name=="FieldKitPartyMeterFrame" then return FieldKit.MeterWidth(FieldKitDB.meterValues) end
- if string.find(name,"^FieldKitPartyCard[1-4]$") then return 280 end
+ if string.find(name,"^FieldKitPartyCard[1-4]$") or name=="FieldKitPlayerCard" then return 280 end
  return name=="FieldKitMoneyFrame" and 320 or 220
 end
 
 function C.Width(frame,fallback)
  local size=FieldKitDB.cardSizes[frame:GetName()]
+ if FieldKitZoneThemes and FieldKitZoneThemes.active and frame:GetName()=="FieldKitStatsFrame" then return math.max(320,size and size.width or fallback) end
  return math.max(C.MinimumWidth(frame:GetName()),size and size.width or fallback)
 end
 
@@ -36,7 +37,9 @@ function C.Rows(frame,natural,count,kind,collapsed)
  local rowMinimum=kind=="loadout" and (frame.fieldkitDenseLoadout and 16 or 32) or (kind=="gear" and 16 or 14)
  local minimum=padding+math.max(count,1)*rowMinimum
  frame.fieldkitMinimumHeight=minimum
- local height=size and size.height and math.max(minimum,size.height) or natural
+ local themedStats=kind=="stats" and FieldKitZoneThemes and FieldKitZoneThemes.active
+ if themedStats then padding=32;rowMinimum=25;minimum=padding+math.max(count,1)*rowMinimum end
+ local height=size and size.height and math.max(minimum,size.height) or math.max(themedStats and minimum or 0,natural)
  frame.fieldkitExpandedHeight=height
  frame:SetWidth(C.Width(frame,frame:GetWidth()))
  frame:SetHeight(collapsed and (kind=="loadout" and 23 or (bar and 24 or 23)) or height)
@@ -48,10 +51,10 @@ function C.Rows(frame,natural,count,kind,collapsed)
    row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-22-(frame.fieldkitHeaderHeight or 0)-step*(i-1))
    row:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-6,-22-(frame.fieldkitHeaderHeight or 0)-step*(i-1));row:SetHeight(math.max(12,step-2))
   elseif kind=="stats" then
-   row.label:ClearAllPoints();row.label:SetPoint("TOPLEFT",frame,"TOPLEFT",9,-8-step*(i-1))
-   row.value:ClearAllPoints();row.value:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-27,-8-step*(i-1))
+   row.label:ClearAllPoints();row.label:SetPoint("TOPLEFT",frame,"TOPLEFT",themedStats and 16 or 9,-(themedStats and 16 or 8)-step*(i-1))
+   row.value:ClearAllPoints();row.value:SetPoint("TOPRIGHT",frame,"TOPRIGHT",-27,-(themedStats and 16 or 8)-step*(i-1))
    row.label:SetWidth((frame:GetWidth()-44)*.64);row.value:SetWidth((frame:GetWidth()-44)*.34)
-   row.label:SetHeight(14);row.value:SetHeight(14);row.value:SetJustifyH("RIGHT")
+   row.label:SetHeight(themedStats and 24 or 14);row.value:SetHeight(themedStats and 24 or 14);if themedStats then FieldKitTheme.Font(row.label,14,FieldKitTheme.text);FieldKitTheme.Font(row.value,14,FieldKitTheme.text) end;row.value:SetJustifyH("RIGHT")
   else
    row:ClearAllPoints();row:SetPoint("TOPLEFT",frame,"TOPLEFT",6,-8-step*(i-1))
    row:SetPoint("RIGHT",frame,"RIGHT",i==1 and -26 or -6,0);row:SetHeight(math.max(14,step-2))
@@ -106,6 +109,7 @@ function C.Bind(frame)
 end
 
 function C.ApplyRight()
+ if FieldKitZoneThemes and FieldKitZoneThemes.active and not FieldKit.layoutEditing then return end
  if not C.root then return end
  local frames={FieldKitGearFrame,FieldKitStatsFrame}
  if not FieldKitDB.linkRightCards then

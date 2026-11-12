@@ -10,7 +10,9 @@ local DISPLAY_LIMIT=500
 local copyFrame,copyEdit
 local active=false
 local button, chatFrame, styleBefore, chatBackdrop, moveHandle
-local moving=false
+local moving=false;local themedMove=nil
+-- true while the theme owns the chat geometry (defined first: the move handle needs it)
+local function Themed() return FieldKitReferenceHUD and FieldKitReferenceHUD.active and FieldKitReferenceHUD.chat and true or false end
 local copiedNative=false
 local lastPositionStamp
 local geometryStamp
@@ -81,6 +83,11 @@ end
 local function FinishMove()
  if not moving then return end
  moving=false
+ if themedMove then
+  themedMove=nil;local card=FieldKitReferenceHUD and FieldKitReferenceHUD.chat
+  if card then FieldKitZoneThemes.Finish(card) end
+  return
+ end
  local f=NativeChat()
  if f then
   f:StopMovingOrSizing()
@@ -108,6 +115,10 @@ local function MoveControl()
   moveHandle:SetScript("OnDragStart",function()
    if not FieldKitDB or not FieldKitDB.chatStyle or not FieldKitDB.chatMove then return end
    local frame=NativeChat();if not frame then return end
+   if Themed() then
+    local card=FieldKitReferenceHUD.chat;if not card then return end
+    themedMove=true;moving=true;card.azsMoving=true;card:StartMoving();return
+   end
    frame:SetMovable(true)
    if frame.SetClampedToScreen then frame:SetClampedToScreen(true) end
    moving=true
@@ -117,10 +128,11 @@ local function MoveControl()
   moveHandle:SetScript("OnMouseUp",FinishMove)
   moveHandle:SetScript("OnHide",FinishMove)
  end
- if moveHandle.fieldkitAnchor~=f then
+ local anchorFrame=(Themed() and FieldKitReferenceHUD.chat) or f
+ if moveHandle.fieldkitAnchor~=anchorFrame then
   moveHandle:ClearAllPoints()
-  moveHandle:SetPoint("BOTTOMLEFT",f,"TOPLEFT",56,2)
-  moveHandle.fieldkitAnchor=f
+  moveHandle:SetPoint("BOTTOMLEFT",anchorFrame,"TOPLEFT",56,2)
+  moveHandle.fieldkitAnchor=anchorFrame
  end
  if FieldKitDB and FieldKitDB.chatStyle and FieldKitDB.chatMove then moveHandle:Show()
  else moveHandle:Hide() end
@@ -160,9 +172,125 @@ end
 -- Stage 1 of the in-game isolation recipe: capture, movement and a separate
 -- backdrop ONLY. Do not touch native message rendering, font, history, sizing,
 -- fading, or AddMessage color hooks until each is validated on the real client.
+-- ---------------------------------------------------------------------------------------------------------------------
+-- Theme integration. With a themed HUD the native ChatFrame1 lives inside the theme's chat card. The card (position, size,
+-- fill) and the text frame inside it are driven by the user's chat preferences through FieldKitReferenceHUD.ChatPlan: the theme
+-- only dresses the chat, it never replaces a preference. While themed, this module does not touch the native geometry, font or
+-- anchor itself (two writers would fight); it keeps the move handle and the message hooks.
+FieldKit.ChatThemed=Themed
+function FieldKit.ChatBackground(index) local c=backgrounds[Clamp(index,1,1,table.getn(backgrounds))];return {c[1],c[2],c[3]} end
+-- Font and size the themed chat must use: the user's choice when customization is on (face 1 = the theme's own font).
+function FieldKit.ChatFontWanted(themePath,themeSize)
+ local db=FieldKitDB
+ if not db or not db.chatStyle then return themePath,themeSize end
+ local face=Clamp(db.chatFontFace,1,1,5)
+ return (face==1 and themePath) or fontFiles[face] or themePath,Clamp(db.chatFontSize,12,10,20)
+end
+-- Chat geometry helpers (UIParent-relative anchors only): where the frame would be on the screen.
+local function Frac(point)
+ local px,py=.5,.5
+ if string.find(point or "","LEFT") then px=0 elseif string.find(point or "","RIGHT") then px=1 end
+ if string.find(point or "","TOP") then py=1 elseif string.find(point or "","BOTTOM") then py=0 end
+ return px,py
+end
+function FieldKit.ChatRect(point,relPoint,x,y,width,height,scale)
+ if type(point)~="string" or type(width)~="number" or type(height)~="number" then return nil end
+ scale=scale or 1;local sw,sh=UIParent:GetWidth(),UIParent:GetHeight()
+ local rx,ry=Frac(relPoint or point);local fx,fy=Frac(point)
+ local px,py=rx*sw+(tonumber(x) or 0)*scale,ry*sh+(tonumber(y) or 0)*scale
+ local left,bottom=px-fx*width*scale,py-fy*height*scale
+ return left,bottom,left+width*scale,bottom+height*scale
+end
+-- Visible = most of the chat is on the screen (a drag may legitimately overhang by a few pixels).
+function FieldKit.ChatVisible(left,bottom,right,top)
+ if not left then return false end
+ local sw,sh=UIParent:GetWidth(),UIParent:GetHeight()
+ local w,h=right-left,top-bottom;if w<=0 or h<=0 then return false end
+ local across=math.min(right,sw)-math.max(left,0);local depth=math.min(top,sh)-math.max(bottom,0)
+ return across>=w*.6 and depth>=h*.6
+end
+-- Native chat geometry remembered while the chat is NOT themed (additive key chatNative, never rewritten while themed).
+function FieldKit.ChatNativeCapture()
+ local f=NativeChat();if not f or not FieldKitDB then return false end
+ if f.GetParent and f:GetParent()~=UIParent then return false end -- already themed: nothing native to remember
+ local point,relative,relPoint,x,y=f:GetPoint()
+ if type(point)~="string" or point=="" then return false end
+ if relative~=nil and relative~=UIParent and relative~="UIParent" then return false end
+ local scale=f.GetScale and f:GetScale() or 1
+ local l,b,r,t=FieldKit.ChatRect(point,relPoint or point,x,y,f:GetWidth(),f:GetHeight(),scale)
+ if not FieldKit.ChatVisible(l,b,r,t) then return false end
+ FieldKitDB.chatNative={point=point,relPoint=relPoint or point,x=tonumber(x) or 0,y=tonumber(y) or 0,width=f:GetWidth(),height=f:GetHeight(),scale=scale}
+ return true
+end
+-- Put the chat back where it is visible: the points the theme saved if they are valid, else the remembered native geometry,
+-- else the default place; then the guard.
+function FieldKit.ChatRestoreNative(f,saved)
+ local db=FieldKitDB;local choice
+ local function Try(point,relative,relPoint,x,y,width,height,scale)
+  if type(point)~="string" or (relative~=UIParent and relative~=nil) then return nil end
+  local l,b,r,t=FieldKit.ChatRect(point,relPoint or point,x,y,width,height,scale)
+  if FieldKit.ChatVisible(l,b,r,t) then return {point=point,relPoint=relPoint or point,x=x,y=y,width=width,height=height,scale=scale or 1} end
+ end
+ local first=saved and saved.points and saved.points[1]
+ if first then choice=Try(first[1],first[2],first[3],first[4],first[5],saved.width,saved.height,saved.scale) end
+ if not choice and db and type(db.chatNative)=="table" then local n=db.chatNative;choice=Try(n.point,UIParent,n.relPoint,n.x,n.y,n.width,n.height,n.scale) end
+ if not choice then choice={point="BOTTOMLEFT",relPoint="BOTTOMLEFT",x=32,y=95,width=(saved and saved.width) or 440,height=(saved and saved.height) or 180,scale=(saved and saved.scale) or 1} end
+ f:ClearAllPoints();f:SetPoint(choice.point,UIParent,choice.relPoint,choice.x,choice.y)
+ if not FieldKit.ResizeChatPreservingHistory or not FieldKit.ResizeChatPreservingHistory(choice.width,choice.height) then
+  if f:GetWidth()~=choice.width then f:SetWidth(choice.width) end;if f:GetHeight()~=choice.height then f:SetHeight(choice.height) end
+ end
+ local font=saved and saved.font;if font and f.SetFont then if FieldKit.ThemeChatFont then FieldKit.ThemeChatFont(font[1],font[2],font[3]) else pcall(f.SetFont,f,font[1],font[2],font[3]) end end
+ geometryStamp=nil;fontStamp=nil;lastPositionStamp=nil
+ -- customization on: the preferences (size, font, position) apply to the native chat right away, then the guard
+ if FieldKit.ApplyChatStyle then FieldKit.ApplyChatStyle() end
+ FieldKit.ChatGuard(f)
+ return true
+end
+-- Never leave the chat off the screen: after any restore, any themed -> native change or any style application.
+function FieldKit.ChatGuard(f)
+ f=f or NativeChat();if not f or Themed() then return false end
+ local point,relative,relPoint,x,y=f:GetPoint()
+ local scale=f.GetScale and f:GetScale() or 1;local w,h=f:GetWidth(),f:GetHeight()
+ local l,b,r,t
+ if f.GetLeft and f:GetLeft() and f.GetBottom and f:GetBottom() and f.GetRight and f:GetRight() and f.GetTop and f:GetTop() then l,b,r,t=f:GetLeft(),f:GetBottom(),f:GetRight(),f:GetTop()
+ elseif relative==UIParent or relative=="UIParent" then l,b,r,t=FieldKit.ChatRect(point,relPoint or point,x,y,w,h,scale) end
+ if FieldKit.ChatVisible(l,b,r,t) then return false end
+ -- off the screen (or unmeasurable): bring it back to the remembered / default place, kept fully inside the screen
+ local n=FieldKitDB and FieldKitDB.chatNative
+ local px,py=32,95
+ if type(n)=="table" and n.point=="BOTTOMLEFT" and n.relPoint=="BOTTOMLEFT" then px,py=tonumber(n.x) or 32,tonumber(n.y) or 95 end
+ local sw,sh=UIParent:GetWidth(),UIParent:GetHeight()
+ px=math.max(0,math.min(px,math.max(0,sw-w*scale)))/scale;py=math.max(0,math.min(py,math.max(0,sh-h*scale)))/scale
+ f:ClearAllPoints();f:SetPoint("BOTTOMLEFT",UIParent,"BOTTOMLEFT",px,py);lastPositionStamp=nil
+ return true
+end
+-- The themed chat card is planned from these preferences only (R.ChatPlan, ChatFontWanted). The chat watcher calls ApplyChatStyle
+-- five times a second: the theme is told to refresh only when one of them CHANGED (it used to be forced twice per tick, i.e. a full
+-- theme refresh ten times a second). The theme's own periodic refresh recomputes the plan anyway, so a missed change is applied
+-- within a fifth of a second even without this call.
+local themedChatKeys={"chatStyle","chatWidth","chatHeight","chatBackgroundOpacity","chatBackgroundColor","chatFontFace","chatFontSize"}
+local themedChatSeen={}
+local themedChatKnown=false
+local function ThemedChatChanged()
+ local db=FieldKitDB;local changed=not themedChatKnown
+ for i=1,table.getn(themedChatKeys) do
+  local key=themedChatKeys[i];local value=db[key]
+  if themedChatSeen[key]~=value then themedChatSeen[key]=value;changed=true end
+ end
+ themedChatKnown=true
+ return changed
+end
 function FieldKit.ApplyChatStyle()
  local f=NativeChat()
  if not f or not FieldKitDB then return end
+ if Themed() then
+  -- the theme owns the geometry while it is active; keep the handle and the hooks, never restore a native snapshot onto a themed chat
+  if chatBackdrop then chatBackdrop:Hide() end
+  MoveControl()
+  if ThemedChatChanged() and FieldKitReferenceHUD.ChatSync then FieldKitReferenceHUD.ChatSync() end
+  return
+ end
+ themedChatKnown=false -- the next themed pass synchronises once
  if not FieldKitDB.chatStyle then
   if moving then FinishMove() end
   if chatBackdrop then chatBackdrop:Hide() end
@@ -208,7 +336,7 @@ function FieldKit.ApplyChatStyle()
   geometryStamp=nil; fontStamp=nil
   chatFrame=f
  end
- local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,85)
+ local opacity=Clamp(FieldKitDB.chatBackgroundOpacity,0,0,100)
  local bg=Clamp(FieldKitDB.chatBackgroundColor,1,1,table.getn(backgrounds))
  if opacity>0 then
   if not chatBackdrop then
@@ -336,7 +464,7 @@ local function Hook(index)
  frame.AddMessage=function(self,text,r,g,b,id)
   if not replaying then
    Capture(index,text)
-   if FieldKitDB and (FieldKitDB.chatStyle or styleWasEnabled) and type(text)=="string" then
+   if FieldKitDB and (FieldKitDB.chatStyle or FieldKitDB.zoneThemes or styleWasEnabled) and type(text)=="string" then
     if table.getn(displayHistory)>=DISPLAY_LIMIT then table.remove(displayHistory,1) end
     table.insert(displayHistory,{text=text,r=r,g=g,b=b,id=id})
    end
@@ -356,6 +484,31 @@ end
 -- journal is not the opt-in chat-copy history, and is never persisted.
 function FieldKit.ClearChatRenderHistory()
  displayHistory={}
+end
+
+-- Some native clients clear scrolling text on resize. Never compact an
+-- existing chat unless its entire displayed history can be restored.
+function FieldKit.ResizeChatPreservingHistory(width,height)
+ local f=NativeChat()
+ if not f then return false end
+ if f:GetWidth()==width and f:GetHeight()==height then return true end
+ if not f.GetNumMessages then return false end
+ local count=f:GetNumMessages()
+ if type(count)~="number" then return false end
+ if count>0 and count~=table.getn(displayHistory) then
+  if type(f.GetMessageInfo)~="function" then return false end
+  local snapshot={}
+  for i=1,count do
+   local ok,text,r,g,b,id=pcall(f.GetMessageInfo,f,i)
+   if not ok or type(text)~="string" then return false end
+   table.insert(snapshot,{text=text,r=r,g=g,b=b,id=id})
+  end
+  displayHistory=snapshot
+ end
+ if f:GetWidth()~=width then f:SetWidth(width) end
+ if f:GetHeight()~=height then f:SetHeight(height) end
+ if count>0 and f:GetNumMessages()<count then FieldKit.RestoreDisplayedChat() end
+ return true
 end
 
 -- Rebuild only when a native layout setter demonstrably discards lines.
@@ -495,4 +648,22 @@ SlashCmdList.FieldKitLOG=function(message)
  if message=="off" then FieldKitDB.chatCopy=false;FieldKit.SyncChat();return end
  if message=="clear" then FieldKit.ClearChat();return end
  OpenCopy()
+end
+
+-- Native SetFont can clear every visible line. Theme changes use the same
+-- complete-history gate as resizing, and never repeat an unchanged setter.
+function FieldKit.ThemeChatFont(path,size,flags)
+ local f=NativeChat();if not f or not f.GetFont or not f.SetFont or not f.GetNumMessages then return false end
+ local old,oldSize,oldFlags=f:GetFont();flags=flags or ""
+ if old==path and oldSize==size and (oldFlags or "")==flags then return true end
+ local count=f:GetNumMessages();if type(count)~="number" then return false end
+ if count>0 and count~=table.getn(displayHistory) then
+  if type(f.GetMessageInfo)~="function" then return false end
+  local snapshot={}
+  for i=1,count do local ok,text,r,g,b,id=pcall(f.GetMessageInfo,f,i);if not ok or type(text)~="string" then return false end;table.insert(snapshot,{text=text,r=r,g=g,b=b,id=id}) end
+  displayHistory=snapshot
+ end
+ local ok=pcall(f.SetFont,f,path,size,flags)
+ if count>0 and f:GetNumMessages()<count then FieldKit.RestoreDisplayedChat() end
+ return ok
 end

@@ -71,3 +71,27 @@ assert(d.chatAnchor==nil and d.chatWidth==280 and d.chatHeight==100)
 assert(d.chatTextColor==3 and d.chatOverrideText==true)
 assert(table.getn(visible)==3)
 
+
+-- Zone compaction must preserve native messages even when setters clear them.
+local countBefore=table.getn(visible)
+assert(FieldKit.ResizeChatPreservingHistory(320,66))
+assert(table.getn(visible)==countBefore and visible[countBefore].text=="after switching")
+local info=ChatFrame1.GetMessageInfo
+ChatFrame1.GetMessageInfo=nil
+FieldKit.ClearChatRenderHistory()
+local widthBefore=ChatFrame1:GetWidth()
+assert(not FieldKit.ResizeChatPreservingHistory(321,67))
+assert(ChatFrame1:GetWidth()==widthBefore and table.getn(visible)==countBefore)
+ChatFrame1.GetMessageInfo=info
+
+-- Font changes are destructive on this native model, just like resizing.
+ChatFrame1.GetMessageInfo=function(self,i) local m=visible[i];return m.text,m.r,m.g,m.b,m.id end
+assert(FieldKit.ThemeChatFont("Interface\\AddOns\\AzerothFieldKit\\media\\AzerothSans.ttf",12,""))
+assert(table.getn(visible)==countBefore and visible[countBefore].text=="after switching")
+local fontSetter=ChatFrame1.SetFont;local fontCalls=0
+ChatFrame1.SetFont=function(self,...) fontCalls=fontCalls+1;return fontSetter(self,unpack(arg)) end
+assert(FieldKit.ThemeChatFont("Interface\\AddOns\\AzerothFieldKit\\media\\AzerothSans.ttf",12,""))
+assert(fontCalls==0,"Unchanged theme font must never call a destructive setter")
+FieldKit.ClearChatRenderHistory();ChatFrame1.GetMessageInfo=nil
+assert(not FieldKit.ThemeChatFont("Fonts\\FRIZQT__.TTF",14,""))
+assert(fontCalls==0 and table.getn(visible)==countBefore,"Unknown chat history must remain intact")

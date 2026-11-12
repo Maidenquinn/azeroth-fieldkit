@@ -38,6 +38,7 @@ function T.Create(create,fit,move)
  warnings:Hide();N.Watch()
 end
 function T.ShowRows(frame,rows,total)
+ frame.lastRows=rows -- real entries only; the themed panel reads these, not a hidden frame
  if table.getn(rows)==0 and not FieldKit.layoutEditing then frame:Hide();return end
  if table.getn(rows)==0 then rows={{label=FieldKit_L("Preview"),value="?"}} end
  FieldKit_Text(frame.total,total or "")
@@ -61,8 +62,35 @@ function T.ShowRows(frame,rows,total)
  if not moving then T.fit(frame,count) end
  frame:Show()
 end
+-- Active player buffs from the client: icon, name (hidden tooltip), stacks and time left when exposed.
+function T.Buffs(rows)
+ if type(GetPlayerBuff)~="function" or type(GetPlayerBuffTexture)~="function" then return false end
+ if not T.scan and type(CreateFrame)=="function" then
+  local ok,tip=pcall(CreateFrame,"GameTooltip","FieldKitBuffScan",nil,"GameTooltipTemplate")
+  if ok and tip then T.scan=tip;tip:SetOwner(UIParent,"ANCHOR_NONE") end
+ end
+ for i=0,31 do
+  local index=GetPlayerBuff(i,"HELPFUL")
+  if not index or index<0 then break end
+  local texture=GetPlayerBuffTexture(index)
+  if texture then
+   local name
+   if T.scan and T.scan.SetPlayerBuff then
+    T.scan:ClearLines();T.scan:SetPlayerBuff(index)
+    local line=getglobal("FieldKitBuffScanTextLeft1");name=line and line:GetText()
+   end
+   local count=type(GetPlayerBuffApplications)=="function" and FieldKit.Number(GetPlayerBuffApplications(index),nil,0)
+   local remaining=type(GetPlayerBuffTimeLeft)=="function" and FieldKit.Number(GetPlayerBuffTimeLeft(index),nil,0)
+   local value=""
+   if count and count>1 then value=tostring(count).."x" end
+   if remaining and remaining>0 then value=(value~="" and (value.." · ") or "")..N.Clock(remaining) end
+   table.insert(rows,{label=(name and name~="") and N.Text(name) or FieldKit_L("Effect"),value=value,icon=N.Text(texture,240),buffIndex=index})
+  end
+ end
+ return true
+end
 function T.Effects()
- local frame=T.frames[1];if not FieldKitDB.effectsFrame then frame:Hide();return end
+ local frame=T.frames[1];if not FieldKitDB.effectsFrame then frame.lastRows={};frame:Hide();return end
  local rows,available={},false
  local defs={{"effectTotems","AZS_GetTotems","AZSTOTEMS"},{"effectSummons","AZS_GetSummonGroups","AZSPETS"},{"effectTimers","AZS_GetTimers","AZSTIMERS"}}
  for _,def in ipairs(defs) do
@@ -89,6 +117,7 @@ function T.Effects()
    end
   end
  end
+ if FieldKitDB.effectBuffs and T.Buffs(rows) then available=true end
  if not available then rows={{label=FieldKit_L("Effects API unavailable"),value="?"}} end
  if table.getn(rows)>T.rows then
   local extra=table.getn(rows)-(T.rows-1)
@@ -125,14 +154,15 @@ function T.NextBoss()
   end
  end
  -- Native endless countdown, when present; never extrapolate a schedule.
- if not chosen and type(AZS_RUN)=="table" and type(AZS_RUN.nbn)=="string" and AZS_RUN.nbn~="" then
+ if not chosen and type(AZS_RUN)=="table" and (FieldKit.Number(AZS_RUN.endl)==1 or (type(AZS_RUN.nbn)=="string" and AZS_RUN.nbn~="")) then
   local left=FieldKit.Number(AZS_RUN.nb,nil,0)
   if left then
+   local bossName=type(AZS_RUN.nbn)=="string" and AZS_RUN.nbn~="" and AZS_RUN.nbn or FieldKit_L("Next boss")
    local stamp=FieldKit.Number(AZS_RUN_UPDATED)
    if N.Read("AZS_GetPhase")=="playing" and stamp then left=math.max(0,left-math.max(0,GetTime()-stamp)) end
-   if not T.endless or T.endless.name~=AZS_RUN.nbn or left>T.endless.left+2 then T.endlessCycle=(T.endlessCycle or 0)+1 end
-   T.endless={name=AZS_RUN.nbn,left=left}
-   chosen={name=N.Text(AZS_RUN.nbn),left=left,key="endless:"..tostring(T.endlessCycle)}
+   if not T.endless or T.endless.name~=bossName or left>T.endless.left+2 then T.endlessCycle=(T.endlessCycle or 0)+1 end
+   T.endless={name=bossName,left=left}
+   chosen={name=N.Text(bossName),left=left,key="endless:"..tostring(T.endlessCycle)}
   end
  end
  return chosen
@@ -211,6 +241,7 @@ function T.Update()
  if T.serial~=N.serial then T.serial=N.serial;T.warnings={};T.recent={};T.lastBoss={};T.bossKeys={};T.endless=nil;T.endlessCycle=0 end
  if not N.Active() and not FieldKit.layoutEditing then
   for _,frame in ipairs(T.frames) do frame:Hide() end
+  T.frames[1].lastRows={}
   T.warnings={};T.warningFrame:Hide();return
  end
  T.Effects();T.Revive();T.Reminders();T.Warnings()

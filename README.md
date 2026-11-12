@@ -1,5 +1,9 @@
 # Azeroth FieldKit
 
+> **Development branch: 0.6.0-alpha.50.** Elwynn/Naxxramas themes, three HUD layouts,
+> themed settings, square native minimap and reversible native frame ownership.
+> Not merged or published. Start with [the French acceptance guide](docs/RECEPTION_0.6.0.txt).
+
 > **0.4.0 update:** bilingual UI, combat profiles, HUD previews and UX polish. See [release notes](docs/RELEASE_0.4.0.md).
 
 > **0.3.4 update:** chronicle boss timeline/frames, tabbed meter suite and split

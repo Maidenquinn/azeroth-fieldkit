@@ -124,18 +124,19 @@ function FieldKit.BuildJourneySections(sections,actions)
  }
  for _,item in ipairs(FieldKitCardLayout.Options()) do table.insert(layout,item) end
  local look={
+  {kind="zoneThemes"},
   {kind="note",label="Visual style",tip="Chronicle look for FieldKit cards only. Does not change other addons."},
   {kind="choice",label="Card style",values={"Decorative","Classic"},get=function() return FieldKitDB.cardStyle end,
    set=function(v) FieldKitDB.cardStyle=v;T.Refresh() end},
   {kind="slider",label="Card background opacity",min=0,max=100,step=1,
    format=function(v) return FieldKit_L("Card background opacity")..": "..v.."%" end,
-   get=function() return FieldKitDB.cardOpacity end,set=function(v) FieldKitDB.cardOpacity=v;T.Refresh() end},
+   get=function() return FieldKitDB.cardOpacity end,set=function(v) FieldKitDB.cardOpacity=v;if FieldKitZoneThemes and FieldKitZoneThemes.ApplyOpacity then FieldKitZoneThemes.ApplyOpacity() else T.Refresh() end end},
   {kind="check",label="Keep pinned details above card choices",tip="Requires the recent native overlay API. Covers level-up and jewelry choices, not every modal.",
    get=function() return FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame end,
    set=function(v) FieldKitDB.onTopWindows.FieldKitPartyDetailsFrame=v and true or nil;FieldKitScreenLayers.Update() end},
  }
  local health={{kind="preview",preview=18},options.playerBar,HealthChoice("playerHealthMode","Player health format",actions.UpdatePlayerBar),options.playerBuffs,options.playerShield,options.targetHealth,HealthChoice("targetHealthMode","Target health format",actions.UpdateTargetHealth)}
- for _,def in ipairs({{"effectTotems","Track totems"},{"effectSummons","Track summons"},{"effectTimers","Track native effect timers"}}) do
+ for _,def in ipairs({{"effectTotems","Track totems"},{"effectSummons","Track summons"},{"effectTimers","Track native effect timers"},{"effectBuffs","Track active buffs"}}) do
   local key,label=def[1],def[2]
   table.insert(health,{kind="check",label=label,tip="Filters the Effects tracker. Counts and remaining times come from the native API; unavailable data is never invented.",
    get=function() return FieldKitDB[key] end,set=function(v) FieldKitDB[key]=v;FieldKitNativeTools.Update() end})
@@ -162,6 +163,24 @@ function FieldKit.BuildJourneySections(sections,actions)
   {kind="check",label="Co-op teammate cards",tip="Optional passive cards. Native teammate frames remain available for targeting and their usual interactions.",
    get=function() return FieldKitDB.partyCards end,set=function(v) FieldKitDB.partyCards=v;FieldKitCoop.Update() end},
   HealthChoice("partyHealthMode","Teammate health format",FieldKitCoop.Update),
+  {kind="check",label="Show group cards",tip="Group cards of the active theme (replace the native round teammate frames while the HUD theme is on). Off: the native frames stay.",
+   get=function() return FieldKitDB.partyShow~=false end,set=function(v) FieldKitDB.partyShow=v and true or false;FieldKitCoop.Update() end},
+  {kind="check",label="Show my own card",tip="Adds a card for your character with the same component as the teammates. Off by default: the theme already shows your health.",
+   get=function() return FieldKitDB.partyPlayerCard end,set=function(v) FieldKitDB.partyPlayerCard=v and true or false;FieldKitCoop.Update() end},
+  {kind="choice",label="Card detail",values={"Compact","Standard","Full"},get=function() return FieldKitCoop.Detail() end,
+   set=function(i) FieldKitDB.partyDetail=i;FieldKitCoop.Update() end},
+  {kind="slider",label="Card size",min=70,max=130,step=5,get=function() return FieldKitDB.partyCardScale end,
+   format=function(v) return string.format("%s : %d %%",FieldKit_L("Card size"),v) end,set=function(v) FieldKitDB.partyCardScale=v;FieldKitCoop.Update() end},
+  {kind="check",label="Action history",tip="Short history of what each teammate casts, from the party combat-log messages the client sends. Only what is actually received is shown (tooltip on the card). Off by default.",
+   get=function() return FieldKitDB.partyHistory end,set=function(v) FieldKitDB.partyHistory=v and true or false;FieldKitGroupHistory.Sync();FieldKitCoop.Update() end},
+  {kind="slider",label="Actions shown",min=1,max=20,step=1,get=function() return FieldKitDB.partyHistoryCount end,
+   format=function(v) return string.format("%s : %d",FieldKit_L("Actions shown"),v) end,set=function(v) FieldKitDB.partyHistoryCount=v end},
+  {kind="check",label="History: buffs",tip="Record buffs gained by teammates.",
+   get=function() return FieldKitDB.partyHistoryBuffs~=false end,set=function(v) FieldKitDB.partyHistoryBuffs=v and true or false end},
+  {kind="check",label="History: damage and healing",tip="Record spells cast, damage, healing and interruptions reported for teammates.",
+   get=function() return FieldKitDB.partyHistoryCombat~=false end,set=function(v) FieldKitDB.partyHistoryCombat=v and true or false end},
+  {kind="check",label="History: spell icons",tip="Show the icon of the last spells on the card. An icon exists only for spells in your own spellbook; the client gives no icon for another player's spell.",
+   get=function() return FieldKitDB.partyHistoryIcons~=false end,set=function(v) FieldKitDB.partyHistoryIcons=v and true or false;FieldKitCoop.Update() end},
   {kind="check",label="Co-op revive progress",tip="Show native local revive progress and the ally involved. Original revive HUD stays available; no automatic actions.",
    get=function() return FieldKitDB.reviveFrame end,set=function(v) FieldKitDB.reviveFrame=v;FieldKitNativeTools.Update() end},
   {kind="check",label="Hide native teammate frames",tip="Advanced: hide originals only while a card has valid health. Field cards do not provide native targeting, menus or buff interactions. Turn off to restore originals.",
@@ -208,7 +227,11 @@ function FieldKit.BuildJourneySections(sections,actions)
 end
 
 -- One owned tooltip; no chat/network output for normal configuration changes.
+function U.HideTip()
+ GameTooltip:Hide();if FieldKitThemeHUD then FieldKitThemeHUD.HideTip() end
+end
 function U.Tip(owner,label,detail)
+ if FieldKitZoneThemes and FieldKitZoneThemes.active then FieldKitThemeHUD.Tip(owner,FieldKit_L(label),{FieldKit_L(detail or "")});return end
  GameTooltip:SetOwner(owner,"ANCHOR_RIGHT");GameTooltip:SetText(FieldKit_L(label),1,.85,.55)
  if detail then GameTooltip:AddLine(FieldKit_L(detail),.8,.83,.8,true) end
  GameTooltip:Show()
@@ -271,14 +294,14 @@ end
 -- Live getters are separate from click setters, preventing initialization writes.
 local function Checkbox(page,item,y)
  local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(76)
- local check=CreateFrame("CheckButton",nil,row,"UICheckButtonTemplate");check:SetWidth(24);check:SetHeight(24);check:SetPoint("TOPLEFT",row,"TOPLEFT",0,-2)
+ local check=CreateFrame("CheckButton",nil,row,"UICheckButtonTemplate");check:SetWidth(24);check:SetHeight(24);T.Control(check,"check");check:SetPoint("TOPLEFT",row,"TOPLEFT",0,-2)
  local label=T.Label(row,item.label,30,1,500,24,14)
  local detail=T.Label(row,item.tip,30,29,500,44,12,T.muted)
  local action
  if item.button then action=T.Button(row,nil,item.button.text,0,1,132,26,item.button.onClick) end
  check.item=item;check.Refresh=function() check:SetChecked(item.get() and true or false) end
  check:SetScript("OnClick",function() item.set(this:GetChecked() and true or false);U.Refresh() end)
- check:SetScript("OnEnter",function() U.Tip(this,item.label,item.tip) end);check:SetScript("OnLeave",function() GameTooltip:Hide() end)
+ check:SetScript("OnEnter",function() U.Tip(this,item.label,item.tip) end);check:SetScript("OnLeave",function() U.HideTip() end)
  row.Reflow=function(w)
   row:SetWidth(w);label:SetWidth(w-32-(action and 144 or 0));detail:SetWidth(w-32)
   if action then action:ClearAllPoints();action:SetPoint("TOPRIGHT",row,"TOPRIGHT",0,-1) end
@@ -291,7 +314,7 @@ local function Slider(page,item,y,camera)
  local row=CreateFrame("Frame",nil,page);row:SetPoint("TOPLEFT",page,"TOPLEFT",0,-y);row:SetHeight(camera and 100 or 78)
  local label=T.Label(row,item.label or "Max camera distance",0,0,500,24,14)
  local name="FieldKitJourneySlider"..(table.getn(U.controls)+1)
- local s=CreateFrame("Slider",name,row,"OptionsSliderTemplate");s:SetPoint("TOPLEFT",row,"TOPLEFT",8,-36);s:SetHeight(18)
+ local s=CreateFrame("Slider",name,row,"OptionsSliderTemplate");T.Control(s,"slider");s:SetPoint("TOPLEFT",row,"TOPLEFT",8,-36);s:SetHeight(18)
  s.item=item;s.label=item.label
  s:SetMinMaxValues(item.min or 15,item.max or 50);s:SetValueStep(item.step or 1)
  s.Refresh=function()
@@ -307,7 +330,7 @@ local function Slider(page,item,y,camera)
  if high then high:SetText(item.max or 50);T.Font(high,11,T.muted) end
  local templateTitle=getglobal(name.."Text");if templateTitle then templateTitle:Hide() end
  local detail=camera and T.Label(row,"Camera changes apply immediately; other settings stay unchanged.",0,69,500,28,12,T.muted)
- row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);s:SetWidth(w-16);if detail then detail:SetWidth(w) end end
+ row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);s:SetWidth(w-16);T.Update(s);if detail then detail:SetWidth(w) end end
  table.insert(U.controls,s);table.insert(page.flow,{frame=row,y=y});return y+(camera and 106 or 84)
 end
 
@@ -733,6 +756,7 @@ function U.BuildPage(section,index)
    row.Reflow=function(w) row:SetWidth(w);label:SetWidth(w);detail:SetWidth(w) end
    if item.kind=="syncStatus" then U.syncStatus=detail end
    table.insert(page.flow,{frame=row,y=y});y=y+110
+  elseif item.kind=="zoneThemes" then y=FieldKitThemeUI(page,y)
   elseif item.kind=="combat" then FieldKit_CreateCombatOptions(page);y=570
   elseif item.kind=="worldmarkers" then y=BuildMarkerGallery(page,y)
   elseif item.kind=="profiles" then y=BuildProfileManager(page,y)
@@ -800,7 +824,7 @@ function U.Refresh()
     string.format(FieldKit_L("Profile %d · empty"),i)
    local active=FieldKitDB.activeHudProfile==i
    FieldKit_Text(b,active and ("✓ "..label) or label)
-   b.fieldkitSelected=active
+   b.fieldkitChoice=true;b.fieldkitSelected=active
    T.State(b,active)
    if b.fieldkitShowSelected then b.fieldkitShowSelected(active) end
   end
@@ -813,7 +837,7 @@ function U.Refresh()
      string.format(FieldKit_L("Profile %d · empty"),i)
     if active then label=label.." ✓" end
    FieldKit_Text(U.quickProfileButtons[i],label)
-   U.quickProfileButtons[i].fieldkitSelected=active
+   U.quickProfileButtons[i].fieldkitChoice=true;U.quickProfileButtons[i].fieldkitSelected=active
    T.State(U.quickProfileButtons[i],active)
   end
  end
@@ -829,6 +853,7 @@ function U.Refresh()
   local fr=FieldKit_Language()=="fr"
   -- Unlike a momentary hover, selected buttons must stay selected after
   -- OnLeave and show an unambiguous visible check mark.
+  U.languageRow.en.fieldkitChoice=true;U.languageRow.fr.fieldkitChoice=true
   U.languageRow.en.fieldkitSelected=en
   U.languageRow.fr.fieldkitSelected=fr
   T.State(U.languageRow.en,en)
@@ -890,10 +915,11 @@ end
 function U.Reflow()
  if not U.frame then return end
  local sw,sh=UIParent:GetWidth(),UIParent:GetHeight()
- local w,h=math.max(740,math.min(1000,sw-24)),math.max(560,math.min(760,sh-24))
+ local themed=T.zone~="classic"
+ local w,h=math.max(740,math.min(themed and 1260 or 1000,sw-24)),math.max(560,math.min(themed and 780 or 760,sh-24))
  U.screenWidth=sw;U.screenHeight=sh;U.frame:SetWidth(w);U.frame:SetHeight(h)
- U.frame:SetScale(math.min(1,(sw-16)/w,(sh-16)/h));T.Update(U.frame)
- local sidebar=w<900 and 174 or 204;local x=sidebar+36;local content=w-x-34
+ U.frame:SetScale(math.min(1,(sw-48)/w,(sh-48)/h)/(themed and (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale() or 1) or 1));T.Update(U.frame)
+ local sidebar=themed and math.floor(w*.218) or (w<900 and 174 or 204);local x=sidebar+36;local content=w-x-34
  if U.navigation then
   U.navigation:SetWidth(sidebar+6)
   U.navigation:SetHeight(math.max(180,h-236))
@@ -905,7 +931,7 @@ function U.Reflow()
  -- close button and panel header's drag hit area.
  -- Fit three named buttons inside a single fixed-width header band.
  -- Avoid the window close icon, title and native draggable header region.
- local selectorWidth=math.min(386,math.max(218,w*.40))
+ local selectorWidth=math.min(themed and 470 or 386,math.max(218,w*.40))
  U.headerProfileLayer:SetWidth(selectorWidth)
  U.headerProfileLayer:ClearAllPoints()
  U.headerProfileLayer:SetPoint("TOPRIGHT",U.frame,"TOPRIGHT",-34,-72)
@@ -948,7 +974,7 @@ function U.Reflow()
   local page=U.pages[i];local scroll=page.scroll
   scroll:ClearAllPoints();scroll:SetPoint("TOPLEFT",U.frame,"TOPLEFT",x,-132)
   scroll:SetWidth(content);scroll:SetHeight(h-232);page:SetWidth(content-10);page:SetHeight(math.max(page.contentHeight,h-232))
-  page.heading:SetWidth(content-14)
+  page.heading:SetWidth(content-14);T.Font(page.heading,themed and 30 or 26,T.text,true)
   for j=1,table.getn(page.flow) do page.flow[j].frame.Reflow(content-16) end
   if page.windowTabs then
    local tw=(content-22)/4
@@ -984,11 +1010,14 @@ function U.Reflow()
     end
   end
  end
+ if U.LayoutNavigation then U.LayoutNavigation() end
+ if FieldKitReferenceHUD then FieldKitReferenceHUD.Settings(U) end
  U.CloseMenus()
 end
 
 -- Hide settings during arrangement so the large panel cannot cover movable frames.
 function U.SetLayoutEditing(enabled,returnToSettings)
+ if enabled and FieldKitZoneThemes then FieldKitZoneThemes.Suspend() end
  FieldKit.layoutEditing=enabled and true or false
  if enabled then
   U.routingLayout=true;U.frame:Hide();U.routingLayout=nil
@@ -1114,14 +1143,14 @@ function U.Build(sections,context)
    end
    local header=group.header
    header:ClearAllPoints();header:SetPoint("TOPLEFT",navBody,"TOPLEFT",8,-y)
-   header:SetWidth(180);header:SetHeight(30)
-   T.State(header,U.navOpen==group.name)
-   y=y+33
+   local navWidth=U.navigationBody:GetWidth()-16;header:SetWidth(navWidth);header.fieldkitLabel:SetWidth(navWidth-20);header:SetHeight(36)
+   T.Font(header.fieldkitLabel,T.zone~="classic" and 18 or 13,T.text,T.zone~="classic");T.State(header,U.navOpen==group.name);T.Update(header)
+   y=y+40
    for j=1,table.getn(group.items) do
     local tab=group.items[j]
     if U.navOpen==group.name then
      tab:ClearAllPoints();tab:SetPoint("TOPLEFT",navBody,"TOPLEFT",8,-y)
-     tab:Show();y=y+34
+     tab:SetWidth(U.navigationBody:GetWidth()-16);tab.fieldkitLabel:SetWidth(U.navigationBody:GetWidth()-59);T.Font(tab.fieldkitLabel,T.zone~="classic" and 16 or 13,T.text);T.Update(tab);tab:Show();y=y+36
     else tab:Hide() end
    end
    y=y+4

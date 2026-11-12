@@ -1,8 +1,8 @@
 -- All persisted data belongs to FieldKitDB only. No automatic MASHDB import:
 -- old settings and game saves must not be overwritten by a renamed review build.
-local defaults={lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,reviveFrame=false,
+local defaults={zoneThemes=false,zoneThemeMode="auto",zoneThemeVariant="complete",zoneThemeMinimap=true,zoneThemeMapShape="square",zoneThemeArt=true,zoneThemeOverlap=false,zoneThemeScale=100,lairNextBoss=true,windowsLocked=false,effectsFrame=false,effectTotems=true,effectSummons=true,effectTimers=true,effectBuffs=true,reviveFrame=false,
  nextBossCard=false,nextBossAlert=false,bossTimeline=false,bossTimelineWidth=560,storedLevelsBadge=false,nativeWarnings=false,bossBannerWarnings=true,mechanicWarnings=true,partyBannerWarnings=true,
- highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
+ highlightFlaggedLair=false,showNativeAffixes=true,hideUnknownMode=true,replacePartyFrames=false,partyDetailSync=false,partyCards=false,partyMeter=true,partyHealthMode=3,partyShow=true,partyPlayerCard=false,partyDetail=2,partyCardScale=100,partyHistory=false,partyHistoryCount=5,partyHistoryBuffs=true,partyHistoryCombat=true,partyHistoryIcons=true,linkRightCards=true,linkLeftCards=true,runModeCard=true,moneyFrame=true,hidePlates=false,hideUnknown=false,targetHealth=true,playerBar=true,
  bossFrame=false,bossStyle="classic",statsFrame=true,playerBuffs=true,gearFrame=true,meterFrame=true,
  meterTabs=true,meterSpellTips=true,meterKeepTakenFrame=false,meterViewKey="damage",
  meterSortKey="dmg",meterSortAsc=false,meterHealDone=false,meterPartyOwner=nil,
@@ -26,7 +26,18 @@ function FieldKit.InitializeSettings(defaultStats)
  end
  d.spellsFrame=nil -- retired separate spell window; the existing card now has tabs
  d.loadoutTab=d.loadoutTab==2 and 2 or 1
- d.schema=1;d.language=d.language=="fr" and "fr" or "en"
+ d.schema=1;
+ d.zoneThemeScale=FieldKit.Number(d.zoneThemeScale,100,75,110)
+ d.zoneThemePositions=FieldKitZoneThemes.NormalizePositions(d.zoneThemePositions)
+ d.zoneThemeElementScales=FieldKitZoneThemes.NormalizeScales(d.zoneThemeElementScales)
+ if type(d.zoneThemeNativeBefore)=="table" then
+  for key,value in pairs(d.zoneThemeNativeBefore) do
+   if (key~="clock" and key~="tally" and key~="build" and key~="banners" and key~="bosses" and key~="meter" and key~="levels") or type(value)~="boolean" then d.zoneThemeNativeBefore[key]=nil end
+  end
+ else d.zoneThemeNativeBefore=nil end
+ if d.zoneThemeMode~="auto" and d.zoneThemeMode~="elwynn" and d.zoneThemeMode~="naxx" then d.zoneThemeMode="auto" end
+ if d.zoneThemeVariant~="minimal" and d.zoneThemeVariant~="complete" and d.zoneThemeVariant~="alternative" then d.zoneThemeVariant="complete" end
+d.language=d.language=="fr" and "fr" or "en"
  d.cardStyle=math.floor(FieldKit.Number(d.cardStyle,1,1,2))
  d.cardOpacity=math.floor(FieldKit.Number(d.cardOpacity,100,0,100))
  d.meterView=math.floor(FieldKit.Number(d.meterView,1,1,3))
@@ -75,7 +86,7 @@ function FieldKit.InitializeSettings(defaultStats)
  d.chatHeight=math.floor(FieldKit.Number(d.chatHeight,180,100,450))
  d.chatFontSize=math.floor(FieldKit.Number(d.chatFontSize,12,10,20))
  d.chatHistoryLines=math.floor(FieldKit.Number(d.chatHistoryLines,200,100,500))
- d.chatBackgroundOpacity=math.floor(FieldKit.Number(d.chatBackgroundOpacity,0,0,85))
+ d.chatBackgroundOpacity=math.floor(FieldKit.Number(d.chatBackgroundOpacity,0,0,100))
  d.chatFontFace=math.floor(FieldKit.Number(d.chatFontFace,1,1,5))
  d.chatBackgroundColor=math.floor(FieldKit.Number(d.chatBackgroundColor,1,1,6))
  d.chatTextColor=math.floor(FieldKit.Number(d.chatTextColor,1,1,6))
@@ -113,6 +124,7 @@ function FieldKit.InitializeSettings(defaultStats)
  for _,key in ipairs({"hideDamage","showCrits","groupCrits","hideGryphons","moneyDetached","hudBossesHidden","hudTallyHidden","hudMeterHidden","statsCollapsed","gearCollapsed"}) do
   if d[key]~=nil and type(d[key])~="boolean" then d[key]=nil end
  end
+ d.partyDetail=math.floor(FieldKit.Number(d.partyDetail,2,1,3));d.partyHistoryCount=math.floor(FieldKit.Number(d.partyHistoryCount,5,1,20));d.partyCardScale=math.floor(FieldKit.Number(d.partyCardScale,100,70,130)/5+.5)*5
  d.chestsOpened=FieldKit.Number(d.chestsOpened,0,0,1e9)
  if type(d.shownStats)~="table" then
   d.shownStats={};for i=1,table.getn(defaultStats) do d.shownStats[defaultStats[i]]=true end
