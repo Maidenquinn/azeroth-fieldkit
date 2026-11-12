@@ -463,7 +463,7 @@ function C.Command(msg)
   if Minimap and Minimap.GetChildren then for _,f in ipairs({Minimap:GetChildren()}) do
    local name=f.GetName and f:GetName()
    if name then local p,rel,rp,x,y=f:GetPoint();local parked=(x==-4000)
-    DEFAULT_CHAT_FRAME:AddMessage(name.." size="..tostring(f:GetWidth()).."x"..tostring(f:GetHeight()).." scale="..tostring(f.GetScale and f:GetScale()).." level="..tostring(f.GetFrameLevel and f:GetFrameLevel()).." shape="..tostring(M.shape).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown()).." mouse="..tostring(f.IsMouseEnabled and f:IsMouseEnabled())..string.format(" pt=%s %s %s",tostring(p),tostring(x),tostring(y)).." ring="..tostring(M.ring and M.ring[f]~=nil).." parked="..tostring(parked)) end
+    DEFAULT_CHAT_FRAME:AddMessage(name.." size="..tostring(f:GetWidth()).."x"..tostring(f:GetHeight()).." scale="..tostring(f.GetScale and f:GetScale()).." level="..tostring(f.GetFrameLevel and f:GetFrameLevel()).." shape="..tostring(M.shape).." alpha="..tostring(f:GetAlpha()).." shown="..tostring(f:IsShown()).." mouse="..tostring(f.IsMouseEnabled and f:IsMouseEnabled())..string.format(" pt=%s %s %s",tostring(p),tostring(x),tostring(y)).." ring="..tostring(M.ring and M.ring[f]~=nil).." parked="..tostring(parked)..(M.ring and M.ring[f] and M.Metrics and (" apparent="..string.format("%.1f",M.Metrics(f).apparent).." ringBorder="..tostring(M.Metrics(f).ring~=nil)) or "")) end
   end end
  elseif arg=="off" then C.Set("zoneThemes",false)
  elseif arg=="on" then C.Set("zoneThemes",true)

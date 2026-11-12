@@ -605,7 +605,7 @@ do
  local M=FieldKitThemeMinimap
  FieldKitThemeMinimap.probe.ring=true -- edge placement is an opt-in probe now
  local gear=NewGear()
- local parkedOne=CreateFrame("Button","AzerothStatsMinimap",Minimap);parkedOne:SetPoint("CENTER",Minimap,"CENTER",70,20)
+ local parkedOne=CreateFrame("Button","AzerothStatsMinimap",Minimap);parkedOne:SetWidth(30);parkedOne:SetHeight(30);parkedOne:SetPoint("CENTER",Minimap,"CENTER",70,20)
  -- this client may return the relative frame as a name
  local rawGet=parkedOne.GetPoint;parkedOne.GetPoint=function(self) local p,rel,rp,x,y=rawGet(self);if type(rel)=="table" and rel.GetName then rel=rel:GetName() end;return p,rel,rp,x,y end
  local oldChildren=Minimap.GetChildren;Minimap.GetChildren=function() return gear,parkedOne end
@@ -615,7 +615,7 @@ do
   C.Refresh(true)
   for step=1,6 do lastAngle=lastAngle+37;Owner(lastAngle) -- the owner places the button on every drag frame
    local _,_,_,gx,gy=gear:GetPoint();local radius=math.sqrt(gx*gx+gy*gy);assert(radius>85,"cycle "..cycle..": dragged gear is placed at the edge at once, not pulled to the centre ("..radius..")")
-   local want=math.rad(lastAngle);local ex,ey=M.Edge(math.cos(want)*80,math.sin(want)*80,32)
+   local want=math.rad(lastAngle);local ex,ey=M.Edge(math.cos(want)*80,math.sin(want)*80,32,gear)
    assert(math.abs(ex-gx)<1e-6 and math.abs(ey-gy)<1e-6,"cycle "..cycle..": the owner's own placement is mapped by the ring geometry")
    local diff=math.abs(math.atan2(gy,gx)-math.atan2(math.sin(want),math.cos(want)));if diff>math.pi then diff=2*math.pi-diff end
    assert(diff<math.rad(75),"cycle "..cycle..": the direction is kept, at most slid along the border past a keep-out ("..math.deg(diff)..")") end
@@ -2706,3 +2706,132 @@ do
  for _,b in ipairs(H.buttons) do assert(not b:IsShown(),"theme off: nothing of the shortcuts left") end
 end
 print("Elwynn Complete: no FieldKit / Journal shortcut, no version text, no clickable ghost; other layouts unchanged; menu and version command reachable passed (synthetic)")
+
+-- ===== alpha.49: launcher icons follow the map shape, one apparent size, no overlap, no drift =====
+do
+ local M=FieldKitThemeMinimap
+ local BS=string.char(92)
+ local TRACK="Interface"..BS.."Minimap"..BS.."MiniMap-TrackingBorder"
+ local function Button(name,size)
+  local b=CreateFrame("Button",name,Minimap);b:SetWidth(size);b:SetHeight(size);b.regionList={}
+  b.GetRegions=function(self) return unpack(self.regionList) end
+  b:SetScript("OnClick",function() b.clicks=(b.clicks or 0)+1 end)
+  return b
+ end
+ local function Border(b,w,point,ox,oy)
+  local r=b:CreateTexture(nil,"OVERLAY");r:SetTexture(TRACK);r:SetWidth(w);r:SetHeight(w);r:SetPoint(point,b,point,ox,oy);table.insert(b.regionList,r);return r
+ end
+ local function Pos(f) local _,_,_,x,y=f:GetPoint();local s=f:GetScale() or 1;return x*s,y*s end
+ local function Set(f) local n=0;for _ in pairs(f.scripts) do n=n+1 end return n end
+ local launcherOrder
+ local layouts={{"elwynn","complete",{80,90,100}},{"elwynn","minimal",{100}},{"naxx","complete",{80,90,100}},{"naxx","alternative",{100}}}
+ local checked=0
+ for _,L in ipairs(layouts) do for _,pct in ipairs(L[3]) do for _,shape in ipairs({"square","round","native"}) do
+  local tag=L[1].." "..L[2].." "..shape.." HUD "..pct.."%"
+  C.Set("zoneThemes",false);C.Set("zoneThemeMode",L[1]);C.Set("zoneThemeVariant",L[2]);C.Set("zoneThemeMapShape",shape);C.Set("zoneThemeScale",pct)
+  local fk=Button("FieldKitMinimapButton",31)
+  local st=Button("AzerothStatsMinimap",30);local stRing=Border(st,48,"CENTER",0,0)
+  local al=Button("AzerlootMinimapButton",31);Border(al,53,"TOPLEFT",0,0)
+  local odd=Button("OddAddonMinimapButton",24)
+  local all={fk,st,al,odd}
+  local angleDB=FieldKitDB.minimapAngle
+  -- the owners' own placements: radius 80 for three of them, half the map width + 10 for AzerLoot (follows the map size)
+  local function Owner(f,deg)
+   local a=math.rad(deg);local r=80
+   if f==al then r=Minimap:GetWidth()/2+10 end
+   f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",math.cos(a)*r,math.sin(a)*r)
+  end
+  for _,f in ipairs(all) do Owner(f,30) end -- all four at the same angle on purpose
+  local raw={};for _,f in ipairs(all) do local _,_,_,x,y=f:GetPoint();raw[f]={x,y} end
+  local scripts={};for _,f in ipairs(all) do scripts[f]=Set(f) end
+  local old=Minimap.GetChildren;Minimap.GetChildren=function() return fk,st,al,odd end
+  C.Set("zoneThemes",true);C.Refresh(true)
+  local function Geometry() local g=M.ringHalf;return g[1]+(g[3] or 0)/2,g[2]+(g[3] or 0)/2 end
+  local function Checks(label)
+   local rx,ry=Geometry()
+   for _,f in ipairs(all) do
+    local x,y=Pos(f);local half=(f:GetWidth()*f:GetScale())/2
+    if M.ringCircle then assert(math.abs(math.sqrt(x*x+y*y)-rx)<1e-6,label..": "..f:GetName().." rides the circle at a homogeneous distance ("..math.sqrt(x*x+y*y).." vs "..rx..")")
+    else
+     -- same definition as the validated border test: along its own direction the icon sits band/2 beyond the opening edge
+     local g=M.ringHalf;local dist=math.sqrt(x*x+y*y);local dx,dy=x/dist,y/dist;local edge=1/math.max(math.abs(dx)/g[1],math.abs(dy)/g[2])
+     assert(math.abs(dist-edge-g[3]/2)<1e-6,label..": "..f:GetName().." follows the rectangle of the frame ("..x..","..y..")") end
+    if not M.ringCircle then
+     for _,sx in ipairs({-1,1}) do for _,sy in ipairs({-1,1}) do
+      assert(not (math.abs(x-sx*rx)<M.cornerClear+half and math.abs(y-sy*ry)<M.cornerClear+half),label..": "..f:GetName().." keeps the frame corner clear")
+     end end
+    end
+    for _,k in ipairs(M.ringHalf[4]) do assert(not (x-half<k.r and x+half>k.l and y-half<k.top and y+half>k.bottom),label..": "..f:GetName().." covers no title / foot / zoom keep-out") end
+    for _,g in ipairs(all) do if g~=f then
+     local gx,gy=Pos(g);local reach=half+(g:GetWidth()*g:GetScale())/2+M.gap
+     assert(math.max(math.abs(x-gx),math.abs(y-gy))>=reach-1e-6,label..": "..f:GetName().." and "..g:GetName().." do not overlap ("..x..","..y.." / "..gx..","..gy..")")
+    end end
+   end
+  end
+  if M.active then
+   assert(M.shape==shape,tag..": the requested shape is the applied one ("..tostring(M.shape)..")")
+   for _,f in ipairs(all) do assert(M.ring[f],tag..": "..f:GetName().." is on the ring, whatever its own radius convention") end
+   assert(M.ringCircle==(shape=="round"),tag..": circular geometry exactly for the round map")
+   Checks(tag)
+   -- uniform apparent size, from the icon audit and never a SetSize
+   for _,f in ipairs(all) do
+    local m=M.Metrics(f);local drawn=m.apparent*f:GetScale()
+    assert(math.abs(drawn-M.target)/M.target<.1,tag..": "..f:GetName().." has the common apparent diameter ("..drawn..")")
+    assert(f:GetWidth()==(f==st and 30 or (f==odd and 24 or 31)),tag..": "..f:GetName().." frame size untouched")
+   end
+   assert(odd:GetScale()>1.2 and odd:GetScale()<=1.25,tag..": the small icon is scaled up (clamped) ("..odd:GetScale()..")")
+   assert(fk:GetScale()==1 and al:GetScale()==1 and st:GetScale()==1,tag..": icons already at the common size keep their scale")
+   local p=stRing:GetPoint();assert(p=="TOPLEFT" and stRing:GetWidth()==53,tag..": AzerothStats' tracking border is anchored like the stock one: its ring is centred on the icon")
+   -- the owners' drag: every frame the owner places the button itself
+   for _,deg in ipairs({10,75,160,250,330,45,135,225,315}) do
+    for _,f in ipairs({st,al,fk}) do Owner(f,deg);Checks(tag.." drag "..deg.." of "..f:GetName()) end
+   end
+   -- scripts, clicks, mouse: nothing of the owners replaced, no OnUpdate added
+   for _,f in ipairs(all) do assert(Set(f)==scripts[f],tag..": "..f:GetName().." scripts untouched") end
+   for _,f in ipairs(all) do f.clicks=0;click(f);assert(f.clicks==1,tag..": "..f:GetName().." first click reaches its own handler once") end
+   assert(FieldKitDB.minimapAngle==angleDB,tag..": no owner angle written")
+   -- the same inputs give the same result after reloads, shape changes and profile-like re-applies: no cumulative drift
+   for _,f in ipairs(all) do Owner(f,30) end
+   C.Refresh(true)
+   local first={};for _,f in ipairs(all) do local x,y=Pos(f);first[f]={x,y,f:GetScale()} end
+   for cycle=1,4 do
+    for _,other in ipairs({"native","round","square",shape}) do
+     C.Set("zoneThemeMapShape",other);C.Refresh(true)
+     for _,f in ipairs(all) do Owner(f,30) end
+    end
+    C.Set("zoneThemes",false);C.Set("zoneThemes",true);C.Refresh(true)
+   end
+   C.Set("zoneThemeMapShape",shape);C.Refresh(true)
+   for _,f in ipairs(all) do Owner(f,30) end;C.Refresh(true)
+   for _,f in ipairs(all) do
+    local x,y=Pos(f);assert(math.abs(x-first[f][1])<1e-6 and math.abs(y-first[f][2])<1e-6 and f:GetScale()==first[f][3],tag..": "..f:GetName().." is at the same place and scale after 4 rounds of transitions and reloads (no drift)")
+   end
+   -- gate: launcher-sized buttons far beyond the native radius are accepted, other children never
+   local g=M.ringHalf;local far=math.max(g[1],g[2])*1.4
+   assert(M.Edge(far*.7071,far*.7071,31)~=nil,tag..": a square-path owner (far corner placement) is taken")
+   assert(M.Edge(far,0,232)==nil and M.Edge(10,0,31)==nil,tag..": a wide frame far out and a point near the centre are never grabbed")
+  else
+   -- native map: every owner keeps its own placement, scale and border
+   for _,f in ipairs(all) do
+    local _,_,_,x,y=f:GetPoint();assert(x==raw[f][1] and y==raw[f][2],tag..": "..f:GetName().." keeps its native position")
+    assert(f:GetScale()==1 and not M.ring[f],tag..": "..f:GetName().." is not wrapped or scaled in native mode")
+   end
+   assert(stRing:GetPoint()=="CENTER" and stRing:GetWidth()==48,tag..": AzerothStats' border is the owner's own in native mode")
+  end
+  -- theme off: everything back as the owner left it
+  C.Set("zoneThemes",false)
+  for _,f in ipairs(all) do
+   local _,_,_,x,y=f:GetPoint()
+   if M.shape~="native" or true then assert(f:GetScale()==1,tag..": "..f:GetName().." scale restored") end
+   assert(rawget(f,"SetPoint")==nil,tag..": "..f:GetName().." method unwrapped")
+  end
+  assert(stRing:GetPoint()=="CENTER" and stRing:GetWidth()==48,tag..": AzerothStats' border restored to the owner's anchor and size")
+  Minimap.GetChildren=old
+  for _,f in ipairs(all) do f:Hide() end
+  FieldKitMinimapButton=nil;AzerothStatsMinimap=nil;AzerlootMinimapButton=nil;OddAddonMinimapButton=nil
+  checked=checked+1
+ end end end
+ assert(checked==3*(3+1+3+1),"every layout x HUD scale x shape combination was checked ("..checked..")")
+ C.Set("zoneThemeScale",100);C.Set("zoneThemeMapShape","square");C.Set("zoneThemes",false)
+end
+print("Launcher icons: rectangular / circular / native placement, common apparent size, border re-anchor, no overlap, corners clear, no drift (3 shapes x 4 layouts, HUD 80/90/100) passed (synthetic)")

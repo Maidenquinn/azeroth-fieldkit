@@ -44,11 +44,32 @@ local ringProxied={AzerothOneMinimapButton=true}
 -- the thickness of the decorative border there (the button is centred ON the gold border: half over the map, half over the frame).
 -- geometry = {holeHalfWidth,holeHalfHeight,borderThickness,keepOutRectangles}; a keep-out rectangle (title, foot, zoom buttons) is
 -- never covered: the button slides along the border, nearest allowed direction first (counter-clockwise on a tie).
-local function Edge(x,y,size)
+-- Internal tuning of the launcher icons around the map (map units): the clear space kept between two icons, the half-size of the
+-- corner of a square frame that no icon may touch (studs, chamfers), and the apparent diameter every icon is brought to.
+M.gap=3;M.cornerClear=8;M.target=31
+-- The stock tracking border (Interface\Minimap\MiniMap-TrackingBorder) is a 64 px texture whose ring only fills its top-left: with the
+-- standard 53 px border anchored on the TOPLEFT of a 31 px button the ring is centred on the button, which gives the ratios below.
+-- Derived from that convention, not measured natively: the native comparison is part of the recette.
+local RING_SIZE,RING_DIAMETER,RING_CENTRE=53,.58,.2925
+local function Span(f) return ((f.GetWidth and f:GetWidth()) or 32)*((f.GetScale and f:GetScale()) or 1) end
+local function Edge(x,y,size,owner)
  local geometry=M.ringHalf;if not geometry then return nil end
  local radius=math.sqrt(x*x+y*y)
- if radius<55 or radius>100 then return nil end
+ -- native launchers sit at a radius of ~80 (cos/sin*80); some follow the map size (half width + 6..10), which on the enlarged square map
+ -- is far beyond 100: those are accepted too, but only when launcher-sized, so no other child of the map is ever grabbed
+ local far=math.max(geometry[1],geometry[2])*1.5+20
+ if radius<55 or radius>math.max(100,far) then return nil end
+ if radius>100 and not (size and size>=16 and size<=48) then return nil end
  local half=(size or 32)/2;local theta=math.atan2(y,x)
+ local others={}
+ for o,r in pairs(M.ring or {}) do
+  if o~=owner and r.ax and not r.pending and (not o.IsShown or o:IsShown()) then table.insert(others,{x=r.ax,y=r.ay,half=Span(o)/2}) end
+ end
+ local corners={}
+ if not M.ringCircle then
+  local hw,hh=geometry[1]+(geometry[3] or 0)/2,geometry[2]+(geometry[3] or 0)/2;local c=M.cornerClear
+  for _,sx in ipairs({-1,1}) do for _,sy in ipairs({-1,1}) do table.insert(corners,{l=sx*hw-c,r=sx*hw+c,top=sy*hh+c,bottom=sy*hh-c}) end end
+ end
  local function Place(t)
   local dx,dy=math.cos(t),math.sin(t)
   local reach=(M.ringCircle and geometry[1] or 1/math.max(math.abs(dx)/geometry[1],math.abs(dy)/geometry[2]))+(geometry[3] or 0)/2 -- round map: the border is a circle
@@ -56,6 +77,8 @@ local function Edge(x,y,size)
  end
  local function Blocked(px,py)
   for _,k in ipairs(geometry[4] or {}) do if px-half<k.r and px+half>k.l and py-half<k.top and py+half>k.bottom then return true end end
+  for _,k in ipairs(corners) do if px-half<k.r and px+half>k.l and py-half<k.top and py+half>k.bottom then return true end end
+  for _,o in ipairs(others) do local reach=half+o.half+(M.gap or 0);if math.abs(px-o.x)<reach and math.abs(py-o.y)<reach then return true end end
   return false
  end
  local px,py=Place(theta)
@@ -65,17 +88,70 @@ local function Edge(x,y,size)
  return px,py
 end
 M.Edge=Edge -- exposed for the tests and the diagnostics
+-- Audit of one launcher button: main frame, scale, the tracking border region (if any) and the apparent diameter of what is drawn.
+function M.Metrics(f)
+ local m={name=f.GetName and f:GetName(),w=f.GetWidth and f:GetWidth() or 0,h=f.GetHeight and f:GetHeight() or 0,scale=f.GetScale and f:GetScale() or 1}
+ if f.GetRegions then
+  for _,r in ipairs({f:GetRegions()}) do
+   local path=r.GetObjectType and r:GetObjectType()=="Texture" and r.GetTexture and r:GetTexture()
+   if type(path)=="string" and string.find(string.lower(path),"trackingborder",1,true) then
+    m.ring=r;m.ringW=r:GetWidth() or 0;m.ringH=r:GetHeight() or 0;m.ringShown=(not r.IsShown) or r:IsShown();m.ringPoint={r:GetPoint()}
+    break
+   end
+  end
+ end
+ if m.ring and m.ringShown and m.ringW>=8 then m.apparent=RING_DIAMETER*math.max(m.ringW,m.ringH) else m.apparent=math.max(m.w,m.h) end
+ return m
+end
+-- Brings one ring button to the common apparent diameter, from its OWN frames only (never a saved variable, never SetSize on the
+-- button): (1) a tracking border anchored on the CENTER of the button (the ring is drawn in the top-left of its texture, so the
+-- ring ends up ~10 px off the icon: AzerothStats' button) is re-anchored the way the stock border is, (2) a button whose apparent
+-- diameter differs by more than 8 % gets a scale, clamped. The first state is remembered and put back with the theme.
+-- Returns true when the scale changed (the caller places the button again).
+function M.Tune(f)
+ M.tuned=M.tuned or {}
+ local t=M.tuned[f];if not t then t={baseScale=(f.GetScale and f:GetScale()) or 1};M.tuned[f]=t end
+ local m=M.Metrics(f)
+ if m.ring and not t.ring and m.ringW>=8 then
+  local p=m.ringPoint;local name=f.GetName and f:GetName()
+  if p[1]=="CENTER" and (p[2]==nil or p[2]==f or p[2]==name) then
+   t.ring={region=m.ring,points={m.ring:GetPoint()},w=m.ringW,h=m.ringH}
+   m.ring:SetWidth(RING_SIZE);m.ring:SetHeight(RING_SIZE);m.ring:ClearAllPoints()
+   m.ring:SetPoint("TOPLEFT",f,"TOPLEFT",m.w/2-RING_CENTRE*RING_SIZE,-(m.h/2-RING_CENTRE*RING_SIZE))
+   m=M.Metrics(f)
+  end
+ end
+ local want=t.baseScale
+ if m.w>=16 and m.apparent>=16 then
+  local factor=M.target/m.apparent
+  if math.abs(factor-1)>.08 then want=t.baseScale*math.max(.8,math.min(1.25,factor)) end
+ end
+ t.apparent=m.apparent
+ if math.abs((f:GetScale() or 1)-want)>1e-6 then f:SetScale(want);t.scaled=true;return true end
+ return false
+end
+function M.Untune()
+ for f,t in pairs(M.tuned or {}) do
+  if t.scaled and f.SetScale then f:SetScale(t.baseScale) end
+  if t.ring then
+   local r=t.ring.region;r:SetWidth(t.ring.w);r:SetHeight(t.ring.h);r:ClearAllPoints()
+   local p=t.ring.points;r:SetPoint(p[1],p[2],p[3],p[4],p[5])
+  end
+ end
+ M.tuned={}
+end
 function M.Wrap(f)
  if f.fieldkitRingOriginal then return end
  local original=f.SetPoint;f.fieldkitRingOriginal=original
  M.wrapped=M.wrapped or {};table.insert(M.wrapped,f)
  f.SetPoint=function(self,point,rel,relPoint,x,y)
   if M.active and point=="CENTER" and rel==Minimap and relPoint=="CENTER" and type(x)=="number" and type(y)=="number" then
-   local ax,ay=Edge(x,y,self.GetWidth and self:GetWidth())
+   local ax,ay=Edge(x,y,Span(self),self)
    if ax then
-    M.ring[self]={rx=x,ry=y,ax=ax,ay=ay}
+    local s=(self.GetScale and self:GetScale()) or 1;if not (s>0) then s=1 end -- offsets are in the button's own scale
+    M.ring[self]={rx=x,ry=y,ax=ax,ay=ay,s=s}
     M.log=M.log or {};table.insert(M.log,string.format("%s raw %.1f,%.1f -> %.1f,%.1f",tostring(self:GetName()),x,y,ax,ay));if table.getn(M.log)>8 then table.remove(M.log,1) end
-    return original(self,point,rel,relPoint,ax,ay)
+    return original(self,point,rel,relPoint,ax/s,ay/s)
    end
   end
   M.ring[self]=nil -- the owner placed it some other way: it is no longer ours to restore
@@ -100,12 +176,30 @@ function M.Ring(halfW,halfH,band,keep)
   end
   if name and not ringProxied[name] and f.GetObjectType and f:GetObjectType()=="Button" and (name=="FieldKitMinimapButton" or not string.find(name,"^FieldKit")) and not f.fieldkitRingOriginal then
    local points=FieldKitThemeHUD.Points(f);local p=points[1]
-   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5],f.GetWidth and f:GetWidth()) then
-    M.Wrap(f);f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",p[4],p[5]) -- goes through the wrapper: edge position, raw remembered
+   if table.getn(points)==1 and p[1]=="CENTER" and p[2]==Minimap and p[3]=="CENTER" and Edge(p[4],p[5],Span(f),f) then
+    M.Tune(f);M.Wrap(f);f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",p[4],p[5]) -- goes through the wrapper: edge position, raw remembered
    end
   end
  end
- if changed then for f,r in pairs(M.ring) do local ax,ay=Edge(r.rx,r.ry,f.GetWidth and f:GetWidth());if ax then r.ax,r.ay=ax,ay;f.fieldkitRingOriginal(f,"CENTER",Minimap,"CENTER",ax,ay) end end end
+ -- A button whose drawn state changed since (a border shown, a scale) is measured again and placed again.
+ for f,r in pairs(M.ring) do M.Tune(f) end
+ do
+  -- At every refresh (never per frame) every icon is placed again from its owner's raw offsets, in a fixed order (by name), each one
+  -- seeing the ones already placed: the result depends neither on table order nor on how many transitions or reloads came before.
+  local list={};for f,r in pairs(M.ring) do table.insert(list,f);r.pending=true end
+  table.sort(list,function(a,b) return tostring(a:GetName())<tostring(b:GetName()) end)
+  for _,f in ipairs(list) do
+   local r=M.ring[f];local ax,ay=Edge(r.rx,r.ry,Span(f),f)
+   if ax then
+    local s=f:GetScale() or 1;if not (s>0) then s=1 end
+    -- written only when something moved (position, scale or geometry): a plain refresh re-anchors nothing
+    local moved=changed or r.s~=s or math.abs(ax-(r.ax or 1e9))>1e-6 or math.abs(ay-(r.ay or 1e9))>1e-6
+    r.ax,r.ay,r.s=ax,ay,s
+    if moved then f.fieldkitRingOriginal(f,"CENTER",Minimap,"CENTER",ax/s,ay/s) end
+   end
+   r.pending=nil
+  end
+ end
  M.Lift()
 end
 -- Render order only: the art rim (a frame redrawn over the map edge) sits at map level + 2, i.e. ABOVE a map button at the native
@@ -128,6 +222,7 @@ function M.RingRestore()
  for f,base in pairs(M.lifted or {}) do if f.SetFrameLevel then f:SetFrameLevel(base) end end
  M.lifted={}
  for _,f in ipairs(M.wrapped or {}) do f.SetPoint=nil;f.fieldkitRingOriginal=nil end
+ M.Untune() -- scale and border back to the owner's own, BEFORE its raw offsets (they are in its own scale)
  for f,r in pairs(M.ring or {}) do f:ClearAllPoints();f:SetPoint("CENTER",Minimap,"CENTER",r.rx,r.ry) end
  M.ring={};M.wrapped={};M.ringHalf=nil;M.ringKey=nil
 end
