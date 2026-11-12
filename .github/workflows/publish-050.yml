@@ -1,9 +1,6 @@
 name: Publish Azeroth FieldKit v0.5.0
+# Legacy v0.5.0 publisher: manual-only and version-locked.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'data/publication-status.json'
   workflow_dispatch:
 permissions:
   contents: write
